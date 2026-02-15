@@ -21,7 +21,8 @@ const SAMPLES = [
     { id: 3, type: "Writing", category: "Task 2", title: "Environmental Protection - Essay", score: 7.5, date: "2026-02-12" },
     { id: 4, type: "Writing", category: "Task 1", title: "Carbon Emissions - General Task 1", score: 8.0, date: "2026-02-11" },
     { id: 5, type: "Speaking", category: "Part 1", title: "Talking about advertisements", score: 8.5, date: "2026-02-10" },
-    { id: 6, type: "Speaking", category: "Part 3", title: "The future of urbanization", score: 7.5, date: "2026-02-09" }
+    { id: 6, type: "Speaking", category: "Part 3", title: "The future of urbanization", score: 7.5, date: "2026-02-09" },
+    { id: 7, type: "Rewriter", category: "Academic", title: "Tech & Lethargy Essay", score: 9.0, date: "2026-02-08" }
 ]
 
 export default function SampleReportsPage() {
@@ -39,7 +40,7 @@ export default function SampleReportsPage() {
                 {/* Filters */}
                 <div className="flex flex-wrap items-center justify-between gap-6 pb-2">
                     <div className="flex bg-[#F9FAFB] p-1.5 rounded-2xl border w-fit">
-                        {["All", "Writing", "Speaking"].map((f) => (
+                        {["All", "Writing", "Speaking", "Rewriter"].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -105,9 +106,11 @@ function SampleCard({ sample }: { sample: any }) {
             <div className="flex items-center justify-between">
                 <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
-                    sample.type === "Writing" ? "bg-purple-50 text-purple-600" : "bg-blue-50 text-blue-600"
+                    sample.type === "Writing" ? "bg-purple-50 text-purple-600" :
+                        sample.type === "Speaking" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
                 )}>
-                    {sample.type === "Writing" ? <FileText className="h-6 w-6" /> : <Mic2 className="h-6 w-6" />}
+                    {sample.type === "Writing" ? <FileText className="h-6 w-6" /> :
+                        sample.type === "Speaking" ? <Mic2 className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-xl text-xs font-black">
                     <Star className="h-3.5 w-3.5 fill-current" />
