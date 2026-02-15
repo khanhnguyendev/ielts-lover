@@ -1,7 +1,7 @@
-import * as React from "react"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { NotificationOverlay } from "@/components/global/notification-overlay"
 import { UserProfileMenu } from "@/components/global/user-profile-menu"
+import { DynamicTitle } from "@/components/dashboard/dynamic-title"
 
 export default function DashboardLayout({
     children,
@@ -15,7 +15,7 @@ export default function DashboardLayout({
                 <header className="h-16 border-b bg-white/80 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-30">
                     <div className="flex items-center gap-2">
                         <div className="bg-muted px-3 py-1 rounded text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                            Dashboard
+                            <DynamicTitle />
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
