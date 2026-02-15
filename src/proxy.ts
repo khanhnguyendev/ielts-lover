@@ -1,3 +1,7 @@
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
 const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding"];
 
 export default async function proxy(request: NextRequest) {
