@@ -81,8 +81,8 @@ export default function DashboardPage() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-black font-outfit text-slate-900">Hi, I&apos;m your IELTS Coach!</h1>
-                    <p className="text-slate-600 font-medium text-lg">
+                    <h1 className="text-4xl">Hi, I&apos;m your IELTS Coach!</h1>
+                    <p className="text-foreground-secondary font-medium text-lg">
                         ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
                     </p>
                 </div>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-xl font-bold font-outfit">Start Practice</h3>
                 </div>
-                <p className="text-sm text-slate-600 font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
+                <p className="text-sm text-foreground-secondary font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                     <Link href="/dashboard/writing" className="flex-1">
@@ -243,9 +243,9 @@ function PracticeCard({
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Icon className="h-7 w-7 text-primary" />
             </div>
-            <div className="space-y-1 text-slate-900">
-                <h4 className="text-xl font-bold font-outfit">{title}</h4>
-                <p className="text-sm text-slate-600 font-medium">{desc}</p>
+            <div className="space-y-1">
+                <h4 className="text-xl">{title}</h4>
+                <p className="text-sm text-foreground-secondary font-medium">{desc}</p>
             </div>
             <Button className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
                 <div className="flex items-center gap-2">
