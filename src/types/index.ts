@@ -37,3 +37,4 @@ export type Attempt = {
     submitted_at?: string;
     evaluated_at?: string;
 };
+export * from "./lesson";

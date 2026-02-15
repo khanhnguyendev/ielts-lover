@@ -9,14 +9,19 @@ import { AIService } from "@/services/ai.service";
 import { ExerciseType } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+import { LessonRepository } from "@/repositories/lesson.repository";
+import { LessonService } from "@/services/lesson.service";
+
 // Dependencies Injection
 const exerciseRepo = new ExerciseRepository();
 const userRepo = new UserRepository();
 const attemptRepo = new AttemptRepository();
+const lessonRepo = new LessonRepository();
 const aiService = new AIService();
 
 const exerciseService = new ExerciseService(exerciseRepo);
 const attemptService = new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService);
+const lessonService = new LessonService(lessonRepo);
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
@@ -64,6 +69,14 @@ export async function getUserAttempts() {
 
     if (error) throw error;
     return data;
+}
+
+export async function getLessons() {
+    return lessonService.getAllLessons();
+}
+
+export async function getLessonById(id: string) {
+    return lessonService.getLesson(id);
 }
 
 export async function getUserProfile(id: string) {
