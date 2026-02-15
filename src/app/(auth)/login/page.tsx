@@ -14,8 +14,8 @@ export default function LoginPage() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2">
-                <h1 className="text-4xl font-bold font-outfit text-[#1F2937]">Log in</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-4xl font-black font-outfit text-slate-900 leading-tight">Welcome to IELTS Lover</h1>
+                <p className="text-sm font-medium text-slate-500">
                     Don&apos;t have an account?{" "}
                     <Link href="/signup" className="text-primary font-medium hover:underline underline-offset-4">
                         Register for free
@@ -39,7 +39,7 @@ export default function LoginPage() {
                         <Separator className="w-full" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-4 text-muted-foreground font-medium">Log in with email</span>
+                        <span className="bg-background px-4 text-slate-500 font-bold tracking-widest uppercase text-[10px]">Log in with email</span>
                     </div>
                 </div>
 
@@ -92,10 +92,10 @@ export default function LoginPage() {
                 </form>
             </div>
 
-            <p className="text-center text-[10px] text-muted-foreground leading-relaxed px-4">
-                By signing up, I agree to Cathoven&apos;s{" "}
-                <Link href="/privacy" className="font-semibold underline underline-offset-2">Privacy Policy</Link> and{" "}
-                <Link href="/terms" className="font-semibold underline underline-offset-2">Terms of Service</Link>
+            <p className="text-center text-[10px] text-slate-500 font-medium leading-relaxed px-4 uppercase tracking-wider">
+                By signing up, I agree to IELTS Lover&apos;s{" "}
+                <Link href="/privacy" className="font-bold underline underline-offset-2">Privacy Policy</Link> and{" "}
+                <Link href="/terms" className="font-bold underline underline-offset-2">Terms of Service</Link>
             </p>
         </div>
     )

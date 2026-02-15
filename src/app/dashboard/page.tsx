@@ -81,9 +81,9 @@ export default function DashboardPage() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-black font-outfit text-[#1F2937]">Hey, I&apos;m Catbot!</h1>
-                    <p className="text-muted-foreground font-medium text-lg">
-                        ✨ I&apos;m here to make IELTS prep fun and effective for you. ✨
+                    <h1 className="text-4xl font-black font-outfit text-slate-900">Hi, I&apos;m your IELTS Coach!</h1>
+                    <p className="text-slate-600 font-medium text-lg">
+                        ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
                     </p>
                 </div>
 
