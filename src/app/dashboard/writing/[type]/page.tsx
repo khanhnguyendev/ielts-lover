@@ -45,7 +45,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             {/* Question Side */}
             <div className="w-1/2 overflow-y-auto p-12 border-r bg-[#F9FAFB] scrollbar-hide">
                 <div className="max-w-xl mx-auto space-y-10 pb-20">
-                    <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-muted-foreground/40">
+                    <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
                         <Link href="/writing" className="hover:text-primary flex items-center gap-1 transition-colors">
                             Writing Tasks
                         </Link>
@@ -124,7 +124,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             value={text}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
                             placeholder="Start writing your answer here..."
-                            className="flex-1 w-full border-none focus-visible:ring-0 text-lg leading-relaxed font-medium placeholder:text-muted-foreground/30 resize-none scrollbar-hide bg-transparent"
+                            className="flex-1 w-full border-none focus-visible:ring-0 text-lg leading-relaxed font-medium placeholder:text-muted-foreground/60 resize-none scrollbar-hide bg-transparent"
                         />
                     </div>
 

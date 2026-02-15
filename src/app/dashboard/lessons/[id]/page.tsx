@@ -131,7 +131,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
                                                 <div className="flex items-center gap-6">
                                                     <div className={cn(
                                                         "w-10 h-10 rounded-xl border-2 flex items-center justify-center font-bold font-outfit transition-colors",
-                                                        selectedAnswer === i ? "bg-primary text-white border-primary" : "text-slate-400 group-hover:text-primary group-hover:border-primary/40"
+                                                        selectedAnswer === i ? "bg-primary text-white border-primary" : "text-slate-600 group-hover:text-primary group-hover:border-primary/40"
                                                     )}>
                                                         {String.fromCharCode(65 + i)}
                                                     </div>
@@ -203,7 +203,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
                 {/* Sidebar Navigation */}
                 <aside className="w-[450px] border-l flex flex-col bg-white overflow-hidden shrink-0">
                     <div className="p-8 border-b">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Up Next</h4>
+                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2">Up Next</h4>
                         <div className="flex items-center justify-between">
                             <h3 className="font-bold font-outfit">Lexical Resource Series</h3>
                             <ChevronDown className="h-5 w-5 text-muted-foreground" />
@@ -233,7 +233,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
                                         ? "bg-primary text-white scale-110"
                                         : item.status === "completed"
                                             ? "bg-emerald-100 text-emerald-600"
-                                            : "bg-slate-100 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary"
+                                            : "bg-slate-100 text-slate-600 group-hover:bg-primary/10 group-hover:text-primary"
                                 )}>
                                     {item.status === "completed" ? <CheckCircle2 className="h-5 w-5" /> : i + 1}
                                 </div>

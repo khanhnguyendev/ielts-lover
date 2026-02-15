@@ -213,7 +213,7 @@ export default function SpeakingHubPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-slate-700">Question</label>
                             <textarea
-                                className="w-full min-h-[160px] p-5 rounded-2xl border bg-[#F9FAFB] text-sm resize-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/40 outline-none"
+                                className="w-full min-h-[160px] p-5 rounded-2xl border bg-[#F9FAFB] text-sm resize-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 outline-none"
                                 placeholder="Example: Do you like advertisements?"
                             />
                         </div>
@@ -223,7 +223,7 @@ export default function SpeakingHubPage() {
                             <label className="text-sm font-bold text-slate-700">Question title</label>
                             <input
                                 type="text"
-                                className="w-full h-14 px-5 rounded-2xl border bg-[#F9FAFB] text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/40 outline-none"
+                                className="w-full h-14 px-5 rounded-2xl border bg-[#F9FAFB] text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 outline-none"
                                 placeholder="Example: Advertisement"
                             />
                         </div>

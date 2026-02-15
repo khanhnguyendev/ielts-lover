@@ -22,7 +22,7 @@ export function RewriterEvaluation({ data }: RewriterEvaluationProps) {
                 {/* Original Content */}
                 <div className="bg-white rounded-[32px] border p-10 shadow-sm space-y-6">
                     <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">Original Text</h4>
+                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Original Text</h4>
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Word Count: {data.originalText.split(" ").length}</span>
                     </div>
                     <div className="text-lg leading-relaxed font-medium text-slate-500 italic">

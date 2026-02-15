@@ -105,7 +105,7 @@ export default function SupportPage() {
                                             <Input
                                                 required
                                                 placeholder="e.g. John Doe"
-                                                className="h-14 bg-[#F9FAFB] border-muted-foreground/10 rounded-2xl px-6 font-medium focus:ring-primary/20"
+                                                className="h-14 bg-[#F9FAFB] border-muted-foreground/20 rounded-2xl px-6 font-medium focus:ring-primary/20"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -114,7 +114,7 @@ export default function SupportPage() {
                                                 required
                                                 type="email"
                                                 placeholder="e.g. john@example.com"
-                                                className="h-14 bg-[#F9FAFB] border-muted-foreground/10 rounded-2xl px-6 font-medium focus:ring-primary/20"
+                                                className="h-14 bg-[#F9FAFB] border-muted-foreground/20 rounded-2xl px-6 font-medium focus:ring-primary/20"
                                             />
                                         </div>
                                     </div>
@@ -124,7 +124,7 @@ export default function SupportPage() {
                                         <Input
                                             required
                                             placeholder="What can we help you with?"
-                                            className="h-14 bg-[#F9FAFB] border-muted-foreground/10 rounded-2xl px-6 font-medium focus:ring-primary/20"
+                                            className="h-14 bg-[#F9FAFB] border-muted-foreground/20 rounded-2xl px-6 font-medium focus:ring-primary/20"
                                         />
                                     </div>
 
@@ -133,7 +133,7 @@ export default function SupportPage() {
                                         <Textarea
                                             required
                                             placeholder="Please describe your issue or question in detail..."
-                                            className="min-h-[200px] bg-[#F9FAFB] border-muted-foreground/10 rounded-[24px] p-6 font-medium focus:ring-primary/20 resize-none scrollbar-hide"
+                                            className="min-h-[200px] bg-[#F9FAFB] border-muted-foreground/20 rounded-[24px] p-6 font-medium focus:ring-primary/20 resize-none scrollbar-hide"
                                         />
                                     </div>
 

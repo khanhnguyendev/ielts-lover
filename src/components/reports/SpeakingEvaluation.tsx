@@ -59,7 +59,7 @@ export function SpeakingEvaluation({ data }: SpeakingEvaluationProps) {
             <div className="grid grid-cols-1 xl:grid-cols-[1fr,400px] gap-8">
                 {/* Left Column: Transcript */}
                 <div className="bg-white rounded-[32px] border p-10 shadow-sm space-y-8 h-fit">
-                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">Transcript</h4>
+                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Transcript</h4>
 
                     <div className="space-y-10">
                         {data.transcript.map((segment, idx) => (
@@ -68,7 +68,7 @@ export function SpeakingEvaluation({ data }: SpeakingEvaluationProps) {
                                     <button className="w-8 h-8 rounded-lg bg-slate-50 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center">
                                         <Volume2 className="h-4 w-4" />
                                     </button>
-                                    <div className="text-[10px] font-bold text-muted-foreground/40 mt-1 text-center">{segment.startTime}</div>
+                                    <div className="text-[10px] font-bold text-muted-foreground/60 mt-1 text-center">{segment.startTime}</div>
                                 </div>
                                 <div className="space-y-2 pt-1">
                                     <div className="flex flex-wrap gap-x-1 gap-y-1.5">

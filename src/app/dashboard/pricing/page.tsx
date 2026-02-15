@@ -81,7 +81,7 @@ export default function PricingPage() {
                                     onValueChange={(v: number[]) => setDays(v[0])}
                                     className="py-4"
                                 />
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                                     <span>3 days (min)</span>
                                     <span>365 days</span>
                                 </div>
@@ -122,7 +122,7 @@ export default function PricingPage() {
                                 </button>
 
                                 <div className="pt-6 border-t flex flex-col items-center gap-4">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Secure Payment via Stripe</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Secure Payment via Stripe</span>
                                     <div className="flex gap-4 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
                                         <div className="h-4 w-8 bg-slate-200 rounded-sm" />
                                         <div className="h-4 w-8 bg-slate-200 rounded-sm" />

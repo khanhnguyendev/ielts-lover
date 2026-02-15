@@ -37,11 +37,11 @@ export function UserProfileMenu() {
                 <DropdownMenuSeparator className="mx-2 bg-slate-50" />
                 <DropdownMenuGroup className="p-1">
                     <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 transition-colors">
-                        <User className="mr-3 h-4 w-4 text-slate-400" />
+                        <User className="mr-3 h-4 w-4 text-slate-600" />
                         <span>Account</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 transition-colors">
-                        <CreditCard className="mr-3 h-4 w-4 text-slate-400" />
+                        <CreditCard className="mr-3 h-4 w-4 text-slate-600" />
                         <span>My Plan</span>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>

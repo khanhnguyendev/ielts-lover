@@ -46,7 +46,7 @@ export function WritingEvaluation({ data }: WritingEvaluationProps) {
                 {/* Left Column: Essay content */}
                 <div className="bg-white rounded-[32px] border p-10 shadow-sm relative overflow-hidden group">
                     <div className="flex items-center justify-between mb-8">
-                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">Your Answer</h4>
+                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Your Answer</h4>
                         <div className="flex items-center gap-4">
                             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Word Count: 168</span>
                         </div>

@@ -109,7 +109,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                         </div>
                     </div>
 
-                    <Button disabled className="w-full h-16 rounded-[24px] bg-[#E5E7EB] text-slate-400 font-black text-sm">
+                    <Button disabled className="w-full h-16 rounded-[24px] bg-[#E5E7EB] text-slate-600 font-black text-sm">
                         Processing...
                     </Button>
                 </div>
@@ -172,7 +172,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                                         ? "bg-[#7C3AED] text-white ring-4 ring-primary/10"
                                         : i + 1 < currentQuestion
                                             ? "bg-emerald-500 text-white"
-                                            : "bg-[#F3F4F6] text-slate-400"
+                                            : "bg-[#F3F4F6] text-slate-600"
                                 )}>
                                     {i + 1 < currentQuestion ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
                                 </div>
@@ -251,7 +251,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                         </button>
                         <button
                             onClick={() => setSidebarExpanded(false)}
-                            className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-primary transition-colors"
+                            className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 hover:text-primary transition-colors"
                         >
                             <X className="h-5 w-5" />
                         </button>
@@ -298,7 +298,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                         <input
                             type="text"
                             placeholder="Ask anything in your language"
-                            className="w-full h-14 pl-6 pr-14 rounded-2xl border bg-white shadow-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm font-bold placeholder:text-slate-300"
+                            className="w-full h-14 pl-6 pr-14 rounded-2xl border bg-white shadow-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm font-bold placeholder:text-slate-500"
                         />
                         <button className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all">
                             <ChevronRight className="h-5 w-5" />

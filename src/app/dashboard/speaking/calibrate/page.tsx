@@ -83,7 +83,7 @@ export default function SpeakingCalibratePage() {
                         <div className="flex items-start gap-6 relative z-10">
                             <div className={cn(
                                 "w-12 h-12 rounded-2xl flex items-center justify-center shadow-xl text-lg font-black transition-all duration-500",
-                                isRecording ? "bg-rose-500 text-white" : hasRecorded ? "bg-emerald-500 text-white" : "bg-white text-slate-300 border border-slate-100"
+                                isRecording ? "bg-rose-500 text-white" : hasRecorded ? "bg-emerald-500 text-white" : "bg-white text-slate-500 border border-slate-100"
                             )}>
                                 {hasRecorded ? <CheckCircle2 className="h-6 w-6" /> : "1"}
                             </div>
@@ -151,7 +151,7 @@ export default function SpeakingCalibratePage() {
                             "w-full h-18 rounded-[32px] font-black text-sm transition-all shadow-2xl flex items-center justify-center gap-3",
                             hasRecorded
                                 ? "bg-indigo-900 hover:bg-indigo-950 text-white shadow-indigo-900/40 hover:scale-[1.02] active:scale-[0.98]"
-                                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                : "bg-slate-100 text-slate-600 cursor-not-allowed"
                         )}
                         disabled={!hasRecorded}
                     >

@@ -169,20 +169,20 @@ export default function ReportsPage() {
                                 <div>
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Mock Test</h4>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black text-muted-foreground/40">— sessions</span>
+                                        <span className="text-sm font-black text-muted-foreground/60">— sessions</span>
                                     </div>
                                 </div>
                                 <div className="w-px h-10 bg-slate-100" />
                                 <div>
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Latest</h4>
-                                    <div className="text-2xl font-black font-outfit text-slate-300">—</div>
+                                    <div className="text-2xl font-black font-outfit text-slate-500">—</div>
                                 </div>
                                 <div className="w-px h-10 bg-slate-100" />
                                 <div>
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2 flex items-center gap-1">
                                         Avg <Info className="h-3 w-3" />
                                     </h4>
-                                    <div className="text-2xl font-black font-outfit text-slate-300">—</div>
+                                    <div className="text-2xl font-black font-outfit text-slate-500">—</div>
                                 </div>
                             </div>
                             <div className="text-right">
@@ -196,18 +196,18 @@ export default function ReportsPage() {
                             <div className="bg-white rounded-[32px] border p-8 shadow-sm space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-black text-slate-900">Academic Task 1</h4>
-                                    <span className="text-[10px] font-black text-muted-foreground/40">0 attempts</span>
+                                    <span className="text-[10px] font-black text-muted-foreground/60">0 attempts</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                        <p className="text-xl font-black font-outfit text-slate-300">—</p>
+                                        <p className="text-xl font-black font-outfit text-slate-500">—</p>
                                     </div>
                                     <div className="text-right space-y-1">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
                                             Avg <Info className="h-3 w-3" />
                                         </p>
-                                        <p className="text-xl font-black font-outfit text-slate-300">—</p>
+                                        <p className="text-xl font-black font-outfit text-slate-500">—</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">
@@ -218,18 +218,18 @@ export default function ReportsPage() {
                             <div className="bg-white rounded-[32px] border p-8 shadow-sm space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-black text-slate-900">Task 2</h4>
-                                    <span className="text-[10px] font-black text-muted-foreground/40">0 attempts</span>
+                                    <span className="text-[10px] font-black text-muted-foreground/60">0 attempts</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                        <p className="text-xl font-black font-outfit text-slate-300">—</p>
+                                        <p className="text-xl font-black font-outfit text-slate-500">—</p>
                                     </div>
                                     <div className="text-right space-y-1">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
                                             Avg <Info className="h-3 w-3" />
                                         </p>
-                                        <p className="text-xl font-black font-outfit text-slate-300">—</p>
+                                        <p className="text-xl font-black font-outfit text-slate-500">—</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">
@@ -277,7 +277,7 @@ export default function ReportsPage() {
                                 <div className="absolute inset-0 flex flex-col justify-between py-2 border-b border-slate-100 pointer-events-none">
                                     {[9, 6, 3, 0].map(val => (
                                         <div key={val} className="flex items-center gap-4">
-                                            <span className="text-[10px] font-black text-slate-300 w-4">{val}</span>
+                                            <span className="text-[10px] font-black text-slate-500 w-4">{val}</span>
                                             <div className="flex-1 h-px bg-slate-50 relative">
                                                 {val === 6 && <div className="absolute inset-0 border-t border-dashed border-slate-300" />}
                                             </div>
@@ -291,7 +291,7 @@ export default function ReportsPage() {
                                         <div className="w-6 h-6 rounded-full bg-slate-50 border-2 border-slate-100 flex items-center justify-center">
                                             <div className="w-1 h-1 rounded-full bg-slate-300" />
                                         </div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{day}</span>
+                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{day}</span>
                                     </div>
                                 ))}
                             </div>
@@ -334,11 +334,11 @@ export default function ReportsPage() {
                                         <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                                             <div className="space-y-1">
                                                 <p>Latest</p>
-                                                <p className="text-slate-300">—</p>
+                                                <p className="text-slate-500">—</p>
                                             </div>
                                             <div className="text-right space-y-1">
                                                 <p>Avg</p>
-                                                <p className="text-slate-300">—</p>
+                                                <p className="text-slate-500">—</p>
                                             </div>
                                         </div>
                                         <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">

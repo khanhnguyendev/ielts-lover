@@ -49,7 +49,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         <div className="flex items-center gap-6">
                             <span className="text-sm font-bold text-muted-foreground">
                                 {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
-                                <span className="text-muted-foreground/40 ml-2">Date: 2026-02-14 23:24:57</span>
+                                <span className="text-muted-foreground/60 ml-2">Date: 2026-02-14 23:24:57</span>
                             </span>
                             <Button variant="ghost" size="icon" className="text-muted-foreground rounded-lg">
                                 <Share2 className="h-4 w-4" />
@@ -67,7 +67,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             <div className="text-center">
                                 <div className="text-5xl sm:text-6xl font-black font-outfit text-primary flex items-baseline gap-1">
                                     {isSample ? sampleData.bandScore.toFixed(1) : "1.0"}
-                                    <span className="text-xl sm:text-2xl text-muted-foreground/30 font-bold">/9.0</span>
+                                    <span className="text-xl sm:text-2xl text-muted-foreground/60 font-bold">/9.0</span>
                                 </div>
                                 <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/60 mt-1">Overall Band Score</p>
                             </div>
@@ -92,7 +92,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             <div className="flex items-center gap-4 relative z-10 w-full sm:w-auto">
                                 <div className="hidden sm:flex -space-x-3">
                                     {[1, 2, 3].map(i => (
-                                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400">
+                                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
                                             {String.fromCharCode(64 + i)}
                                         </div>
                                     ))}
@@ -308,7 +308,7 @@ function CriteriaCard({ title, score, color }: { title: string, score: number, c
                 <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full", color.replace("text-", "bg-"))} />
                     <span className="text-sm font-bold">{title}</span>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-muted-foreground cursor-pointer" />
+                    <Info className="h-3.5 w-3.5 text-muted-foreground/60 hover:text-muted-foreground cursor-pointer" />
                 </div>
                 <span className={cn("text-2xl font-black font-outfit", color)}>{score.toFixed(1)}</span>
             </div>

@@ -69,12 +69,12 @@ export default function RewriterPage() {
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
-                        <div className="flex-1 min-h-[400px] bg-[#F9FAFB] rounded-[32px] border border-muted-foreground/10 focus-within:border-primary/20 transition-all p-8 flex flex-col">
+                        <div className="flex-1 min-h-[400px] bg-[#F9FAFB] rounded-[32px] border border-muted-foreground/20 focus-within:border-primary/20 transition-all p-8 flex flex-col">
                             <Textarea
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 placeholder="Paste your sentence or paragraph here..."
-                                className="flex-1 w-full border-none bg-transparent focus-visible:ring-0 text-md leading-relaxed font-medium placeholder:text-muted-foreground/30 resize-none scrollbar-hide"
+                                className="flex-1 w-full border-none bg-transparent focus-visible:ring-0 text-md leading-relaxed font-medium placeholder:text-muted-foreground/60 resize-none scrollbar-hide"
                             />
                         </div>
                         <Button

@@ -57,11 +57,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Writing</p>
-                        <div className="text-2xl font-black font-outfit text-muted-foreground/30">--</div>
+                        <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Speaking</p>
-                        <div className="text-2xl font-black font-outfit text-muted-foreground/30">--</div>
+                        <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
                     </div>
                 </div>
 
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-xl font-bold font-outfit">Start Practice</h3>
                 </div>
-                <p className="text-sm text-muted-foreground font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
+                <p className="text-sm text-slate-600 font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                     <Link href="/dashboard/writing" className="flex-1">
@@ -245,7 +245,7 @@ function PracticeCard({
             </div>
             <div className="space-y-1 text-slate-900">
                 <h4 className="text-xl font-bold font-outfit">{title}</h4>
-                <p className="text-sm text-muted-foreground font-medium">{desc}</p>
+                <p className="text-sm text-slate-600 font-medium">{desc}</p>
             </div>
             <Button className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
                 <div className="flex items-center gap-2">

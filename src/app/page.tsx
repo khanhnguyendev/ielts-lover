@@ -281,7 +281,7 @@ export default function Home() {
               <ShieldCheck className="h-4 w-4" />
               <span className="text-[10px] font-black uppercase tracking-widest">Secure Platform</span>
             </div>
-            <div className="text-muted-foreground/40 hover:text-primary transition-colors">
+            <div className="text-muted-foreground/60 hover:text-primary transition-colors">
               <Play className="h-4 w-4 fill-current" />
             </div>
           </div>
