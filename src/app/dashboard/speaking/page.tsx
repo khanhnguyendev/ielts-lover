@@ -256,35 +256,34 @@ function SpeakingCard({
     badge?: { text: string, color: "yellow" | "green" }
 }) {
     return (
-        <div className="bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
-            <div className="flex items-start gap-4">
-                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
-                    <Icon className="h-6 w-6" />
+        <Link href={`/dashboard/speaking/calibrate?test=${title.toLowerCase().replace(/ /g, "-")}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
+            <div className="h-full bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
+                <div className="flex items-start gap-4">
+                    <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
+                        <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary pr-2">{title}</h4>
+                            {badge && (
+                                <span className={cn(
+                                    "inline-block px-2 py-0.5 rounded-lg text-[9px] font-bold border",
+                                    badge.color === "yellow" ? "bg-amber-50 text-amber-600 border-amber-100/50" : "bg-emerald-50 text-emerald-600 border-emerald-100/50"
+                                )}>
+                                    {badge.text}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-1 min-w-0 space-y-2">
-                    <div className="space-y-1">
-                        <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary group-hover:text-primary transition-colors pr-2">{title}</h4>
-                        {badge && (
-                            <span className={cn(
-                                "inline-block px-2 py-0.5 rounded-lg text-[9px] font-bold border",
-                                badge.color === "yellow" ? "bg-amber-50 text-amber-600 border-amber-100/50" : "bg-emerald-50 text-emerald-600 border-emerald-100/50"
-                            )}>
-                                {badge.text}
-                            </span>
-                        )}
+
+                <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
+                    <div className="h-8 px-4 rounded-lg border border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest flex items-center bg-transparent group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                        <Plus className="h-3 w-3 mr-1" /> Start
                     </div>
                 </div>
             </div>
-
-            <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
-                <Link href={`/dashboard/speaking/calibrate?test=${title.toLowerCase().replace(/ /g, "-")}`}>
-                    <Button variant="outline" className="h-8 px-4 rounded-lg border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        <Play className="h-3 w-3 mr-1 fill-current" /> Start
-                    </Button>
-                </Link>
-            </div>
-        </div>
+        </Link>
     )
 }
-

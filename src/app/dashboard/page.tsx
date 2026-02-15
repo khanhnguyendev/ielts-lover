@@ -240,19 +240,19 @@ function PracticeCard({
 }) {
     return (
         <div className="bg-card p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
                 <Icon className="h-7 w-7 text-primary" />
             </div>
             <div className="space-y-1">
-                <h4 className="text-xl">{title}</h4>
+                <h4 className="text-xl font-black font-outfit">{title}</h4>
                 <p className="text-sm text-foreground-secondary font-medium">{desc}</p>
             </div>
-            <Button className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+            <div className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 flex items-center justify-center transition-all group-hover:bg-primary/90">
                 <div className="flex items-center gap-2">
                     <PenTool className="h-4 w-4" />
                     {buttonText}
                 </div>
-            </Button>
+            </div>
         </div>
     )
 }

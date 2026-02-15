@@ -282,37 +282,37 @@ function ExerciseCard({
     isRecommended?: boolean
 }) {
     return (
-        <div className="bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
-            {isRecommended && (
-                <div className="absolute -top-2.5 right-6 bg-[#7C3AED] text-white text-[8px] px-2 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-primary/20">
-                    <Star className="h-2 w-2 fill-white" /> Recommended
-                </div>
-            )}
+        <Link href={`/dashboard/writing/${title.toLowerCase().replace(/ /g, "-")}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
+            <div className="h-full bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
+                {isRecommended && (
+                    <div className="absolute -top-2.5 right-6 bg-[#7C3AED] text-white text-[8px] px-2 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-primary/20">
+                        <Star className="h-2 w-2 fill-white" /> Recommended
+                    </div>
+                )}
 
-            <div className="flex items-start gap-4">
-                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
-                    <Icon className="h-6 w-6" />
+                <div className="flex items-start gap-4">
+                    <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
+                        <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary pr-2">{title}</h4>
+                            {subtitle && (
+                                <span className="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-bold border border-indigo-100/50">
+                                    {subtitle}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-1 min-w-0 space-y-2">
-                    <div className="space-y-1">
-                        <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary group-hover:text-primary transition-colors pr-2">{title}</h4>
-                        {subtitle && (
-                            <span className="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-bold border border-indigo-100/50">
-                                {subtitle}
-                            </span>
-                        )}
+
+                <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
+                    <div className="h-8 px-4 rounded-lg border border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest flex items-center bg-transparent group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                        <Plus className="h-3 w-3 mr-1" /> Start
                     </div>
                 </div>
             </div>
-
-            <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
-                <Link href={`/dashboard/writing/${title.toLowerCase().replace(/ /g, "-")}`}>
-                    <Button variant="outline" className="h-8 px-4 rounded-lg border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        <Plus className="h-3 w-3 mr-1" /> Start
-                    </Button>
-                </Link>
-            </div>
-        </div>
+        </Link>
     )
 }

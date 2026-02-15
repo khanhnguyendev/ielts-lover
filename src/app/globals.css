@@ -118,6 +118,11 @@
     font-weight: 900;
   }
 
+  button,
+  a {
+    cursor: pointer;
+  }
+
   .card {
     @apply text-foreground-primary;
   }
