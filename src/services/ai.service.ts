@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+
 /**
  * AI Service: Orchestrates all AI calls.
  * Prompts are versioned and structured here.
@@ -5,32 +7,89 @@
 
 export type AIPromptVersion = "v1" | "v2";
 
+export interface AIFeedbackResponse {
+    overall_band: number;
+    breakdown: {
+        task_response: number;
+        coherence: number;
+        lexical: number;
+        grammar: number;
+    };
+    feedback: string;
+    confidence: number;
+    version: string;
+}
+
 export class AIService {
+    private genAI: GoogleGenerativeAI;
     private static PROMPTS = {
         writing_task1: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
         },
         writing_task2: {
             v1: "Analyze the following IELTS Writing Task 2 essay and provide a detailed band score breakdown and improvement suggestions.",
+        },
+        speaking_part1: {
+            v1: "Analyze the following IELTS Speaking Part 1 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
+        },
+        speaking_part2: {
+            v1: "Analyze the following IELTS Speaking Part 2 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
+        },
+        speaking_part3: {
+            v1: "Analyze the following IELTS Speaking Part 3 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
         }
     };
 
-    async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1") {
-        const prompt = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS[type]["v1"];
-        console.log(`Calling AI with prompt: ${prompt}`);
-
-        // Mock response following AI OUTPUT CONTRACT
-        return {
-            overall_band: 6.5,
+    private static RESPONSE_SCHEMA = {
+        type: SchemaType.OBJECT,
+        properties: {
+            overall_band: { type: SchemaType.NUMBER, description: "The overall IELTS band score (e.g., 6.5)" },
             breakdown: {
-                task_response: 7.0,
-                coherence: 6.0,
-                lexical: 6.5,
-                grammar: 6.5
+                type: SchemaType.OBJECT,
+                properties: {
+                    task_response: { type: SchemaType.NUMBER },
+                    coherence: { type: SchemaType.NUMBER },
+                    lexical: { type: SchemaType.NUMBER },
+                    grammar: { type: SchemaType.NUMBER }
+                },
+                required: ["task_response", "coherence", "lexical", "grammar"]
             },
-            feedback: "Your writing is clear but lacks complex sentence structures.",
-            confidence: 0.95,
-            version: version
-        };
+            feedback: { type: SchemaType.STRING, description: "Detailed feedback and improvement suggestions" },
+            confidence: { type: SchemaType.NUMBER, description: "Confidence score of the evaluation (0-1)" }
+        },
+        required: ["overall_band", "breakdown", "feedback", "confidence"]
+    };
+
+    constructor() {
+        const apiKey = process.env.GEMINI_API_KEY!;
+        this.genAI = new GoogleGenerativeAI(apiKey);
+    }
+
+    async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
+        const model = this.genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.RESPONSE_SCHEMA as any,
+            },
+        });
+
+        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v1;
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format.`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
+            const parsed = JSON.parse(responseText);
+
+            return {
+                ...parsed,
+                version
+            };
+        } catch (error) {
+            console.error("AI Evaluation failed:", error);
+            // Fallback mock or rethrow
+            throw new Error("AI Evaluation failed. Please try again later.");
+        }
     }
 }
