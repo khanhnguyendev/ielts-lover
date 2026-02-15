@@ -18,7 +18,29 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
+import { getCurrentUser } from "@/app/actions"
+import { UserProfile } from "@/types"
+
 export default function DashboardPage() {
+    const [user, setUser] = React.useState<UserProfile | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
+
+    React.useEffect(() => {
+        async function loadData() {
+            try {
+                const userData = await getCurrentUser()
+                setUser(userData)
+            } catch (error) {
+                console.error("Failed to load dashboard data:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadData()
+    }, [])
+
+    if (isLoading) return <div className="p-10 text-center">Loading dashboard...</div>
+
     return (
         <div className="space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
 
@@ -29,13 +51,19 @@ export default function DashboardPage() {
                         <Zap className="h-5 w-5 fill-white" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold font-outfit text-white">0/2 daily free reports used</h3>
+                        <h3 className="text-sm font-bold font-outfit text-white">
+                            {user?.daily_quota_used || 0}/5 daily free reports used
+                        </h3>
                         <p className="text-[10px] text-white/80 font-medium">Renews in 23 hours 59 minutes</p>
                     </div>
                 </div>
-                <Button variant="secondary" size="sm" className="h-9 px-4 rounded-full font-bold text-xs shadow-sm hover:scale-105 transition-transform">
-                    Upgrade to premium now
-                </Button>
+                {user?.is_premium ? (
+                    <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
+                ) : (
+                    <Button variant="secondary" size="sm" className="h-9 px-4 rounded-full font-bold text-xs shadow-sm hover:scale-105 transition-transform">
+                        Upgrade to premium now
+                    </Button>
+                )}
             </div>
 
             {/* 2. IELTS Info Card */}
@@ -45,15 +73,15 @@ export default function DashboardPage() {
                         <Calendar className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div>
-                        <h4 className="text-lg font-bold font-outfit">IELTS Academic</h4>
-                        <p className="text-sm text-muted-foreground font-medium">No date selected</p>
+                        <h4 className="text-lg font-bold font-outfit uppercase">IELTS {user?.test_type || "Academic"}</h4>
+                        <p className="text-sm text-muted-foreground font-medium">{user?.exam_date || "No date selected"}</p>
                     </div>
                 </div>
 
                 <div className="flex gap-10">
                     <div className="text-center">
                         <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Target Score</p>
-                        <div className="text-2xl font-black font-outfit text-primary">7.0</div>
+                        <div className="text-2xl font-black font-outfit text-primary">{user?.target_score || "7.0"}</div>
                     </div>
                     <div className="text-center">
                         <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Writing</p>

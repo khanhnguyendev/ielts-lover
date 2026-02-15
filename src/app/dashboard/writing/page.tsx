@@ -46,7 +46,11 @@ const CATEGORIES = [
     "Custom Question"
 ]
 
+import { getExercises } from "@/app/actions"
+import { Exercise as DbExercise, ExerciseType } from "@/types"
+
 interface Exercise {
+    id: string
     title: string
     subtitle?: string
     attempts?: number
@@ -55,47 +59,48 @@ interface Exercise {
     isRecommended?: boolean
 }
 
+const TYPE_CONFIG: Record<string, { icon: any, color: string }> = {
+    writing_task1: { icon: Activity, color: "text-blue-600 bg-blue-50" },
+    writing_task2: { icon: FileText, color: "text-indigo-600 bg-indigo-50" },
+    speaking_part1: { icon: MessageSquare, color: "text-cyan-600 bg-cyan-50" },
+    // Add others as needed
+}
+
 export default function WritingHubPage() {
     const [activeCategory, setActiveCategory] = React.useState("Mock Test")
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
+    const [exercises, setExercises] = React.useState<Exercise[]>([])
+    const [isLoading, setIsLoading] = React.useState(true)
 
-    const getExercises = (): Exercise[] => {
-        if (activeCategory === "Mock Test") {
-            return Array.from({ length: 12 }).map((_, i) => ({
-                title: `${i % 2 === 0 ? "Academic" : "General"} Writing Mock Test ${i + 1}`,
-                attempts: 0,
-                icon: i % 2 === 0 ? Cat : Heart,
-                color: i % 2 === 0 ? "text-purple-600 bg-purple-50" : "text-pink-500 bg-pink-50"
-            }))
-        }
-        if (activeCategory === "Academic Task 1") {
-            return [
-                { title: "Milk Consumption", subtitle: "Line Graph", icon: Activity, color: "text-blue-600 bg-blue-50" },
-                { title: "Physical Activity", subtitle: "Bar Chart", icon: BarChart, color: "text-emerald-600 bg-emerald-50", isRecommended: true },
-                { title: "Public School Budget", subtitle: "Pie Chart", icon: PieChart, color: "text-indigo-600 bg-indigo-50", isRecommended: true },
-                { title: "Age Distribution", subtitle: "Pie Chart", icon: PieChart, color: "text-indigo-600 bg-indigo-50" },
-                { title: "Airport Redevelopment", subtitle: "Maps", icon: Map, color: "text-pink-600 bg-pink-50" },
-                { title: "Butter and Margarine Consumption", subtitle: "Line Graph", icon: Activity, color: "text-blue-600 bg-blue-50" },
-                { title: "Carbon Emissions", subtitle: "Line Graph", icon: Activity, color: "text-blue-600 bg-blue-50" },
-                { title: "Ceramic Tiles Manufacturing", subtitle: "Process Diagram", icon: Zap, color: "text-orange-600 bg-orange-50" },
-                { title: "Cocoa and Coffee Sales", subtitle: "Table", icon: Table, color: "text-amber-600 bg-amber-50" },
-                { title: "Electricity Production", subtitle: "Process Diagram", icon: Zap, color: "text-orange-600 bg-orange-50" },
-                { title: "Electricity Production by Fuel Source", subtitle: "Pie Chart", icon: PieChart, color: "text-indigo-600 bg-indigo-50" }
-            ]
-        }
-        if (activeCategory === "Task 2") {
-            return [
-                { title: "Accepting vs. Improving Hard Situations", subtitle: "Discussion", icon: MessageSquare, color: "text-cyan-600 bg-cyan-50", isRecommended: true },
-                { title: "Printed vs. Online Materials", subtitle: "Opinion", icon: FileText, color: "text-indigo-600 bg-indigo-50", isRecommended: true },
-                { title: "Taking Risks", subtitle: "Advantage-Disadvantage", icon: Globe, color: "text-blue-600 bg-blue-50", isRecommended: true },
-                { title: "Age Imbalance in the Population", subtitle: "Advantage-Disadvantage", icon: Users, color: "text-blue-600 bg-blue-50" },
-                { title: "Alternative Medicine vs. Regular Doctors", subtitle: "Positive-Negative", icon: Activity, color: "text-purple-600 bg-purple-50" }
-            ]
-        }
-        return []
-    }
+    React.useEffect(() => {
+        const fetchExercises = async () => {
+            setIsLoading(true)
+            try {
+                let type: ExerciseType = "writing_task1"
+                if (activeCategory === "Task 2") type = "writing_task2"
 
-    const exercises = getExercises()
+                // For "Mock Test", we might want a different logic, but using task1 for now
+                const data = await getExercises(type)
+
+                const adapted: Exercise[] = data.map(db => ({
+                    id: db.id,
+                    title: db.title,
+                    subtitle: db.type.replace("_", " ").toUpperCase(),
+                    attempts: 0, // Should come from attempts count
+                    icon: TYPE_CONFIG[db.type]?.icon || Cat,
+                    color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50"
+                }))
+
+                setExercises(adapted)
+            } catch (error) {
+                console.error("Failed to fetch exercises:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchExercises()
+    }, [activeCategory])
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
