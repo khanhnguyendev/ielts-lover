@@ -219,7 +219,7 @@ export default function Home() {
               <h2 className="text-5xl md:text-7xl font-black font-outfit text-white tracking-tight leading-none">
                 Ready to stop guessing and <span className="text-primary">start growing?</span>
               </h2>
-              <p className="text-xl text-slate-400 font-medium">
+              <p className="text-xl text-slate-500 font-medium">
                 Join 10,000+ students who improved their IELTS scores by an average of 1.5 bands using our AI platform.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">

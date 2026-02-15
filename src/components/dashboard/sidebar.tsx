@@ -54,8 +54,8 @@ export function DashboardSidebar() {
                 {!isCollapsed && (
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <div className="flex flex-col">
-                            <span className="text-xl font-bold font-outfit text-primary tracking-tight">CATH0VEN</span>
-                            <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] -mt-1 uppercase">IELTS</span>
+                            <span className="text-xl font-bold font-outfit text-primary tracking-tight">IELTS LOVER</span>
+                            <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] -mt-1 uppercase">Practice Platform</span>
                         </div>
                     </Link>
                 )}

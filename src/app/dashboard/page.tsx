@@ -168,7 +168,7 @@ export default function DashboardPage() {
                     <h3 className="text-xl font-bold font-outfit">Recent Activity</h3>
                 </div>
 
-                <div className="hidden md:grid grid-cols-5 text-[10px] uppercase tracking-widest font-black text-muted-foreground/50 border-b pb-4">
+                <div className="hidden md:grid grid-cols-5 text-[10px] uppercase tracking-widest font-black text-muted-foreground/60 border-b pb-4">
                     <div>Time</div>
                     <div>Task</div>
                     <div>Task Description</div>

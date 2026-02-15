@@ -16,16 +16,15 @@ export default function AuthLayout({
                     <Link href="/" className="flex items-center gap-2 mb-2">
                         <span className="text-3xl font-bold font-outfit text-primary tracking-tight">IELTS Lover</span>
                     </Link>
-                    <div className="flex items-center gap-1.5 grayscale opacity-70">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Partnered with</span>
-                        <span className="text-sm font-bold font-outfit">Cathoven</span>
+                    <div className="flex items-center gap-1.5 opacity-70">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">AI Excellence</span>
                     </div>
                 </div>
                 {children}
             </div>
 
             <footer className="mt-8 text-center text-[10px] text-muted-foreground uppercase tracking-widest">
-                &copy; 2026 Cathoven AI. All rights reserved.
+                &copy; 2026 IELTS Lover. All rights reserved.
             </footer>
         </div>
     )
