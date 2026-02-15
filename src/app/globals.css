@@ -58,13 +58,13 @@
   /* Slate 600 - Ratio 5.1:1 */
   --foreground-muted: hsl(215 20% 65%);
   /* Slate 400 - For Placeholders */
-  --foreground-accent: hsl(262 83% 58%);
-  /* Indigo 600 - Ratio 4.5:1 */
+  --foreground-accent: hsl(262 80% 48%);
+  /* Indigo 700ish - Safer contrast ratio (>7:1) */
 
   /* Borders */
   --border-default: hsl(214 32% 91%);
   /* Slate 200 */
-  --border-focus: hsl(262 83% 58%);
+  --border-focus: hsl(262 80% 48%);
   /* Indigo 600 */
 
   /* Legacy Compat */
@@ -90,13 +90,13 @@
   /* Slate 300 - Medium Contrast */
   --foreground-muted: hsl(215 16% 47%);
   /* Slate 600 - Low Contrast */
-  --foreground-accent: hsl(263 70% 65%);
-  /* Lighter Indigo for Dark Mode */
+  --foreground-accent: hsl(263 85% 75%);
+  /* Brighter Indigo for Dark Mode - Enhanced visibility */
 
   /* Borders */
   --border-default: hsl(217 33% 17%);
   /* Slate 800 */
-  --border-focus: hsl(263 70% 65%);
+  --border-focus: hsl(263 85% 75%);
 }
 
 @layer base {
