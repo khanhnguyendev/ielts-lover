@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
     Zap,
     ChevronRight,
@@ -139,20 +140,22 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <PracticeCard
-                        title="Writing Practice"
-                        desc="Practice Task 1 & Task 2"
-                        icon={PenTool}
-                        buttonText="Start Writing"
-                        onClick={() => { }}
-                    />
-                    <PracticeCard
-                        title="Speaking Practice"
-                        desc="Practice Part 1, Part 2, Part 3"
-                        icon={Mic2}
-                        buttonText="Start Speaking"
-                        onClick={() => { }}
-                    />
+                    <Link href="/dashboard/writing" className="flex-1">
+                        <PracticeCard
+                            title="Writing Practice"
+                            desc="Practice Task 1 & Task 2"
+                            icon={PenTool}
+                            buttonText="Start Writing"
+                        />
+                    </Link>
+                    <Link href="/dashboard/speaking" className="flex-1">
+                        <PracticeCard
+                            title="Speaking Practice"
+                            desc="Practice Part 1, Part 2, Part 3"
+                            icon={Mic2}
+                            buttonText="Start Speaking"
+                        />
+                    </Link>
                 </div>
             </div>
 
@@ -181,18 +184,22 @@ export default function DashboardPage() {
                             Check out sample reports to see feedback examples for premium users.
                         </p>
                     </div>
-                    <Button variant="secondary" className="rounded-full px-8 h-12 font-bold bg-primary text-white hover:bg-primary/90">
-                        View Premium Sample Reports
-                    </Button>
+                    <Link href="/dashboard/samples">
+                        <Button variant="secondary" className="rounded-full px-8 h-12 font-bold bg-primary text-white hover:bg-primary/90">
+                            View Premium Sample Reports
+                        </Button>
+                    </Link>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium pt-8">
                         Free users can see up to 5 completed records. <span className="text-primary font-bold cursor-pointer hover:underline">Upgrade</span> to see more results.
                     </p>
                 </div>
 
                 <div className="pt-8 border-t text-center">
-                    <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 rounded-xl group">
-                        View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Button>
+                    <Link href="/dashboard/reports">
+                        <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 rounded-xl group">
+                            View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
@@ -224,25 +231,23 @@ function PracticeCard({
     title,
     desc,
     icon: Icon,
-    buttonText,
-    onClick
+    buttonText
 }: {
     title: string,
     desc: string,
     icon: any,
-    buttonText: string,
-    onClick: () => void
+    buttonText: string
 }) {
     return (
-        <div className="bg-white p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8">
+        <div className="bg-white p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Icon className="h-7 w-7 text-primary" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 text-slate-900">
                 <h4 className="text-xl font-bold font-outfit">{title}</h4>
                 <p className="text-sm text-muted-foreground font-medium">{desc}</p>
             </div>
-            <Button onClick={onClick} className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+            <Button className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
                 <div className="flex items-center gap-2">
                     <PenTool className="h-4 w-4" />
                     {buttonText}

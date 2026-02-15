@@ -31,11 +31,10 @@ export default function Home() {
         </div>
 
         <div className="hidden md:flex items-center gap-10">
-          {["Writing", "Speaking", "Sample Hub", "Pricing"].map((item) => (
-            <Link key={item} href={`/${item.toLowerCase().replace(" ", "-")}`} className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">
-              {item}
-            </Link>
-          ))}
+          <Link href="/dashboard/writing" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Writing</Link>
+          <Link href="/dashboard/speaking" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Speaking</Link>
+          <Link href="/dashboard/samples" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Sample Hub</Link>
+          <Link href="/dashboard/pricing" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Pricing</Link>
         </div>
 
         <div className="flex items-center gap-4">
@@ -79,7 +78,7 @@ export default function Home() {
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
-              <Link href="/samples">
+              <Link href="/dashboard/samples">
                 <Button variant="outline" className="h-16 px-10 rounded-[28px] border-slate-200 text-sm font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
                   View Sample Reports
                 </Button>
