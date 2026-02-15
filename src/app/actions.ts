@@ -56,6 +56,9 @@ export async function getUserProfile(id: string) {
 }
 
 export async function getCurrentUser() {
-    // In a real app, we'd get the ID from the auth session
-    return userRepo.getById("mock-user-id");
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+    return userRepo.getById(user.id);
 }
