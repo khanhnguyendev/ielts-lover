@@ -34,9 +34,6 @@ export default function ReportsPage() {
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">My Reports</h1>
-            </div>
 
             <div className="bg-white rounded-[32px] border shadow-sm overflow-hidden min-h-[600px] flex flex-col">
                 {/* Tabs */}

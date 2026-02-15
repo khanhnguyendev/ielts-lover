@@ -82,9 +82,6 @@ export default function SpeakingHubPage() {
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">Speaking Tasks</h1>
-            </div>
 
             <div className="bg-card rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Category Tabs */}
