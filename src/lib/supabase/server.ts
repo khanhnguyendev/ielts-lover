@@ -29,7 +29,7 @@ export async function createServiceSupabaseClient() {
                 persistSession: false,
             },
             db: {
-                schema: 'ielts_lover'
+                schema: 'ielts_lover_v1'
             }
         }
     );
