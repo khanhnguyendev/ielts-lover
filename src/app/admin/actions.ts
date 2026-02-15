@@ -7,8 +7,15 @@ import { AdminPolicy } from "@/services/admin.policy";
 import { Lesson, LessonQuestion } from "@/types";
 import { revalidatePath } from "next/cache";
 
+import { ExerciseRepository } from "@/repositories/exercise.repository";
+import { ExerciseService } from "@/services/exercise.service";
+import { Exercise } from "@/types";
+
 const lessonRepo = new LessonRepository();
 const lessonService = new LessonService(lessonRepo);
+
+const exerciseRepo = new ExerciseRepository();
+const exerciseService = new ExerciseService(exerciseRepo);
 
 async function checkAdmin() {
     const user = await getCurrentUser();
@@ -65,4 +72,16 @@ export async function deleteLessonQuestion(id: string, lessonId: string) {
 export async function getLessonQuestions(lessonId: string) {
     await checkAdmin();
     return lessonService.getQuestions(lessonId);
+}
+
+// Exercise Actions
+
+export async function createExercise(exercise: Omit<Exercise, "id" | "created_at" | "version">) {
+    await checkAdmin();
+    // We use createExerciseVersion because it handles versioning automatically
+    const result = await exerciseService.createExerciseVersion(exercise);
+    revalidatePath("/admin/exercises");
+    revalidatePath("/dashboard/writing");
+    revalidatePath("/dashboard/speaking");
+    return result;
 }

@@ -18,7 +18,7 @@ interface InviteFriendsModalProps {
 
 export function InviteFriendsModal({ open, onOpenChange }: InviteFriendsModalProps) {
     const [copied, setCopied] = React.useState(false)
-    const inviteLink = "https://ielts.cathoven.com/ielts/refer/aws-khanh"
+    const inviteLink = "https://ieltslover.com/ielts/refer/aws-khanh"
 
     const handleCopy = () => {
         navigator.clipboard.writeText(inviteLink)

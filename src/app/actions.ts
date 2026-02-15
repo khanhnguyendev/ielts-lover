@@ -92,7 +92,6 @@ export async function getCurrentUser() {
 
     // Attempt to get the profile, but don't fail if it doesn't exist yet (e.g., during OAuth onboarding)
     const profile = await userRepo.getById(user.id);
-    console.log("getCurrentUser Profile Check:", { authId: user.id, profileFound: !!profile, role: profile?.role });
 
     return {
         ...(profile || { id: user.id, email: user.email }),

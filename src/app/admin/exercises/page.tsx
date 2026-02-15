@@ -13,6 +13,8 @@ import { getExercises } from "@/app/actions";
 import { Exercise, ExerciseType } from "@/types";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import { PulseLoader } from "@/components/global/PulseLoader";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function ExercisesPage() {
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -41,10 +43,20 @@ export default function ExercisesPage() {
                     <h2 className="text-2xl font-bold text-gray-900">Exercises Management</h2>
                     <p className="text-gray-500">Create and manage IELTS writing and speaking exercises.</p>
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                    <Plus size={20} />
-                    <span>New Exercise</span>
-                </button>
+                <div className="flex gap-2">
+                    <Link href="/admin/exercises/create/writing">
+                        <Button className="bg-purple-600 hover:bg-purple-700">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New Writing
+                        </Button>
+                    </Link>
+                    <Link href="/admin/exercises/create/speaking">
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New Speaking
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

@@ -143,7 +143,7 @@ export default function SignupPage() {
                         <div className="flex items-start space-x-3 pt-2">
                             <Checkbox id="marketing" className="mt-1 border-muted-foreground/30 data-[state=checked]:bg-primary" />
                             <Label htmlFor="marketing" className="text-xs font-medium leading-relaxed text-muted-foreground select-none">
-                                Yes, I want to receive marketing communication (product tips, use case etc.) from Cathoven
+                                Yes, I want to receive marketing communication (product tips, use case etc.) from IELTS Lover
                             </Label>
                         </div>
 
@@ -155,7 +155,7 @@ export default function SignupPage() {
             </div>
 
             <p className="text-center text-[10px] text-muted-foreground leading-relaxed px-4">
-                By signing up, I agree to Cathoven&apos;s{" "}
+                By signing up, I agree to IELTS Lover&apos;s{" "}
                 <Link href="/privacy" className="font-semibold underline underline-offset-2">Privacy Policy</Link> and{" "}
                 <Link href="/terms" className="font-semibold underline underline-offset-2">Terms of Service</Link>
             </p>
