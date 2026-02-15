@@ -1,26 +1,40 @@
-// This is a mock implementation for Phase 3. Real Supabase integration will follow.
 import { UserProfile } from "@/types";
 import { IUserRepository } from "./interfaces";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export class UserRepository implements IUserRepository {
     async getById(id: string): Promise<UserProfile | null> {
-        return {
-            id,
-            email: "user@example.com",
-            target_score: 7.0,
-            test_type: "academic",
-            is_premium: false,
-            daily_quota_used: 0,
-            last_quota_reset: new Date().toISOString(),
-            created_at: new Date().toISOString()
-        };
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from("user_profiles")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error) return null;
+        return data as UserProfile;
     }
 
     async update(id: string, data: Partial<UserProfile>): Promise<void> {
-        console.log(`Updating user ${id}`, data);
+        const supabase = await createServerSupabaseClient();
+        const { error } = await supabase
+            .from("user_profiles")
+            .update(data)
+            .eq("id", id);
+
+        if (error) throw new Error(`Failed to update user: ${error.message}`);
     }
 
     async incrementQuota(id: string): Promise<void> {
-        console.log(`Incrementing quota for user ${id}`);
+        const supabase = await createServerSupabaseClient();
+        const { error } = await supabase.rpc("increment_daily_quota", { user_id: id });
+
+        if (error) {
+            // Fallback to manual update if RPC fails
+            const user = await this.getById(id);
+            if (user) {
+                await this.update(id, { daily_quota_used: user.daily_quota_used + 1 });
+            }
+        }
     }
 }

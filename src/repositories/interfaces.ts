@@ -1,4 +1,4 @@
-import { UserProfile, Exercise, Attempt } from "@/types";
+import { UserProfile, Exercise, Attempt, ExerciseType } from "@/types";
 
 export interface IUserRepository {
     getById(id: string): Promise<UserProfile | null>;
@@ -8,7 +8,9 @@ export interface IUserRepository {
 
 export interface IExerciseRepository {
     getById(id: string): Promise<Exercise | null>;
-    listByType(type: string): Promise<Exercise[]>;
+    getLatestVersion(type: ExerciseType): Promise<Exercise | null>;
+    listByType(type: ExerciseType): Promise<Exercise[]>;
+    createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise>;
 }
 
 export interface IAttemptRepository {
