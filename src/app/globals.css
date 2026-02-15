@@ -118,6 +118,10 @@
     font-weight: 900;
   }
 
+  .card {
+    @apply text-foreground-primary;
+  }
+
   p {
     @apply text-foreground-secondary;
   }
