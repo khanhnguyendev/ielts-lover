@@ -147,6 +147,24 @@ export default function SupportPage() {
                     </div>
                 </div>
             </div>
+
+            {/* FAQ Section */}
+            <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm mt-10">
+                <h3 className="text-2xl font-black font-outfit text-center">Frequently Asked Questions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {[
+                        { q: "How does the AI scoring work?", a: "Our AI uses the official IELTS assessment criteria including Lexical Resource and Grammatical Range." },
+                        { q: "Can I cancel my subscription?", a: "Yes, you can cancel any time. Since you pay per day, there are no long-term contracts." },
+                        { q: "Is the feedback accurate?", a: "Our models are calibrated against thousands of examiner-marked papers to ensure high accuracy." },
+                        { q: "Do you offer tutor support?", a: "Premium users get access to the AI Chatbot tutor for 24/7 help." }
+                    ].map((faq, i) => (
+                        <div key={i} className="space-y-2">
+                            <h4 className="text-sm font-black font-outfit text-primary">{faq.q}</h4>
+                            <p className="text-xs text-muted-foreground font-medium leading-relaxed">{faq.a}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     )
 }

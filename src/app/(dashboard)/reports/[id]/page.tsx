@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
-import { ActionTooltip } from "@/components/dashboard/action-tooltip"
 import { WritingEvaluation } from "@/components/reports/WritingEvaluation"
 import { SpeakingEvaluation } from "@/components/reports/SpeakingEvaluation"
 import { RewriterEvaluation } from "@/components/reports/RewriterEvaluation"

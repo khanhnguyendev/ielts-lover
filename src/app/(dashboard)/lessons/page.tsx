@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 const LESSONS = [
     { id: 1, title: "IELTS Writing Task 1: Complete Guide", type: "Video", duration: "45 mins", progress: 100, premium: false },
@@ -106,15 +107,17 @@ export default function LessonsHubPage() {
                                 )}
                             </div>
 
-                            <Button className={cn(
-                                "h-14 px-8 rounded-2xl font-black text-sm transition-all",
-                                lesson.premium
-                                    ? "bg-muted text-muted-foreground/60 hover:bg-muted"
-                                    : "bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 hover:scale-105"
-                            )}>
-                                {lesson.progress === 100 ? "Review Lesson" : lesson.progress > 0 ? "Continue" : "Start Now"}
-                                <ChevronRight className="ml-2 h-5 w-5" />
-                            </Button>
+                            <Link href={lesson.premium ? "/dashboard/pricing" : `/dashboard/lessons/${lesson.id}`}>
+                                <Button className={cn(
+                                    "h-14 px-8 rounded-2xl font-black text-sm transition-all w-full",
+                                    lesson.premium
+                                        ? "bg-muted text-muted-foreground/60 hover:bg-muted"
+                                        : "bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 hover:scale-105"
+                                )}>
+                                    {lesson.progress === 100 ? "Review Lesson" : lesson.progress > 0 ? "Continue" : "Start Now"}
+                                    <ChevronRight className="ml-2 h-5 w-5" />
+                                </Button>
+                            </Link>
                         </div>
                     ))}
                 </div>
