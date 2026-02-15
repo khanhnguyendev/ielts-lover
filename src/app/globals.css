@@ -114,7 +114,8 @@
   h4,
   h5,
   h6 {
-    @apply text-foreground-primary font-black;
+    color: var(--foreground-primary);
+    font-weight: 900;
   }
 
   p {

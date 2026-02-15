@@ -295,7 +295,7 @@ function ExerciseCard({
                 </div>
                 <div className="flex-1 min-w-0 space-y-2">
                     <div className="space-y-1">
-                        <h4 className="text-sm font-bold font-outfit leading-tight group-hover:text-primary transition-colors pr-2">{title}</h4>
+                        <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary group-hover:text-primary transition-colors pr-2">{title}</h4>
                         {subtitle && (
                             <span className="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-bold border border-indigo-100/50">
                                 {subtitle}

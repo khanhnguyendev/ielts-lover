@@ -263,7 +263,7 @@ function SpeakingCard({
                 </div>
                 <div className="flex-1 min-w-0 space-y-2">
                     <div className="space-y-1">
-                        <h4 className="text-sm font-bold font-outfit leading-tight group-hover:text-primary transition-colors pr-2">{title}</h4>
+                        <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary group-hover:text-primary transition-colors pr-2">{title}</h4>
                         {badge && (
                             <span className={cn(
                                 "inline-block px-2 py-0.5 rounded-lg text-[9px] font-bold border",
