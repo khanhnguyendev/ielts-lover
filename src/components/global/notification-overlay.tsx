@@ -36,52 +36,56 @@ const notifications: Notification[] = [
     },
 ]
 
+import { BarChart3 } from "lucide-react"
+
 export function NotificationOverlay() {
     const unreadCount = notifications.filter((n) => !n.read).length
 
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-full">
-                    <Bell className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="relative h-11 w-11 rounded-full hover:bg-slate-100 transition-colors">
+                    <Bell className="h-5 w-5 text-slate-600" />
                     {unreadCount > 0 && (
-                        <Badge
-                            variant="destructive"
-                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-[10px]"
-                        >
-                            {unreadCount}
-                        </Badge>
+                        <div className="absolute right-2.5 top-2.5 h-4 w-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
+                            <span className="text-[8px] font-black text-white">{unreadCount}</span>
+                        </div>
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-0 shadow-xl border-border bg-card rounded-[16px]">
-                <div className="p-4 border-b">
-                    <h4 className="font-semibold text-sm">Notifications</h4>
+            <PopoverContent align="end" className="w-[380px] p-0 shadow-2xl border-slate-100 bg-white rounded-[24px] overflow-hidden" sideOffset={12}>
+                <div className="p-5 border-b border-slate-50">
+                    <h4 className="font-black text-sm text-slate-900 font-outfit">Notifications</h4>
                 </div>
-                <ScrollArea className="h-80">
-                    <div className="grid">
+                <ScrollArea className="h-[400px]">
+                    <div className="divide-y divide-slate-50">
                         {notifications.map((notification) => (
                             <div
                                 key={notification.id}
-                                className="flex flex-col gap-1 p-4 border-b last:border-0 hover:bg-muted transition-colors cursor-pointer"
+                                className="flex gap-4 p-5 hover:bg-slate-50/50 transition-all cursor-pointer group"
                             >
-                                <div className="flex items-center justify-between gap-2">
-                                    <span className="font-medium text-sm">{notification.title}</span>
-                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                        {notification.time}
-                                    </span>
+                                <div className="w-10 h-10 rounded-full bg-cyan-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <BarChart3 className="h-5 w-5 text-cyan-500" />
                                 </div>
-                                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                    {notification.description}
-                                </p>
+                                <div className="flex flex-col gap-1 flex-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-black text-[13px] text-slate-900 leading-tight">{notification.title}</span>
+                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                                            {notification.time}
+                                        </span>
+                                    </div>
+                                    <p className="text-[12px] font-medium text-slate-600 leading-relaxed pr-4">
+                                        {notification.description}
+                                    </p>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </ScrollArea>
-                <div className="p-2 border-t text-center">
-                    <Button variant="link" size="sm" className="text-xs text-primary h-auto py-1">
+                <div className="p-3 bg-slate-50/50 border-t border-slate-50 text-center">
+                    <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors py-2 w-full">
                         View all notifications
-                    </Button>
+                    </button>
                 </div>
             </PopoverContent>
         </Popover>

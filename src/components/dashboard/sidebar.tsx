@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { InviteFriendsModal } from "./invite-friends-modal"
 
 const NAV_ITEMS = [
     { icon: Home, label: "Home", href: "/dashboard" },
@@ -39,6 +40,7 @@ const BOTTOM_NAV = [
 export function DashboardSidebar() {
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = React.useState(false)
+    const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
 
     return (
         <div
@@ -106,12 +108,22 @@ export function DashboardSidebar() {
                     <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 transition-all group-hover:bg-primary/10">
                         <h4 className="text-sm font-bold text-primary mb-1">Invite friends</h4>
                         <p className="text-[10px] text-muted-foreground leading-tight mb-3">Get 1 free mock test for every friend who joins.</p>
-                        <Button size="sm" variant="outline" className="h-8 w-full text-[10px] font-bold uppercase tracking-wider rounded-lg border-primary/20 hover:bg-primary hover:text-white transition-all">
+                        <Button
+                            onClick={() => setIsInviteModalOpen(true)}
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-full text-[10px] font-bold uppercase tracking-wider rounded-lg border-primary/20 hover:bg-primary hover:text-white transition-all"
+                        >
                             Invite friends
                         </Button>
                     </div>
                 </div>
             )}
+
+            <InviteFriendsModal
+                open={isInviteModalOpen}
+                onOpenChange={setIsInviteModalOpen}
+            />
 
             {/* Bottom Navigation */}
             <div className="px-3 pb-6 space-y-1.5 border-t pt-6">
