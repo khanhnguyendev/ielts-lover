@@ -5,6 +5,7 @@ export function Sidebar() {
     const navItems = [
         { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { name: "Exercises", href: "/admin/exercises", icon: BookOpen },
+        { name: "Lessons", href: "/admin/lessons", icon: BookOpen },
         { name: "Users", href: "/admin/users", icon: Users },
         { name: "Attempts Audit", href: "/admin/attempts", icon: BarChart3 },
         { name: "Settings", href: "/admin/settings", icon: Settings },

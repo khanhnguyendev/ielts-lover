@@ -92,6 +92,7 @@ export async function getCurrentUser() {
 
     // Attempt to get the profile, but don't fail if it doesn't exist yet (e.g., during OAuth onboarding)
     const profile = await userRepo.getById(user.id);
+    console.log("getCurrentUser Profile Check:", { authId: user.id, profileFound: !!profile, role: profile?.role });
 
     return {
         ...(profile || { id: user.id, email: user.email }),
@@ -127,4 +128,13 @@ export async function signOut() {
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();
     return redirect("/login");
+}
+
+export async function rewriteText(text: string) {
+    const result = await aiService.rewriteContent(text);
+    return result.rewritten_text;
+}
+
+export async function getLessonQuestions(lessonId: string) {
+    return lessonService.getQuestions(lessonId);
 }

@@ -37,6 +37,9 @@ export class AIService {
         },
         speaking_part3: {
             v1: "Analyze the following IELTS Speaking Part 3 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
+        },
+        rewrite: {
+            v1: "Rewrite the following text to be more academic and professional, suitable for IELTS Writing Band 8.0+. Improve vocabulary and sentence structure while retaining the original meaning.",
         }
     };
 
@@ -58,6 +61,15 @@ export class AIService {
             confidence: { type: SchemaType.NUMBER, description: "Confidence score of the evaluation (0-1)" }
         },
         required: ["overall_band", "breakdown", "feedback", "confidence"]
+    };
+
+    private static REWRITE_SCHEMA = {
+        type: SchemaType.OBJECT,
+        properties: {
+            rewritten_text: { type: SchemaType.STRING, description: "The rewritten version of the input text" },
+            improvements: { type: SchemaType.STRING, description: "Brief explanation of key improvements made" }
+        },
+        required: ["rewritten_text"]
     };
 
     constructor() {
@@ -90,6 +102,28 @@ export class AIService {
             console.error("AI Evaluation failed:", error);
             // Fallback mock or rethrow
             throw new Error("AI Evaluation failed. Please try again later.");
+        }
+    }
+
+    async rewriteContent(content: string, version: AIPromptVersion = "v1"): Promise<{ rewritten_text: string, improvements?: string }> {
+        const model = this.genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.REWRITE_SCHEMA as any,
+            },
+        });
+
+        const promptBase = (AIService.PROMPTS.rewrite as any)[version];
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the result in the requested JSON format.`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
+            return JSON.parse(responseText);
+        } catch (error) {
+            console.error("AI Rewrite failed:", error);
+            throw new Error("AI Rewrite failed. Please try again later.");
         }
     }
 }

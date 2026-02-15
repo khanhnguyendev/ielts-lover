@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
+import { rewriteText } from "@/app/actions"
 
 export default function RewriterPage() {
     const [inputText, setInputText] = React.useState("")
@@ -22,14 +23,19 @@ export default function RewriterPage() {
     const [isRewriting, setIsRewriting] = React.useState(false)
     const [copied, setCopied] = React.useState(false)
 
-    const handleRewrite = () => {
+    const handleRewrite = async () => {
         if (!inputText) return
         setIsRewriting(true)
-        // Simulate API call
-        setTimeout(() => {
-            setRewrittenText(`Here is a more professional and academic version of your text:\n\n"${inputText.trim()}" rewritten with more sophisticated vocabulary and better sentence structure to ensure a higher band score.`)
+        // Call Server Action
+        try {
+            const result = await rewriteText(inputText)
+            setRewrittenText(result)
+        } catch (error) {
+            console.error("Rewrite failed:", error)
+            // Ideally show error toast here
+        } finally {
             setIsRewriting(false)
-        }, 2000)
+        }
     }
 
     const handleCopy = () => {
