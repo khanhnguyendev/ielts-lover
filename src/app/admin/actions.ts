@@ -9,13 +9,15 @@ import { revalidatePath } from "next/cache";
 
 import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { ExerciseService } from "@/services/exercise.service";
-import { Exercise } from "@/types";
+import { Exercise, ExerciseType } from "@/types";
+import { AIService } from "@/services/ai.service";
 
 const lessonRepo = new LessonRepository();
 const lessonService = new LessonService(lessonRepo);
 
 const exerciseRepo = new ExerciseRepository();
 const exerciseService = new ExerciseService(exerciseRepo);
+const aiService = new AIService();
 
 async function checkAdmin() {
     const user = await getCurrentUser();
@@ -84,4 +86,11 @@ export async function createExercise(exercise: Omit<Exercise, "id" | "created_at
     revalidatePath("/dashboard/writing");
     revalidatePath("/dashboard/speaking");
     return result;
+}
+
+export async function generateAIExercise(type: string, topic?: string) {
+    await checkAdmin();
+    // Verify type is valid key of PROMPTS.generation
+    // For now we trust the client sends correct string, or we can validate
+    return aiService.generateExerciseContent(type, topic);
 }

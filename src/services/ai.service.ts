@@ -40,7 +40,33 @@ export class AIService {
         },
         rewrite: {
             v1: "Rewrite the following text to be more academic and professional, suitable for IELTS Writing Band 8.0+. Improve vocabulary and sentence structure while retaining the original meaning.",
+        },
+        generation: {
+            writing_task1: {
+                v1: "Generate a realistic IELTS Writing Task 1 prompt. Include a title describing the chart/graph/process, and the full question prompt. NOTE: Since you cannot generate images, strictly describe what the visual data would be in the prompt text so the user knows what image to find/create.",
+            },
+            writing_task2: {
+                v1: "Generate a challenging IELTS Writing Task 2 essay prompt on a common topic (e.g., Education, Environment, Technology). Include a catchy title and the full essay question.",
+            },
+            speaking_part1: {
+                v1: "Generate a set of 3-4 IELTS Speaking Part 1 questions on a specific manufacturing topic. Return a title (e.g., 'Hometown', 'Work') and the list of questions.",
+            },
+            speaking_part2: {
+                v1: "Generate an IELTS Speaking Part 2 Cue Card topic. Include the main topic title and the bullet points the candidate should cover.",
+            },
+            speaking_part3: {
+                v1: "Generate a set of 4-5 abstract IELTS Speaking Part 3 questions related to a specific theme. Return a title and the list of questions.",
+            }
         }
+    };
+
+    private static OPERATION_SCHEMA = {
+        type: SchemaType.OBJECT,
+        properties: {
+            title: { type: SchemaType.STRING, description: "A short, descriptive title for the exercise" },
+            prompt: { type: SchemaType.STRING, description: "The full content of the question/prompt" }
+        },
+        required: ["title", "prompt"]
     };
 
     private static RESPONSE_SCHEMA = {
@@ -124,6 +150,36 @@ export class AIService {
         } catch (error) {
             console.error("AI Rewrite failed:", error);
             throw new Error("AI Rewrite failed. Please try again later.");
+        }
+    }
+
+    async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<{ title: string, prompt: string }> {
+        const model = this.genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.OPERATION_SCHEMA as any,
+            },
+        });
+
+        const promptBase = (AIService.PROMPTS.generation as any)[type]?.[version];
+        if (!promptBase) {
+            throw new Error(`No generation prompt found for type: ${type}`);
+        }
+
+        let fullPrompt = `${promptBase}\n\n`;
+        if (topic) {
+            fullPrompt += `TOPIC / THEME: ${topic}\n\n`;
+        }
+        fullPrompt += `Return the result in the requested JSON format.`;
+
+        try {
+            const result = await model.generateContent(fullPrompt);
+            const responseText = result.response.text();
+            return JSON.parse(responseText);
+        } catch (error) {
+            console.error("AI Generation failed:", error);
+            throw new Error("AI Generation failed. Please try again later.");
         }
     }
 }

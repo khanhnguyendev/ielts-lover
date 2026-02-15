@@ -6,25 +6,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createExercise } from "@/app/admin/actions";
+import { createExercise, generateAIExercise } from "@/app/admin/actions";
+import { Sparkles, Loader2 } from "lucide-react";
 
 export default function CreateSpeakingExercisePage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"speaking_part1" | "speaking_part2" | "speaking_part3">("speaking_part1");
+
+    // Controlled inputs
+    const [title, setTitle] = useState("");
+    const [prompt, setPrompt] = useState("");
+    const [topic, setTopic] = useState("");
+
+    async function handleGenerate() {
+        setIsGenerating(true);
+        try {
+            const result = await generateAIExercise(type, topic || undefined);
+            if (result) {
+                setTitle(result.title);
+                setPrompt(result.prompt);
+            }
+        } catch (error) {
+            console.error("Failed to generate exercise:", error);
+            alert("Failed to generate content. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    }
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
 
-        const title = formData.get("title") as string;
-        const prompt = formData.get("prompt") as string;
+        const formTitle = formData.get("title") as string;
+        const formPrompt = formData.get("prompt") as string;
         // In the future, we might add audio file uploads here
 
         try {
             await createExercise({
-                title,
+                title: formTitle,
                 type,
-                prompt,
+                prompt: formPrompt,
                 is_published: true,
             });
             router.push("/admin/exercises");
@@ -44,6 +67,41 @@ export default function CreateSpeakingExercisePage() {
             </div>
 
             <form action={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
+                <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-end gap-3">
+                        <div className="flex-1 space-y-2">
+                            <Label htmlFor="topic">Topic / Theme (Optional)</Label>
+                            <Input
+                                id="topic"
+                                placeholder="e.g., Hometown, Work, Travel..."
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]"
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Generate AI
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                        Use AI to generate a realistic title and prompt based on the selected type and optional topic.
+                    </p>
+                </div>
+
                 <div className="space-y-2">
                     <Label>Exercise Type</Label>
                     <div className="flex gap-2">
@@ -65,7 +123,14 @@ export default function CreateSpeakingExercisePage() {
 
                 <div className="space-y-2">
                     <Label htmlFor="title">Title</Label>
-                    <Input id="title" name="title" placeholder="e.g., Hometown & Childhood" required />
+                    <Input
+                        id="title"
+                        name="title"
+                        placeholder="e.g., Hometown & Childhood"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
                 </div>
 
                 <div className="space-y-2">
@@ -80,6 +145,8 @@ export default function CreateSpeakingExercisePage() {
                             : "Do you like your hometown?\nHow often do you visit your hometown?"}
                         className="h-48"
                         required
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
                     />
                     <p className="text-xs text-gray-500">
                         {type === "speaking_part2"

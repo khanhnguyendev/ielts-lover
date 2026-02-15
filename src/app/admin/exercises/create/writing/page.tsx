@@ -6,26 +6,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createExercise } from "@/app/admin/actions";
+import { createExercise, generateAIExercise } from "@/app/admin/actions";
+import { Sparkles, Loader2 } from "lucide-react";
 // import { ExerciseType } from "@/types"; // Might need to import this if used directly
 
 export default function CreateWritingExercisePage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"writing_task1" | "writing_task2">("writing_task1");
+
+    // Controlled inputs for AI generation population
+    const [title, setTitle] = useState("");
+    const [prompt, setPrompt] = useState("");
+    const [topic, setTopic] = useState("");
+
+    async function handleGenerate() {
+        setIsGenerating(true);
+        try {
+            // If topic is empty, standard generation
+            const result = await generateAIExercise(type, topic || undefined);
+            if (result) {
+                setTitle(result.title);
+                setPrompt(result.prompt);
+            }
+        } catch (error) {
+            console.error("Failed to generate exercise:", error);
+            alert("Failed to generate content. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    }
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
 
-        const title = formData.get("title") as string;
-        const prompt = formData.get("prompt") as string;
+        // We use state for title/prompt if they were generated, or fallback to formData if user typed manually (but need to ensure sync)
+        // Actually, better to rely on formData which pulls from the inputs, and the inputs are controlled by state or default value.
+        // If we make them controlled, we must update state on change.
+
+        // Let's rely on the form data, but since inputs are controlled, we need to ensure they have name attributes.
+        const formTitle = formData.get("title") as string;
+        const formPrompt = formData.get("prompt") as string;
         const imageUrl = formData.get("image_url") as string;
 
         try {
             await createExercise({
-                title,
+                title: formTitle,
                 type,
-                prompt,
+                prompt: formPrompt,
                 image_url: type === "writing_task1" ? imageUrl : undefined,
                 is_published: true, // Default to published for now, or add checkbox
             });
@@ -46,6 +75,41 @@ export default function CreateWritingExercisePage() {
             </div>
 
             <form action={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
+                <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-end gap-3">
+                        <div className="flex-1 space-y-2">
+                            <Label htmlFor="topic">Topic / Theme (Optional)</Label>
+                            <Input
+                                id="topic"
+                                placeholder="e.g., Environment, Education, Coffee Production..."
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]"
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Generate AI
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                        Use AI to generate a realistic title and prompt based on the selected type and optional topic.
+                    </p>
+                </div>
+
                 <div className="space-y-2">
                     <Label>Exercise Type</Label>
                     <div className="flex gap-4">
@@ -74,7 +138,14 @@ export default function CreateWritingExercisePage() {
 
                 <div className="space-y-2">
                     <Label htmlFor="title">Title</Label>
-                    <Input id="title" name="title" placeholder="e.g., Bar Chart: Coffee Production" required />
+                    <Input
+                        id="title"
+                        name="title"
+                        placeholder="e.g., Bar Chart: Coffee Production"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
                 </div>
 
                 {type === "writing_task1" && (
@@ -93,6 +164,8 @@ export default function CreateWritingExercisePage() {
                         placeholder="Enter the full question prompt here..."
                         className="h-32"
                         required
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
                     />
                 </div>
 
