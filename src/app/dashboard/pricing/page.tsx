@@ -34,9 +34,7 @@ export default function PricingPage() {
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto pb-20">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">Pricing</h1>
-            </div>
+            {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border shadow-sm overflow-hidden min-h-[800px] flex flex-col">
                 {/* Top Section */}
@@ -113,13 +111,13 @@ export default function PricingPage() {
                                     </div>
                                 </div>
 
-                                <Button className="w-full h-16 rounded-[24px] bg-primary hover:bg-primary/90 text-white font-black text-sm shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]">
+                                <Button variant="premium" size="lg" className="w-full">
                                     Buy now
                                 </Button>
 
-                                <button className="w-full text-[10px] font-black uppercase tracking-widest text-primary hover:underline transition-all">
+                                <Button variant="link" size="sm" className="w-full font-black uppercase tracking-widest text-[10px]">
                                     View sample premium reports
-                                </button>
+                                </Button>
 
                                 <div className="pt-6 border-t flex flex-col items-center gap-4">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Secure Payment via Stripe</span>

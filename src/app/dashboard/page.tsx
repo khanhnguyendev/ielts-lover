@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/PulseLoader"
+import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
@@ -53,30 +54,14 @@ export default function DashboardPage() {
         <div className="space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
 
             {/* 1. Daily Quota Banner */}
-            <div className="bg-primary rounded-2xl p-4 flex items-center justify-between text-white shadow-lg shadow-primary/20">
-                <div className="flex items-center gap-4">
-                    <div className="bg-white/20 p-2 rounded-xl">
-                        <Zap className="h-5 w-5 fill-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-bold font-outfit text-white">
-                            {user?.daily_quota_used || 0}/5 daily free reports used
-                        </h3>
-                        <p className="text-[10px] text-white/80 font-medium">Renews in 23 hours 59 minutes</p>
-                    </div>
-                </div>
-                {user?.is_premium ? (
+            <PremiumBanner
+                title={`${user?.daily_quota_used || 0}/5 daily free reports used`}
+                subtitle="Renews in 23 hours 59 minutes"
+                action={user?.is_premium ? (
                     <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
-                ) : (
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        className="h-9 px-6 rounded-full font-bold text-xs shadow-xl bg-white text-primary hover:bg-slate-50 hover:scale-105 transition-all"
-                    >
-                        Upgrade to premium now
-                    </Button>
-                )}
-            </div>
+                ) : undefined}
+                buttonText="Upgrade to premium now"
+            />
 
             {/* 2. IELTS Info Card */}
             <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
@@ -105,7 +90,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted rounded-xl">
+                <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
                     <Edit3 className="h-5 w-5" />
                 </Button>
             </div>
@@ -136,11 +121,11 @@ export default function DashboardPage() {
                         />
                         <div className="flex items-center justify-between px-2 pb-2">
                             <div className="flex gap-2">
-                                <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-muted-foreground rounded-lg hover:bg-muted">Ask</Button>
-                                <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-muted-foreground rounded-lg hover:bg-muted">Learn</Button>
-                                <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-muted-foreground rounded-lg hover:bg-muted">Support</Button>
+                                <Button variant="soft" size="xs">Ask</Button>
+                                <Button variant="soft" size="xs">Learn</Button>
+                                <Button variant="soft" size="xs">Support</Button>
                             </div>
-                            <Button size="icon" className="h-10 w-10 rounded-xl shadow-lg shadow-primary/20 bg-primary hover:scale-110 transition-transform">
+                            <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110">
                                 <Send className="h-4 w-4 text-white" />
                             </Button>
                         </div>
@@ -225,7 +210,7 @@ export default function DashboardPage() {
                         </p>
                     </div>
                     <Link href="/dashboard/samples">
-                        <Button variant="secondary" className="rounded-full px-8 h-12 font-bold bg-primary text-white hover:bg-primary/90">
+                        <Button variant="premium" size="lg" className="px-10">
                             View Premium Sample Reports
                         </Button>
                     </Link>
@@ -236,7 +221,7 @@ export default function DashboardPage() {
 
                 <div className="pt-8 border-t text-center">
                     <Link href="/dashboard/reports">
-                        <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 rounded-xl group">
+                        <Button variant="ghost" className="text-primary hover:bg-primary/5 group">
                             View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Button>
                     </Link>
@@ -287,12 +272,12 @@ function PracticeCard({
                 <h4 className="text-xl font-black font-outfit">{title}</h4>
                 <p className="text-sm text-foreground-secondary font-medium">{desc}</p>
             </div>
-            <div className="w-full h-12 bg-primary text-white rounded-xl font-black text-sm shadow-lg shadow-primary/20 flex items-center justify-center transition-all group-hover:bg-primary/90">
+            <Button className="w-full font-black text-sm shadow-lg shadow-primary/20 transition-all group-hover:bg-primary/90">
                 <div className="flex items-center gap-2">
                     <PenTool className="h-4 w-4" />
                     {buttonText}
                 </div>
-            </div>
+            </Button>
         </div>
     )
 }

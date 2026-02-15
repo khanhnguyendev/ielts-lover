@@ -167,7 +167,7 @@ export default function ReportsPage() {
                                                 </TableCell>
                                                 <TableCell className="py-5 text-right pr-10">
                                                     <Link href={`/dashboard/reports/${attempt.id}`}>
-                                                        <Button className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 transition-all">
+                                                        <Button variant="outline" size="sm" className="font-black uppercase tracking-widest text-[10px]">
                                                             View Report
                                                         </Button>
                                                     </Link>
@@ -287,7 +287,7 @@ export default function ReportsPage() {
                                     <p className="text-sm font-medium text-muted-foreground">Complete your first practice to learn the one skill you need to improve for a higher band.</p>
                                 </div>
                             </div>
-                            <Button className="h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-xs shadow-lg shadow-primary/20">
+                            <Button variant="premium" size="lg">
                                 Start Writing
                             </Button>
                         </div>
@@ -395,14 +395,16 @@ export default function ReportsPage() {
 
 function PaginationButton({ icon: Icon, disabled = false }: { icon: any, disabled?: boolean }) {
     return (
-        <button
+        <Button
+            variant="outline"
+            size="icon"
             disabled={disabled}
             className={cn(
-                "p-1.5 rounded-lg border bg-white transition-all",
-                disabled ? "opacity-30 cursor-not-allowed" : "hover:border-primary hover:text-primary"
+                "p-1.5",
+                disabled && "opacity-30"
             )}
         >
             <Icon className="h-4 w-4" />
-        </button>
+        </Button>
     )
 }

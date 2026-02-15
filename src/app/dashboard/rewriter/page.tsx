@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 export default function RewriterPage() {
     const [inputText, setInputText] = React.useState("")
@@ -39,9 +40,7 @@ export default function RewriterPage() {
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">AI Writing Rewriter</h1>
-            </div>
+            {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Instruction */}
@@ -80,7 +79,9 @@ export default function RewriterPage() {
                         <Button
                             onClick={handleRewrite}
                             disabled={!inputText || isRewriting}
-                            className="w-full h-16 rounded-[24px] bg-primary hover:bg-primary/90 text-white font-black text-sm shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="w-full"
+                            variant="premium"
+                            size="lg"
                         >
                             {isRewriting ? (
                                 <>
@@ -128,20 +129,10 @@ export default function RewriterPage() {
                             )}
                         </div>
 
-                        <div className="bg-[#EEF2FF] rounded-[24px] p-5 flex items-center justify-between border border-[#E0E7FF] group overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-                                <Zap className="h-20 w-20 text-[#4F46E5] fill-[#4F46E5]" />
-                            </div>
-                            <div className="flex items-center gap-4 relative z-10">
-                                <div className="bg-[#4F46E5] p-2.5 rounded-xl shadow-lg shadow-[#4F46E5]/20">
-                                    <Zap className="h-5 w-5 text-white fill-white" />
-                                </div>
-                                <p className="text-xs font-bold text-[#4338CA]">Access Advanced Rewrite Modes with Premium</p>
-                            </div>
-                            <Button className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white h-10 px-5 rounded-xl font-black text-[10px] relative z-10 shadow-lg shadow-[#7C3AED]/10">
-                                Upgrade
-                            </Button>
-                        </div>
+                        <PremiumBanner
+                            title="Access Advanced Rewrite Modes with Premium"
+                            buttonText="Upgrade"
+                        />
                     </div>
                 </div>
             </div>

@@ -39,7 +39,7 @@ export default function LoginPage() {
             <div className="space-y-4">
                 <Button
                     variant="outline"
-                    className="w-full h-12 rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 transition-all font-bold text-slate-800 shadow-sm flex items-center justify-center gap-3 active:scale-[0.98]"
+                    className="w-full bg-white gap-3"
                     onClick={handleGoogleSignIn}
                     disabled={isLoading}
                 >
@@ -108,7 +108,7 @@ export default function LoginPage() {
                             </button>
                         </div>
                     </div>
-                    <Button type="submit" className="w-full h-12 text-base font-semibold rounded-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all">
+                    <Button type="submit" className="w-full">
                         Log in
                     </Button>
                 </form>

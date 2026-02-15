@@ -38,6 +38,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { PulseLoader } from "@/components/global/PulseLoader"
+import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 const CATEGORIES = [
     "Mock Test",
@@ -130,27 +131,17 @@ export default function WritingHubPage() {
                     </div>
 
                     <div className="relative group">
-                        <Button variant="outline" className="h-11 rounded-1.5xl px-5 text-xs font-bold border-muted-foreground/10 group-hover:border-primary/20 transition-all">
+                        <Button variant="outline" className="group-hover:border-primary/20">
                             All tasks <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
                         </Button>
                     </div>
                 </div>
 
                 {/* Premium Banner */}
-                <div className="bg-[#EEF2FF] rounded-[24px] p-5 flex items-center justify-between border border-[#E0E7FF] group overflow-hidden relative">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-                        <Zap className="h-20 w-20 text-[#4F46E5] fill-[#4F46E5]" />
-                    </div>
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className="bg-primary p-2.5 rounded-xl shadow-lg shadow-primary/20">
-                            <Zap className="h-5 w-5 text-white fill-white" />
-                        </div>
-                        <p className="text-sm font-bold text-foreground-accent">Premium Feature - Upgrade to Premium for unlimited mock tests</p>
-                    </div>
-                    <Button className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white h-11 px-6 rounded-xl font-black text-xs shadow-xl shadow-[#7C3AED]/20 relative z-10">
-                        Upgrade to Premium
-                    </Button>
-                </div>
+                <PremiumBanner
+                    title="Premium Feature - Upgrade to Premium for unlimited mock tests"
+                    buttonText="Upgrade to Premium"
+                />
 
                 {activeCategory === "Custom Question" ? (
                     <div className="space-y-8">
@@ -248,7 +239,7 @@ export default function WritingHubPage() {
                                 <p className="text-[10px] font-medium text-muted-foreground max-w-[200px]">
                                     Please upload a clear, close-up image with high resolution.
                                 </p>
-                                <Button variant="outline" className="h-10 px-6 rounded-xl border-muted-foreground/20 text-xs font-black">
+                                <Button variant="outline" size="sm" className="font-black">
                                     <Upload className="h-4 w-4 mr-2" /> Upload
                                 </Button>
                             </div>
@@ -265,8 +256,10 @@ export default function WritingHubPage() {
                         </div>
                     </div>
                     <Button
+                        variant="premium"
+                        size="lg"
                         onClick={() => setIsAddModalOpen(false)}
-                        className="w-full h-14 rounded-2xl bg-indigo-900 hover:bg-indigo-950 text-white font-black text-sm shadow-xl shadow-indigo-900/20"
+                        className="w-full"
                     >
                         Add Questions
                     </Button>

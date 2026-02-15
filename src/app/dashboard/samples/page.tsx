@@ -32,9 +32,7 @@ export default function SampleReportsPage() {
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">Sample Reports</h1>
-            </div>
+            {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Filters */}
@@ -89,7 +87,7 @@ export default function SampleReportsPage() {
                         <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto">
                             Get access to a massive library of high-scoring band 8.0-9.0 samples with detailed examiner notes.
                         </p>
-                        <Button className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-[24px] font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                        <Button variant="premium" size="lg">
                             Upgrade to Premium
                             <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
@@ -126,7 +124,7 @@ function SampleCard({ sample }: { sample: any }) {
             <div className="flex items-center justify-between mt-auto">
                 <span className="text-xs font-medium text-muted-foreground">{sample.date}</span>
                 <Link href={`/dashboard/reports/${sample.id}`}>
-                    <Button variant="ghost" className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl px-4 h-10">
+                    <Button variant="ghost" size="sm" className="font-black uppercase tracking-widest text-xs">
                         View Sample
                         <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>

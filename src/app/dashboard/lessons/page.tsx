@@ -29,9 +29,7 @@ const LESSONS = [
 export default function LessonsHubPage() {
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-outfit">Lessons & Guides</h1>
-            </div>
+            {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Search & Filters */}
@@ -108,12 +106,10 @@ export default function LessonsHubPage() {
                             </div>
 
                             <Link href={lesson.premium ? "/dashboard/pricing" : `/dashboard/lessons/${lesson.id}`}>
-                                <Button className={cn(
-                                    "h-14 px-8 rounded-2xl font-black text-sm transition-all w-full",
-                                    lesson.premium
-                                        ? "bg-muted text-muted-foreground/60 hover:bg-muted"
-                                        : "bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 hover:scale-105"
-                                )}>
+                                <Button
+                                    variant={lesson.premium ? "outline" : "premium"}
+                                    className={cn("w-full", lesson.premium && "opacity-60 bg-muted hover:bg-muted border-none")}
+                                >
                                     {lesson.progress === 100 ? "Review Lesson" : lesson.progress > 0 ? "Continue" : "Start Now"}
                                     <ChevronRight className="ml-2 h-5 w-5" />
                                 </Button>

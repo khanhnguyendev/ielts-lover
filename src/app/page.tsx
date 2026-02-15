@@ -39,10 +39,10 @@ export default function Home() {
 
         <div className="flex items-center gap-4">
           <Link href="/login">
-            <Button variant="ghost" className="text-sm font-bold px-6 h-12 rounded-xl">Login</Button>
+            <Button variant="ghost" className="px-6">Login</Button>
           </Link>
           <Link href="/signup">
-            <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-8 rounded-xl font-black text-sm shadow-xl shadow-primary/20">
+            <Button className="px-8 font-black">
               Get Started
             </Button>
           </Link>
@@ -73,13 +73,13 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
               <Link href="/signup">
-                <Button size="lg" className="h-20 px-12 rounded-[28px] bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
+                <Button variant="cta">
                   Start Practice Now
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
               <Link href="/dashboard/samples">
-                <Button variant="outline" className="h-16 px-10 rounded-[28px] border-slate-200 text-sm font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                <Button variant="outline" size="lg" className="uppercase tracking-widest">
                   View Sample Reports
                 </Button>
               </Link>
@@ -224,7 +224,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
                 <Link href="/signup">
-                  <Button size="lg" className="h-20 px-12 rounded-[28px] bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-2xl shadow-primary/30">
+                  <Button variant="cta">
                     Create Free Account
                   </Button>
                 </Link>
