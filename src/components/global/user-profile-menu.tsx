@@ -15,9 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/app/actions"
 import { useState } from "react"
+import { UserProfile } from "@/types"
 import { PulseLoader } from "./PulseLoader"
 
-export function UserProfileMenu() {
+export function UserProfileMenu({ user }: { user: UserProfile }) {
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSignOut = async () => {
@@ -30,22 +31,39 @@ export function UserProfileMenu() {
         }
     }
 
+    // Generate initials from name or email
+    const getInitials = () => {
+        if (user.full_name) {
+            return user.full_name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2)
+        }
+        return user.email.substring(0, 2).toUpperCase()
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0 ring-offset-background transition-colors hover:ring-2 hover:ring-primary/20 hover:ring-offset-2">
                     <Avatar className="h-11 w-11 border-2 border-white shadow-sm">
-                        <AvatarImage src="/avatar-placeholder.png" alt="User" />
-                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">KN</AvatarFallback>
+                        <AvatarImage src={user.avatar_url} alt={user.full_name || "User"} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                            {getInitials()}
+                        </AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[280px] mt-3 p-2 shadow-2xl border-slate-100 bg-white rounded-[24px]" align="end">
                 <DropdownMenuLabel className="font-normal p-4">
                     <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-black text-slate-900 leading-none">aws.khanhnguyen</p>
+                        <p className="text-sm font-black text-slate-900 leading-none">
+                            {user.full_name || user.email.split("@")[0]}
+                        </p>
                         <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest pt-1">
-                            aws.khanhnguyen@gmail.com
+                            {user.email}
                         </p>
                     </div>
                 </DropdownMenuLabel>

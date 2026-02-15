@@ -9,6 +9,8 @@ export type UserProfile = {
     daily_quota_used: number;
     last_quota_reset: string;
     created_at: string;
+    avatar_url?: string;
+    full_name?: string;
 };
 
 export type ExerciseType = "writing_task1" | "writing_task2" | "speaking_part1" | "speaking_part2" | "speaking_part3";

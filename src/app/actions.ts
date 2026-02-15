@@ -6,7 +6,7 @@ import { AttemptRepository } from "@/repositories/attempt.repository";
 import { ExerciseService } from "@/services/exercise.service";
 import { AttemptService } from "@/services/attempt.service";
 import { AIService } from "@/services/ai.service";
-import { ExerciseType } from "@/types";
+import { ExerciseType, UserProfile } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -92,7 +92,12 @@ export async function getCurrentUser() {
 
     // Attempt to get the profile, but don't fail if it doesn't exist yet (e.g., during OAuth onboarding)
     const profile = await userRepo.getById(user.id);
-    return profile || { id: user.id, email: user.email };
+
+    return {
+        ...(profile || { id: user.id, email: user.email }),
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name,
+    } as UserProfile;
 }
 
 export async function signInWithGoogle() {

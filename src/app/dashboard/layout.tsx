@@ -27,7 +27,7 @@ export default async function DashboardLayout({
                     </div>
                     <div className="flex items-center gap-4">
                         <NotificationOverlay />
-                        <UserProfileMenu />
+                        <UserProfileMenu user={user} />
                     </div>
                 </header>
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
