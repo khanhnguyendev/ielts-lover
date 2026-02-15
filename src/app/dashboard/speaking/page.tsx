@@ -86,7 +86,7 @@ export default function SpeakingHubPage() {
                 <h1 className="text-2xl font-bold font-outfit">Speaking Tasks</h1>
             </div>
 
-            <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
+            <div className="bg-card rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Category Tabs */}
                 <div className="flex flex-wrap items-center justify-between gap-6 pb-2">
                     <div className="flex bg-[#F9FAFB] p-1.5 rounded-2xl border w-fit">
@@ -137,7 +137,7 @@ export default function SpeakingHubPage() {
                     <div className="space-y-8">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="w-full bg-white border-2 border-dashed rounded-[32px] p-8 flex items-center gap-6 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+                            className="w-full bg-card border-2 border-dashed rounded-[32px] p-8 flex items-center gap-6 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
                         >
                             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
                                 <Plus className="h-6 w-6" />
@@ -168,7 +168,7 @@ export default function SpeakingHubPage() {
                         {activeCategory !== "Mock Test" && activeCategory !== "Custom Question" && (
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="bg-white border-2 border-dashed rounded-[28px] p-6 flex items-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left min-h-[140px]"
+                                className="bg-card border-2 border-dashed rounded-[28px] p-6 flex items-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left min-h-[140px]"
                             >
                                 <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
                                     <Plus className="h-6 w-6" />
@@ -196,7 +196,7 @@ export default function SpeakingHubPage() {
 
             {/* Add Custom Question Modal */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                <DialogContent className="sm:max-w-md bg-white rounded-[40px] p-10">
+                <DialogContent className="sm:max-w-md bg-card rounded-[40px] p-10">
                     <DialogHeader className="space-y-4">
                         <DialogTitle className="text-2xl font-black font-outfit text-center">Add a custom question</DialogTitle>
                     </DialogHeader>
@@ -256,7 +256,7 @@ function SpeakingCard({
     badge?: { text: string, color: "yellow" | "green" }
 }) {
     return (
-        <div className="bg-white border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
+        <div className="bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
             <div className="flex items-start gap-4">
                 <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
                     <Icon className="h-6 w-6" />

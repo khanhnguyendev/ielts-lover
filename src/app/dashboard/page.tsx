@@ -39,7 +39,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 2. IELTS Info Card */}
-            <div className="bg-white rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
+            <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center">
                         <Calendar className="h-6 w-6 text-muted-foreground" />
@@ -73,7 +73,7 @@ export default function DashboardPage() {
             {/* 3. Catbot Greeting & AI Input */}
             <div className="text-center space-y-6 py-8">
                 <div className="relative inline-block">
-                    <div className="w-24 h-24 bg-white border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
+                    <div className="w-24 h-24 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
                         <span className="text-5xl">🐱</span>
                     </div>
                     <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full animate-bounce">
@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
                 <div className="max-w-xl mx-auto relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative bg-white border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
+                    <div className="relative bg-card border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
                         <textarea
                             placeholder="Ask anything in your language"
                             className="w-full h-24 p-4 text-base bg-transparent border-none focus:ring-0 resize-none font-medium"
@@ -160,7 +160,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 6. Recent Activity (Empty State) */}
-            <div className="bg-white rounded-3xl border p-8 space-y-8 shadow-sm">
+            <div className="bg-card rounded-3xl border p-8 space-y-8 shadow-sm">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
                         <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -239,7 +239,7 @@ function PracticeCard({
     buttonText: string
 }) {
     return (
-        <div className="bg-white p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
+        <div className="bg-card p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Icon className="h-7 w-7 text-primary" />
             </div>

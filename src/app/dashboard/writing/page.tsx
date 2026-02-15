@@ -103,7 +103,7 @@ export default function WritingHubPage() {
                 <h1 className="text-2xl font-bold font-outfit">Writing Tasks</h1>
             </div>
 
-            <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
+            <div className="bg-card rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">
                 {/* Category Tabs */}
                 <div className="flex flex-wrap items-center justify-between gap-6 pb-2">
                     <div className="flex bg-[#F9FAFB] p-1.5 rounded-2xl border w-fit">
@@ -153,7 +153,7 @@ export default function WritingHubPage() {
                     <div className="space-y-8">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="w-full bg-white border-2 border-dashed rounded-[32px] p-8 flex items-center gap-6 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
+                            className="w-full bg-card border-2 border-dashed rounded-[32px] p-8 flex items-center gap-6 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left"
                         >
                             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
                                 <Plus className="h-6 w-6" />
@@ -181,7 +181,7 @@ export default function WritingHubPage() {
                         {activeCategory !== "Mock Test" && (
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="bg-white border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-center"
+                                className="bg-card border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-center"
                             >
                                 <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
                                     <Plus className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function WritingHubPage() {
 
             {/* Add Custom Question Modal */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                <DialogContent className="sm:max-w-md bg-white rounded-[40px] p-10">
+                <DialogContent className="sm:max-w-md bg-card rounded-[40px] p-10">
                     <DialogHeader className="space-y-4">
                         <DialogTitle className="text-2xl font-black font-outfit text-center">Add a custom question</DialogTitle>
                     </DialogHeader>
@@ -282,7 +282,7 @@ function ExerciseCard({
     isRecommended?: boolean
 }) {
     return (
-        <div className="bg-white border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
+        <div className="bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
             {isRecommended && (
                 <div className="absolute -top-2.5 right-6 bg-[#7C3AED] text-white text-[8px] px-2 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-primary/20">
                     <Star className="h-2 w-2 fill-white" /> Recommended
