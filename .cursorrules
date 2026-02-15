@@ -1,0 +1,29 @@
+# IELTS Lover - AI Coding Standards
+
+## Project Context
+AI-powered IELTS preparation platform using Next.js 16, Supabase, and a strict layered architecture.
+
+## Architectural Layers
+- **UI (app/)**: Render only. Call Server Actions. No DB/AI logic.
+- **Service (services/)**: Business logic center. Subscription rules, AI orchestration, scoring.
+- **Repository (repositories/)**: Data persistence. Pure SQL/Supabase queries.
+
+## Rule Enforcement (CRITICAL)
+1. **Strict Layering**: No DB queries in UI. No AI calls in Repositories.
+2. **Service Mandatory**: If business logic exists outside services/ → REJECT.
+3. **AI Protocol**:
+   - Treatment: Fallible, asynchronous, expensive.
+   - Prompts: Versioned JSON-return prompts in `ai.service.ts`.
+   - Storage: Every AI response must be stored in `reports` table.
+4. **Immutability**:
+   - `exercises` are versioned/immutable once published.
+   - `attempts` and `reports` are historical records; never edit.
+5. **Subscription**:
+   - Only `subscription.policy.ts` decides access.
+   - UI shows "Upgrade" UI based on explicit policy failure reasons.
+
+## Stack Conventions
+- **Next.js**: Use App Router, Server Components where possible.
+- **Tailwind**: Mobile-first, strict adhering to the purple/minimalist design system.
+- **Shadcn UI**: Base components only; customize in `components/ui`.
+- **Zustand**: For ephemeral UI state (e.g., sidebar toggles, active practice state).
