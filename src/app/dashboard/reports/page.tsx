@@ -154,7 +154,7 @@ export default function ReportsPage() {
                                                 </TableCell>
                                                 <TableCell className="py-5">
                                                     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-900 text-sm">
-                                                        {attempt.overall_score || "-"}
+                                                        {attempt.score || "-"}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-5 text-right pr-10">

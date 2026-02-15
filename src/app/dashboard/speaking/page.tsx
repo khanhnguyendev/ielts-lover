@@ -45,40 +45,43 @@ interface Exercise {
     }
 }
 
+import { getExercises } from "@/app/actions"
+import { Exercise as DbExercise, ExerciseType } from "@/types"
+
 export default function SpeakingHubPage() {
     const [activeCategory, setActiveCategory] = React.useState("Mock Test")
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
+    const [exercises, setExercises] = React.useState<any[]>([])
+    const [isLoading, setIsLoading] = React.useState(true)
 
-    const getExercises = (): Exercise[] => {
-        if (activeCategory === "Mock Test") {
-            return Array.from({ length: 18 }).map((_, i) => ({
-                title: `Complete Speaking Mock Test ${i + 1}`,
-                attempts: 0,
-                icon: i % 3 === 0 ? Cat : i % 3 === 1 ? Heart : Coffee,
-                color: i % 3 === 0 ? "text-purple-600 bg-purple-50" : i % 3 === 1 ? "text-pink-500 bg-pink-50" : "text-blue-500 bg-blue-50",
-                badge: { text: "Full Mock Test", color: "yellow" }
-            }))
-        }
-        if (activeCategory === "Part 1") {
-            return [
-                { title: "Advertisement", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Animals", badge: { text: "Practice Topic", color: "yellow" }, icon: Cat, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Art", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Art/drawing", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Bags", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Being happy", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Bicycles", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Bikes", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Books and reading habits", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Boredom", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Borrowing/lending", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Cars", badge: { text: "Practice Topic", color: "yellow" }, icon: MessageSquare, color: "text-emerald-600 bg-emerald-50" }
-            ]
-        }
-        return []
-    }
+    React.useEffect(() => {
+        async function fetchExercises() {
+            setIsLoading(true)
+            try {
+                let type: ExerciseType = "speaking_part1"
+                if (activeCategory === "Part 2") type = "speaking_part2"
+                if (activeCategory === "Part 3") type = "speaking_part3"
 
-    const exercises = getExercises()
+                const data = await getExercises(type)
+
+                const adapted = data.map(db => ({
+                    title: db.title,
+                    subtitle: db.type.replace("_", " ").toUpperCase(),
+                    attempts: 0,
+                    icon: db.type === "speaking_part2" ? MessageSquare : Cat,
+                    color: db.type === "speaking_part2" ? "text-indigo-600 bg-indigo-50" : "text-emerald-600 bg-emerald-50",
+                    badge: { text: "Practice Topic", color: "yellow" }
+                }))
+
+                setExercises(adapted)
+            } catch (error) {
+                console.error("Failed to fetch exercises:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchExercises()
+    }, [activeCategory])
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">
