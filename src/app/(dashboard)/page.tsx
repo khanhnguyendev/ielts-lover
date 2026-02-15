@@ -211,7 +211,7 @@ function OnboardingStep({ label, completed = false }: { label: string, completed
                     "w-10 h-10 rounded-xl flex items-center justify-center",
                     completed ? "bg-green-500" : "bg-muted"
                 )}>
-                    {completed ? <CheckCircle2 className="h-5 w-5 text-white" /> : <label.charAt(0) === 'V' ? <FileText className="h-5 w-5 text-muted-foreground" /> : <Edit3 className="h-5 w-5 text-muted-foreground" />}
+                    {completed ? <CheckCircle2 className="h-5 w-5 text-white" /> : <Edit3 className="h-5 w-5 text-muted-foreground" />}
                 </div>
                 <span className={cn("text-sm font-bold", completed && "line-through text-muted-foreground")}>{label}</span>
             </div>

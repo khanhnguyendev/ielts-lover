@@ -16,7 +16,7 @@ export class AIService {
     };
 
     async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1") {
-        const prompt = AIService.PROMPTS[type][version];
+        const prompt = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS[type]["v1"];
         console.log(`Calling AI with prompt: ${prompt}`);
 
         // Mock response following AI OUTPUT CONTRACT
