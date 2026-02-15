@@ -1,48 +1,87 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding"];
+const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding", "/auth/callback"];
 
 export default async function proxy(request: NextRequest) {
-    const supabase = await createServerSupabaseClient();
+    const { pathname } = request.nextUrl;
+    console.log(`[Proxy] Requesting: ${pathname}`);
+
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
+    });
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        {
+            db: {
+                schema: 'ielts_lover_v1'
+            },
+            cookies: {
+                getAll() {
+                    return request.cookies.getAll();
+                },
+                setAll(cookiesToSet) {
+                    // 1. Update REQUEST cookies for subsequent server components
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+
+                    // 2. Refresh the response to pass the updated request forward
+                    response = NextResponse.next({
+                        request,
+                    });
+
+                    // 3. Update RESPONSE cookies for the browser
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        response.cookies.set(name, value, options)
+                    );
+                },
+            },
+        }
+    );
+
+    // This refreshes the session if needed and triggers setAll
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { pathname } = request.nextUrl;
-
-    // 1. Check if the route is explicitly public
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
-    // 2. Handle Authentication Logic
     if (isPublicRoute) {
-        // If user is already logged in, don't let them go to login/signup
         if (user && (pathname === "/login" || pathname === "/signup")) {
-            return NextResponse.redirect(new URL("/dashboard", request.url));
+            console.log(`[Proxy] User exists, redirecting ${pathname} -> /dashboard`);
+            const url = new URL("/dashboard", request.url);
+            const redirectResponse = NextResponse.redirect(url);
+
+            // IMPORTANT: Copy refreshed cookies to the redirect response
+            response.cookies.getAll().forEach((cookie) => {
+                const { name, value, ...options } = cookie;
+                redirectResponse.cookies.set(name, value, options);
+            });
+
+            return redirectResponse;
         }
-        return NextResponse.next();
+        return response;
     }
 
-    // 3. Protected-by-Default: Redirect to login if no session exists
     if (!user) {
-        const redirectUrl = new URL("/login", request.url);
-        // Store the original destination to redirect back after login
-        redirectUrl.searchParams.set("from", pathname);
-        return NextResponse.redirect(redirectUrl);
+        console.log(`[Proxy] No user, redirecting ${pathname} -> /login`);
+        const url = new URL("/login", request.url);
+        url.searchParams.set("from", pathname);
+        const redirectResponse = NextResponse.redirect(url);
+
+        // Sync response cookies to the redirect
+        response.cookies.getAll().forEach((cookie) => {
+            const { name, value, ...options } = cookie;
+            redirectResponse.cookies.set(name, value, options);
+        });
+
+        return redirectResponse;
     }
 
-    return NextResponse.next();
+    return response;
 }
 
 export const config = {
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - All files in the public folder (images, etc. - usually have extensions)
-     */
-    matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
-    ],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

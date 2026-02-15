@@ -8,6 +8,7 @@ import { AttemptService } from "@/services/attempt.service";
 import { AIService } from "@/services/ai.service";
 import { ExerciseType } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
@@ -88,5 +89,37 @@ export async function getCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return null;
-    return userRepo.getById(user.id);
+
+    // Attempt to get the profile, but don't fail if it doesn't exist yet (e.g., during OAuth onboarding)
+    const profile = await userRepo.getById(user.id);
+    return profile || { id: user.id, email: user.email };
+}
+
+export async function signInWithGoogle() {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+            queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+            },
+        },
+    });
+
+    if (error) {
+        console.error("Google Sign-In Error:", error);
+        throw error;
+    }
+
+    if (data.url) {
+        return redirect(data.url);
+    }
+}
+
+export async function signOut() {
+    const supabase = await createServerSupabaseClient();
+    await supabase.auth.signOut();
+    return redirect("/login");
 }

@@ -13,8 +13,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { signOut } from "@/app/actions"
+import { useState } from "react"
 
 export function UserProfileMenu() {
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSignOut = async () => {
+        setIsLoading(true)
+        try {
+            await signOut()
+        } catch (error) {
+            console.error(error)
+            setIsLoading(false)
+        }
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -46,9 +60,13 @@ export function UserProfileMenu() {
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="mx-2 bg-slate-50" />
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-black text-red-500 hover:bg-red-50 focus:bg-red-50 transition-colors">
+                <DropdownMenuItem
+                    className="rounded-xl cursor-pointer py-3 px-4 text-xs font-black text-red-500 hover:bg-red-50 focus:bg-red-50 transition-colors disabled:opacity-50"
+                    onClick={handleSignOut}
+                    disabled={isLoading}
+                >
                     <LogOut className="mr-3 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{isLoading ? "Logging out..." : "Log out"}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
