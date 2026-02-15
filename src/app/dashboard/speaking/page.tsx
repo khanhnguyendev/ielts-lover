@@ -123,10 +123,10 @@ export default function SpeakingHubPage() {
                         <Zap className="h-20 w-20 text-[#4F46E5] fill-[#4F46E5]" />
                     </div>
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="bg-[#4F46E5] p-2.5 rounded-xl shadow-lg shadow-[#4F46E5]/20">
+                        <div className="bg-primary p-2.5 rounded-xl shadow-lg shadow-primary/20">
                             <Zap className="h-5 w-5 text-white fill-white" />
                         </div>
-                        <p className="text-sm font-bold text-[#4338CA]">Premium Feature - Upgrade to Premium for unlimited mock tests</p>
+                        <p className="text-sm font-bold text-foreground-accent">Premium Feature - Upgrade to Premium for unlimited mock tests</p>
                     </div>
                     <Button className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white h-11 px-6 rounded-xl font-black text-xs shadow-xl shadow-[#7C3AED]/20 relative z-10">
                         Upgrade to Premium

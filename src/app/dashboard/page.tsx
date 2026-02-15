@@ -29,8 +29,8 @@ export default function DashboardPage() {
                         <Zap className="h-5 w-5 fill-white" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold font-outfit">0/2 daily free reports used</h3>
-                        <p className="text-[10px] text-white/70 font-medium">Renews in 23 hours 59 minutes</p>
+                        <h3 className="text-sm font-bold font-outfit text-white">0/2 daily free reports used</h3>
+                        <p className="text-[10px] text-white/80 font-medium">Renews in 23 hours 59 minutes</p>
                     </div>
                 </div>
                 <Button variant="secondary" size="sm" className="h-9 px-4 rounded-full font-bold text-xs shadow-sm hover:scale-105 transition-transform">
