@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/app/actions"
 import { useState } from "react"
+import { PulseLoader } from "./PulseLoader"
 
 export function UserProfileMenu() {
     const [isLoading, setIsLoading] = useState(false)
@@ -66,7 +67,16 @@ export function UserProfileMenu() {
                     disabled={isLoading}
                 >
                     <LogOut className="mr-3 h-4 w-4" />
-                    <span>{isLoading ? "Logging out..." : "Log out"}</span>
+                    <span className="flex items-center gap-2">
+                        {isLoading ? (
+                            <>
+                                <PulseLoader size="sm" color="red" className="flex-row gap-1" />
+                                <span>Logging out...</span>
+                            </>
+                        ) : (
+                            "Log out"
+                        )}
+                    </span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

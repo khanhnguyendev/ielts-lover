@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { signInWithGoogle } from "@/app/actions"
+import { PulseLoader } from "@/components/global/PulseLoader"
 
 export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +57,7 @@ export default function SignupPage() {
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin" />
+                        <PulseLoader size="sm" color="primary" className="flex-row gap-2" />
                     ) : (
                         <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
