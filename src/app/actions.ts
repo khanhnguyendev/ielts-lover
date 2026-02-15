@@ -51,6 +51,21 @@ export async function getAllAttempts() {
     return data;
 }
 
+export async function getUserAttempts() {
+    const user = await getCurrentUser();
+    if (!user) return [];
+
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+        .from("attempts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+}
+
 export async function getUserProfile(id: string) {
     return userRepo.getById(id);
 }

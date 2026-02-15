@@ -29,8 +29,28 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
+import { getUserAttempts } from "@/app/actions";
+import { Attempt } from "@/types";
+
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
+    const [attempts, setAttempts] = React.useState<Attempt[]>([])
+    const [isLoading, setIsLoading] = React.useState(true)
+
+    React.useEffect(() => {
+        async function fetchReports() {
+            setIsLoading(true)
+            try {
+                const data = await getUserAttempts()
+                setAttempts(data as any)
+            } catch (error) {
+                console.error("Failed to fetch reports:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchReports()
+    }, [])
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto">
@@ -105,35 +125,48 @@ export default function ReportsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    <TableRow className="group hover:bg-slate-50 border-slate-50">
-                                        <TableCell className="py-5 pl-10 font-bold text-slate-500 text-xs">2026-02-14 23:24:57</TableCell>
-                                        <TableCell className="py-5">
-                                            <div className="flex items-center gap-3 text-[13px] font-black text-slate-900">
-                                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                    <Mic2 className="h-3.5 w-3.5" />
-                                                </div>
-                                                Speaking Part 1
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="py-5">
-                                            <div className="w-fit flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
-                                                <CheckCircle2 className="h-3 w-3" />
-                                                Completed
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="py-5">
-                                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-900 text-sm">
-                                                1
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="py-5 text-right pr-10">
-                                            <Link href="/dashboard/reports/123">
-                                                <Button className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 transition-all">
-                                                    View Report
-                                                </Button>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
+                                    {isLoading ? (
+                                        <TableRow><TableCell colSpan={5} className="text-center py-10">Loading reports...</TableCell></TableRow>
+                                    ) : attempts.length === 0 ? (
+                                        <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
+                                    ) : (
+                                        attempts.map((attempt) => (
+                                            <TableRow key={attempt.id} className="group hover:bg-slate-50 border-slate-50">
+                                                <TableCell className="py-5 pl-10 font-bold text-slate-500 text-xs">
+                                                    {new Date(attempt.created_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell className="py-5">
+                                                    <div className="flex items-center gap-3 text-[13px] font-black text-slate-900">
+                                                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                                            <PenTool className="h-3.5 w-3.5" />
+                                                        </div>
+                                                        {attempt.exercise_id}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-5">
+                                                    <div className={cn(
+                                                        "w-fit flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border",
+                                                        attempt.state === "EVALUATED" ? "text-green-600 bg-green-50 border-green-100" : "text-amber-600 bg-amber-50 border-amber-100"
+                                                    )}>
+                                                        {attempt.state === "EVALUATED" ? <CheckCircle2 className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+                                                        {attempt.state}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-5">
+                                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-900 text-sm">
+                                                        {attempt.overall_score || "-"}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-5 text-right pr-10">
+                                                    <Link href={`/dashboard/reports/${attempt.id}`}>
+                                                        <Button className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 transition-all">
+                                                            View Report
+                                                        </Button>
+                                                    </Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
                         </div>
