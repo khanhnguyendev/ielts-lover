@@ -8,6 +8,7 @@ CREATE TABLE user_profiles (
     ) DEFAULT 'academic',
     exam_date DATE,
     is_premium BOOLEAN DEFAULT FALSE,
+    role TEXT CHECK (role IN ('user', 'admin')) DEFAULT 'user',
     daily_quota_used INTEGER DEFAULT 0,
     last_quota_reset TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
