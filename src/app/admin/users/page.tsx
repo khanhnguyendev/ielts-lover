@@ -10,6 +10,8 @@ import {
     TableRow
 } from "@/components/ui/table";
 import { Search, UserPlus, CreditCard, ShieldCheck, Edit } from "lucide-react";
+import { getAllUsers } from "@/app/actions";
+import { UserProfile } from "@/types";
 
 export default function UsersPage() {
     const [users, setUsers] = useState<UserProfile[]>([]);
