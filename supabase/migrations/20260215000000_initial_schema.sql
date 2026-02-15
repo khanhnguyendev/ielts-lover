@@ -1,11 +1,8 @@
 -- Create Schema
-CREATE SCHEMA IF NOT EXISTS ielts_lover;
-
--- Set Search Path (Optional but helpful for manual SQL)
--- SET search_path TO ielts_lover, public;
+CREATE SCHEMA IF NOT EXISTS ielts_lover_v1;
 
 -- User Profiles
-CREATE TABLE ielts_lover.user_profiles (
+CREATE TABLE ielts_lover_v1.user_profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     target_score DECIMAL DEFAULT 7.0,
@@ -21,7 +18,7 @@ CREATE TABLE ielts_lover.user_profiles (
 );
 
 -- Exercises
-CREATE TABLE ielts_lover.exercises (
+CREATE TABLE ielts_lover_v1.exercises (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
     type TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -33,10 +30,10 @@ CREATE TABLE ielts_lover.exercises (
 );
 
 -- Attempts
-CREATE TABLE ielts_lover.attempts (
+CREATE TABLE ielts_lover_v1.attempts (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
-    user_id UUID REFERENCES ielts_lover.user_profiles (id) ON DELETE CASCADE,
-    exercise_id UUID REFERENCES ielts_lover.exercises (id) ON DELETE CASCADE,
+    user_id UUID REFERENCES ielts_lover_v1.user_profiles (id) ON DELETE CASCADE,
+    exercise_id UUID REFERENCES ielts_lover_v1.exercises (id) ON DELETE CASCADE,
     state TEXT CHECK (
         state IN (
             'CREATED',
@@ -54,7 +51,7 @@ CREATE TABLE ielts_lover.attempts (
 );
 
 -- Lessons
-CREATE TABLE ielts_lover.lessons (
+CREATE TABLE ielts_lover_v1.lessons (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
@@ -64,11 +61,11 @@ CREATE TABLE ielts_lover.lessons (
 );
 
 -- RLS Policies
-ALTER TABLE ielts_lover.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ielts_lover_v1.user_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own profile" ON ielts_lover.user_profiles FOR
+CREATE POLICY "Users can view their own profile" ON ielts_lover_v1.user_profiles FOR
 SELECT USING (auth.uid () = id);
 
-CREATE POLICY "Users can update their own profile" ON ielts_lover.user_profiles
+CREATE POLICY "Users can update their own profile" ON ielts_lover_v1.user_profiles
 FOR UPDATE
     USING (auth.uid () = id);
