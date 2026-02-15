@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils"
 
 import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
+import { PulseLoader } from "@/components/global/PulseLoader"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
@@ -29,7 +30,7 @@ export default function DashboardPage() {
         async function loadData() {
             try {
                 const userData = await getCurrentUser()
-                setUser(userData)
+                setUser(userData as UserProfile)
             } catch (error) {
                 console.error("Failed to load dashboard data:", error)
             } finally {
@@ -39,7 +40,14 @@ export default function DashboardPage() {
         loadData()
     }, [])
 
-    if (isLoading) return <div className="p-10 text-center">Loading dashboard...</div>
+    if (isLoading) return (
+        <div className="flex flex-col items-center justify-center py-40 animate-in fade-in duration-500">
+            <PulseLoader size="lg" color="primary" />
+            <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
+                Syncing dashboard...
+            </p>
+        </div>
+    )
 
     return (
         <div className="space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
@@ -60,7 +68,11 @@ export default function DashboardPage() {
                 {user?.is_premium ? (
                     <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
                 ) : (
-                    <Button variant="secondary" size="sm" className="h-9 px-4 rounded-full font-bold text-xs shadow-sm hover:scale-105 transition-transform">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="h-9 px-6 rounded-full font-bold text-xs shadow-xl bg-white text-primary hover:bg-slate-50 hover:scale-105 transition-all"
+                    >
                         Upgrade to premium now
                     </Button>
                 )}

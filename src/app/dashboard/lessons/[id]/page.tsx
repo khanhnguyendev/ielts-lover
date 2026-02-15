@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { AppLoading } from "@/components/global/AppLoading"
 
 import { getLessonById, getLessons } from "@/app/actions";
 import { Lesson } from "@/types";
@@ -55,7 +56,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
         loadLesson()
     }, [id])
 
-    if (isLoading) return <div className="flex items-center justify-center h-full text-lg font-bold">Loading lesson...</div>
+    if (isLoading) return <AppLoading />
     if (!lesson) return <div className="flex items-center justify-center h-full text-lg font-bold">Lesson not found.</div>
 
     return (

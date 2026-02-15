@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils"
 
 import { getUserAttempts } from "@/app/actions";
 import { Attempt } from "@/types";
+import { PulseLoader } from "@/components/global/PulseLoader";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
@@ -126,7 +127,14 @@ export default function ReportsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {isLoading ? (
-                                        <TableRow><TableCell colSpan={5} className="text-center py-10">Loading reports...</TableCell></TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="py-20">
+                                                <div className="flex flex-col items-center justify-center gap-4">
+                                                    <PulseLoader size="lg" color="primary" />
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Syncing reports...</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
                                     ) : attempts.length === 0 ? (
                                         <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
                                     ) : (
