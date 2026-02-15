@@ -1,5 +1,11 @@
+-- Create Schema
+CREATE SCHEMA IF NOT EXISTS ielts_lover;
+
+-- Set Search Path (Optional but helpful for manual SQL)
+-- SET search_path TO ielts_lover, public;
+
 -- User Profiles
-CREATE TABLE user_profiles (
+CREATE TABLE ielts_lover.user_profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     target_score DECIMAL DEFAULT 7.0,
@@ -15,7 +21,7 @@ CREATE TABLE user_profiles (
 );
 
 -- Exercises
-CREATE TABLE exercises (
+CREATE TABLE ielts_lover.exercises (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
     type TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -27,10 +33,10 @@ CREATE TABLE exercises (
 );
 
 -- Attempts
-CREATE TABLE attempts (
+CREATE TABLE ielts_lover.attempts (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
-    user_id UUID REFERENCES user_profiles (id) ON DELETE CASCADE,
-    exercise_id UUID REFERENCES exercises (id) ON DELETE CASCADE,
+    user_id UUID REFERENCES ielts_lover.user_profiles (id) ON DELETE CASCADE,
+    exercise_id UUID REFERENCES ielts_lover.exercises (id) ON DELETE CASCADE,
     state TEXT CHECK (
         state IN (
             'CREATED',
@@ -47,8 +53,8 @@ CREATE TABLE attempts (
     evaluated_at TIMESTAMP WITH TIME ZONE
 );
 
--- Lessons (New)
-CREATE TABLE lessons (
+-- Lessons
+CREATE TABLE ielts_lover.lessons (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
@@ -57,12 +63,12 @@ CREATE TABLE lessons (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- RLS Policies (Example for user_profiles)
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+-- RLS Policies
+ALTER TABLE ielts_lover.user_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own profile" ON user_profiles FOR
+CREATE POLICY "Users can view their own profile" ON ielts_lover.user_profiles FOR
 SELECT USING (auth.uid () = id);
 
-CREATE POLICY "Users can update their own profile" ON user_profiles
+CREATE POLICY "Users can update their own profile" ON ielts_lover.user_profiles
 FOR UPDATE
     USING (auth.uid () = id);

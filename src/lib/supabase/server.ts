@@ -11,6 +11,9 @@ export async function createServerSupabaseClient() {
             auth: {
                 persistSession: false,
             },
+            db: {
+                schema: 'ielts_lover'
+            }
         }
     );
 }
@@ -25,6 +28,9 @@ export async function createServiceSupabaseClient() {
                 autoRefreshToken: false,
                 persistSession: false,
             },
+            db: {
+                schema: 'ielts_lover'
+            }
         }
     );
 }
