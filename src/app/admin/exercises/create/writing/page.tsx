@@ -104,12 +104,22 @@ export default function CreateWritingExercisePage() {
             </div>
 
             <form action={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
-                <div className="space-y-4 pt-4 border-t">
+                {/* AI Assistant Section */}
+                <div className="bg-purple-50/50 p-5 rounded-xl border border-purple-100 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-purple-900 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                            AI Content Assistant
+                        </h3>
+                        <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Auto-Generate</span>
+                    </div>
+
                     <div className="flex items-end gap-3">
                         <div className="flex-1 space-y-2">
-                            <Label htmlFor="topic">Topic / Theme (Optional)</Label>
+                            <Label htmlFor="topic" className="text-purple-900">Topic / Theme (Optional)</Label>
                             <Input
                                 id="topic"
+                                className="bg-white border-purple-200 focus-visible:ring-purple-500"
                                 placeholder="e.g., Environment, Education, Coffee Production..."
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
@@ -117,10 +127,10 @@ export default function CreateWritingExercisePage() {
                         </div>
                         {type === "writing_task1" && (
                             <div className="space-y-2 w-[180px]">
-                                <Label htmlFor="chartType">Chart Type</Label>
+                                <Label htmlFor="chartType" className="text-purple-900">Chart Type</Label>
                                 <select
                                     id="chartType"
-                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background"
+                                    className="flex h-10 w-full items-center justify-between rounded-md border border-purple-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background"
                                     value={chartType}
                                     onChange={(e) => setChartType(e.target.value)}
                                 >
@@ -136,7 +146,7 @@ export default function CreateWritingExercisePage() {
                             type="button"
                             onClick={handleGenerate}
                             disabled={isGenerating}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]"
+                            className="bg-purple-600 hover:bg-purple-700 text-white min-w-[140px] shadow-sm"
                         >
                             {isGenerating ? (
                                 <>
@@ -146,13 +156,13 @@ export default function CreateWritingExercisePage() {
                             ) : (
                                 <>
                                     <Sparkles className="mr-2 h-4 w-4" />
-                                    Generate AI
+                                    Generate
                                 </>
                             )}
                         </Button>
                     </div>
-                    <p className="text-xs text-gray-500 select-none">
-                        Use AI to generate a realistic title and prompt based on the selected type and optional topic.
+                    <p className="text-xs text-purple-600/80 select-none">
+                        Use AI to automatically generate a realistic title, prompt, and chart (Task 1) or essay topic (Task 2).
                     </p>
                 </div>
 
