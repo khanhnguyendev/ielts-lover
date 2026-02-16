@@ -193,7 +193,7 @@ export class AIService {
         }
     }
 
-    async generateChartData(topic?: string, version: AIPromptVersion = "v1"): Promise<any> {
+    async generateChartData(topic?: string, chartType?: string, version: AIPromptVersion = "v1"): Promise<any> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -208,13 +208,16 @@ export class AIService {
         if (topic) {
             fullPrompt += `TOPIC: ${topic}\n`;
         }
+        if (chartType && chartType !== "auto") {
+            fullPrompt += `REQUIRED CHART TYPE: ${chartType} (Ensure the JSON "type" field matches this exactly)\n`;
+        }
         fullPrompt += `
         Required JSON Structure:
         {
             "title": "string",
             "prompt": "string (the full essay question describing the chart)",
             "chart_config": {
-                "type": "bar" | "line" | "pie",
+                "type": "bar" | "line" | "pie" | "doughnut",
                 "data": {
                     "labels": ["string", "string"],
                     "datasets": [

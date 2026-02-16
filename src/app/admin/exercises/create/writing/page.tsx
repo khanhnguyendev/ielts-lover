@@ -22,6 +22,7 @@ export default function CreateWritingExercisePage() {
     const [title, setTitle] = useState("");
     const [prompt, setPrompt] = useState("");
     const [topic, setTopic] = useState("");
+    const [chartType, setChartType] = useState("auto");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ export default function CreateWritingExercisePage() {
         setErrorDetails(null);
         try {
             // If topic is empty, standard generation
-            const result = await generateAIExercise(type, topic || undefined);
+            const result = await generateAIExercise(type, topic || undefined, chartType);
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
@@ -114,6 +115,23 @@ export default function CreateWritingExercisePage() {
                                 onChange={(e) => setTopic(e.target.value)}
                             />
                         </div>
+                        {type === "writing_task1" && (
+                            <div className="space-y-2 w-[180px]">
+                                <Label htmlFor="chartType">Chart Type</Label>
+                                <select
+                                    id="chartType"
+                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background"
+                                    value={chartType}
+                                    onChange={(e) => setChartType(e.target.value)}
+                                >
+                                    <option value="auto">Auto (AI Decision)</option>
+                                    <option value="bar">Bar Chart</option>
+                                    <option value="line">Line Graph</option>
+                                    <option value="pie">Pie Chart</option>
+                                    <option value="doughnut">Doughnut Chart</option>
+                                </select>
+                            </div>
+                        )}
                         <Button
                             type="button"
                             onClick={handleGenerate}

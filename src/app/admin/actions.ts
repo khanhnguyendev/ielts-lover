@@ -91,7 +91,7 @@ export async function createExercise(exercise: Omit<Exercise, "id" | "created_at
     return result;
 }
 
-export async function generateAIExercise(type: string, topic?: string) {
+export async function generateAIExercise(type: string, topic?: string, chartType?: string) {
     return withTrace(async () => {
         try {
             await checkAdmin();
@@ -99,7 +99,7 @@ export async function generateAIExercise(type: string, topic?: string) {
             // Special handling for Writing Task 1 to generate chart
             if (type === "writing_task1") {
                 // 1. Generate Data
-                const chartData = await aiService.generateChartData(topic);
+                const chartData = await aiService.generateChartData(topic, chartType);
 
                 // 2. Render Image
                 const { ChartRenderer } = await import("@/lib/chart-renderer");
