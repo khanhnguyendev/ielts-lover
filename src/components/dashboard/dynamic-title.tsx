@@ -29,5 +29,22 @@ export function DynamicTitle() {
         return "Dashboard"
     }
 
-    return <span>{getTitle()}</span>
+    const title = getTitle()
+
+    return (
+        <div className="flex flex-col">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none font-outfit">
+                {title}
+            </h1>
+            <div className="flex items-center gap-1.5 mt-1.5 opacity-60 group">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] transition-colors group-hover:text-primary">
+                    Dashboard
+                </span>
+                <span className="text-[9px] font-bold text-slate-400">/</span>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                    {title}
+                </span>
+            </div>
+        </div>
+    )
 }
