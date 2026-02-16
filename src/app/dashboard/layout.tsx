@@ -34,7 +34,7 @@ export default async function DashboardLayout({
                         <UserProfileMenu user={user} />
                     </div>
                 </header>
-                <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="flex-1 overflow-y-auto flex flex-col">
                     {children}
                 </div>
             </main>

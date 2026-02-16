@@ -13,7 +13,84 @@ import { Exercise, ExerciseType } from "@/types";
 import { AIService } from "@/services/ai.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 
+import { CreditPackageRepository } from "@/repositories/credit-package.repository";
+import { CreditPackage } from "@/types";
+
 const logger = new Logger("AdminActions");
+const creditPackageRepo = new CreditPackageRepository();
+
+export async function seedCreditPackages() {
+    await checkAdmin();
+    const packages: Omit<CreditPackage, "id" | "created_at" | "updated_at">[] = [
+        {
+            name: "Band Booster",
+            credits: 100,
+            bonus_credits: 0,
+            price: 5.00,
+            tagline: "Perfect for getting started.",
+            type: "starter",
+            is_active: true,
+            display_order: 1
+        },
+        {
+            name: "Band Climber",
+            credits: 500,
+            bonus_credits: 50,
+            price: 20.00,
+            tagline: "Best value for serious practice.",
+            type: "pro",
+            is_active: true,
+            display_order: 2
+        },
+        {
+            name: "Band Mastery",
+            credits: 1500,
+            bonus_credits: 200,
+            price: 50.00,
+            tagline: "Maximum power for heavy users.",
+            type: "master",
+            is_active: true,
+            display_order: 3
+        }
+    ];
+
+    for (const pkg of packages) {
+        await creditPackageRepo.create(pkg);
+    }
+
+    revalidatePath("/admin/credits");
+    revalidatePath("/dashboard/pricing");
+}
+
+// ... existing code ...
+
+export async function createCreditPackage(pkg: Omit<CreditPackage, "id" | "created_at" | "updated_at">) {
+    await checkAdmin();
+    const result = await creditPackageRepo.create(pkg);
+    revalidatePath("/admin/credits");
+    revalidatePath("/dashboard/pricing");
+    return result;
+}
+
+export async function updateCreditPackage(id: string, pkg: Partial<CreditPackage>) {
+    await checkAdmin();
+    const result = await creditPackageRepo.update(id, pkg);
+    revalidatePath("/admin/credits");
+    revalidatePath("/dashboard/pricing");
+    return result;
+}
+
+export async function deleteCreditPackage(id: string) {
+    await checkAdmin();
+    await creditPackageRepo.delete(id);
+    revalidatePath("/admin/credits");
+    revalidatePath("/dashboard/pricing");
+}
+
+export async function getCreditPackages() {
+    await checkAdmin();
+    return creditPackageRepo.listAll();
+}
 
 const lessonRepo = new LessonRepository();
 const lessonService = new LessonService(lessonRepo);

@@ -7,7 +7,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, AlertCircle, Check, Info, XCircle, Hash, FileText, HelpCircle } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ErrorDetailsDialogProps {
@@ -59,7 +58,6 @@ export function ErrorDetailsDialog({
         const copyText = `Status: ${statusCode}\nTrace ID: ${traceId || 'N/A'}\nDetails: ${details}\n\nHint: ${hint}`;
         navigator.clipboard.writeText(copyText);
         setCopied(true);
-        toast.success("Error report copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
     };
 

@@ -184,7 +184,7 @@ export default function SpeakingHubPage() {
                                     Unlock full length mock tests and detailed AI scoring by upgrading to premium.
                                 </p>
                             </div>
-                            <Link href="/dashboard/pricing">
+                            <Link href="/dashboard/credits">
                                 <Button variant="premium" size="lg" className="px-10">
                                     Upgrade Now
                                 </Button>

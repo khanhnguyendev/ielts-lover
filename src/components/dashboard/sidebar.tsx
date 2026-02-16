@@ -33,7 +33,7 @@ const NAV_ITEMS = [
 ]
 
 const BOTTOM_NAV = [
-    { icon: Tag, label: "Pricing", href: "/dashboard/pricing" },
+    { icon: Tag, label: "Buy Credits", href: "/dashboard/credits" },
     { icon: MessageCircle, label: "Support", href: "/dashboard/support" },
 ]
 

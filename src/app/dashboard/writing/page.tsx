@@ -206,7 +206,7 @@ export default function WritingHubPage() {
                                     Unlock full length mock tests and detailed AI scoring by upgrading to premium.
                                 </p>
                             </div>
-                            <Link href="/dashboard/pricing">
+                            <Link href="/dashboard/credits">
                                 <Button variant="premium" size="lg" className="px-10">
                                     Upgrade Now
                                 </Button>
@@ -329,7 +329,7 @@ export default function WritingHubPage() {
             <footer className="mt-auto py-8 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em] border-t bg-white/30">
                 © 2026 IELTS Lover. &nbsp; Terms · Privacy · Contact us
             </footer>
-        </div>
+        </div >
     )
 }
 

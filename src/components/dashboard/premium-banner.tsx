@@ -21,7 +21,7 @@ export function PremiumBanner({
     title,
     subtitle,
     buttonText = "Upgrade to Premium",
-    href = "/dashboard/pricing",
+    href = "/dashboard/credits",
     className,
     onClick,
     showIcon = true,

@@ -46,4 +46,18 @@ export type Attempt = {
         type: string;
     };
 };
+export type CreditPackage = {
+    id: string;
+    name: string;
+    credits: number;
+    bonus_credits: number;
+    price: number;
+    tagline: string;
+    type: "starter" | "pro" | "master";
+    is_active: boolean;
+    display_order: number;
+    created_at: string;
+    updated_at: string;
+};
+
 export * from "./lesson";

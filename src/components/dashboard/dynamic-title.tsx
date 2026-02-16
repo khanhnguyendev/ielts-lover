@@ -10,7 +10,7 @@ const ROUTE_MAP: Record<string, string> = {
     "/dashboard/rewriter": "IELTS Rewriter",
     "/dashboard/samples": "Sample Reports",
     "/dashboard/lessons": "Lessons Hub",
-    "/dashboard/pricing": "Pricing Plans",
+    "/dashboard/credits": "Buy Credits",
     "/dashboard/support": "Support",
 }
 
