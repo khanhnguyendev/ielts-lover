@@ -16,11 +16,19 @@ export class StorageService {
         this.configured = true;
     }
 
-    static async upload(file: File, folder: string = "ielts-lover/exercises"): Promise<string> {
+    static async upload(file: File | Buffer | Uint8Array, folder: string = "ielts-lover/exercises"): Promise<string> {
         this.configure();
 
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        let buffer: Buffer;
+
+        if (file instanceof Buffer) {
+            buffer = file;
+        } else if (file instanceof Uint8Array) {
+            buffer = Buffer.from(file);
+        } else {
+            const arrayBuffer = await file.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+        }
 
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(

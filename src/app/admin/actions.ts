@@ -95,6 +95,27 @@ export async function generateAIExercise(type: string, topic?: string) {
     return withTrace(async () => {
         try {
             await checkAdmin();
+
+            // Special handling for Writing Task 1 to generate chart
+            if (type === "writing_task1") {
+                // 1. Generate Data
+                const chartData = await aiService.generateChartData(topic);
+
+                // 2. Render Image
+                const { ChartRenderer } = await import("@/lib/chart-renderer");
+                const imageBuffer = await ChartRenderer.render(chartData.chart_config);
+
+                // 3. Upload Image
+                const { StorageService } = await import("@/services/storage.service");
+                const imageUrl = await StorageService.upload(imageBuffer);
+
+                return {
+                    title: chartData.title,
+                    prompt: chartData.prompt,
+                    image_url: imageUrl
+                };
+            }
+
             return await aiService.generateExerciseContent(type, topic);
         } catch (error) {
             const traceId = getCurrentTraceId();

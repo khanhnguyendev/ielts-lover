@@ -192,4 +192,49 @@ export class AIService {
             throw error; // Let the action handler wrap this with traceId
         }
     }
+
+    async generateChartData(topic?: string, version: AIPromptVersion = "v1"): Promise<any> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                // We use a loose schema or specific one for charts, but strict schema is better
+            },
+        });
+
+        const promptBase = "Generate valid JSON data for a Chart.js (v2/v3) chart representing a realistic IELTS Writing Task 1 scenario. Return a title, chart type (bar, line, pie), labels, and datasets.";
+
+        let fullPrompt = `${promptBase}\n`;
+        if (topic) {
+            fullPrompt += `TOPIC: ${topic}\n`;
+        }
+        fullPrompt += `
+        Required JSON Structure:
+        {
+            "title": "string",
+            "prompt": "string (the full essay question describing the chart)",
+            "chart_config": {
+                "type": "bar" | "line" | "pie",
+                "data": {
+                    "labels": ["string", "string"],
+                    "datasets": [
+                        { "label": "string", "data": [number, number] }
+                    ]
+                }
+            }
+        }
+        `;
+
+        this.logger.debug("Generating chart data", { prompt: fullPrompt });
+
+        try {
+            const result = await model.generateContent(fullPrompt);
+            const responseText = result.response.text();
+            this.logger.info("Generated chart data", { topic });
+            return JSON.parse(responseText);
+        } catch (error) {
+            this.logger.error("AI Chart Generation failed", { error, topic });
+            throw error;
+        }
+    }
 }

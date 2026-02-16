@@ -23,6 +23,7 @@ export default function CreateWritingExercisePage() {
     const [prompt, setPrompt] = useState("");
     const [topic, setTopic] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
 
     // Error Modal State
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
@@ -37,6 +38,12 @@ export default function CreateWritingExercisePage() {
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
+                // @ts-ignore - refined return type needed
+                if (result.image_url) {
+                    // @ts-ignore
+                    setGeneratedImageUrl(result.image_url);
+                    setImageFile(null); // Clear manual file if new AI generation
+                }
                 toast.success("Content generated successfully!");
             }
         } catch (error) {
@@ -62,7 +69,9 @@ export default function CreateWritingExercisePage() {
         // const imageUrl = formData.get("image_url") as string; // Replaced by file upload
 
         try {
-            let imageUrl = undefined;
+            let imageUrl = generatedImageUrl || undefined;
+
+            // If user uploaded a file, it overrides the generated one
             if (type === "writing_task1" && imageFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append("file", imageFile);
@@ -170,6 +179,18 @@ export default function CreateWritingExercisePage() {
                 {type === "writing_task1" && (
                     <div className="space-y-2">
                         <Label htmlFor="image_file">Chart/Graph Image</Label>
+
+                        {generatedImageUrl && !imageFile && (
+                            <div className="mb-4 p-2 border rounded-lg bg-gray-50">
+                                <p className="text-xs font-medium text-purple-600 mb-2">AI Generated Chart:</p>
+                                <img
+                                    src={generatedImageUrl}
+                                    alt="Generated Chart"
+                                    className="max-h-64 object-contain rounded-md border"
+                                />
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-4">
                             <Input
                                 id="image_file"
@@ -182,7 +203,9 @@ export default function CreateWritingExercisePage() {
                                 className="cursor-pointer"
                             />
                         </div>
-                        <p className="text-xs text-gray-500 select-none">Upload the chart/graph image for Task 1.</p>
+                        <p className="text-xs text-gray-500 select-none">
+                            {generatedImageUrl ? "Upload to replace the AI chart, or leave empty to use it." : "Upload the chart/graph image for Task 1."}
+                        </p>
                     </div>
                 )}
 
