@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceSupabaseClient } from '@/lib/supabase/server';
 import { UserRepository } from '@/repositories/user.repository';
+import { Logger } from '@/lib/logger';
+
+const logger = new Logger("AuthCallback");
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
@@ -25,7 +28,7 @@ export async function GET(request: Request) {
 
                 if (!existingProfile) {
                     try {
-                        console.log(`[Auth Callback] Creating profile for ${user.email}`);
+                        logger.info(`Creating profile for ${user.email}`, { userId: user.id });
                         const { error: insertError } = await serviceSupabase
                             .from("user_profiles")
                             .insert({
@@ -42,7 +45,7 @@ export async function GET(request: Request) {
 
                         if (insertError) throw insertError;
                     } catch (createError) {
-                        console.error("Failed to create user profile during OAuth:", createError);
+                        logger.error("Failed to create user profile during OAuth", { error: createError, userId: user.id });
                         // We still redirect, but maybe with an error param if you have a way to show it
                     }
                 }
@@ -50,7 +53,7 @@ export async function GET(request: Request) {
 
             return NextResponse.redirect(`${origin}${next}`);
         } else {
-            console.error("OAuth Exchange Error:", error);
+            logger.error("OAuth Exchange Error", { error });
         }
     }
 

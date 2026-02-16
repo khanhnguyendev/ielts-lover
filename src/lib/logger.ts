@@ -19,7 +19,9 @@ export class Logger {
 
     private formatMessage(level: LogLevel, message: string, meta?: any) {
         const traceId = this.getTraceId() || "no-trace";
-        const timestamp = new Date().toISOString();
+        const now = new Date();
+        const timestamp = now.toISOString();
+        const localTime = now.toLocaleTimeString();
 
         // Handle error objects specifically for logging
         let formattedMeta = meta;
@@ -31,7 +33,6 @@ export class Logger {
                     formattedMeta[key] = {
                         message: err.message,
                         stack: err.stack,
-                        ...(err as any)
                     };
                 }
             }
@@ -48,8 +49,9 @@ export class Logger {
                 debug: "\x1b[34m", // Blue
             }[level] || "\x1b[0m";
             const reset = "\x1b[0m";
+            const gray = "\x1b[90m";
 
-            return `${color}[${timestamp}] [${level.toUpperCase()}] [${this.context}] [${traceId}] ${message}${reset} ${formattedMeta ? '\n' + metaStr : ''}`;
+            return `${color}[${localTime}] [${level.toUpperCase()}]${reset}${gray} [${this.context}] [${traceId}]${reset} ${message}${formattedMeta ? '\n' + metaStr : ''}`;
         }
 
         return JSON.stringify({

@@ -206,7 +206,7 @@ export class AIService {
                 version
             };
         } catch (error) {
-            console.error("AI Evaluation failed:", error);
+            this.logger.error("AI Evaluation failed", { error, type, content, version });
             // Fallback mock or rethrow
             throw new Error("AI Evaluation failed. Please try again later.");
         }
@@ -229,7 +229,7 @@ export class AIService {
             const responseText = result.response.text();
             return JSON.parse(responseText);
         } catch (error) {
-            console.error("AI Rewrite failed:", error);
+            this.logger.error("AI Rewrite failed", { error, content, version });
             throw new Error("AI Rewrite failed. Please try again later.");
         }
     }
