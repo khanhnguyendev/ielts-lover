@@ -19,25 +19,78 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { getExerciseById } from "@/app/actions"
+import { Exercise } from "@/types"
+import { PulseLoader } from "@/components/global/PulseLoader"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
+    const exerciseId = resolvedParams.type
+
+    const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
     const [text, setText] = React.useState("")
-    const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1
+    const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
+
+    React.useEffect(() => {
+        const fetchExercise = async () => {
+            setIsLoading(true)
+            try {
+                const data = await getExerciseById(exerciseId)
+                if (data) {
+                    setExercise(data)
+                    // Adjust timer based on type if needed, e.g. Task 2 = 40 mins
+                    if (data.type === "writing_task2") setTimeLeft(2400)
+                }
+            } catch (error) {
+                console.error("Failed to fetch exercise:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchExercise()
+    }, [exerciseId])
 
     // Timer logic
     React.useEffect(() => {
+        if (isLoading || !exercise) return
         const timer = setInterval(() => {
             setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
         }, 1000)
         return () => clearInterval(timer)
-    }, [])
+    }, [isLoading, exercise])
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
         return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-4">
+                    <PulseLoader size="lg" color="primary" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                        Loading Exercise...
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
+    if (!exercise) {
+        return (
+            <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-white">
+                <div className="text-center space-y-4">
+                    <p className="text-lg font-bold text-slate-700">Exercise not found</p>
+                    <Link href="/dashboard/writing">
+                        <Button variant="outline">Back to Writing Hub</Button>
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -46,40 +99,57 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             <div className="w-1/2 overflow-y-auto p-12 border-r bg-[#F9FAFB] scrollbar-hide">
                 <div className="max-w-xl mx-auto space-y-10 pb-20">
                     <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
-                        <Link href="/writing" className="hover:text-primary flex items-center gap-1 transition-colors">
+                        <Link href="/dashboard/writing" className="hover:text-primary flex items-center gap-1 transition-colors">
                             Writing Tasks
                         </Link>
                         <ChevronRight className="h-3 w-3" />
-                        <span className="text-slate-900">Academic Task 1</span>
+                        <span className="text-slate-900">
+                            {exercise.type === "writing_task1" ? "Academic Task 1" : "Task 2"}
+                        </span>
                     </div>
 
                     <div className="space-y-6">
-                        <h2 className="text-2xl font-black font-outfit">Question</h2>
+                        <h2 className="text-2xl font-black font-outfit">{exercise.title}</h2>
                         <div className="bg-white rounded-[40px] border p-10 space-y-8 shadow-sm">
-                            <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                                The chart below shows the weight of people in the UK from 1990 to 2010.
-                            </p>
-                            <p className="text-sm font-black italic text-slate-900/80">
-                                Summarize the information by selecting and reporting the main features, and make comparisons where relevant.
+                            <p className="text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {exercise.prompt}
                             </p>
 
-                            <div className="aspect-video bg-muted/20 rounded-2xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 group cursor-zoom-in">
-                                <div className="text-center space-y-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                                    <Monitor className="h-8 w-8 mx-auto" />
-                                    <span className="text-[10px] uppercase font-black tracking-widest">Click to expand chart</span>
+                            {exercise.type === "writing_task1" && exercise.image_url && (
+                                <div className="space-y-4">
+                                    <div className="relative aspect-auto min-h-[300px] bg-white rounded-2xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 group overflow-hidden">
+                                        <img
+                                            src={exercise.image_url}
+                                            alt="Task 1 Chart"
+                                            className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
+                                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
+                                                <Maximize2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <p className="text-center text-[10px] uppercase font-black tracking-widest text-muted-foreground/40">
+                                        Chart Visualization
+                                    </p>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="pt-6 border-t border-dashed space-y-4">
                                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Minimum Requirements:</p>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100">
                                         <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
-                                        <span className="text-[10px] font-bold text-purple-700">150+ Words</span>
+                                        <span className="text-[10px] font-bold text-purple-700">
+                                            {exercise.type === "writing_task1" ? "150+ Words" : "250+ Words"}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
                                         <Clock className="h-3.5 w-3.5 text-blue-600" />
-                                        <span className="text-[10px] font-bold text-blue-700">20 Minutes</span>
+                                        <span className="text-[10px] font-bold text-blue-700">
+                                            {exercise.type === "writing_task1" ? "20 Minutes" : "40 Minutes"}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -95,16 +165,18 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                         <div className="flex items-center gap-6">
                             <div className="flex items-center gap-2 text-primary">
                                 <Clock className="h-5 w-5" />
-                                <span className="text-xl font-black font-mono">{formatTime(timeLeft)}</span>
+                                <span className={cn("text-xl font-black font-mono", timeLeft < 60 && "text-rose-500 animate-pulse")}>
+                                    {formatTime(timeLeft)}
+                                </span>
                             </div>
                             <div className="h-4 w-px bg-muted" />
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-muted-foreground">Word Count:</span>
                                 <span className={cn(
                                     "text-xs font-black",
-                                    wordCount >= 150 ? "text-green-600" : "text-primary"
+                                    wordCount >= (exercise.type === "writing_task1" ? 150 : 250) ? "text-green-600" : "text-primary"
                                 )}>
-                                    {wordCount} / 150
+                                    {wordCount} / {exercise.type === "writing_task1" ? 150 : 250}
                                 </span>
                             </div>
                         </div>

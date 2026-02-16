@@ -196,6 +196,7 @@ export default function WritingHubPage() {
                         {exercises.map((ex, i) => (
                             <ExerciseCard
                                 key={i}
+                                id={ex.id}
                                 title={ex.title}
                                 subtitle={ex.subtitle}
                                 attempts={0}
@@ -270,6 +271,7 @@ export default function WritingHubPage() {
 }
 
 function ExerciseCard({
+    id,
     title,
     subtitle,
     attempts,
@@ -277,6 +279,7 @@ function ExerciseCard({
     color,
     isRecommended
 }: {
+    id: string,
     title: string,
     subtitle?: string,
     attempts: number,
@@ -285,7 +288,7 @@ function ExerciseCard({
     isRecommended?: boolean
 }) {
     return (
-        <Link href={`/dashboard/writing/${title.toLowerCase().replace(/ /g, "-")}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
+        <Link href={`/dashboard/writing/${id}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
             <div className="h-full bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
                 {isRecommended && (
                     <div className="absolute -top-2.5 right-6 bg-[#7C3AED] text-white text-[8px] px-2 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-primary/20">
