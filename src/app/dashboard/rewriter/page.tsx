@@ -31,18 +31,40 @@ export default function RewriterPage() {
         // Call Server Action
         try {
             const result = await rewriteText(inputText)
-            setRewrittenText(result)
-            notifySuccess(
-                "Text Improved!",
-                "AI has successfully rewritten your text to a higher band score level (8.0+). You can now copy the improved version and compare it with yours.",
-                "Compare Version"
-            )
+            if (result.success && 'text' in result) {
+                setRewrittenText(result.text as string)
+                notifySuccess(
+                    "Text Improved!",
+                    "AI has successfully rewritten your text to a higher band score level (8.0+). You can now copy the improved version and compare it with yours.",
+                    "Compare Version"
+                )
+            } else {
+                if (result.reason === "INSUFFICIENT_CREDITS") {
+                    notifyError(
+                        "Insufficient Credits",
+                        "You don't have enough StarCredits to use the rewriter. Please top up your balance.",
+                        "Top Up"
+                    )
+                } else {
+                    notifyError(
+                        "Rewrite Failed",
+                        "We encountered an error while processing your request. Please try again in a few moments.",
+                        "Try Again",
+                        result.traceId
+                    )
+                }
+            }
         } catch (error) {
             console.error("Rewrite failed:", error)
+
+            const errorObj = error as any;
+            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+
             notifyError(
                 "Rewrite Failed",
                 "We couldn't rewrite your text at this moment. Please check your internet connection or try a shorter paragraph.",
-                "Try Again"
+                "Try Again",
+                traceId
             )
         } finally {
             setIsRewriting(false)

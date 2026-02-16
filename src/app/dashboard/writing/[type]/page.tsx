@@ -107,10 +107,20 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         try {
             const result = await submitAttempt(currentAttempt.id, text)
 
-            if (result && result.score !== undefined && result.score !== null) {
+            if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
+                notifyError(
+                    "System Error",
+                    "We encountered a problem while evaluating your work. Please provide the trace ID to support.",
+                    "Close",
+                    (result as any).traceId
+                )
+                return;
+            }
+
+            if (result && 'score' in result && result.score !== undefined && result.score !== null) {
                 setFeedbackData({
-                    score: result.score,
-                    feedback: result.feedback,
+                    score: result.score as number,
+                    feedback: result.feedback as string,
                     attemptId: result.id
                 })
                 setShowFeedback(true)
@@ -118,6 +128,12 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     "Evaluation Complete",
                     "Great job! Your exercise has been evaluated. Review your band score and detailed feedback to identify areas for improvement.",
                     "Review Now"
+                )
+            } else if (result && 'reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
+                notifyWarning(
+                    "Insufficient Credits",
+                    "Your work has been saved securely, but you don't have enough StarCredits for evaluation. Please top up your balance.",
+                    "Top Up"
                 )
             } else {
                 notifyWarning(
@@ -128,10 +144,16 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             }
         } catch (error) {
             console.error("Submission failed:", error)
+
+            // Check if error is from server action with traceId
+            const errorObj = error as any;
+            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+
             notifyError(
                 "Submission Failed",
                 "We were unable to save your work. Please check your internet connection and try again.",
-                "Try Again"
+                "Try Again",
+                traceId
             )
         } finally {
             setIsSubmitting(false)

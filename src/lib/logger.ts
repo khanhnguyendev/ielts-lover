@@ -20,7 +20,24 @@ export class Logger {
     private formatMessage(level: LogLevel, message: string, meta?: any) {
         const traceId = this.getTraceId() || "no-trace";
         const timestamp = new Date().toISOString();
-        const metaStr = meta ? JSON.stringify(meta) : "";
+
+        // Handle error objects specifically for logging
+        let formattedMeta = meta;
+        if (meta && typeof meta === 'object') {
+            formattedMeta = { ...meta };
+            for (const key in formattedMeta) {
+                if (formattedMeta[key] instanceof Error) {
+                    const err = formattedMeta[key];
+                    formattedMeta[key] = {
+                        message: err.message,
+                        stack: err.stack,
+                        ...(err as any)
+                    };
+                }
+            }
+        }
+
+        const metaStr = formattedMeta ? JSON.stringify(formattedMeta, null, 2) : "";
 
         // Pretty print for development
         if (process.env.NODE_ENV === "development") {
@@ -32,10 +49,7 @@ export class Logger {
             }[level] || "\x1b[0m";
             const reset = "\x1b[0m";
 
-            // Format: [TIME] [LEVEL] [CONTEXT] [TRACE] Message {meta}
-            // We return a string, but for dev we might want to return an array of args if we were calling console directly.
-            // But since this function returns a string to be logged, let's format it nicely.
-            return `${color}[${timestamp}] [${level.toUpperCase()}] [${this.context}] [${traceId}] ${message}${reset} ${meta ? '\n' + JSON.stringify(meta, null, 2) : ''}`;
+            return `${color}[${timestamp}] [${level.toUpperCase()}] [${this.context}] [${traceId}] ${message}${reset} ${formattedMeta ? '\n' + metaStr : ''}`;
         }
 
         return JSON.stringify({
@@ -44,7 +58,7 @@ export class Logger {
             context: this.context,
             traceId,
             message,
-            ...meta
+            ...formattedMeta
         });
     }
 

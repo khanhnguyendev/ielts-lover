@@ -11,12 +11,13 @@ interface NotificationOptions {
     onAction?: () => void | Promise<void>
     cancelText?: string
     onCancel?: () => void
+    traceId?: string
 }
 
 interface NotificationContextType {
     notify: (options: NotificationOptions) => void
     notifySuccess: (title: string, description: string, actionText?: string, onAction?: () => void) => void
-    notifyError: (title: string, description: string, actionText?: string) => void
+    notifyError: (title: string, description: string, actionText?: string, traceId?: string) => void
     notifyWarning: (title: string, description: string, actionText?: string, onAction?: () => void, cancelText?: string) => void
 }
 
@@ -39,8 +40,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         notify({ title, description, type: "success", actionText, onAction })
     }, [notify])
 
-    const notifyError = React.useCallback((title: string, description: string, actionText?: string) => {
-        notify({ title, description, type: "error", actionText })
+    const notifyError = React.useCallback((title: string, description: string, actionText?: string, traceId?: string) => {
+        notify({ title, description, type: "error", actionText, traceId })
     }, [notify])
 
     const notifyWarning = React.useCallback((title: string, description: string, actionText?: string, onAction?: () => void, cancelText?: string) => {
@@ -60,6 +61,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 onAction={options.onAction}
                 cancelText={options.cancelText}
                 onCancel={options.onCancel}
+                traceId={options.traceId}
             />
         </NotificationContext.Provider>
     )

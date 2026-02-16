@@ -75,26 +75,32 @@ export default function ReportsPage() {
                 )
                 await fetchReports()
             } else {
-                if (result.reason === "DAILY_LIMIT_REACHED") {
+                if (result.reason === "INSUFFICIENT_CREDITS") {
                     notifyWarning(
-                        "Daily Limit Reached",
-                        "You have reached your daily AI evaluation limit. Please try again tomorrow or upgrade to Premium for unlimited access.",
-                        "Upgrade Now"
+                        "Insufficient Credits",
+                        "You don't have enough StarCredits to re-evaluate this attempt. Please top up your balance.",
+                        "Top Up"
                     )
                 } else {
                     notifyError(
                         "Evaluation Failed",
                         "We encountered an error while processing your request. Please try again in a few moments.",
-                        "Try Again"
+                        "Try Again",
+                        (result as any).traceId
                     )
                 }
             }
         } catch (error) {
             console.error("Re-evaluation failed:", error)
+
+            const errorObj = error as any;
+            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+
             notifyError(
                 "System Error",
                 "An unexpected error occurred. Please contact support if the issue persists.",
-                "Close"
+                "Close",
+                traceId
             )
         } finally {
             setReevaluatingId(null)

@@ -32,6 +32,7 @@ interface NotificationDialogProps {
     onAction?: () => void
     cancelText?: string
     onCancel?: () => void
+    traceId?: string
 }
 
 const TYPE_CONFIG = {
@@ -76,7 +77,8 @@ export function NotificationDialog({
     actionText = "Understand",
     onAction,
     cancelText,
-    onCancel
+    onCancel,
+    traceId
 }: NotificationDialogProps) {
     const config = TYPE_CONFIG[type]
     const Icon = config.icon
@@ -105,6 +107,12 @@ export function NotificationDialog({
                         <DialogDescription className="text-slate-500 font-medium leading-relaxed">
                             {description}
                         </DialogDescription>
+                        {traceId && (
+                            <div className="mt-4 p-2 rounded-lg bg-slate-50 border border-slate-100 animate-in fade-in slide-in-from-top-1 duration-500">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Trace ID</p>
+                                <code className="text-xs font-mono font-bold text-slate-600 select-all">{traceId}</code>
+                            </div>
+                        )}
                     </div>
 
                     <DialogFooter className="w-full flex sm:flex-row gap-3 pt-2">
