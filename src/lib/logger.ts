@@ -18,8 +18,25 @@ export class Logger {
     }
 
     private formatMessage(level: LogLevel, message: string, meta?: any) {
-        const traceId = this.getTraceId();
+        const traceId = this.getTraceId() || "no-trace";
         const timestamp = new Date().toISOString();
+        const metaStr = meta ? JSON.stringify(meta) : "";
+
+        // Pretty print for development
+        if (process.env.NODE_ENV === "development") {
+            const color = {
+                info: "\x1b[32m", // Green
+                warn: "\x1b[33m", // Yellow
+                error: "\x1b[31m", // Red
+                debug: "\x1b[34m", // Blue
+            }[level] || "\x1b[0m";
+            const reset = "\x1b[0m";
+
+            // Format: [TIME] [LEVEL] [CONTEXT] [TRACE] Message {meta}
+            // We return a string, but for dev we might want to return an array of args if we were calling console directly.
+            // But since this function returns a string to be logged, let's format it nicely.
+            return `${color}[${timestamp}] [${level.toUpperCase()}] [${this.context}] [${traceId}] ${message}${reset} ${meta ? '\n' + JSON.stringify(meta, null, 2) : ''}`;
+        }
 
         return JSON.stringify({
             timestamp,

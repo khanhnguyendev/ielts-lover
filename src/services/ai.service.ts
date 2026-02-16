@@ -178,6 +178,8 @@ export class AIService {
         }
         fullPrompt += `Return the result in the requested JSON format.`;
 
+        this.logger.debug("Generating exercise content", { prompt: fullPrompt });
+
         try {
             const result = await model.generateContent(fullPrompt);
             const responseText = result.response.text();
