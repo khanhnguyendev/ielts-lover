@@ -22,6 +22,7 @@ export interface AIFeedbackResponse {
 
 export class AIService {
     private genAI: GoogleGenerativeAI;
+    private modelName: string;
     private static PROMPTS = {
         writing_task1: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
@@ -101,11 +102,12 @@ export class AIService {
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY!;
         this.genAI = new GoogleGenerativeAI(apiKey);
+        this.modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     }
 
     async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
         const model = this.genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: this.modelName,
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: AIService.RESPONSE_SCHEMA as any,
@@ -133,7 +135,7 @@ export class AIService {
 
     async rewriteContent(content: string, version: AIPromptVersion = "v1"): Promise<{ rewritten_text: string, improvements?: string }> {
         const model = this.genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: this.modelName,
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: AIService.REWRITE_SCHEMA as any,
@@ -155,7 +157,7 @@ export class AIService {
 
     async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<{ title: string, prompt: string }> {
         const model = this.genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: this.modelName,
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: AIService.OPERATION_SCHEMA as any,
