@@ -11,7 +11,9 @@ import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { ExerciseService } from "@/services/exercise.service";
 import { Exercise, ExerciseType } from "@/types";
 import { AIService } from "@/services/ai.service";
-import { withTrace, getCurrentTraceId, logger } from "@/lib/logger";
+import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
+
+const logger = new Logger("AdminActions");
 
 const lessonRepo = new LessonRepository();
 const lessonService = new LessonService(lessonRepo);
@@ -101,7 +103,8 @@ export async function generateAIExercise(type: string, topic?: string) {
             if (error instanceof Error && error.message === "Unauthorized") {
                 throw error;
             }
-            throw new Error(`AI Generation failed (Trace ID: ${traceId}). Please try again later.`);
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            throw new Error(`AI Generation failed: ${errorMessage} (Trace ID: ${traceId})`);
         }
     });
 }
