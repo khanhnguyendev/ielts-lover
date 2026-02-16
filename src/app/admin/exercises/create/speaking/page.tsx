@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { createExercise, generateAIExercise } from "@/app/admin/actions";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
 
 export default function CreateSpeakingExercisePage() {
     const router = useRouter();
@@ -21,8 +22,13 @@ export default function CreateSpeakingExercisePage() {
     const [prompt, setPrompt] = useState("");
     const [topic, setTopic] = useState("");
 
+    // Error Modal State
+    const [errorDetails, setErrorDetails] = useState<string | null>(null);
+    const [isErrorOpen, setIsErrorOpen] = useState(false);
+
     async function handleGenerate() {
         setIsGenerating(true);
+        setErrorDetails(null);
         try {
             const result = await generateAIExercise(type, topic || undefined);
             if (result) {
@@ -32,8 +38,9 @@ export default function CreateSpeakingExercisePage() {
             }
         } catch (error) {
             console.error("Failed to generate exercise:", error);
-            const message = error instanceof Error ? error.message : "Failed to generate content. Please try again.";
-            toast.error(message);
+            const message = error instanceof Error ? error.message : "Unknown error occurred";
+            setErrorDetails(message);
+            setIsErrorOpen(true);
         } finally {
             setIsGenerating(false);
         }
@@ -168,6 +175,12 @@ export default function CreateSpeakingExercisePage() {
                     </Button>
                 </div>
             </form>
+
+            <ErrorDetailsDialog
+                open={isErrorOpen}
+                onOpenChange={setIsErrorOpen}
+                error={errorDetails}
+            />
         </div>
     );
 }
