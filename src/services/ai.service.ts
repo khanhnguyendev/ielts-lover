@@ -28,11 +28,25 @@ export class AIService {
     private static PROMPTS = {
         writing_task1: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
-            v2: "Analyze the following IELTS Writing Task 1 response. Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (break the original text into fragments, marking corrections and CEFR levels of words). 3. Detailed band score breakdown for Task Achievement, Coherence, Lexical Resource, and Grammatical Range. 4. Specific feedback cards for mistakes. 5. CEFR distribution of the vocabulary used."
+            v2: `Analyze the following IELTS Writing Task 1 response according to official IELTS public band descriptors. 
+            
+            CRITICAL RULES:
+            1. WORD COUNT PENALTY: Task 1 requires 150+ words. If the response is significantly underlength, you MUST penalize the Task Achievement score severely. 
+            2. INCOMPLETE RESPONSES: If the response is less than 50 words, completely off-topic, or nonsensical, provide an Overall Band between 1.0 and 3.0. A few sentences or developer notes DO NOT qualify for a Band 7.0 even if grammatically correct.
+            3. CEFR ALIGNMENT: To achieve Band 7.0+ (C1), the writer must demonstrate complex sentence structures and a wide range of specialized vocabulary.
+            
+            Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (original text fragments with corrections). 3. Detailed band score breakdown. 4. Specific mistake cards. 5. CEFR distribution.`
         },
         writing_task2: {
             v1: "Analyze the following IELTS Writing Task 2 essay and provide a detailed band score breakdown and improvement suggestions.",
-            v2: "Analyze the following IELTS Writing Task 2 essay. Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (break the original text into fragments, marking corrections and CEFR levels within the text). 3. Detailed band score breakdown for Task Response, Coherence, Lexical Resource, and Grammatical Range. 4. Specific feedback cards for mistakes. 5. CEFR distribution of the vocabulary used."
+            v2: `Analyze the following IELTS Writing Task 2 essay according to official IELTS public band descriptors.
+            
+            CRITICAL RULES:
+            1. WORD COUNT PENALTY: Task 2 requires 250+ words. If the response is underlength, penalize the Task Response score. 
+            2. INCOMPLETE RESPONSES: If the response is less than 100 words, provide an Overall Band between 1.0 and 4.0. Developer notes or casual chat are NOT Band 7.0/8.0.
+            3. CEFR ALIGNMENT: Band 7.0+ (C1) requires sustained logical development and sophisticated language use.
+            
+            Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback. 3. Detailed band score breakdown. 4. Specific mistake cards. 5. CEFR distribution.`
         },
         speaking_part1: {
             v1: "Analyze the following IELTS Speaking Part 1 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",

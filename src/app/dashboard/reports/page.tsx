@@ -64,47 +64,55 @@ export default function ReportsPage() {
     }, [fetchReports])
 
     const handleReevaluate = async (id: string) => {
-        setReevaluatingId(id)
-        try {
-            const result = await reevaluateAttempt(id)
-            if (result.success) {
-                notifySuccess(
-                    "Evaluation Complete",
-                    "Your report has been updated with the latest AI feedback. You can now view your score and detailed analysis.",
-                    "View Report"
-                )
-                await fetchReports()
-            } else {
-                if (result.reason === "INSUFFICIENT_CREDITS") {
-                    notifyWarning(
-                        "Insufficient Credits",
-                        "You don't have enough StarCredits to re-evaluate this attempt. Please top up your balance.",
-                        "Top Up"
-                    )
-                } else {
+        notifyWarning(
+            "Confirm Re-evaluation",
+            "This will use 1 StarCredit to get a detailed AI report for this attempt. Do you want to proceed?",
+            "Get AI Feedback",
+            async () => {
+                setReevaluatingId(id)
+                try {
+                    const result = await reevaluateAttempt(id)
+                    if (result.success) {
+                        notifySuccess(
+                            "Evaluation Complete",
+                            "Your report has been updated with the latest AI feedback. You can now view your score and detailed analysis.",
+                            "View Report"
+                        )
+                        await fetchReports()
+                    } else {
+                        if (result.reason === "INSUFFICIENT_CREDITS") {
+                            notifyWarning(
+                                "Insufficient Credits",
+                                "You don't have enough StarCredits to re-evaluate this attempt. Please top up your balance.",
+                                "Top Up"
+                            )
+                        } else {
+                            notifyError(
+                                "Evaluation Failed",
+                                "We encountered an error while processing your request. Please try again in a few moments.",
+                                "Try Again",
+                                (result as any).traceId
+                            )
+                        }
+                    }
+                } catch (error) {
+                    console.error("Re-evaluation failed:", error)
+
+                    const errorObj = error as any;
+                    const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+
                     notifyError(
-                        "Evaluation Failed",
-                        "We encountered an error while processing your request. Please try again in a few moments.",
-                        "Try Again",
-                        (result as any).traceId
+                        "System Error",
+                        "An unexpected error occurred. Please contact support if the issue persists.",
+                        "Close",
+                        traceId
                     )
+                } finally {
+                    setReevaluatingId(null)
                 }
-            }
-        } catch (error) {
-            console.error("Re-evaluation failed:", error)
-
-            const errorObj = error as any;
-            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
-
-            notifyError(
-                "System Error",
-                "An unexpected error occurred. Please contact support if the issue persists.",
-                "Close",
-                traceId
-            )
-        } finally {
-            setReevaluatingId(null)
-        }
+            },
+            "Cancel"
+        )
     }
 
     return (

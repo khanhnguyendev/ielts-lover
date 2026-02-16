@@ -101,63 +101,66 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }
 
     const handleFinish = async () => {
-        if (!currentAttempt) return;
+        if (!currentAttempt || !text.trim()) return;
 
-        setIsSubmitting(true)
-        try {
-            const result = await submitAttempt(currentAttempt.id, text)
+        notifyWarning(
+            "Confirm Evaluation",
+            "This will use 1 StarCredit to evaluate your work and provide detailed AI feedback. Do you want to proceed?",
+            "Evaluate Now",
+            async () => {
+                setIsSubmitting(true)
+                try {
+                    const result = await submitAttempt(currentAttempt.id, text)
 
-            if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
-                notifyError(
-                    "System Error",
-                    "We encountered a problem while evaluating your work. Please provide the trace ID to support.",
-                    "Close",
-                    (result as any).traceId
-                )
-                return;
-            }
+                    if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
+                        notifyError(
+                            "System Error",
+                            "We encountered a problem while evaluating your work. Please provide the trace ID to support.",
+                            "Close",
+                            (result as any).traceId
+                        )
+                        return;
+                    }
 
-            if (result && 'score' in result && result.score !== undefined && result.score !== null) {
-                setFeedbackData({
-                    score: result.score as number,
-                    feedback: result.feedback as string,
-                    attemptId: result.id
-                })
-                setShowFeedback(true)
-                notifySuccess(
-                    "Evaluation Complete",
-                    "Great job! Your exercise has been evaluated. Review your band score and detailed feedback to identify areas for improvement.",
-                    "Review Now"
-                )
-            } else if (result && 'reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
-                notifyWarning(
-                    "Insufficient Credits",
-                    "Your work has been saved securely, but you don't have enough StarCredits for evaluation. Please top up your balance.",
-                    "Top Up"
-                )
-            } else {
-                notifyWarning(
-                    "Daily Limit Reached",
-                    "Your work has been saved securely, but your daily AI evaluation limit has been reached. You can request feedback for this attempt from the Reports tab once your limit resets.",
-                    "View Reports"
-                )
-            }
-        } catch (error) {
-            console.error("Submission failed:", error)
+                    if (result && 'score' in result && result.score !== undefined && result.score !== null) {
+                        setFeedbackData({
+                            score: result.score as number,
+                            feedback: result.feedback as string,
+                            attemptId: result.id
+                        })
+                        setShowFeedback(true)
+                    } else if (result && 'reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
+                        notifyWarning(
+                            "Insufficient Credits",
+                            "Your work has been saved securely, but you don't have enough StarCredits for evaluation. Please top up your balance.",
+                            "Top Up"
+                        )
+                    } else {
+                        notifyWarning(
+                            "Daily Limit Reached",
+                            "Your work has been saved securely, but your daily AI evaluation limit has been reached. You can request feedback for this attempt from the Reports tab once your limit resets.",
+                            "View Reports"
+                        )
+                    }
+                } catch (error) {
+                    console.error("Submission failed:", error)
 
-            // Check if error is from server action with traceId
-            const errorObj = error as any;
-            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+                    // Check if error is from server action with traceId
+                    const errorObj = error as any;
+                    const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
 
-            notifyError(
-                "Submission Failed",
-                "We were unable to save your work. Please check your internet connection and try again.",
-                "Try Again",
-                traceId
-            )
-        } finally {
-            setIsSubmitting(false)
-        }
+                    notifyError(
+                        "Submission Failed",
+                        "We were unable to save your work. Please check your internet connection and try again.",
+                        "Try Again",
+                        traceId
+                    )
+                } finally {
+                    setIsSubmitting(false)
+                }
+            },
+            "Cancel"
+        )
     }
 
     if (isLoading) {

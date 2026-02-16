@@ -23,52 +23,61 @@ export default function RewriterPage() {
     const [rewrittenText, setRewrittenText] = React.useState("")
     const [isRewriting, setIsRewriting] = React.useState(false)
     const [copied, setCopied] = React.useState(false)
-    const { notifySuccess, notifyError } = useNotification()
+    const { notifySuccess, notifyError, notifyWarning } = useNotification()
 
     const handleRewrite = async () => {
         if (!inputText) return
-        setIsRewriting(true)
-        // Call Server Action
-        try {
-            const result = await rewriteText(inputText)
-            if (result.success && 'text' in result) {
-                setRewrittenText(result.text as string)
-                notifySuccess(
-                    "Text Improved!",
-                    "AI has successfully rewritten your text to a higher band score level (8.0+). You can now copy the improved version and compare it with yours.",
-                    "Compare Version"
-                )
-            } else {
-                if (result.reason === "INSUFFICIENT_CREDITS") {
-                    notifyError(
-                        "Insufficient Credits",
-                        "You don't have enough StarCredits to use the rewriter. Please top up your balance.",
-                        "Top Up"
-                    )
-                } else {
+
+        notifyWarning(
+            "Confirm Improvement",
+            "This will use 1 StarCredit to rewrite your text and improve its band score levels. Do you want to proceed?",
+            "Rewrite Now",
+            async () => {
+                setIsRewriting(true)
+                // Call Server Action
+                try {
+                    const result = await rewriteText(inputText)
+                    if (result.success && 'text' in result) {
+                        setRewrittenText(result.text as string)
+                        notifySuccess(
+                            "Text Improved!",
+                            "AI has successfully rewritten your text to a higher band score level (8.0+). You can now copy the improved version and compare it with yours.",
+                            "Compare Version"
+                        )
+                    } else {
+                        if (result.reason === "INSUFFICIENT_CREDITS") {
+                            notifyError(
+                                "Insufficient Credits",
+                                "You don't have enough StarCredits to use the rewriter. Please top up your balance.",
+                                "Top Up"
+                            )
+                        } else {
+                            notifyError(
+                                "Rewrite Failed",
+                                "We encountered an error while processing your request. Please try again in a few moments.",
+                                "Try Again",
+                                result.traceId
+                            )
+                        }
+                    }
+                } catch (error) {
+                    console.error("Rewrite failed:", error)
+
+                    const errorObj = error as any;
+                    const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
+
                     notifyError(
                         "Rewrite Failed",
-                        "We encountered an error while processing your request. Please try again in a few moments.",
+                        "We couldn't rewrite your text at this moment. Please check your internet connection or try a shorter paragraph.",
                         "Try Again",
-                        result.traceId
+                        traceId
                     )
+                } finally {
+                    setIsRewriting(false)
                 }
-            }
-        } catch (error) {
-            console.error("Rewrite failed:", error)
-
-            const errorObj = error as any;
-            const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
-
-            notifyError(
-                "Rewrite Failed",
-                "We couldn't rewrite your text at this moment. Please check your internet connection or try a shorter paragraph.",
-                "Try Again",
-                traceId
-            )
-        } finally {
-            setIsRewriting(false)
-        }
+            },
+            "Cancel"
+        )
     }
 
     const handleCopy = () => {
