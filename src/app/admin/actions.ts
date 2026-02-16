@@ -108,3 +108,21 @@ export async function generateAIExercise(type: string, topic?: string) {
         }
     });
 }
+
+export async function uploadImage(formData: FormData) {
+    await checkAdmin();
+
+    const file = formData.get("file") as File;
+    if (!file) {
+        throw new Error("No file uploaded");
+    }
+
+    try {
+        const { StorageService } = await import("@/services/storage.service");
+        const url = await StorageService.upload(file);
+        return url;
+    } catch (error) {
+        logger.error("Image upload failed", { error });
+        throw new Error("Failed to upload image");
+    }
+}

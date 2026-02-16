@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createExercise, generateAIExercise } from "@/app/admin/actions";
-import { Sparkles, Loader2 } from "lucide-react";
+import { createExercise, generateAIExercise, uploadImage } from "@/app/admin/actions";
+import { Sparkles, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
 // import { ExerciseType } from "@/types"; // Might need to import this if used directly
@@ -22,6 +22,7 @@ export default function CreateWritingExercisePage() {
     const [title, setTitle] = useState("");
     const [prompt, setPrompt] = useState("");
     const [topic, setTopic] = useState("");
+    const [imageFile, setImageFile] = useState<File | null>(null);
 
     // Error Modal State
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
@@ -58,9 +59,16 @@ export default function CreateWritingExercisePage() {
         // Let's rely on the form data, but since inputs are controlled, we need to ensure they have name attributes.
         const formTitle = formData.get("title") as string;
         const formPrompt = formData.get("prompt") as string;
-        const imageUrl = formData.get("image_url") as string;
+        // const imageUrl = formData.get("image_url") as string; // Replaced by file upload
 
         try {
+            let imageUrl = undefined;
+            if (type === "writing_task1" && imageFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append("file", imageFile);
+                imageUrl = await uploadImage(uploadFormData);
+            }
+
             await createExercise({
                 title: formTitle,
                 type,
@@ -161,9 +169,20 @@ export default function CreateWritingExercisePage() {
 
                 {type === "writing_task1" && (
                     <div className="space-y-2">
-                        <Label htmlFor="image_url">Chart/Graph Image URL</Label>
-                        <Input id="image_url" name="image_url" placeholder="https://..." required />
-                        <p className="text-xs text-gray-500">Provide a direct link to the image.</p>
+                        <Label htmlFor="image_file">Chart/Graph Image</Label>
+                        <div className="flex items-center gap-4">
+                            <Input
+                                id="image_file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) setImageFile(file);
+                                }}
+                                className="cursor-pointer"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 select-none">Upload the chart/graph image for Task 1.</p>
                     </div>
                 )}
 
