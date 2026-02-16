@@ -102,7 +102,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         try {
             const result = await submitAttempt(currentAttempt.id, text)
 
-            if (result && result.score !== undefined) {
+            if (result && result.score !== undefined && result.score !== null) {
                 setFeedbackData({
                     score: result.score,
                     feedback: result.feedback,
@@ -111,7 +111,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 setShowFeedback(true)
                 toast.success("Evaluation complete!")
             } else {
-                toast.warning("Submission received, but evaluation is pending.")
+                toast.warning("Daily limit reached. Your work is saved, but AI evaluation is unavailable for now.")
             }
         } catch (error) {
             console.error("Submission failed:", error)

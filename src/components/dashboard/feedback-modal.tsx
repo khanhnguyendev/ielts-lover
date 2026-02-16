@@ -55,7 +55,7 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
                         </p>
                     </div>
 
-                    {score !== undefined && (
+                    {(score !== undefined && score !== null) && (
                         <div className={`inline-flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 ${scoreColorClass}`}>
                             <span className="text-3xl font-black">{score.toFixed(1)}</span>
                             <span className="text-[10px] uppercase font-bold tracking-widest opacity-80">Band</span>
