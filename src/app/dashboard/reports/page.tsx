@@ -34,7 +34,8 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-import { getUserAttempts } from "@/app/actions";
+import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
+import { toast } from "sonner";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/PulseLoader";
 import { getBandScoreConfig } from "@/lib/score-utils";
@@ -43,21 +44,45 @@ export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
+    const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
+
+    const fetchReports = React.useCallback(async () => {
+        setIsLoading(true)
+        try {
+            const data = await getUserAttempts()
+            setAttempts(data as any)
+        } catch (error) {
+            console.error("Failed to fetch reports:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
 
     React.useEffect(() => {
-        async function fetchReports() {
-            setIsLoading(true)
-            try {
-                const data = await getUserAttempts()
-                setAttempts(data as any)
-            } catch (error) {
-                console.error("Failed to fetch reports:", error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
         fetchReports()
-    }, [])
+    }, [fetchReports])
+
+    const handleReevaluate = async (id: string) => {
+        setReevaluatingId(id)
+        try {
+            const result = await reevaluateAttempt(id)
+            if (result.success) {
+                toast.success("Evaluation complete!")
+                await fetchReports()
+            } else {
+                if (result.reason === "DAILY_LIMIT_REACHED") {
+                    toast.error("Daily limit reached. Try again tomorrow or upgrade to Premium.")
+                } else {
+                    toast.error("Evaluation failed. Please try again.")
+                }
+            }
+        } catch (error) {
+            console.error("Re-evaluation failed:", error)
+            toast.error("An error occurred during evaluation.")
+        } finally {
+            setReevaluatingId(null)
+        }
+    }
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto">
@@ -209,15 +234,34 @@ export default function ReportsPage() {
                                                     })()}
                                                 </TableCell>
                                                 <TableCell className="py-6 text-right pr-10">
-                                                    <Link href={`/dashboard/reports/${attempt.id}`}>
+                                                    {attempt.state === "SUBMITTED" ? (
                                                         <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
+                                                            onClick={() => handleReevaluate(attempt.id)}
+                                                            disabled={reevaluatingId === attempt.id}
+                                                            className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
                                                         >
-                                                            View Report <ChevronRight className="ml-1.5 h-3 w-3" />
+                                                            {reevaluatingId === attempt.id ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                                                    Evaluating...
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    Get AI Feedback <Sparkles className="ml-1.5 h-3 w-3 fill-primary" />
+                                                                </>
+                                                            )}
                                                         </Button>
-                                                    </Link>
+                                                    ) : (
+                                                        <Link href={`/dashboard/reports/${attempt.id}`}>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
+                                                            >
+                                                                View Report <ChevronRight className="ml-1.5 h-3 w-3" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))

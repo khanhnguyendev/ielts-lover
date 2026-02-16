@@ -72,6 +72,10 @@ export async function submitAttempt(attemptId: string, content: string) {
     return attemptService.getAttempt(attemptId);
 }
 
+export async function reevaluateAttempt(attemptId: string) {
+    return attemptService.reevaluate(attemptId);
+}
+
 export async function getAttemptById(id: string) {
     return attemptService.getAttempt(id);
 }

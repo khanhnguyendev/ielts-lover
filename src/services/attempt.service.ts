@@ -88,6 +88,33 @@ export class AttemptService {
         await this.userRepo.incrementQuota(attempt.user_id);
     }
 
+    async reevaluate(id: string): Promise<{ success: boolean; reason?: string }> {
+        const attempt = await this.attemptRepo.getById(id);
+        if (!attempt) throw new Error("Attempt not found");
+
+        const user = await this.userRepo.getById(attempt.user_id);
+        if (!user) throw new Error("User not found");
+
+        const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
+        if (!exercise) throw new Error("Exercise not found");
+
+        const feature = exercise.type.startsWith('writing') ? "writing_evaluation" : "speaking_evaluation";
+        const { SubscriptionPolicy } = await import("./subscription.policy");
+
+        if (!SubscriptionPolicy.canAccessFeature(user, feature)) {
+            return { success: false, reason: "DAILY_LIMIT_REACHED" };
+        }
+
+        await this.evaluateAttempt(id);
+
+        const updated = await this.attemptRepo.getById(id);
+        if (updated?.state === "EVALUATED") {
+            return { success: true };
+        }
+
+        return { success: false, reason: "EVALUATION_FAILED" };
+    }
+
     async getAttempt(id: string): Promise<Attempt | null> {
         return this.attemptRepo.getById(id);
     }

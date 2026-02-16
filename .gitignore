@@ -40,8 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-design_assets
+docs
 .agent
-PRD.md
-TECH_STACK.md
-TODO.md
