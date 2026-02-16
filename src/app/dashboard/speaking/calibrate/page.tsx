@@ -37,7 +37,7 @@ export default function SpeakingCalibratePage() {
     }, [isRecording])
 
     return (
-        <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8 -m-8 lg:-m-12 relative overflow-hidden">
+        <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8 relative overflow-hidden">
             {/* Background blobs for premium feel */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />

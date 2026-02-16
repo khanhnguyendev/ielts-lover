@@ -71,7 +71,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "PROCESSING") {
         return (
-            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8 -m-8 lg:-m-12">
+            <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="space-y-4">
                         <h2 className="text-4xl font-black font-outfit text-[#7C3AED]">Processing...</h2>
@@ -119,7 +119,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "COMPLETE") {
         return (
-            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8 -m-8 lg:-m-12">
+            <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="space-y-4">
                         <h2 className="text-4xl font-black font-outfit text-[#C026D3]">Task Completed 🎉</h2>
@@ -154,7 +154,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     }
 
     return (
-        <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex -m-8 lg:-m-12 overflow-hidden">
+        <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex overflow-hidden">
             {/* Main Area */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}

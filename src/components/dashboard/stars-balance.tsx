@@ -14,7 +14,7 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
         <Link
             href="/dashboard/credits"
             className={cn(
-                "group relative flex items-center gap-2 bg-yellow-50/50 hover:bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200/50 hover:border-yellow-200 shadow-sm transition-all active:scale-95",
+                "group relative flex items-center gap-1.5 bg-yellow-50/50 hover:bg-yellow-50 px-2.5 py-1 rounded-full border border-yellow-200/50 hover:border-yellow-200 shadow-sm transition-all active:scale-95",
                 className
             )}
         >

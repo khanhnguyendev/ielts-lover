@@ -126,7 +126,7 @@ export default function ReportsPage() {
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={cn(
-                                    "px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                                    "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
                                     activeTab === tab
                                         ? "bg-white text-primary shadow-sm"
                                         : "text-muted-foreground hover:text-foreground"
@@ -164,27 +164,27 @@ export default function ReportsPage() {
                                 <Table>
                                     <TableHeader className="bg-[#F9FAFB]">
                                         <TableRow className="hover:bg-transparent border-none">
-                                            <TableHead className="w-[200px] py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-10">
+                                            <TableHead className="w-[180px] py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-6">
                                                 <div className="flex items-center gap-1 cursor-pointer group">
                                                     Time <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                 <div className="flex items-center gap-1 cursor-pointer group">
                                                     Task <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                 <div className="flex items-center gap-1 cursor-pointer group">
                                                     Status <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                 <div className="flex items-center gap-1 cursor-pointer group">
                                                     Score <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="text-right pr-10"></TableHead>
+                                            <TableHead className="text-right pr-6"></TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -202,41 +202,41 @@ export default function ReportsPage() {
                                         ) : (
                                             attempts.map((attempt) => (
                                                 <TableRow key={attempt.id} className="group hover:bg-slate-50/50 border-slate-50/50 transition-colors">
-                                                    <TableCell className="py-6 pl-10">
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                                                                <Calendar className="h-3 w-3 text-slate-400" />
+                                                    <TableCell className="py-3 pl-6">
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <div className="flex items-center gap-1 text-xs font-black text-slate-900">
+                                                                <Calendar className="h-2.5 w-2.5 text-slate-400" />
                                                                 {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                             </div>
-                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                                                                <Clock className="h-2.5 w-2.5" />
+                                                            <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                                                                <Clock className="h-2 w-2" />
                                                                 {new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="py-6">
-                                                        <div className="flex items-center gap-4">
+                                                    <TableCell className="py-3">
+                                                        <div className="flex items-center gap-3">
                                                             <div className={cn(
-                                                                "w-10 h-10 rounded-xl flex items-center justify-center border",
+                                                                "w-8 h-8 rounded-lg flex items-center justify-center border",
                                                                 attempt.exercises?.type?.startsWith('speaking')
                                                                     ? "bg-cyan-50 border-cyan-100 text-cyan-600"
                                                                     : "bg-indigo-50 border-indigo-100 text-indigo-600"
                                                             )}>
-                                                                {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-5 w-5" /> : <PenTool className="h-5 w-5" />}
+                                                                {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-4 w-4" /> : <PenTool className="h-4 w-4" />}
                                                             </div>
-                                                            <div className="space-y-0.5">
-                                                                <p className="text-[13px] font-black text-slate-900 leading-none group-hover:text-primary transition-colors">
+                                                            <div className="space-y-0">
+                                                                <p className="text-[12px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
                                                                     {attempt.exercises?.title || "Exercise"}
                                                                 </p>
-                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                                                                     {attempt.exercises?.type?.replace('_', ' ') || "Practice"}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="py-6">
+                                                    <TableCell className="py-3">
                                                         <div className={cn(
-                                                            "w-fit flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm",
+                                                            "w-fit flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border shadow-sm",
                                                             attempt.state === "EVALUATED"
                                                                 ? "text-emerald-700 bg-emerald-50 border-emerald-100"
                                                                 : "text-amber-700 bg-amber-50 border-amber-100"
@@ -248,37 +248,37 @@ export default function ReportsPage() {
                                                             {attempt.state}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="py-6">
+                                                    <TableCell className="py-3">
                                                         {(() => {
                                                             const config = getBandScoreConfig(attempt.score);
                                                             return (
                                                                 <div className={cn(
-                                                                    "w-11 h-11 rounded-2xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
+                                                                    "w-9 h-9 rounded-xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
                                                                     config.bg,
                                                                     config.border,
                                                                     config.color
                                                                 )}>
-                                                                    <span className="text-sm leading-none">{attempt.score || "-"}</span>
-                                                                    <span className="text-[8px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
+                                                                    <span className="text-[12px] leading-none">{attempt.score || "-"}</span>
+                                                                    <span className="text-[7px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
                                                                 </div>
                                                             );
                                                         })()}
                                                     </TableCell>
-                                                    <TableCell className="py-6 text-right pr-10">
+                                                    <TableCell className="py-3 text-right pr-6">
                                                         {attempt.state === "SUBMITTED" ? (
                                                             <Button
                                                                 onClick={() => handleReevaluate(attempt.id)}
                                                                 disabled={reevaluatingId === attempt.id}
-                                                                className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
+                                                                className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
                                                             >
                                                                 {reevaluatingId === attempt.id ? (
                                                                     <div className="flex items-center gap-2">
-                                                                        <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                                                        <div className="w-2.5 h-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                                                                         Evaluating...
                                                                     </div>
                                                                 ) : (
                                                                     <>
-                                                                        Get AI Feedback <Sparkles className="ml-1.5 h-3 w-3 fill-primary" />
+                                                                        AI Feedback <Sparkles className="ml-1 h-2.5 w-2.5 fill-primary" />
                                                                     </>
                                                                 )}
                                                             </Button>
@@ -287,9 +287,9 @@ export default function ReportsPage() {
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
+                                                                    className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
                                                                 >
-                                                                    View Report <ChevronRight className="ml-1.5 h-3 w-3" />
+                                                                    View Report <ChevronRight className="ml-1 h-2.5 w-2.5" />
                                                                 </Button>
                                                             </Link>
                                                         )}
@@ -324,110 +324,110 @@ export default function ReportsPage() {
                     ) : (
                         <div className="flex-1 p-10 space-y-10 bg-[#F9FAFB]">
                             {/* Summary Stats Row */}
-                            <div className="bg-white rounded-[32px] border p-8 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-10">
+                            <div className="bg-white rounded-2xl border p-6 flex items-center justify-between shadow-sm">
+                                <div className="flex items-center gap-8">
                                     <div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Mock Test</h4>
+                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Mock Test</h4>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-black text-muted-foreground/60">— sessions</span>
                                         </div>
                                     </div>
-                                    <div className="w-px h-10 bg-slate-100" />
+                                    <div className="w-px h-8 bg-slate-100" />
                                     <div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Latest</h4>
-                                        <div className="text-2xl font-black font-outfit text-slate-500">—</div>
+                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Latest</h4>
+                                        <div className="text-xl font-black font-outfit text-slate-500">—</div>
                                     </div>
-                                    <div className="w-px h-10 bg-slate-100" />
+                                    <div className="w-px h-8 bg-slate-100" />
                                     <div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2 flex items-center gap-1">
-                                            Avg <Info className="h-3 w-3" />
+                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5 flex items-center gap-1">
+                                            Avg <Info className="h-2.5 w-2.5" />
                                         </h4>
-                                        <div className="text-2xl font-black font-outfit text-slate-500">—</div>
+                                        <div className="text-xl font-black font-outfit text-slate-500">—</div>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Target</h4>
-                                    <div className="text-2xl font-black font-outfit text-primary">7.5</div>
+                                    <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Target</h4>
+                                    <div className="text-xl font-black font-outfit text-primary">7.5</div>
                                 </div>
                             </div>
 
                             {/* Task Specific Boxes */}
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="bg-white rounded-[32px] border p-8 shadow-sm space-y-6">
+                                <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-sm font-black text-slate-900">Academic Task 1</h4>
-                                        <span className="text-[10px] font-black text-muted-foreground/60">0 attempts</span>
+                                        <h4 className="text-xs font-black text-slate-900">Academic Task 1</h4>
+                                        <span className="text-[9px] font-black text-muted-foreground/60">0 attempts</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                            <p className="text-xl font-black font-outfit text-slate-500">—</p>
+                                        <div className="space-y-0.5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
+                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
                                         </div>
-                                        <div className="text-right space-y-1">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
-                                                Avg <Info className="h-3 w-3" />
+                                        <div className="text-right space-y-0.5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
+                                                Avg <Info className="h-2.5 w-2.5" />
                                             </p>
-                                            <p className="text-xl font-black font-outfit text-slate-500">—</p>
+                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">
-                                        Show details <ChevronDown className="ml-2 h-3 w-3" />
+                                    <Button variant="ghost" className="w-full text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-3 border-t border-dashed rounded-none h-auto">
+                                        Show details <ChevronDown className="ml-1.5 h-2.5 w-2.5" />
                                     </Button>
                                 </div>
 
-                                <div className="bg-white rounded-[32px] border p-8 shadow-sm space-y-6">
+                                <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-sm font-black text-slate-900">Task 2</h4>
-                                        <span className="text-[10px] font-black text-muted-foreground/60">0 attempts</span>
+                                        <h4 className="text-xs font-black text-slate-900">Task 2</h4>
+                                        <span className="text-[9px] font-black text-muted-foreground/60">0 attempts</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                            <p className="text-xl font-black font-outfit text-slate-500">—</p>
+                                        <div className="space-y-0.5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
+                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
                                         </div>
-                                        <div className="text-right space-y-1">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
-                                                Avg <Info className="h-3 w-3" />
+                                        <div className="text-right space-y-0.5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
+                                                Avg <Info className="h-2.5 w-2.5" />
                                             </p>
-                                            <p className="text-xl font-black font-outfit text-slate-500">—</p>
+                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">
-                                        Show details <ChevronDown className="ml-2 h-3 w-3" />
+                                    <Button variant="ghost" className="w-full text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-3 border-t border-dashed rounded-none h-auto">
+                                        Show details <ChevronDown className="ml-1.5 h-2.5 w-2.5" />
                                     </Button>
                                 </div>
                             </div>
 
                             {/* Next Step Card */}
-                            <div className="bg-[#FAF9FF] border border-primary/10 rounded-[32px] p-8 flex items-center justify-between">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border shadow-sm">
-                                        <Sparkles className="h-8 w-8 text-primary" />
+                            <div className="bg-[#FAF9FF] border border-primary/10 rounded-2xl p-6 flex items-center justify-between">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border shadow-sm">
+                                        <Sparkles className="h-6 w-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-black font-outfit text-slate-900">Your Next Step to a Higher Band</h4>
-                                        <p className="text-sm font-medium text-muted-foreground">Complete your first practice to learn the one skill you need to improve for a higher band.</p>
+                                        <h4 className="text-base font-black font-outfit text-slate-900">Your Next Step to a Higher Band</h4>
+                                        <p className="text-xs font-medium text-muted-foreground">Complete your first practice to learn the one skill you need to improve for a higher band.</p>
                                     </div>
                                 </div>
-                                <Button variant="premium" size="lg">
+                                <Button variant="premium" size="default">
                                     Start Writing
                                 </Button>
                             </div>
 
                             {/* Chart Placeholder */}
-                            <div className="bg-white rounded-[32px] border p-10 shadow-sm space-y-8">
+                            <div className="bg-white rounded-2xl border p-8 shadow-sm space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <div className="space-y-1">
-                                        <h4 className="text-lg font-black font-outfit text-slate-900">Progress over time</h4>
-                                        <p className="text-xs font-medium text-muted-foreground">Shows only the latest score for each day</p>
+                                    <div className="space-y-0.5">
+                                        <h4 className="text-base font-black font-outfit text-slate-900">Progress over time</h4>
+                                        <p className="text-[10px] font-medium text-muted-foreground">Shows only the latest score for each day</p>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs font-bold border-muted-foreground/10">
-                                            <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
+                                    <div className="flex items-center gap-3">
+                                        <Button variant="outline" size="xs" className="h-7 rounded-md text-[10px] font-bold border-muted-foreground/10">
+                                            <ChevronLeft className="h-3 w-3 mr-1" /> Previous
                                         </Button>
-                                        <span className="text-xs font-black text-slate-500">Feb 9 - Feb 15, 2026</span>
-                                        <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs font-bold border-muted-foreground/10">
-                                            Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                                        <span className="text-[10px] font-black text-slate-500">Feb 9 - Feb 15, 2026</span>
+                                        <Button variant="outline" size="xs" className="h-7 rounded-md text-[10px] font-bold border-muted-foreground/10">
+                                            Next <ChevronRight className="h-3 w-3 ml-1" />
                                         </Button>
                                     </div>
                                 </div>

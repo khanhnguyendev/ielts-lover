@@ -65,7 +65,7 @@ export function DashboardSidebar() {
             )}
         >
             {/* Logo Section */}
-            <div className="p-6 flex items-center justify-between">
+            <div className="p-4 flex items-center justify-between">
                 {!isCollapsed && (
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <div className="flex flex-col">
@@ -89,8 +89,8 @@ export function DashboardSidebar() {
             </div>
 
             {/* Main Navigation */}
-            <ScrollArea className="flex-1 px-3 py-4">
-                <div className="space-y-6">
+            <ScrollArea className="flex-1 px-3 py-2">
+                <div className="space-y-4">
                     {NAV_GROUPS.map((group, idx) => (
                         <div key={group.label || idx} className="space-y-1.5">
                             {!isCollapsed && (
@@ -105,7 +105,7 @@ export function DashboardSidebar() {
                                         key={item.href}
                                         href={item.href}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
+                                            "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
                                             isActive
                                                 ? "bg-primary text-white shadow-md shadow-primary/20"
                                                 : "text-muted-foreground hover:bg-muted"
@@ -168,7 +168,7 @@ export function DashboardSidebar() {
                     <Link
                         key={item.href}
                         href={item.href}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-all group relative"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted transition-all group relative"
                     >
                         <item.icon className="h-5 w-5 group-hover:text-primary transition-colors" />
                         {!isCollapsed && <span className="text-sm font-semibold">{item.label}</span>}

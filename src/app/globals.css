@@ -42,7 +42,7 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.5rem;
 
   /* Backgrounds */
   --background: hsl(0 0% 100%);
@@ -105,7 +105,7 @@
   }
 
   body {
-    @apply bg-background text-foreground-primary antialiased;
+    @apply bg-background text-foreground-primary text-sm leading-normal antialiased;
   }
 
   h1,
@@ -115,8 +115,14 @@
   h5,
   h6 {
     color: var(--foreground-primary);
-    font-weight: 900;
+    font-weight: 800;
+    @apply tracking-tight;
   }
+
+  h1 { @apply text-2xl; }
+  h2 { @apply text-xl; }
+  h3 { @apply text-lg; }
+  h4 { @apply text-base; }
 
   button,
   a {
@@ -128,7 +134,7 @@
   }
 
   p {
-    @apply text-foreground-secondary;
+    @apply text-foreground-secondary leading-relaxed;
   }
 }
 /* Loading Animations */

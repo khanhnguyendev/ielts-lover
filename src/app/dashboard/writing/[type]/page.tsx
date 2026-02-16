@@ -190,7 +190,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-white -m-8 lg:-m-12">
+        <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-white">
             {/* Question Side */}
             <div className="w-1/2 overflow-y-auto p-12 border-r bg-[#F9FAFB] scrollbar-hide">
                 <div className="max-w-xl mx-auto space-y-10 pb-20">

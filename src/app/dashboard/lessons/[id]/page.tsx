@@ -78,7 +78,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
     const currentQuestion = questions[currentQuestionIndex]
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] -m-8 lg:-m-12 bg-white">
+        <div className="flex flex-col h-[calc(100vh-80px)] bg-white">
             {/* Header */}
             <header className="h-20 border-b flex items-center justify-between px-10 shrink-0">
                 <div className="flex items-center gap-6">

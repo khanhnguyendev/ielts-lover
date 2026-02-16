@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3.5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:scale-[0.98]",
   {
     variants: {
       variant: {
@@ -20,20 +20,20 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "bg-gradient-to-r from-indigo-600 to-primary text-white font-black shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:scale-105 transition-all outline-none",
-        cta: "bg-primary text-white font-black text-lg h-20 px-12 rounded-[28px] shadow-2xl shadow-primary/30 hover:scale-105 hover:bg-primary/95 transition-all",
+        cta: "bg-primary text-white font-black text-sm h-12 px-8 rounded-lg shadow-xl shadow-primary/30 hover:scale-105 hover:bg-primary/95 transition-all",
         soft: "bg-primary/10 text-primary hover:bg-primary/20 transition-colors border-none shadow-none",
-        white: "bg-white text-primary hover:bg-slate-50 shadow-xl font-bold",
+        white: "bg-white text-primary hover:bg-slate-50 shadow-lg font-bold",
       },
       size: {
-        default: "h-11 px-6 has-[>svg]:px-5",
-        xs: "h-8 gap-1 rounded-lg px-3 text-xs has-[>svg]:px-2 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-9 rounded-xl gap-1.5 px-4 has-[>svg]:px-3.5",
-        lg: "h-14 rounded-2xl px-8 text-base has-[>svg]:px-6",
-        xl: "h-20 rounded-[28px] px-12 text-lg has-[>svg]:px-8",
-        icon: "size-11 rounded-xl",
-        "icon-xs": "size-8 rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-9 rounded-xl",
-        "icon-lg": "size-14 rounded-2xl",
+        default: "h-9 px-4 has-[>svg]:px-3",
+        xs: "h-7 gap-1 rounded-sm px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        lg: "h-11 rounded-lg px-6 text-base has-[>svg]:px-5",
+        xl: "h-14 rounded-xl px-10 text-lg has-[>svg]:px-8",
+        icon: "size-9 rounded-md",
+        "icon-xs": "size-7 rounded-sm [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 rounded-md",
+        "icon-lg": "size-11 rounded-lg",
       },
     },
     defaultVariants: {
