@@ -80,7 +80,7 @@ export default function CreateWritingExercisePage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
-            <div>
+            <div className="select-none">
                 <h1 className="text-2xl font-bold">Create Writing Exercise</h1>
                 <p className="text-gray-500">Add a new Task 1 or Task 2 exercise.</p>
             </div>
@@ -116,7 +116,7 @@ export default function CreateWritingExercisePage() {
                             )}
                         </Button>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 select-none">
                         Use AI to generate a realistic title and prompt based on the selected type and optional topic.
                     </p>
                 </div>
