@@ -51,6 +51,9 @@ export class Logger {
     }
 }
 
+// Default logger
+export const logger = new Logger();
+
 // Helper to run a function within a new trace context
 export async function withTrace<T>(fn: () => Promise<T>, existingTraceId?: string): Promise<T> {
     const traceId = existingTraceId || uuidv4();

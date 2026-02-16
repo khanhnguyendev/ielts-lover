@@ -5,7 +5,6 @@ const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding", "/auth/callback"
 
 export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    console.log(`[Proxy] Requesting: ${pathname}`);
 
     let response = NextResponse.next({
         request: {
