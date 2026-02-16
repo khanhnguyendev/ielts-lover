@@ -11,6 +11,7 @@ const ROUTE_MAP: Record<string, string> = {
     "/dashboard/samples": "Sample Reports",
     "/dashboard/lessons": "Lessons Hub",
     "/dashboard/credits": "Buy Credits",
+    "/dashboard/transactions": "Transactions",
     "/dashboard/support": "Support",
 }
 

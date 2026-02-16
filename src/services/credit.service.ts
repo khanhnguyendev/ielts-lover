@@ -75,11 +75,20 @@ export class CreditService {
         await (this.userRepo as any).deductCredits(userId, pricing.cost_per_unit);
 
         // 5. Log transaction
+        const descriptionMap: Record<string, string> = {
+            "writing_evaluation": "Writing Task Evaluation",
+            "speaking_evaluation": "Speaking Practice Assessment",
+            "text_rewriter": "IELTS Text Rewriter",
+            "mock_test": "Full Mock Test Access"
+        };
+
+        const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;
+
         await this.transactionRepo.create({
             user_id: userId,
             amount: -pricing.cost_per_unit,
             type: "usage",
-            description: `Used feature: ${featureKey}`
+            description: description
         });
 
         return true;

@@ -15,7 +15,8 @@ import {
     MessageCircle,
     ChevronLeft,
     Search,
-    ExternalLink
+    ExternalLink,
+    History
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,7 @@ const NAV_GROUPS = [
         items: [
             { icon: Home, label: "Home", href: "/dashboard" },
             { icon: PieChart, label: "My Reports", href: "/dashboard/reports" },
+            { icon: History, label: "Transactions", href: "/dashboard/transactions" },
         ]
     },
     {
