@@ -22,7 +22,8 @@ import {
     Clock,
     FileText,
     Activity,
-    BarChart3
+    BarChart3,
+    X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,11 +42,26 @@ import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/PulseLoader";
 import { getBandScoreConfig } from "@/lib/score-utils";
 
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { Check } from "lucide-react"
+
+const ITEMS_PER_PAGE = 10
+
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
+
+    // Filters & Pagination
+    const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
+    const [toolFilter, setToolFilter] = React.useState<string | null>(null)
+    const [currentPage, setCurrentPage] = React.useState(1)
+
     const { notifySuccess, notifyError, notifyWarning } = useNotification()
     const router = useRouter()
 
@@ -64,6 +80,31 @@ export default function ReportsPage() {
     React.useEffect(() => {
         fetchReports()
     }, [fetchReports])
+
+    // Filter Logic
+    const filteredAttempts = React.useMemo(() => {
+        return attempts.filter(attempt => {
+            if (statusFilter && attempt.state !== statusFilter) return false
+            if (toolFilter) {
+                const type = attempt.exercises?.type || ""
+                if (toolFilter === "writing" && !type.startsWith("writing")) return false
+                if (toolFilter === "speaking" && !type.startsWith("speaking")) return false
+            }
+            return true
+        })
+    }, [attempts, statusFilter, toolFilter])
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredAttempts.length / ITEMS_PER_PAGE)
+    const paginatedAttempts = filteredAttempts.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
+
+    // Reset page when filters change
+    React.useEffect(() => {
+        setCurrentPage(1)
+    }, [statusFilter, toolFilter])
 
     const handleReevaluate = async (id: string) => {
         notifyWarning(
@@ -153,12 +194,97 @@ export default function ReportsPage() {
                             {/* Filters */}
                             <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b">
                                 <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" className="h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20">
-                                        <span className="mr-2 text-muted-foreground">+</span> Status
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20">
-                                        <span className="mr-2 text-muted-foreground">+</span> Tool
-                                    </Button>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" size="sm" className={cn(
+                                                "h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20 data-[state=open]:border-primary/50 data-[state=open]:bg-primary/5",
+                                                statusFilter && "bg-primary/5 border-primary/30 text-primary"
+                                            )}>
+                                                {statusFilter ? (
+                                                    <span className="mr-2 text-primary font-black">Status: {statusFilter.replace('_', ' ')}</span>
+                                                ) : (
+                                                    <span className="mr-2 text-muted-foreground">+ Status</span>
+                                                )}
+                                                <ChevronDown className="ml-2 h-3.5 w-3.5 text-muted-foreground/50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
+                                            <div className="space-y-1">
+                                                <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by status</div>
+                                                {['EVALUATED', 'SUBMITTED', 'IN_PROGRESS'].map((status) => (
+                                                    <button
+                                                        key={status}
+                                                        onClick={() => setStatusFilter(statusFilter === status ? null : status)}
+                                                        className={cn(
+                                                            "w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-between group transition-all",
+                                                            statusFilter === status
+                                                                ? "bg-primary/5 text-primary"
+                                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                                        )}
+                                                    >
+                                                        <span className="capitalize">{status.replace('_', ' ').toLowerCase()}</span>
+                                                        {statusFilter === status && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                    </button>
+                                                ))}
+                                                {statusFilter && (
+                                                    <div className="pt-2 mt-2 border-t border-dashed">
+                                                        <button
+                                                            onClick={() => setStatusFilter(null)}
+                                                            className="w-full text-center px-2 py-1.5 rounded-md text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-rose-500 transition-colors flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <X className="h-3 w-3" /> Clear Filter
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" size="sm" className={cn(
+                                                "h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20 data-[state=open]:border-primary/50 data-[state=open]:bg-primary/5",
+                                                toolFilter && "bg-primary/5 border-primary/30 text-primary"
+                                            )}>
+                                                {toolFilter ? (
+                                                    <span className="mr-2 text-primary font-black">Tool: {toolFilter}</span>
+                                                ) : (
+                                                    <span className="mr-2 text-muted-foreground">+ Tool</span>
+                                                )}
+                                                <ChevronDown className="ml-2 h-3.5 w-3.5 text-muted-foreground/50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
+                                            <div className="space-y-1">
+                                                <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by tool</div>
+                                                {['writing', 'speaking'].map((tool) => (
+                                                    <button
+                                                        key={tool}
+                                                        onClick={() => setToolFilter(toolFilter === tool ? null : tool)}
+                                                        className={cn(
+                                                            "w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-between group transition-all",
+                                                            toolFilter === tool
+                                                                ? "bg-primary/5 text-primary"
+                                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                                        )}
+                                                    >
+                                                        <span className="capitalize">{tool}</span>
+                                                        {toolFilter === tool && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                    </button>
+                                                ))}
+                                                {toolFilter && (
+                                                    <div className="pt-2 mt-2 border-t border-dashed">
+                                                        <button
+                                                            onClick={() => setToolFilter(null)}
+                                                            className="w-full text-center px-2 py-1.5 rounded-md text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-rose-500 transition-colors flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <X className="h-3 w-3" /> Clear Filter
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
 
                                 <div className="flex items-center gap-4">
@@ -208,10 +334,10 @@ export default function ReportsPage() {
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
-                                        ) : attempts.length === 0 ? (
-                                            <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
+                                        ) : filteredAttempts.length === 0 ? (
+                                            <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found matching your filters.</TableCell></TableRow>
                                         ) : (
-                                            attempts.map((attempt) => (
+                                            paginatedAttempts.map((attempt) => (
                                                 <TableRow key={attempt.id} className="group hover:bg-slate-50/50 border-slate-50/50 transition-colors">
                                                     <TableCell className="py-3 pl-6">
                                                         <div className="flex flex-col gap-0.5">
@@ -315,19 +441,36 @@ export default function ReportsPage() {
                             {/* Pagination */}
                             <div className="px-10 py-6 flex items-center justify-between border-t border-slate-50">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Rows per page</span>
-                                    <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:border-primary transition-all">
-                                        20 <ChevronDown className="h-3 w-3" />
-                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                                        Showing {paginatedAttempts.length} of {filteredAttempts.length} results
+                                    </span>
                                 </div>
 
                                 <div className="flex items-center gap-8">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Page 1 of 1</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                                        Page {currentPage} of {totalPages || 1}
+                                    </span>
                                     <div className="flex items-center gap-2">
-                                        <PaginationButton icon={ChevronsLeft} disabled />
-                                        <PaginationButton icon={ChevronLeft} disabled />
-                                        <PaginationButton icon={ChevronRight} disabled />
-                                        <PaginationButton icon={ChevronsRight} disabled />
+                                        <PaginationButton
+                                            icon={ChevronsLeft}
+                                            disabled={currentPage === 1}
+                                            onClick={() => setCurrentPage(1)}
+                                        />
+                                        <PaginationButton
+                                            icon={ChevronLeft}
+                                            disabled={currentPage === 1}
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        />
+                                        <PaginationButton
+                                            icon={ChevronRight}
+                                            disabled={currentPage === totalPages || totalPages === 0}
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        />
+                                        <PaginationButton
+                                            icon={ChevronsRight}
+                                            disabled={currentPage === totalPages || totalPages === 0}
+                                            onClick={() => setCurrentPage(totalPages)}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -530,12 +673,13 @@ export default function ReportsPage() {
     )
 }
 
-function PaginationButton({ icon: Icon, disabled = false }: { icon: any, disabled?: boolean }) {
+function PaginationButton({ icon: Icon, disabled = false, onClick }: { icon: any, disabled?: boolean, onClick?: () => void }) {
     return (
         <Button
             variant="outline"
             size="icon"
             disabled={disabled}
+            onClick={onClick}
             className={cn(
                 "p-1.5",
                 disabled && "opacity-30"

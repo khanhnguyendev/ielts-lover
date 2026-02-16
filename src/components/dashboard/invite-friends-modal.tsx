@@ -36,7 +36,7 @@ export function InviteFriendsModal({ open, onOpenChange }: InviteFriendsModalPro
                             Earn a free mock test
                         </div>
                         <div className="space-y-1">
-                            <h2 className="text-3xl font-black font-outfit text-slate-900">Invite your friends</h2>
+                            <DialogTitle className="text-3xl font-black font-outfit text-slate-900">Invite your friends</DialogTitle>
                             <p className="text-muted-foreground font-medium">and get a free mock test</p>
                         </div>
 
