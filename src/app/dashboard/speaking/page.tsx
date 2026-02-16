@@ -47,7 +47,7 @@ interface Exercise {
     }
 }
 
-import { getExercises } from "@/app/actions"
+import { getExercises, checkFeatureAccess } from "@/app/actions"
 import { Exercise as DbExercise, ExerciseType } from "@/types"
 
 export default function SpeakingHubPage() {
@@ -55,11 +55,26 @@ export default function SpeakingHubPage() {
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
     const [exercises, setExercises] = React.useState<any[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
+    const [hasMockAccess, setHasMockAccess] = React.useState(true)
 
     React.useEffect(() => {
         async function fetchExercises() {
             setIsLoading(true)
+            setExercises([]) // Clear immediately to prevent leakage from previous tab
             try {
+                // Check access if it's mock test
+                if (activeCategory === "Mock Test") {
+                    const access = await checkFeatureAccess("mock_test");
+                    setHasMockAccess(access);
+                    if (!access) {
+                        setExercises([]);
+                        setIsLoading(false);
+                        return;
+                    }
+                } else {
+                    setHasMockAccess(true);
+                }
+
                 let type: ExerciseType = "speaking_part1"
                 if (activeCategory === "Part 2") type = "speaking_part2"
                 if (activeCategory === "Part 3") type = "speaking_part3"
@@ -119,11 +134,6 @@ export default function SpeakingHubPage() {
                     </div>
                 </div>
 
-                {/* Premium Banner */}
-                <PremiumBanner
-                    title="Premium Feature - Upgrade to Premium for unlimited mock tests"
-                    buttonText="Upgrade to Premium"
-                />
 
                 {activeCategory === "Custom Question" ? (
                     <div className="space-y-8">
@@ -162,28 +172,46 @@ export default function SpeakingHubPage() {
                             Syncing Exercises...
                         </p>
                     </div>
+                ) : !hasMockAccess ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200">
+                        <div className="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center border-2 border-primary/20">
+                            <Zap className="h-10 w-10 text-primary" />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-black font-outfit text-slate-900 uppercase tracking-tight">Mock Tests are Premium Features</h3>
+                            <p className="text-sm font-medium text-muted-foreground max-w-sm mx-auto">
+                                Unlock full length mock tests and detailed AI scoring by upgrading to premium.
+                            </p>
+                        </div>
+                        <Link href="/dashboard/pricing">
+                            <Button variant="premium" size="lg" className="px-10">
+                                Upgrade Now
+                            </Button>
+                        </Link>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {activeCategory !== "Mock Test" && activeCategory !== "Custom Question" && (
+                        {activeCategory !== "Mock Test" && (
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="bg-card border-2 border-dashed rounded-[28px] p-6 flex items-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-left min-h-[140px]"
+                                className="bg-card border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-center"
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
-                                    <Plus className="h-6 w-6" />
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+                                    <Plus className="h-5 w-5" />
                                 </div>
                                 <div className="space-y-1">
-                                    <h3 className="text-base font-black font-outfit">Add Custom Question</h3>
-                                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Add a question you&apos;ve found elsewhere</p>
+                                    <p className="text-sm font-bold text-slate-900">Add Custom Task</p>
+                                    <p className="text-[10px] text-muted-foreground font-medium">Add a question you've found elsewhere</p>
                                 </div>
                             </button>
                         )}
                         {exercises.map((ex, i) => (
                             <SpeakingCard
                                 key={i}
+                                id={ex.id}
                                 title={ex.title}
-                                _subtitle={ex.subtitle}
-                                _attempts={0}
+                                subtitle={ex.subtitle}
+                                attempts={ex.attempts || 0}
                                 icon={ex.icon}
                                 color={ex.color}
                                 badge={ex.badge}
@@ -242,16 +270,18 @@ export default function SpeakingHubPage() {
 }
 
 function SpeakingCard({
+    id,
     title,
-    _subtitle,
-    _attempts,
+    subtitle,
+    attempts,
     icon: Icon,
     color,
     badge
 }: {
+    id: string,
     title: string,
-    _subtitle?: string,
-    _attempts: number,
+    subtitle?: string,
+    attempts: number,
     icon: React.ElementType,
     color: string,
     badge?: { text: string, color: "yellow" | "green" }
@@ -279,9 +309,12 @@ function SpeakingCard({
                 </div>
 
                 <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+                        {attempts > 0 ? `${attempts} attempt${attempts > 1 ? 's' : ''}` : "No attempts yet"}
+                    </p>
                     <div className="h-8 px-4 rounded-lg border border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest flex items-center bg-transparent group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        <Plus className="h-3 w-3 mr-1" /> Start
+                        {attempts > 0 ? <Plus className="h-3 w-3 mr-1" /> : <Play className="h-3 w-3 mr-1" />}
+                        {attempts > 0 ? "Practice Again" : "Start"}
                     </div>
                 </div>
             </div>

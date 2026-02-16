@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
+import { SubscriptionPolicy } from "@/services/subscription.policy";
 
 // Dependencies Injection
 const exerciseRepo = new ExerciseRepository();
@@ -36,9 +37,30 @@ export async function startAttempt(userId: string, exerciseId: string) {
     return attemptService.startAttempt(userId, exerciseId);
 }
 
+export async function checkFeatureAccess(feature: string) {
+    const user = await getCurrentUser();
+    if (!user) return false;
+    return SubscriptionPolicy.canAccessFeature(user, feature);
+}
+
 export async function startExerciseAttempt(exerciseId: string) {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
+
+    const exercise = await exerciseService.getExercise(exerciseId);
+    if (!exercise) throw new Error("Exercise not found");
+
+    // Check for premium features
+    if (exercise.title.toLowerCase().includes("mock test")) {
+        if (!SubscriptionPolicy.canAccessFeature(user, "mock_test")) {
+            throw new Error("MOCK_TEST_PREMIUM_ONLY");
+        }
+    }
+
+    // Check for evaluation limits
+    if (!SubscriptionPolicy.canAccessFeature(user, "writing_evaluation")) {
+        throw new Error("DAILY_LIMIT_EXCEEDED");
+    }
 
     // Check for existing in-progress attempt to resume
     const attempts = await attemptService.getUserAttempts(user.id);

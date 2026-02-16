@@ -16,7 +16,12 @@ import {
     ChevronsLeft,
     ChevronsRight,
     Sparkles,
-    Info
+    Info,
+    Calendar,
+    Clock,
+    FileText,
+    Activity,
+    BarChart3
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +37,7 @@ import { cn } from "@/lib/utils"
 import { getUserAttempts } from "@/app/actions";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/PulseLoader";
+import { getBandScoreConfig } from "@/lib/score-utils";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
@@ -139,36 +145,77 @@ export default function ReportsPage() {
                                         <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
                                     ) : (
                                         attempts.map((attempt) => (
-                                            <TableRow key={attempt.id} className="group hover:bg-slate-50 border-slate-50">
-                                                <TableCell className="py-5 pl-10 font-bold text-slate-500 text-xs">
-                                                    {new Date(attempt.created_at).toLocaleString()}
-                                                </TableCell>
-                                                <TableCell className="py-5">
-                                                    <div className="flex items-center gap-3 text-[13px] font-black text-slate-900">
-                                                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                            {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-3.5 w-3.5" /> : <PenTool className="h-3.5 w-3.5" />}
+                                            <TableRow key={attempt.id} className="group hover:bg-slate-50/50 border-slate-50/50 transition-colors">
+                                                <TableCell className="py-6 pl-10">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
+                                                            <Calendar className="h-3 w-3 text-slate-400" />
+                                                            {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                         </div>
-                                                        {attempt.exercises?.title || "Exercise"}
+                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                                                            <Clock className="h-2.5 w-2.5" />
+                                                            {new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="py-5">
+                                                <TableCell className="py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={cn(
+                                                            "w-10 h-10 rounded-xl flex items-center justify-center border",
+                                                            attempt.exercises?.type?.startsWith('speaking')
+                                                                ? "bg-cyan-50 border-cyan-100 text-cyan-600"
+                                                                : "bg-indigo-50 border-indigo-100 text-indigo-600"
+                                                        )}>
+                                                            {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-5 w-5" /> : <PenTool className="h-5 w-5" />}
+                                                        </div>
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[13px] font-black text-slate-900 leading-none group-hover:text-primary transition-colors">
+                                                                {attempt.exercises?.title || "Exercise"}
+                                                            </p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                {attempt.exercises?.type?.replace('_', ' ') || "Practice"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-6">
                                                     <div className={cn(
-                                                        "w-fit flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border",
-                                                        attempt.state === "EVALUATED" ? "text-green-600 bg-green-50 border-green-100" : "text-amber-600 bg-amber-50 border-amber-100"
+                                                        "w-fit flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm",
+                                                        attempt.state === "EVALUATED"
+                                                            ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+                                                            : "text-amber-700 bg-amber-50 border-amber-100"
                                                     )}>
-                                                        {attempt.state === "EVALUATED" ? <CheckCircle2 className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+                                                        <div className={cn(
+                                                            "w-1.5 h-1.5 rounded-full animate-pulse",
+                                                            attempt.state === "EVALUATED" ? "bg-emerald-500" : "bg-amber-500"
+                                                        )} />
                                                         {attempt.state}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="py-5">
-                                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-900 text-sm">
-                                                        {attempt.score || "-"}
-                                                    </div>
+                                                <TableCell className="py-6">
+                                                    {(() => {
+                                                        const config = getBandScoreConfig(attempt.score);
+                                                        return (
+                                                            <div className={cn(
+                                                                "w-11 h-11 rounded-2xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
+                                                                config.bg,
+                                                                config.border,
+                                                                config.color
+                                                            )}>
+                                                                <span className="text-sm leading-none">{attempt.score || "-"}</span>
+                                                                <span className="text-[8px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </TableCell>
-                                                <TableCell className="py-5 text-right pr-10">
+                                                <TableCell className="py-6 text-right pr-10">
                                                     <Link href={`/dashboard/reports/${attempt.id}`}>
-                                                        <Button variant="outline" size="sm" className="font-black uppercase tracking-widest text-[10px]">
-                                                            View Report
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-9 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
+                                                        >
+                                                            View Report <ChevronRight className="ml-1.5 h-3 w-3" />
                                                         </Button>
                                                     </Link>
                                                 </TableCell>

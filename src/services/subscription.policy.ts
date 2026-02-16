@@ -7,6 +7,9 @@ export class SubscriptionPolicy {
         // Business Rule: Premium users have unlimited access
         if (user.is_premium) return true;
 
+        // Business Rule: Mock tests are premium only
+        if (feature === "mock_test") return false;
+
         // Business Rule: Free users have daily limits for AI features
         const aiFeatures = ["writing_evaluation", "speaking_evaluation", "rewriter"];
         if (aiFeatures.includes(feature)) {
