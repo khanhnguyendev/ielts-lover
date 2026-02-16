@@ -17,6 +17,28 @@ export function SpeakingEvaluation({ data }: SpeakingEvaluationProps) {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Exercise Prompt */}
+            {data.prompt && (
+                <div className="bg-white rounded-[32px] border p-10 shadow-sm space-y-6">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Practice Question</h4>
+
+                    <div className="space-y-6">
+                        {data.imageUrl && (
+                            <div className="rounded-[24px] overflow-hidden border bg-slate-50 max-w-2xl mx-auto shadow-inner">
+                                <img
+                                    src={data.imageUrl}
+                                    alt="Exercise Visual"
+                                    className="w-full h-auto object-contain max-h-[400px]"
+                                />
+                            </div>
+                        )}
+                        <p className="text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                            {data.prompt}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Audio Player Header */}
             <div className="bg-white rounded-[32px] border p-8 flex items-center gap-8 shadow-sm">
                 <Button

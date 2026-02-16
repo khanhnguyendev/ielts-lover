@@ -45,6 +45,8 @@ export interface WritingSampleData {
     }>
     feedbackCards: FeedbackCard[]
     cefrDistribution: Array<{ level: string, percentage: number }>
+    prompt?: string
+    imageUrl?: string
 }
 
 export interface SpeakingSampleData {
@@ -78,6 +80,8 @@ export interface SpeakingSampleData {
             usPhonetic: string
         }>
     }>
+    prompt?: string
+    imageUrl?: string
 }
 
 export interface RewriterSampleData {
@@ -92,6 +96,8 @@ export interface RewriterSampleData {
     }>
     bandScore: number
     cefrLevel: string
+    prompt?: string
+    imageUrl?: string
 }
 
 export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleData | RewriterSampleData> = {
@@ -137,7 +143,8 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
             { level: "B2", percentage: 10 },
             { level: "C1", percentage: 10 },
             { level: "C2", percentage: 5 }
-        ]
+        ],
+        prompt: "The chart below shows the amount of milk consumed in four different countries over a ten-year period. Summarize the information by selecting and reporting the main features, and make comparisons where relevant."
     },
     2: {
         id: 2,
