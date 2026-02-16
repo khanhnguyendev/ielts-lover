@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createExercise, generateAIExercise } from "@/app/admin/actions";
 import { Sparkles, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 // import { ExerciseType } from "@/types"; // Might need to import this if used directly
 
 export default function CreateWritingExercisePage() {
@@ -29,10 +30,13 @@ export default function CreateWritingExercisePage() {
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
+                toast.success("Content generated successfully!");
             }
         } catch (error) {
             console.error("Failed to generate exercise:", error);
-            alert("Failed to generate content. Please try again.");
+            // Extract error message if possible
+            const message = error instanceof Error ? error.message : "Failed to generate content. Please try again.";
+            toast.error(message);
         } finally {
             setIsGenerating(false);
         }
@@ -58,10 +62,11 @@ export default function CreateWritingExercisePage() {
                 image_url: type === "writing_task1" ? imageUrl : undefined,
                 is_published: true, // Default to published for now, or add checkbox
             });
+            toast.success("Exercise created successfully!");
             router.push("/admin/exercises");
         } catch (error) {
             console.error("Failed to create exercise:", error);
-            alert("Failed to create exercise");
+            toast.error("Failed to create exercise");
         } finally {
             setIsLoading(false);
         }

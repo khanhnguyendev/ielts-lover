@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createExercise, generateAIExercise } from "@/app/admin/actions";
 import { Sparkles, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CreateSpeakingExercisePage() {
     const router = useRouter();
@@ -27,10 +28,12 @@ export default function CreateSpeakingExercisePage() {
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
+                toast.success("Content generated successfully!");
             }
         } catch (error) {
             console.error("Failed to generate exercise:", error);
-            alert("Failed to generate content. Please try again.");
+            const message = error instanceof Error ? error.message : "Failed to generate content. Please try again.";
+            toast.error(message);
         } finally {
             setIsGenerating(false);
         }
@@ -50,10 +53,11 @@ export default function CreateSpeakingExercisePage() {
                 prompt: formPrompt,
                 is_published: true,
             });
+            toast.success("Exercise created successfully!");
             router.push("/admin/exercises");
         } catch (error) {
             console.error("Failed to create exercise:", error);
-            alert("Failed to create exercise");
+            toast.error("Failed to create exercise");
         } finally {
             setIsLoading(false);
         }
