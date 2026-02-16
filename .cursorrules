@@ -27,3 +27,47 @@ AI-powered IELTS preparation platform using Next.js 16, Supabase, and a strict l
 - **Tailwind**: Mobile-first, strict adhering to the purple/minimalist design system.
 - **Shadcn UI**: Base components only; customize in `components/ui`.
 - **Zustand**: For ephemeral UI state (e.g., sidebar toggles, active practice state).
+
+## 🌲 GIT COMMIT CONVENTION (STRICT)
+
+When I ask you to generate a git commit message or execute a commit, you **MUST** strictly follow the **Conventional Commits** standard with the following format:
+
+`<type>(<scope>): <emoji> <subject>`
+
+### 1. Allowed Types & Emojis
+| Type | Emoji | Usage |
+| :--- | :--- | :--- |
+| **feat** | ✨ | New feature or functionality |
+| **fix** | 🐛 | Bug fix |
+| **ui** | 💄 | CSS, styling, visual changes (no logic change) |
+| **refactor** | ♻️ | Code restructuring without behavioral change |
+| **perf** | ⚡️ | Performance improvements |
+| **docs** | 📚 | Documentation updates (README, comments) |
+| **test** | ✅ | Adding or fixing tests |
+| **chore** | 🔧 | Build, config, dependencies, tooling |
+| **wip** | 🚧 | Work in progress (intermediate commit) |
+
+### 2. Formatting Rules
+- **Scope**: Optional but recommended (e.g., `auth`, `header`, `api`). Use lowercase.
+- **Subject**:
+  - Use **imperative mood** ("add" not "added", "fix" not "fixed").
+  - No trailing period (.).
+  - Max 50-70 characters.
+  - Must be lowercase.
+
+### 3. Examples
+✅ **Good:**
+- `feat(auth): ✨ add google login provider`
+- `fix(navbar): 🐛 resolve layout shift on mobile`
+- `ui(dashboard): 💄 update card shadow and spacing`
+- `chore(deps): 🔧 upgrade next.js to v14`
+
+❌ **Bad:**
+- `Added login` (No type)
+- `feat: fixed the bug` (Past tense, wrong type)
+- `Update styles.` (Capitalized, period at end)
+
+### 4. Workflow
+1. Analyze the staged changes (`git diff --staged`).
+2. Determine the most appropriate `type` and `scope`.
+3. Generate the commit message strictly following the format above.

@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { Logger } from "@/lib/logger";
 
 /**
  * AI Service: Orchestrates all AI calls.
@@ -23,6 +24,7 @@ export interface AIFeedbackResponse {
 export class AIService {
     private genAI: GoogleGenerativeAI;
     private modelName: string;
+    private logger: Logger;
     private static PROMPTS = {
         writing_task1: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
@@ -103,6 +105,7 @@ export class AIService {
         const apiKey = process.env.GEMINI_API_KEY!;
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+        this.logger = new Logger("AI Service");
     }
 
     async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
@@ -178,10 +181,13 @@ export class AIService {
         try {
             const result = await model.generateContent(fullPrompt);
             const responseText = result.response.text();
+
+            this.logger.info("Generated exercise content", { type, topic, version });
+
             return JSON.parse(responseText);
         } catch (error) {
-            console.error("AI Generation failed:", error);
-            throw new Error("AI Generation failed. Please try again later.");
+            this.logger.error("AI Generation failed", { error, type, topic });
+            throw error; // Let the action handler wrap this with traceId
         }
     }
 }

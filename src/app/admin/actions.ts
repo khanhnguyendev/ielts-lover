@@ -11,6 +11,7 @@ import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { ExerciseService } from "@/services/exercise.service";
 import { Exercise, ExerciseType } from "@/types";
 import { AIService } from "@/services/ai.service";
+import { withTrace, getCurrentTraceId, logger } from "@/lib/logger";
 
 const lessonRepo = new LessonRepository();
 const lessonService = new LessonService(lessonRepo);
@@ -89,8 +90,18 @@ export async function createExercise(exercise: Omit<Exercise, "id" | "created_at
 }
 
 export async function generateAIExercise(type: string, topic?: string) {
-    await checkAdmin();
-    // Verify type is valid key of PROMPTS.generation
-    // For now we trust the client sends correct string, or we can validate
-    return aiService.generateExerciseContent(type, topic);
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            return await aiService.generateExerciseContent(type, topic);
+        } catch (error) {
+            const traceId = getCurrentTraceId();
+            logger.error("generateAIExercise action failed", { error, type, topic });
+
+            if (error instanceof Error && error.message === "Unauthorized") {
+                throw error;
+            }
+            throw new Error(`AI Generation failed (Trace ID: ${traceId}). Please try again later.`);
+        }
+    });
 }
