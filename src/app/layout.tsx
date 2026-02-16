@@ -13,6 +13,8 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+import { NotificationProvider } from "@/lib/contexts/notification-context";
+
 export const metadata: Metadata = {
   title: "IELTS Lover | AI-Powered IELTS Preparation",
   description: "Master the IELTS with AI-driven scoring, feedback, and personalized practice.",
@@ -28,7 +30,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-background text-foreground`}
       >
-        {children}
+        <NotificationProvider>
+          {children}
+        </NotificationProvider>
         <Toaster />
       </body>
     </html>

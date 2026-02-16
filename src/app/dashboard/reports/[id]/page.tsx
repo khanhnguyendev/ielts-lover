@@ -28,6 +28,7 @@ import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
 import { getAttemptWithExercise } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { getBandScoreConfig } from "@/lib/score-utils"
+import { PulseLoader } from "@/components/global/PulseLoader"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
@@ -66,7 +67,16 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     } : null)
 
     if (isLoading) {
-        return <div className="flex h-screen items-center justify-center">Loading report...</div>
+        return (
+            <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-4">
+                    <PulseLoader size="lg" color="primary" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                        Loading Report...
+                    </p>
+                </div>
+            </div>
+        )
     }
 
     if (!isSample && !realData) {

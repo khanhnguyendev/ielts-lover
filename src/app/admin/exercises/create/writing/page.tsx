@@ -7,10 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createExercise, generateAIExercise, uploadImage } from "@/app/admin/actions";
-import { Sparkles, Loader2, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { Sparkles, Loader2 } from "lucide-react";
+import { useNotification } from "@/lib/contexts/notification-context";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
-// import { ExerciseType } from "@/types"; // Might need to import this if used directly
 
 export default function CreateWritingExercisePage() {
     const router = useRouter();
@@ -29,23 +28,25 @@ export default function CreateWritingExercisePage() {
     // Error Modal State
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const [isErrorOpen, setIsErrorOpen] = useState(false);
+    const { notifySuccess, notifyError } = useNotification();
 
     async function handleGenerate() {
         setIsGenerating(true);
         setErrorDetails(null);
         try {
-            // If topic is empty, standard generation
             const result = await generateAIExercise(type, topic || undefined, chartType);
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
-                // @ts-ignore - refined return type needed
-                if (result.image_url) {
-                    // @ts-ignore
-                    setGeneratedImageUrl(result.image_url);
-                    setImageFile(null); // Clear manual file if new AI generation
+                if ('image_url' in result && result.image_url) {
+                    setGeneratedImageUrl(result.image_url as string);
+                    setImageFile(null);
                 }
-                toast.success("Content generated successfully!");
+                notifySuccess(
+                    "Content Generated",
+                    "AI has successfully generated a title, prompt, and chart for your new exercise. You can now review and publish it.",
+                    "Review Content"
+                );
             }
         } catch (error) {
             console.error("Failed to generate exercise:", error);
@@ -59,20 +60,12 @@ export default function CreateWritingExercisePage() {
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
-
-        // We use state for title/prompt if they were generated, or fallback to formData if user typed manually (but need to ensure sync)
-        // Actually, better to rely on formData which pulls from the inputs, and the inputs are controlled by state or default value.
-        // If we make them controlled, we must update state on change.
-
-        // Let's rely on the form data, but since inputs are controlled, we need to ensure they have name attributes.
         const formTitle = formData.get("title") as string;
         const formPrompt = formData.get("prompt") as string;
-        // const imageUrl = formData.get("image_url") as string; // Replaced by file upload
 
         try {
             let imageUrl = generatedImageUrl || undefined;
 
-            // If user uploaded a file, it overrides the generated one
             if (type === "writing_task1" && imageFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append("file", imageFile);
@@ -84,13 +77,21 @@ export default function CreateWritingExercisePage() {
                 type,
                 prompt: formPrompt,
                 image_url: type === "writing_task1" ? imageUrl : undefined,
-                is_published: true, // Default to published for now, or add checkbox
+                is_published: true,
             });
-            toast.success("Exercise created successfully!");
+            notifySuccess(
+                "Exercise Published",
+                "The exercise has been created and is now available for students in the Writing Hub.",
+                "Back to List"
+            );
             router.push("/admin/exercises");
         } catch (error) {
             console.error("Failed to create exercise:", error);
-            toast.error("Failed to create exercise");
+            notifyError(
+                "Creation Failed",
+                "We couldn't save the exercise. Please ensure all fields are filled correctly and try again.",
+                "Close"
+            );
         } finally {
             setIsLoading(false);
         }
@@ -104,7 +105,6 @@ export default function CreateWritingExercisePage() {
             </div>
 
             <form action={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl border shadow-sm">
-                {/* AI Assistant Section */}
                 <div className="bg-purple-50/50 p-5 rounded-xl border border-purple-100 space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-purple-900 flex items-center gap-2">
@@ -161,9 +161,6 @@ export default function CreateWritingExercisePage() {
                             )}
                         </Button>
                     </div>
-                    <p className="text-xs text-purple-600/80 select-none">
-                        Use AI to automatically generate a realistic title, prompt, and chart (Task 1) or essay topic (Task 2).
-                    </p>
                 </div>
 
                 <div className="space-y-2">
@@ -207,10 +204,8 @@ export default function CreateWritingExercisePage() {
                 {type === "writing_task1" && (
                     <div className="space-y-2">
                         <Label htmlFor="image_file">Chart/Graph Image</Label>
-
                         {generatedImageUrl && !imageFile && (
                             <div className="mb-4 p-2 border rounded-lg bg-gray-50">
-                                <p className="text-xs font-medium text-purple-600 mb-2">AI Generated Chart:</p>
                                 <img
                                     src={generatedImageUrl}
                                     alt="Generated Chart"
@@ -218,22 +213,15 @@ export default function CreateWritingExercisePage() {
                                 />
                             </div>
                         )}
-
-                        <div className="flex items-center gap-4">
-                            <Input
-                                id="image_file"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) setImageFile(file);
-                                }}
-                                className="cursor-pointer"
-                            />
-                        </div>
-                        <p className="text-xs text-gray-500 select-none">
-                            {generatedImageUrl ? "Upload to replace the AI chart, or leave empty to use it." : "Upload the chart/graph image for Task 1."}
-                        </p>
+                        <Input
+                            id="image_file"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) setImageFile(file);
+                            }}
+                        />
                     </div>
                 )}
 

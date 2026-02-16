@@ -16,12 +16,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
 import { rewriteText } from "@/app/actions"
+import { useNotification } from "@/lib/contexts/notification-context"
 
 export default function RewriterPage() {
     const [inputText, setInputText] = React.useState("")
     const [rewrittenText, setRewrittenText] = React.useState("")
     const [isRewriting, setIsRewriting] = React.useState(false)
     const [copied, setCopied] = React.useState(false)
+    const { notifySuccess, notifyError } = useNotification()
 
     const handleRewrite = async () => {
         if (!inputText) return
@@ -30,9 +32,18 @@ export default function RewriterPage() {
         try {
             const result = await rewriteText(inputText)
             setRewrittenText(result)
+            notifySuccess(
+                "Text Improved!",
+                "AI has successfully rewritten your text to a higher band score level (8.0+). You can now copy the improved version and compare it with yours.",
+                "Compare Version"
+            )
         } catch (error) {
             console.error("Rewrite failed:", error)
-            // Ideally show error toast here
+            notifyError(
+                "Rewrite Failed",
+                "We couldn't rewrite your text at this moment. Please check your internet connection or try a shorter paragraph.",
+                "Try Again"
+            )
         } finally {
             setIsRewriting(false)
         }

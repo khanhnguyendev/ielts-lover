@@ -35,7 +35,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
-import { toast } from "sonner";
+import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/PulseLoader";
 import { getBandScoreConfig } from "@/lib/score-utils";
@@ -45,6 +45,7 @@ export default function ReportsPage() {
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
+    const { notifySuccess, notifyError, notifyWarning } = useNotification()
 
     const fetchReports = React.useCallback(async () => {
         setIsLoading(true)
@@ -67,18 +68,34 @@ export default function ReportsPage() {
         try {
             const result = await reevaluateAttempt(id)
             if (result.success) {
-                toast.success("Evaluation complete!")
+                notifySuccess(
+                    "Evaluation Complete",
+                    "Your report has been updated with the latest AI feedback. You can now view your score and detailed analysis.",
+                    "View Report"
+                )
                 await fetchReports()
             } else {
                 if (result.reason === "DAILY_LIMIT_REACHED") {
-                    toast.error("Daily limit reached. Try again tomorrow or upgrade to Premium.")
+                    notifyWarning(
+                        "Daily Limit Reached",
+                        "You have reached your daily AI evaluation limit. Please try again tomorrow or upgrade to Premium for unlimited access.",
+                        "Upgrade Now"
+                    )
                 } else {
-                    toast.error("Evaluation failed. Please try again.")
+                    notifyError(
+                        "Evaluation Failed",
+                        "We encountered an error while processing your request. Please try again in a few moments.",
+                        "Try Again"
+                    )
                 }
             }
         } catch (error) {
             console.error("Re-evaluation failed:", error)
-            toast.error("An error occurred during evaluation.")
+            notifyError(
+                "System Error",
+                "An unexpected error occurred. Please contact support if the issue persists.",
+                "Close"
+            )
         } finally {
             setReevaluatingId(null)
         }

@@ -23,7 +23,7 @@ import { getExerciseById, startExerciseAttempt, submitAttempt } from "@/app/acti
 import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/PulseLoader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
-import { toast } from "sonner"
+import { useNotification } from "@/lib/contexts/notification-context"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
@@ -38,6 +38,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
+    const { notifySuccess, notifyWarning, notifyError } = useNotification()
 
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
 
@@ -68,7 +69,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
                 } catch (err) {
                     console.error("Failed to start attempt:", err)
-                    toast.error("Failed to initialize attempt session")
+                    notifyError(
+                        "Initialization Failed",
+                        "We couldn't start your practice session. Please try refreshing the page.",
+                        "Close"
+                    )
                 }
 
             } catch (error) {
@@ -109,13 +114,25 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     attemptId: result.id
                 })
                 setShowFeedback(true)
-                toast.success("Evaluation complete!")
+                notifySuccess(
+                    "Evaluation Complete",
+                    "Great job! Your exercise has been evaluated. Review your band score and detailed feedback to identify areas for improvement.",
+                    "Review Now"
+                )
             } else {
-                toast.warning("Daily limit reached. Your work is saved, but AI evaluation is unavailable for now.")
+                notifyWarning(
+                    "Daily Limit Reached",
+                    "Your work has been saved securely, but your daily AI evaluation limit has been reached. You can request feedback for this attempt from the Reports tab once your limit resets.",
+                    "View Reports"
+                )
             }
         } catch (error) {
             console.error("Submission failed:", error)
-            toast.error("Failed to submit attempt")
+            notifyError(
+                "Submission Failed",
+                "We were unable to save your work. Please check your internet connection and try again.",
+                "Try Again"
+            )
         } finally {
             setIsSubmitting(false)
         }
