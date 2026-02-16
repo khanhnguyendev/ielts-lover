@@ -331,7 +331,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
                     <div className="p-8 bg-slate-50 border-t space-y-4">
                         <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
                             <MessageSquare className="h-4 w-4 text-primary" />
-                            <span>Ask your Personal Catbot about this lesson</span>
+                            <span>Ask your Personal Horsebot about this lesson</span>
                         </div>
                         <Button variant="outline" className="w-full h-12 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white hover:bg-white hover:border-primary border-slate-200 transition-all">
                             Open Discussion Forum

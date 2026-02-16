@@ -35,6 +35,33 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     const [isCatbotOpen, setIsCatbotOpen] = React.useState(true)
     const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
+    const [messages, setMessages] = React.useState<{ role: "user" | "assistant", content: string }[]>([
+        { role: "assistant", content: "Hey! I'm your personal IELTS tutor. Got questions about your report? Go ahead and ask." }
+    ])
+    const [chatInput, setChatInput] = React.useState("")
+    const [isTyping, setIsTyping] = React.useState(false)
+    const chatContainerRef = React.useRef<HTMLDivElement>(null)
+
+    React.useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+        }
+    }, [messages, isTyping])
+
+    const handleSendMessage = (content: string) => {
+        if (!content.trim()) return
+
+        const userMessage = { role: "user" as const, content }
+        setMessages(prev => [...prev, userMessage])
+        setChatInput("")
+        setIsTyping(true)
+
+        // Mock AI response
+        setTimeout(() => {
+            setMessages(prev => [...prev, { role: "assistant", content: "This feature is under development. I will be able to provide you with detailed support on this task soon!" }])
+            setIsTyping(false)
+        }, 1000)
+    }
 
     // Check if it's a sample report
     const sampleData = SAMPLE_REPORTS[parseInt(id)]
@@ -89,7 +116,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] -m-8 lg:-m-12">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB]">
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto p-8 lg:p-12 scrollbar-hide">
                 <div className="max-w-6xl mx-auto space-y-10 pb-20">
@@ -147,7 +174,10 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 </div>
 
                                 {!isSample && (
-                                    <Button className="bg-primary hover:bg-primary/90 text-white rounded-2xl h-14 px-8 font-black text-sm shadow-xl shadow-primary/20 relative z-10 w-full sm:w-auto">
+                                    <Button
+                                        onClick={() => setIsCatbotOpen(true)}
+                                        className="bg-primary hover:bg-primary/90 text-white rounded-2xl h-14 px-8 font-black text-sm shadow-xl shadow-primary/20 relative z-10 w-full sm:w-auto hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    >
                                         <MessageCircle className="mr-2 h-5 w-5 fill-white" />
                                         Chat with your personal AI tutor
                                     </Button>
@@ -314,10 +344,10 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                     <div className="p-8 space-y-8 flex-1 flex flex-col overflow-hidden">
                         <div className="flex items-center gap-4 border-b pb-6">
                             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-sm">
-                                <span className="text-2xl">🐱</span>
+                                <span className="text-2xl">🐴</span>
                             </div>
                             <div>
-                                <h4 className="font-black font-outfit">Catbot - Personal Tutor</h4>
+                                <h4 className="font-black font-outfit">Horsebot - Personal Tutor</h4>
                                 <div className="flex items-center gap-4 mt-1">
                                     <button className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                                         <History className="h-3 w-3" /> History
@@ -329,33 +359,68 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2">
-                            <div className="bg-muted/30 p-5 rounded-2xl rounded-tl-none border">
-                                <p className="text-sm font-medium leading-relaxed">
-                                    Hey! I&apos;m your personal IELTS tutor. Got questions about your report? Go ahead and ask.
-                                </p>
-                            </div>
+                        <div
+                            ref={chatContainerRef}
+                            className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2"
+                        >
+                            {messages.map((msg, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "p-5 rounded-2xl border transition-all animate-in fade-in slide-in-from-bottom-2",
+                                        msg.role === "assistant"
+                                            ? "bg-muted/30 rounded-tl-none"
+                                            : "bg-primary/5 border-primary/10 rounded-tr-none ml-10"
+                                    )}
+                                >
+                                    <p className="text-sm font-medium leading-relaxed">
+                                        {msg.content}
+                                    </p>
+                                </div>
+                            ))}
 
+                            {isTyping && (
+                                <div className="bg-muted/30 p-5 rounded-2xl rounded-tl-none border w-fit">
+                                    <div className="flex gap-1">
+                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="pt-6 border-t mt-auto space-y-6">
                             <div className="space-y-3">
                                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Suggested questions:</p>
                                 <div className="flex flex-wrap gap-2">
                                     {["Give improvement tips", "Find my key mistakes", "Explain my score", "Help with ideas", "Suggest new vocabulary"].map(q => (
-                                        <button key={q} className="text-[11px] font-bold px-3 py-2 bg-white border border-muted hover:border-primary hover:text-primary rounded-lg transition-all shadow-sm">
+                                        <button
+                                            key={q}
+                                            onClick={() => handleSendMessage(q)}
+                                            className="text-[11px] font-bold px-3 py-2 bg-white border border-muted hover:border-primary hover:text-primary rounded-lg transition-all shadow-sm active:scale-95 text-left"
+                                        >
                                             {q}
                                         </button>
                                     ))}
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="pt-6 border-t mt-auto">
                             <div className="relative group">
                                 <input
                                     type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") handleSendMessage(chatInput)
+                                    }}
                                     placeholder="Ask anything in your language"
                                     className="w-full bg-muted/30 border border-muted-foreground/10 rounded-2xl h-14 pl-5 pr-14 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                 />
-                                <button className="absolute right-2 top-2 h-10 w-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                                <button
+                                    onClick={() => handleSendMessage(chatInput)}
+                                    className="absolute right-2 top-2 h-10 w-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform active:scale-95"
+                                >
                                     <Send className="h-4 w-4" />
                                 </button>
                             </div>

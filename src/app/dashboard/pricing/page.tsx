@@ -33,7 +33,7 @@ export default function PricingPage() {
     const totalPrice = days * pricePerDay
 
     return (
-        <div className="space-y-10 max-w-6xl mx-auto pb-20">
+        <div className="p-8 lg:p-12 space-y-10 max-w-6xl mx-auto pb-20">
             {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border shadow-sm overflow-hidden min-h-[800px] flex flex-col">

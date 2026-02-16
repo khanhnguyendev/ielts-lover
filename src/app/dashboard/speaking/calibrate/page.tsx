@@ -47,10 +47,10 @@ export default function SpeakingCalibratePage() {
             </Link>
 
             <div className="max-w-2xl w-full space-y-10 text-center relative z-10">
-                {/* Catbot Bubble */}
+                {/* Horsebot Bubble */}
                 <div className="flex items-center justify-center gap-4">
                     <div className="w-14 h-14 bg-white border-2 border-primary/10 rounded-2xl flex items-center justify-center shadow-xl shadow-primary/5 transition-transform hover:scale-110">
-                        <span className="text-3xl">🐱</span>
+                        <span className="text-3xl">🐴</span>
                     </div>
                     <div className="bg-[#7C3AED] text-white px-8 py-4 rounded-[28px] rounded-bl-none shadow-2xl shadow-primary/20 relative animate-in fade-in slide-in-from-left-4 duration-500">
                         <p className="text-sm font-black font-outfit tracking-wide">Please read the instructions before you continue</p>

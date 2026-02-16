@@ -101,7 +101,7 @@ export default function Home() {
                 {
                   icon: Mic2,
                   title: "Speaking Coach",
-                  desc: "Interactive Part 1-3 practice with Catbot. Real-time pronunciation & fluency analysis.",
+                  desc: "Interactive Part 1-3 practice with Horsebot. Real-time pronunciation & fluency analysis.",
                   color: "bg-blue-50 text-blue-600"
                 },
                 {

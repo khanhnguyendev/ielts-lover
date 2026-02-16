@@ -232,7 +232,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 </div>
             </div>
 
-            {/* Sidebar (Catbot) */}
+            {/* Sidebar (Horsebot) */}
             <div className={cn(
                 "w-[400px] border-l bg-white flex flex-col transition-all duration-500 relative",
                 !sidebarExpanded && "w-0 overflow-hidden border-l-0"
@@ -240,7 +240,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 {/* Sidebar Header */}
                 <div className="h-20 flex items-center justify-between px-8 border-b">
                     <div className="flex items-center gap-3">
-                        <span className="text-lg py-1 px-1 bg-white border rounded-lg whitespace-nowrap">🐱 Catbot - Personal Tutor</span>
+                        <span className="text-lg py-1 px-1 bg-white border rounded-lg whitespace-nowrap">🐴 Horsebot - Personal Tutor</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <button className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-primary transition-colors">
@@ -262,10 +262,10 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 <div className="flex-1 overflow-y-auto p-8 space-y-8">
                     <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-2xl border flex items-center justify-center flex-shrink-0 bg-[#F9FAFB]">
-                            <span className="text-xl">🐱</span>
+                            <span className="text-xl">🐴</span>
                         </div>
                         <div className="space-y-2">
-                            <p className="text-xs font-black uppercase tracking-widest text-[#7C3AED]">Catbot</p>
+                            <p className="text-xs font-black uppercase tracking-widest text-[#7C3AED]">Horsebot</p>
                             <div className="bg-[#F9FAFB] p-6 rounded-3xl rounded-tl-none border border-slate-100">
                                 <p className="text-sm font-bold text-slate-600 leading-relaxed">
                                     Hey! I am your personal tutor. Need help with the task? Go ahead and ask.

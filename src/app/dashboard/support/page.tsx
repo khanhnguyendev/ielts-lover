@@ -23,7 +23,7 @@ export default function SupportPage() {
     }
 
     return (
-        <div className="space-y-10 max-w-6xl mx-auto">
+        <div className="p-8 lg:p-12 space-y-10 max-w-6xl mx-auto">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold font-outfit">Support & Help</h1>
             </div>

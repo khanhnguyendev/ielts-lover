@@ -31,7 +31,7 @@ export default function SampleReportsPage() {
     const filteredSamples = SAMPLES.filter(s => filter === "All" || s.type === filter)
 
     return (
-        <div className="space-y-10 max-w-6xl mx-auto">
+        <div className="p-8 lg:p-12 space-y-10 max-w-6xl mx-auto">
             {/* Title removed to avoid duplication with Header */}
 
             <div className="bg-white rounded-[40px] border p-12 space-y-10 shadow-sm overflow-hidden relative">

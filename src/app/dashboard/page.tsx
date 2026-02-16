@@ -42,193 +42,188 @@ export default function DashboardPage() {
         loadData()
     }, [])
 
-    if (isLoading) return (
-        <div className="flex flex-col items-center justify-center py-40 animate-in fade-in duration-500">
-            <PulseLoader size="lg" color="primary" />
-            <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
-                Syncing dashboard...
-            </p>
-        </div>
-    )
-
     return (
-        <div className="space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="p-8 lg:p-12 space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
+                {/* 1. Daily Quota Banner */}
+                <PremiumBanner
+                    title={`You have ${user?.credits_balance || 0} StarCredits available`}
+                    subtitle={`Daily grants add ${CreditPolicy.DAILY_GRANT_FREE} credits every 24 hours`}
+                    action={user?.is_premium ? (
+                        <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
+                    ) : undefined}
+                    buttonText="Upgrade for higher daily grants"
+                />
 
-            {/* 1. Daily Quota Banner */}
-            <PremiumBanner
-                title={`You have ${user?.credits_balance || 0} StarCredits available`}
-                subtitle={`Daily grants add ${CreditPolicy.DAILY_GRANT_FREE} credits every 24 hours`}
-                action={user?.is_premium ? (
-                    <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
-                ) : undefined}
-                buttonText="Upgrade for higher daily grants"
-            />
+                {/* 2. IELTS Info Card */}
+                <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center">
+                            <Calendar className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <div>
+                            <h4 className="text-lg font-bold font-outfit uppercase">IELTS {user?.test_type || "Academic"}</h4>
+                            <p className="text-sm text-muted-foreground font-medium">{user?.exam_date || "No date selected"}</p>
+                        </div>
+                    </div>
 
-            {/* 2. IELTS Info Card */}
-            <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center">
-                        <Calendar className="h-6 w-6 text-muted-foreground" />
+                    <div className="flex gap-10">
+                        <div className="text-center">
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Target Score</p>
+                            <div className="text-2xl font-black font-outfit text-primary">{user?.target_score || "7.0"}</div>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Writing</p>
+                            <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Speaking</p>
+                            <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="text-lg font-bold font-outfit uppercase">IELTS {user?.test_type || "Academic"}</h4>
-                        <p className="text-sm text-muted-foreground font-medium">{user?.exam_date || "No date selected"}</p>
-                    </div>
+
+                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
+                        <Edit3 className="h-5 w-5" />
+                    </Button>
                 </div>
 
-                <div className="flex gap-10">
-                    <div className="text-center">
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Target Score</p>
-                        <div className="text-2xl font-black font-outfit text-primary">{user?.target_score || "7.0"}</div>
+                {/* 3. Horsebot Greeting & AI Input */}
+                <div className="text-center space-y-6 py-8">
+                    <div className="relative inline-block">
+                        <div className="w-24 h-24 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
+                            <span className="text-5xl">🐴</span>
+                        </div>
+                        <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full animate-bounce">
+                            <Sparkles className="h-4 w-4" />
+                        </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Writing</p>
-                        <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
+                    <div className="space-y-2">
+                        <h1 className="text-4xl">Hi, I&apos;m your IELTS Coach!</h1>
+                        <p className="text-foreground-secondary font-medium text-lg">
+                            ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
+                        </p>
                     </div>
-                    <div className="text-center">
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Speaking</p>
-                        <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
-                    </div>
-                </div>
 
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
-                    <Edit3 className="h-5 w-5" />
-                </Button>
-            </div>
-
-            {/* 3. Catbot Greeting & AI Input */}
-            <div className="text-center space-y-6 py-8">
-                <div className="relative inline-block">
-                    <div className="w-24 h-24 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                        <span className="text-5xl">🐱</span>
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full animate-bounce">
-                        <Sparkles className="h-4 w-4" />
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <h1 className="text-4xl">Hi, I&apos;m your IELTS Coach!</h1>
-                    <p className="text-foreground-secondary font-medium text-lg">
-                        ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
-                    </p>
-                </div>
-
-                <div className="max-w-xl mx-auto relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative bg-card border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
-                        <textarea
-                            placeholder="Ask anything in your language"
-                            className="w-full h-24 p-4 text-base bg-transparent border-none focus:ring-0 resize-none font-medium"
-                        />
-                        <div className="flex items-center justify-between px-2 pb-2">
-                            <div className="flex gap-2">
-                                <Button variant="soft" size="xs">Ask</Button>
-                                <Button variant="soft" size="xs">Learn</Button>
-                                <Button variant="soft" size="xs">Support</Button>
+                    <div className="max-w-xl mx-auto relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="relative bg-card border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
+                            <textarea
+                                placeholder="Ask anything in your language"
+                                className="w-full h-24 p-4 text-base bg-transparent border-none focus:ring-0 resize-none font-medium"
+                            />
+                            <div className="flex items-center justify-between px-2 pb-2">
+                                <div className="flex gap-2">
+                                    <Button variant="soft" size="xs">Ask</Button>
+                                    <Button variant="soft" size="xs">Learn</Button>
+                                    <Button variant="soft" size="xs">Support</Button>
+                                </div>
+                                <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110">
+                                    <Send className="h-4 w-4 text-white" />
+                                </Button>
                             </div>
-                            <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110">
-                                <Send className="h-4 w-4 text-white" />
-                            </Button>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* 4. Getting Started Progress */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between mb-2">
+                {/* 4. Getting Started Progress */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-xl">
+                                <Zap className="h-5 w-5 text-primary" />
+                            </div>
+                            <h3 className="text-xl font-bold font-outfit">Getting Started</h3>
+                        </div>
+                        <span className="text-lg font-black font-outfit text-primary">25%</span>
+                    </div>
+                    <Progress value={25} className="h-2 bg-muted rounded-full overflow-hidden" />
+
+                    <div className="grid grid-cols-1 gap-3 pt-4">
+                        <OnboardingStep label="Add your target score" completed={true} />
+                        <OnboardingStep label="Learn your speaking level" />
+                        <OnboardingStep label="Learn your writing level" />
+                        <OnboardingStep label="View premium sample reports" />
+                    </div>
+                </div>
+
+                {/* 5. Start Practice Cards */}
+                <div className="space-y-6">
                     <div className="flex items-center gap-3">
                         <div className="bg-primary/10 p-2 rounded-xl">
                             <Zap className="h-5 w-5 text-primary" />
                         </div>
-                        <h3 className="text-xl font-bold font-outfit">Getting Started</h3>
+                        <h3 className="text-xl font-bold font-outfit">Start Practice</h3>
                     </div>
-                    <span className="text-lg font-black font-outfit text-primary">25%</span>
-                </div>
-                <Progress value={25} className="h-2 bg-muted rounded-full overflow-hidden" />
+                    <p className="text-sm text-foreground-secondary font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
-                <div className="grid grid-cols-1 gap-3 pt-4">
-                    <OnboardingStep label="Add your target score" completed={true} />
-                    <OnboardingStep label="Learn your speaking level" />
-                    <OnboardingStep label="Learn your writing level" />
-                    <OnboardingStep label="View premium sample reports" />
-                </div>
-            </div>
-
-            {/* 5. Start Practice Cards */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-2 rounded-xl">
-                        <Zap className="h-5 w-5 text-primary" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <Link href="/dashboard/writing" className="flex-1">
+                            <PracticeCard
+                                title="Writing Practice"
+                                desc="Practice Task 1 & Task 2"
+                                icon={PenTool}
+                                buttonText="Start Writing"
+                            />
+                        </Link>
+                        <Link href="/dashboard/speaking" className="flex-1">
+                            <PracticeCard
+                                title="Speaking Practice"
+                                desc="Practice Part 1, Part 2, Part 3"
+                                icon={Mic2}
+                                buttonText="Start Speaking"
+                            />
+                        </Link>
                     </div>
-                    <h3 className="text-xl font-bold font-outfit">Start Practice</h3>
                 </div>
-                <p className="text-sm text-foreground-secondary font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <Link href="/dashboard/writing" className="flex-1">
-                        <PracticeCard
-                            title="Writing Practice"
-                            desc="Practice Task 1 & Task 2"
-                            icon={PenTool}
-                            buttonText="Start Writing"
-                        />
-                    </Link>
-                    <Link href="/dashboard/speaking" className="flex-1">
-                        <PracticeCard
-                            title="Speaking Practice"
-                            desc="Practice Part 1, Part 2, Part 3"
-                            icon={Mic2}
-                            buttonText="Start Speaking"
-                        />
-                    </Link>
-                </div>
-            </div>
-
-            {/* 6. Recent Activity (Empty State) */}
-            <div className="bg-card rounded-3xl border p-8 space-y-8 shadow-sm">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
+                {/* 6. Recent Activity (Empty State) */}
+                <div className="bg-card rounded-3xl border p-8 space-y-8 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xl font-bold font-outfit">Recent Activity</h3>
                     </div>
-                    <h3 className="text-xl font-bold font-outfit">Recent Activity</h3>
-                </div>
 
-                <div className="hidden md:grid grid-cols-5 text-[10px] uppercase tracking-widest font-black text-muted-foreground/60 border-b pb-4">
-                    <div>Time</div>
-                    <div>Task</div>
-                    <div>Task Description</div>
-                    <div>Status</div>
-                    <div className="text-right">Score</div>
-                </div>
+                    <div className="hidden md:grid grid-cols-5 text-[10px] uppercase tracking-widest font-black text-muted-foreground/60 border-b pb-4">
+                        <div>Time</div>
+                        <div>Task</div>
+                        <div>Task Description</div>
+                        <div>Status</div>
+                        <div className="text-right">Score</div>
+                    </div>
 
-                <div className="text-center py-12 space-y-6">
-                    <div className="text-8xl grayscale opacity-50">🐱🪴</div>
-                    <div className="space-y-2">
-                        <h4 className="text-lg font-bold">You don&apos;t have any reports yet.</h4>
-                        <p className="text-sm text-muted-foreground max-w-sm mx-auto font-medium leading-relaxed">
-                            Check out sample reports to see feedback examples for premium users.
+                    <div className="text-center py-12 space-y-6">
+                        <div className="text-8xl grayscale opacity-50">🐴🪴</div>
+                        <div className="space-y-2">
+                            <h4 className="text-lg font-bold">You don&apos;t have any reports yet.</h4>
+                            <p className="text-sm text-muted-foreground max-w-sm mx-auto font-medium leading-relaxed">
+                                Check out sample reports to see feedback examples for premium users.
+                            </p>
+                        </div>
+                        <Link href="/dashboard/samples">
+                            <Button variant="premium" size="lg" className="px-10">
+                                View Premium Sample Reports
+                            </Button>
+                        </Link>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium pt-8">
+                            Free users can see up to 5 completed records. <span className="text-primary font-bold cursor-pointer hover:underline">Upgrade</span> to see more results.
                         </p>
                     </div>
-                    <Link href="/dashboard/samples">
-                        <Button variant="premium" size="lg" className="px-10">
-                            View Premium Sample Reports
-                        </Button>
-                    </Link>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium pt-8">
-                        Free users can see up to 5 completed records. <span className="text-primary font-bold cursor-pointer hover:underline">Upgrade</span> to see more results.
-                    </p>
-                </div>
 
-                <div className="pt-8 border-t text-center">
-                    <Link href="/dashboard/reports">
-                        <Button variant="ghost" className="text-primary hover:bg-primary/5 group">
-                            View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                    </Link>
+                    <div className="pt-8 border-t text-center">
+                        <Link href="/dashboard/reports">
+                            <Button variant="ghost" className="text-primary hover:bg-primary/5 group">
+                                View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
+            <footer className="mt-auto py-8 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em] border-t bg-white/30">
+                © 2026 IELTS Lover. &nbsp; Terms · Privacy · Contact us
+            </footer>
         </div>
     )
 }
