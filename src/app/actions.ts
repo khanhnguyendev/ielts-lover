@@ -55,6 +55,17 @@ export async function submitAttempt(attemptId: string, content: string) {
     return attemptService.getAttempt(attemptId);
 }
 
+export async function getAttemptById(id: string) {
+    return attemptService.getAttempt(id);
+}
+
+export async function getAttemptWithExercise(id: string) {
+    const attempt = await attemptService.getAttempt(id);
+    if (!attempt) return null;
+    const exercise = await exerciseService.getExercise(attempt.exercise_id);
+    return { ...attempt, exercise };
+}
+
 export async function getAllUsers() {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.from("user_profiles").select("*").order("created_at", { ascending: false });
@@ -79,7 +90,13 @@ export async function getUserAttempts() {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
         .from("attempts")
-        .select("*")
+        .select(`
+            *,
+            exercises (
+                title,
+                type
+            )
+        `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 

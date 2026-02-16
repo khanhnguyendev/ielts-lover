@@ -146,9 +146,9 @@ export default function ReportsPage() {
                                                 <TableCell className="py-5">
                                                     <div className="flex items-center gap-3 text-[13px] font-black text-slate-900">
                                                         <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                            <PenTool className="h-3.5 w-3.5" />
+                                                            {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-3.5 w-3.5" /> : <PenTool className="h-3.5 w-3.5" />}
                                                         </div>
-                                                        {attempt.exercise_id}
+                                                        {attempt.exercises?.title || "Exercise"}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-5">

@@ -24,15 +24,55 @@ import { cn } from "@/lib/utils"
 import { WritingEvaluation } from "@/components/reports/WritingEvaluation"
 import { SpeakingEvaluation } from "@/components/reports/SpeakingEvaluation"
 import { RewriterEvaluation } from "@/components/reports/RewriterEvaluation"
-import { SAMPLE_REPORTS } from "@/lib/sample-data"
+import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
+import { getAttemptWithExercise } from "@/app/actions"
+import { Attempt, Exercise } from "@/types"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
     const [isCatbotOpen, setIsCatbotOpen] = React.useState(true)
+    const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
 
     // Check if it's a sample report
     const sampleData = SAMPLE_REPORTS[parseInt(id)]
     const isSample = !!sampleData
+
+    React.useEffect(() => {
+        if (!isSample) {
+            async function fetchData() {
+                try {
+                    const data = await getAttemptWithExercise(id)
+                    setRealData(data as any)
+                } catch (error) {
+                    console.error("Failed to fetch report:", error)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
+            fetchData()
+        } else {
+            setIsLoading(false)
+        }
+    }, [id, isSample])
+
+    const displayData = isSample ? sampleData : (realData?.feedback ? {
+        ...JSON.parse(realData.feedback),
+        id: realData.id,
+        type: realData.exercise?.type.startsWith('writing') ? "Writing" :
+            realData.exercise?.type.startsWith('speaking') ? "Speaking" : "Rewriter"
+    } : null)
+
+    if (isLoading) {
+        return <div className="flex h-screen items-center justify-center">Loading report...</div>
+    }
+
+    if (!isSample && !realData) {
+        return <div className="flex h-screen items-center justify-center flex-col gap-4">
+            <h1 className="text-2xl font-bold">Report not found</h1>
+            <Link href="/dashboard/reports"><Button>Back to Reports</Button></Link>
+        </div>
+    }
 
     return (
         <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] -m-8 lg:-m-12">
@@ -49,7 +89,9 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         <div className="flex items-center gap-6">
                             <span className="text-sm font-bold text-muted-foreground">
                                 {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
-                                <span className="text-muted-foreground/60 ml-2">Date: 2026-02-14 23:24:57</span>
+                                <span className="text-muted-foreground/60 ml-2">
+                                    Date: {isSample ? "2026-02-14" : new Date(realData!.created_at).toLocaleDateString()}
+                                </span>
                             </span>
                             <Button variant="ghost" size="icon" className="text-muted-foreground rounded-lg">
                                 <Share2 className="h-4 w-4" />
@@ -66,7 +108,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         <div className="flex items-center gap-8 sm:gap-12 relative z-10">
                             <div className="text-center">
                                 <div className="text-5xl sm:text-6xl font-black font-outfit text-primary flex items-baseline gap-1">
-                                    {isSample ? sampleData.bandScore.toFixed(1) : "1.0"}
+                                    {displayData?.bandScore?.toFixed(1) || displayData?.overall_band?.toFixed(1) || "1.0"}
                                     <span className="text-xl sm:text-2xl text-muted-foreground/60 font-bold">/9.0</span>
                                 </div>
                                 <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/60 mt-1">Overall Band Score</p>
@@ -76,7 +118,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                             <div className="text-center sm:text-left">
                                 <div className="text-3xl sm:text-4xl font-black font-outfit text-purple-600">
-                                    {isSample ? sampleData.cefrLevel : "A1"}
+                                    {displayData?.cefrLevel || displayData?.cefr_level || "A1"}
                                 </div>
                                 <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/60 mt-1">CEFR Level</p>
                             </div>
@@ -105,14 +147,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         )}
                     </div>
 
-                    {isSample ? (
+                    {(isSample || (realData && realData.state === "EVALUATED")) ? (
                         <>
-                            {sampleData.type === "Writing" ? (
-                                <WritingEvaluation data={sampleData as any} />
-                            ) : sampleData.type === "Speaking" ? (
-                                <SpeakingEvaluation data={sampleData as any} />
+                            {displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing')) ? (
+                                <WritingEvaluation data={displayData as any} />
+                            ) : displayData.type === "Speaking" ? (
+                                <SpeakingEvaluation data={displayData as any} />
                             ) : (
-                                <RewriterEvaluation data={sampleData as any} />
+                                <RewriterEvaluation data={displayData as any} />
                             )}
                         </>
                     ) : (

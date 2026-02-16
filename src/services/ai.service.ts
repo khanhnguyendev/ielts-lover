@@ -28,9 +28,11 @@ export class AIService {
     private static PROMPTS = {
         writing_task1: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
+            v2: "Analyze the following IELTS Writing Task 1 response. Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (break the original text into fragments, marking corrections and CEFR levels of words). 3. Detailed band score breakdown for Task Achievement, Coherence, Lexical Resource, and Grammatical Range. 4. Specific feedback cards for mistakes. 5. CEFR distribution of the vocabulary used."
         },
         writing_task2: {
             v1: "Analyze the following IELTS Writing Task 2 essay and provide a detailed band score breakdown and improvement suggestions.",
+            v2: "Analyze the following IELTS Writing Task 2 essay. Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (break the original text into fragments, marking corrections and CEFR levels within the text). 3. Detailed band score breakdown for Task Response, Coherence, Lexical Resource, and Grammatical Range. 4. Specific feedback cards for mistakes. 5. CEFR distribution of the vocabulary used."
         },
         speaking_part1: {
             v1: "Analyze the following IELTS Speaking Part 1 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
@@ -90,6 +92,66 @@ export class AIService {
             confidence: { type: SchemaType.NUMBER, description: "Confidence score of the evaluation (0-1)" }
         },
         required: ["overall_band", "breakdown", "feedback", "confidence"]
+    };
+
+    private static REPORT_SCHEMA = {
+        type: SchemaType.OBJECT,
+        properties: {
+            bandScore: { type: SchemaType.NUMBER, description: "The overall IELTS band score (e.g., 6.5)" },
+            cefrLevel: { type: SchemaType.STRING, description: "The overall CEFR level (e.g., B2, C1)" },
+            feedbackText: {
+                type: SchemaType.ARRAY,
+                items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        text: { type: SchemaType.STRING },
+                        cefr: { type: SchemaType.STRING, nullable: true },
+                        annotationId: { type: SchemaType.NUMBER, nullable: true },
+                        isError: { type: SchemaType.BOOLEAN, nullable: true }
+                    },
+                    required: ["text"]
+                }
+            },
+            criteria: {
+                type: SchemaType.ARRAY,
+                items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        name: { type: SchemaType.STRING },
+                        score: { type: SchemaType.NUMBER },
+                        details: { type: SchemaType.STRING }
+                    },
+                    required: ["name", "score", "details"]
+                }
+            },
+            feedbackCards: {
+                type: SchemaType.ARRAY,
+                items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        id: { type: SchemaType.NUMBER },
+                        type: { type: SchemaType.STRING, description: "Task Achievement | Coherence | Grammar | Vocabulary" },
+                        original: { type: SchemaType.STRING },
+                        suggested: { type: SchemaType.STRING },
+                        explanation: { type: SchemaType.STRING },
+                        category: { type: SchemaType.STRING }
+                    },
+                    required: ["id", "type", "original", "suggested", "explanation", "category"]
+                }
+            },
+            cefrDistribution: {
+                type: SchemaType.ARRAY,
+                items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        level: { type: SchemaType.STRING },
+                        percentage: { type: SchemaType.NUMBER }
+                    },
+                    required: ["level", "percentage"]
+                }
+            }
+        },
+        required: ["bandScore", "cefrLevel", "feedbackText", "criteria", "feedbackCards", "cefrDistribution"]
     };
 
     private static REWRITE_SCHEMA = {
@@ -238,6 +300,29 @@ export class AIService {
         } catch (error) {
             this.logger.error("AI Chart Generation failed", { error, topic });
             throw error;
+        }
+    }
+
+    async generateWritingReport(type: "writing_task1" | "writing_task2", content: string, version: AIPromptVersion = "v2"): Promise<any> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.REPORT_SCHEMA as any,
+            },
+        });
+
+        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v2;
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
+            this.logger.info("Generated detailed writing report", { type, version });
+            return JSON.parse(responseText);
+        } catch (error) {
+            this.logger.error("Detailed Writing Report generation failed", { error, type });
+            throw new Error("Detailed AI Evaluation failed. Please try again later.");
         }
     }
 }

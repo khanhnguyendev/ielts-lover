@@ -48,7 +48,9 @@ export function WritingEvaluation({ data }: WritingEvaluationProps) {
                     <div className="flex items-center justify-between mb-8">
                         <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Your Answer</h4>
                         <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Word Count: 168</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                Word Count: {data.originalText?.split(/\s+/).filter(Boolean).length || 0}
+                            </span>
                         </div>
                     </div>
 

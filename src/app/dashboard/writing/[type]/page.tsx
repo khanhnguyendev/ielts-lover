@@ -37,7 +37,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
 
     const [showFeedback, setShowFeedback] = React.useState(false)
-    const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string }>({})
+    const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
 
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
 
@@ -105,7 +105,8 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             if (result && result.score !== undefined) {
                 setFeedbackData({
                     score: result.score,
-                    feedback: result.feedback
+                    feedback: result.feedback,
+                    attemptId: result.id
                 })
                 setShowFeedback(true)
                 toast.success("Evaluation complete!")
@@ -278,6 +279,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 onOpenChange={setShowFeedback}
                 score={feedbackData.score}
                 feedback={feedbackData.feedback}
+                attemptId={feedbackData.attemptId}
                 type={exercise.type as any}
             />
         </div>

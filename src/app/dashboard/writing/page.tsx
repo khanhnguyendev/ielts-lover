@@ -48,7 +48,7 @@ const CATEGORIES = [
     "Custom Question"
 ]
 
-import { getExercises } from "@/app/actions"
+import { getExercises, getUserAttempts } from "@/app/actions"
 import { Exercise as DbExercise, ExerciseType } from "@/types"
 
 interface Exercise {
@@ -81,21 +81,29 @@ export default function WritingHubPage() {
                 let type: ExerciseType = "writing_task1"
                 if (activeCategory === "Task 2") type = "writing_task2"
 
-                // For "Mock Test", we might want a different logic, but using task1 for now
-                const data = await getExercises(type)
+                // Fetch both exercises and attempts
+                const [exercisesData, attemptsData] = await Promise.all([
+                    getExercises(type),
+                    getUserAttempts()
+                ]);
 
-                const adapted: Exercise[] = data.map(db => ({
-                    id: db.id,
-                    title: db.title,
-                    subtitle: db.type.replace("_", " ").toUpperCase(),
-                    attempts: 0, // Should come from attempts count
-                    icon: TYPE_CONFIG[db.type]?.icon || Cat,
-                    color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50"
-                }))
+                const adapted: Exercise[] = exercisesData.map((db: DbExercise) => {
+                    // Count attempts for this exercise
+                    const attemptCount = attemptsData.filter((a: any) => a.exercise_id === db.id).length;
+
+                    return {
+                        id: db.id,
+                        title: db.title,
+                        subtitle: db.type.replace("_", " ").toUpperCase(),
+                        attempts: attemptCount,
+                        icon: TYPE_CONFIG[db.type]?.icon || Cat,
+                        color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50"
+                    };
+                })
 
                 setExercises(adapted)
             } catch (error) {
-                console.error("Failed to fetch exercises:", error)
+                console.error("Failed to fetch writing hub data:", error)
             } finally {
                 setIsLoading(false)
             }
@@ -199,7 +207,7 @@ export default function WritingHubPage() {
                                 id={ex.id}
                                 title={ex.title}
                                 subtitle={ex.subtitle}
-                                attempts={0}
+                                attempts={ex.attempts || 0}
                                 icon={ex.icon}
                                 color={ex.color}
                                 isRecommended={ex.isRecommended}
@@ -209,61 +217,85 @@ export default function WritingHubPage() {
                 )}
             </div>
 
-            {/* Add Custom Question Modal */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                <DialogContent className="sm:max-w-md bg-card rounded-[40px] p-10">
-                    <DialogHeader className="space-y-4">
-                        <DialogTitle className="text-2xl font-black font-outfit text-center">Add a custom question</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
+                <DialogContent className="sm:max-w-lg bg-white rounded-[32px] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="bg-[#F9FAFB] p-8 border-b text-center space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border">
+                            <Plus className="w-8 h-8 text-primary" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-2xl font-black font-outfit text-slate-900">
+                                Add Custom Task
+                            </DialogTitle>
+                            <p className="text-muted-foreground font-medium text-sm mt-1">
+                                Add a question you've found elsewhere or created yourself.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
                         {/* Writing task type */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">Writing task type</label>
-                            <button className="w-full h-14 px-5 rounded-2xl border bg-white flex items-center justify-between text-sm font-medium hover:border-primary/40 transition-all group outline-none">
-                                Academic Task 1 <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <div className="space-y-2.5">
+                            <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Writing task type</label>
+                            <button className="w-full h-14 px-6 rounded-2xl border bg-slate-50/50 flex items-center justify-between text-sm font-bold text-slate-900 hover:border-primary/40 hover:bg-white transition-all group outline-none">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                    Academic Task 1
+                                </div>
+                                <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
                             </button>
                         </div>
 
+                        {/* Question title */}
+                        <div className="space-y-2.5">
+                            <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Question title</label>
+                            <input
+                                type="text"
+                                className="w-full h-14 px-6 rounded-2xl border bg-slate-50/50 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 outline-none"
+                                placeholder="Example: Smartphone Ownership Trends"
+                            />
+                        </div>
+
                         {/* Question */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">Question</label>
+                        <div className="space-y-2.5">
+                            <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Question content</label>
                             <textarea
-                                className="w-full min-h-[160px] p-5 rounded-2xl border bg-[#F9FAFB] text-sm resize-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 outline-none"
+                                className="w-full min-h-[160px] p-6 rounded-2xl border bg-slate-50/50 text-sm font-medium leading-relaxed text-slate-700 resize-none focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 outline-none"
                                 placeholder="Example: The diagram below illustrates the daily routine of a highly professional house cat..."
                             />
                         </div>
 
                         {/* Add visual */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">Add visual <span className="text-rose-500">*</span></label>
-                            <div className="border-2 border-dashed rounded-[20px] p-6 bg-[#F9FAFB] flex flex-col items-center gap-4 text-center group hover:bg-white hover:border-primary/40 transition-all cursor-pointer">
-                                <p className="text-[10px] font-medium text-muted-foreground max-w-[200px]">
-                                    Please upload a clear, close-up image with high resolution.
-                                </p>
-                                <Button variant="outline" size="sm" className="font-black">
-                                    <Upload className="h-4 w-4 mr-2" /> Upload
-                                </Button>
+                        <div className="space-y-2.5">
+                            <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">
+                                Add visual <span className="text-rose-500">*</span>
+                            </label>
+                            <div className="border-2 border-dashed rounded-[24px] p-8 bg-slate-50/50 flex flex-col items-center gap-4 text-center group hover:bg-primary/[0.02] hover:border-primary/30 transition-all cursor-pointer border-slate-200">
+                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform">
+                                    <Upload className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-sm font-bold text-slate-900">Click to upload image</p>
+                                    <p className="text-[10px] font-medium text-slate-500 max-w-[240px]">
+                                        Support JPG, PNG or WebP. Max size 5MB.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Question title */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">Question title</label>
-                            <input
-                                type="text"
-                                className="w-full h-14 px-5 rounded-2xl border bg-[#F9FAFB] text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 outline-none"
-                                placeholder="Example: Special Cat"
-                            />
-                        </div>
                     </div>
-                    <Button
-                        variant="premium"
-                        size="lg"
-                        onClick={() => setIsAddModalOpen(false)}
-                        className="w-full"
-                    >
-                        Add Questions
-                    </Button>
+
+                    <div className="p-6 bg-slate-50 border-t flex flex-col sm:flex-row gap-3">
+                        <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="rounded-xl h-12 font-bold flex-1">
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="premium"
+                            onClick={() => setIsAddModalOpen(false)}
+                            className="h-12 flex-[2] shadow-lg shadow-primary/20"
+                        >
+                            Create Question
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>
@@ -313,9 +345,12 @@ function ExerciseCard({
                 </div>
 
                 <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">No attempts yet</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+                        {attempts > 0 ? `${attempts} attempt${attempts > 1 ? 's' : ''}` : "No attempts yet"}
+                    </p>
                     <div className="h-8 px-4 rounded-lg border border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest flex items-center bg-transparent group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        <Plus className="h-3 w-3 mr-1" /> Start
+                        {attempts > 0 ? <Plus className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
+                        {attempts > 0 ? "Start New" : "Start"}
                     </div>
                 </div>
             </div>

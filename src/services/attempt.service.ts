@@ -47,13 +47,25 @@ export class AttemptService {
         const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
         if (!exercise) throw new Error("Exercise not found for attempt");
 
-        // AI Orchestration
-        const feedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
+        // UI Requirement: Use generateWritingReport for detailed reports if it's a writing task
+        let feedback;
+        let score;
+
+        if (exercise.type === "writing_task1" || exercise.type === "writing_task2") {
+            const report = await this.aiService.generateWritingReport(exercise.type as any, attempt.content);
+            feedback = JSON.stringify(report);
+            score = report.bandScore;
+        } else {
+            // Fallback for speaking or other types
+            const simpleFeedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
+            feedback = JSON.stringify(simpleFeedback);
+            score = simpleFeedback.overall_band;
+        }
 
         await this.attemptRepo.update(id, {
             state: "EVALUATED",
-            score: feedback.overall_band,
-            feedback: JSON.stringify(feedback),
+            score,
+            feedback,
             evaluated_at: new Date().toISOString()
         });
 

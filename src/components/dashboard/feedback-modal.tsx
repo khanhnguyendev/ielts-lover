@@ -16,10 +16,11 @@ interface FeedbackModalProps {
     onOpenChange: (open: boolean) => void;
     score?: number;
     feedback?: string; // JSON string or raw text
+    attemptId?: string;
     type: "writing_task1" | "writing_task2";
 }
 
-export function FeedbackModal({ open, onOpenChange, score, feedback, type }: FeedbackModalProps) {
+export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, type }: FeedbackModalProps) {
     const router = useRouter();
 
     let parsedFeedback: any = {};
@@ -101,13 +102,24 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, type }: Fee
                     </div>
                 </div>
 
-                <DialogFooter className="p-6 bg-slate-50 border-t flex gap-3">
-                    <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl h-12 font-bold">
-                        Close
-                    </Button>
-                    <Button onClick={() => router.push("/dashboard/writing")} className="rounded-xl h-12 px-8 font-bold bg-primary hover:bg-primary/90">
-                        Back to Writing Hub
-                    </Button>
+                <DialogFooter className="p-6 bg-slate-50 border-t flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 flex gap-3">
+                        <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl h-12 font-bold flex-1 sm:flex-none">
+                            Close
+                        </Button>
+                        <Button onClick={() => router.push("/dashboard/writing")} className="rounded-xl h-12 px-8 font-bold text-slate-600 hover:bg-slate-100 flex-1 sm:flex-none" variant="ghost">
+                            Writing Hub
+                        </Button>
+                    </div>
+                    {attemptId && (
+                        <Button
+                            onClick={() => router.push(`/dashboard/reports/${attemptId}`)}
+                            className="rounded-xl h-12 px-8 font-black text-sm bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20"
+                        >
+                            View Full Report
+                            <Sparkles className="ml-2 h-4 w-4 fill-white" />
+                        </Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>
