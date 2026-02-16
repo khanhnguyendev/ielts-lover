@@ -26,14 +26,33 @@ export class UserRepository implements IUserRepository {
     }
 
     async incrementQuota(id: string): Promise<void> {
+        // Deprecated but keeping for backward compatibility during migration
+        const user = await this.getById(id);
+        if (user) {
+            await this.update(id, { daily_quota_used: user.daily_quota_used + 1 });
+        }
+    }
+
+    async deductCredits(id: string, amount: number): Promise<void> {
         const supabase = await createServerSupabaseClient();
-        const { error } = await supabase.rpc("increment_daily_quota", { user_id: id });
+        const { error } = await supabase.rpc("deduct_credits", { user_id: id, amount });
 
         if (error) {
-            // Fallback to manual update if RPC fails
             const user = await this.getById(id);
             if (user) {
-                await this.update(id, { daily_quota_used: user.daily_quota_used + 1 });
+                await this.update(id, { credits_balance: user.credits_balance - amount });
+            }
+        }
+    }
+
+    async addCredits(id: string, amount: number): Promise<void> {
+        const supabase = await createServerSupabaseClient();
+        const { error } = await supabase.rpc("add_credits", { user_id: id, amount });
+
+        if (error) {
+            const user = await this.getById(id);
+            if (user) {
+                await this.update(id, { credits_balance: user.credits_balance + amount });
             }
         }
     }

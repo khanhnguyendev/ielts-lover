@@ -24,6 +24,10 @@ export default async function DashboardLayout({
                         <div className="bg-muted px-3 py-1 rounded text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                             <DynamicTitle />
                         </div>
+                        <div className="flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100 shadow-sm animate-in fade-in zoom-in duration-500">
+                            <span className="text-[10px] font-black text-yellow-600">⭐ STARCREDITS:</span>
+                            <span className="text-xs font-black text-yellow-700">{user.credits_balance}</span>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <NotificationOverlay />

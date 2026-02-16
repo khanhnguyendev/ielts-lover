@@ -22,6 +22,7 @@ import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/PulseLoader"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
+import { CreditPolicy } from "@/services/credit.policy"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
@@ -55,12 +56,12 @@ export default function DashboardPage() {
 
             {/* 1. Daily Quota Banner */}
             <PremiumBanner
-                title={`${user?.daily_quota_used || 0}/5 daily free reports used`}
-                subtitle="Renews in 23 hours 59 minutes"
+                title={`You have ${user?.credits_balance || 0} StarCredits available`}
+                subtitle={`Daily grants add ${CreditPolicy.DAILY_GRANT_FREE} credits every 24 hours`}
                 action={user?.is_premium ? (
                     <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
                 ) : undefined}
-                buttonText="Upgrade to premium now"
+                buttonText="Upgrade for higher daily grants"
             />
 
             {/* 2. IELTS Info Card */}

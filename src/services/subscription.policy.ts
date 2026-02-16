@@ -1,31 +1,30 @@
 import { UserProfile } from "@/types";
 
 export class SubscriptionPolicy {
-    private static FREE_DAILY_LIMIT = 5;
-
-    static canAccessFeature(user: UserProfile, feature: string): boolean {
+    static canAccessFeature(user: UserProfile, feature: string, featureCost: number = 0): boolean {
         // Business Rule: Premium users have unlimited access
         if (user.is_premium) return true;
 
         // Business Rule: Mock tests are premium only
         if (feature === "mock_test") return false;
 
-        // Business Rule: Free users have daily limits for AI features
-        const aiFeatures = ["writing_evaluation", "speaking_evaluation", "rewriter"];
-        if (aiFeatures.includes(feature)) {
-            return user.daily_quota_used < SubscriptionPolicy.FREE_DAILY_LIMIT;
+        // Business Rule: Check if credits are sufficient
+        if (featureCost > 0) {
+            return user.credits_balance >= featureCost;
         }
 
         return true;
     }
 
-    static getRemainingQuota(user: UserProfile): number {
-        if (user.is_premium) return Infinity;
-        return Math.max(0, SubscriptionPolicy.FREE_DAILY_LIMIT - user.daily_quota_used);
+    static getBalance(user: UserProfile): number {
+        return user.credits_balance;
     }
 
-    static getLimitReason(user: UserProfile, feature: string): string | null {
-        if (this.canAccessFeature(user, feature)) return null;
-        return `You have reached your daily limit of ${SubscriptionPolicy.FREE_DAILY_LIMIT} free reports. Upgrade to Premium for unlimited access.`;
+    static getLimitReason(user: UserProfile, feature: string, featureCost: number = 0): string | null {
+        if (this.canAccessFeature(user, feature, featureCost)) return null;
+
+        if (feature === "mock_test") return "Mock tests are exclusively for Premium members.";
+
+        return `Insufficient StarCredits. This action requires ${featureCost} Credits, but you only have ${user.credits_balance}.`;
     }
 }

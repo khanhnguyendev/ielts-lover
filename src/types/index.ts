@@ -8,6 +8,8 @@ export type UserProfile = {
     role: "user" | "admin";
     daily_quota_used: number;
     last_quota_reset: string;
+    credits_balance: number;
+    last_daily_grant_at: string;
     created_at: string;
     avatar_url?: string;
     full_name?: string;

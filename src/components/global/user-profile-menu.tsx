@@ -59,14 +59,34 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
             <DropdownMenuContent className="w-[280px] mt-3 p-2 shadow-2xl border-slate-100 bg-white rounded-[24px]" align="end">
                 <DropdownMenuLabel className="font-normal p-4">
                     <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-black text-slate-900 leading-none">
-                            {user.full_name || user.email.split("@")[0]}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm font-black text-slate-900 leading-none">
+                                {user.full_name || user.email.split("@")[0]}
+                            </p>
+                            {user.is_premium && (
+                                <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full border border-primary/20 uppercase tracking-tighter shadow-sm animate-in fade-in duration-700">Premium</span>
+                            )}
+                        </div>
                         <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest pt-1">
                             {user.email}
                         </p>
                     </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 bg-slate-50" />
+                <div className="px-4 py-3 mx-2 my-1 rounded-2xl bg-yellow-50/50 border border-yellow-100/50 group hover:bg-yellow-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center shadow-sm shadow-yellow-200 group-hover:scale-110 transition-transform">
+                                <span className="text-white text-sm">⭐</span>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-yellow-600 uppercase tracking-widest leading-none mb-1">Balance</p>
+                                <p className="text-sm font-black text-yellow-700 leading-none">{user.credits_balance} StarCredits</p>
+                            </div>
+                        </div>
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100/50 p-0 px-2 rounded-lg">Top Up</Button>
+                    </div>
+                </div>
                 <DropdownMenuSeparator className="mx-2 bg-slate-50" />
                 <DropdownMenuGroup className="p-1">
                     <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 transition-colors">

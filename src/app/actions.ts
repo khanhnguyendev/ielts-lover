@@ -13,6 +13,9 @@ import { redirect } from "next/navigation";
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
 import { SubscriptionPolicy } from "@/services/subscription.policy";
+import { FeaturePricingRepository } from "@/repositories/pricing.repository";
+import { CreditTransactionRepository } from "@/repositories/transaction.repository";
+import { CreditService } from "@/services/credit.service";
 
 // Dependencies Injection
 const exerciseRepo = new ExerciseRepository();
@@ -24,6 +27,11 @@ const aiService = new AIService();
 const exerciseService = new ExerciseService(exerciseRepo);
 const attemptService = new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService);
 const lessonService = new LessonService(lessonRepo);
+
+// Credit Economy
+const pricingRepo = new FeaturePricingRepository();
+const transactionRepo = new CreditTransactionRepository();
+const creditService = new CreditService(userRepo, pricingRepo, transactionRepo);
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
@@ -37,10 +45,10 @@ export async function startAttempt(userId: string, exerciseId: string) {
     return attemptService.startAttempt(userId, exerciseId);
 }
 
-export async function checkFeatureAccess(feature: string) {
+export async function checkFeatureAccess(feature: string, cost: number = 0) {
     const user = await getCurrentUser();
     if (!user) return false;
-    return SubscriptionPolicy.canAccessFeature(user, feature);
+    return SubscriptionPolicy.canAccessFeature(user, feature, cost);
 }
 
 export async function startExerciseAttempt(exerciseId: string) {
@@ -67,13 +75,45 @@ export async function startExerciseAttempt(exerciseId: string) {
 }
 
 export async function submitAttempt(attemptId: string, content: string) {
-    await attemptService.submitAttempt(attemptId, content);
-    // Fetch and return the updated attempt with feedback
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const attempt = await attemptService.getAttempt(attemptId);
+    if (!attempt) throw new Error("Attempt not found");
+
+    const exercise = await exerciseService.getExercise(attempt.exercise_id);
+    if (!exercise) throw new Error("Exercise not found");
+
+    const featureKey = exercise.type.startsWith("writing") ? "writing_evaluation" : "speaking_evaluation";
+
+    try {
+        await creditService.billUser(user.id, featureKey);
+        await attemptService.submitAttempt(attemptId, content);
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            // If insufficient credits, we still save the work but don't evaluate
+            await attemptService.updateAttempt(attemptId, { content, state: "SUBMITTED" });
+            return { ...(await attemptService.getAttempt(attemptId)), reason: "INSUFFICIENT_CREDITS" };
+        }
+        throw error;
+    }
+
     return attemptService.getAttempt(attemptId);
 }
 
 export async function reevaluateAttempt(attemptId: string) {
-    return attemptService.reevaluate(attemptId);
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        await creditService.billUser(user.id, "writing_evaluation");
+        return attemptService.reevaluate(attemptId);
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            return { success: false, reason: "INSUFFICIENT_CREDITS", message: error.message };
+        }
+        throw error;
+    }
 }
 
 export async function getAttemptById(id: string) {
@@ -183,8 +223,19 @@ export async function signOut() {
 }
 
 export async function rewriteText(text: string) {
-    const result = await aiService.rewriteContent(text);
-    return result.rewritten_text;
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        await creditService.billUser(user.id, "text_rewriter");
+        const result = await aiService.rewriteContent(text);
+        return result.rewritten_text;
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            throw new Error("INSUFFICIENT_CREDITS");
+        }
+        throw error;
+    }
 }
 
 export async function getLessonQuestions(lessonId: string) {

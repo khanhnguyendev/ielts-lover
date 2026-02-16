@@ -47,21 +47,6 @@ export class AttemptService {
         const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
         if (!exercise) throw new Error("Exercise not found for attempt");
 
-        // Business Rule: Check daily limits before AI evaluation
-        const user = await this.userRepo.getById(attempt.user_id);
-        if (!user) throw new Error("User not found");
-
-        const feature = exercise.type.startsWith('writing') ? "writing_evaluation" : "speaking_evaluation";
-
-        // Use a dynamic import or static service for policy if possible, 
-        // but for now we follow existing patterns
-        const { SubscriptionPolicy } = await import("./subscription.policy");
-
-        if (!SubscriptionPolicy.canAccessFeature(user, feature)) {
-            console.log(`[AttemptService] Daily limit reached for user ${user.id}. Skipping evaluation.`);
-            return;
-        }
-
         // UI Requirement: Use generateWritingReport for detailed reports if it's a writing task
         let feedback;
         let score;
@@ -83,27 +68,15 @@ export class AttemptService {
             feedback,
             evaluated_at: new Date().toISOString()
         });
+    }
 
-        // Increment user quota
-        await this.userRepo.incrementQuota(attempt.user_id);
+    async updateAttempt(id: string, data: Partial<Attempt>): Promise<void> {
+        await this.attemptRepo.update(id, data);
     }
 
     async reevaluate(id: string): Promise<{ success: boolean; reason?: string }> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
-
-        const user = await this.userRepo.getById(attempt.user_id);
-        if (!user) throw new Error("User not found");
-
-        const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
-        if (!exercise) throw new Error("Exercise not found");
-
-        const feature = exercise.type.startsWith('writing') ? "writing_evaluation" : "speaking_evaluation";
-        const { SubscriptionPolicy } = await import("./subscription.policy");
-
-        if (!SubscriptionPolicy.canAccessFeature(user, feature)) {
-            return { success: false, reason: "DAILY_LIMIT_REACHED" };
-        }
 
         await this.evaluateAttempt(id);
 
