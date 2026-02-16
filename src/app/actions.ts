@@ -57,11 +57,6 @@ export async function startExerciseAttempt(exerciseId: string) {
         }
     }
 
-    // Check for evaluation limits
-    if (!SubscriptionPolicy.canAccessFeature(user, "writing_evaluation")) {
-        throw new Error("DAILY_LIMIT_EXCEEDED");
-    }
-
     // Check for existing in-progress attempt to resume
     const attempts = await attemptService.getUserAttempts(user.id);
     const existing = attempts.find(a => a.exercise_id === exerciseId && (a.state === "CREATED" || a.state === "IN_PROGRESS"));

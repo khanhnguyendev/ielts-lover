@@ -60,6 +60,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     const displayData = isSample ? sampleData : (realData?.feedback ? {
         ...JSON.parse(realData.feedback),
         id: realData.id,
+        originalText: realData.content,
         type: realData.exercise?.type.startsWith('writing') ? "Writing" :
             realData.exercise?.type.startsWith('speaking') ? "Speaking" : "Rewriter"
     } : null)
