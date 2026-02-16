@@ -91,15 +91,6 @@ export function ErrorDetailsDialog({
                         </div>
                     </div>
 
-                    {/* Trace ID */}
-                    {traceId && (
-                        <div className="grid gap-1">
-                            <LabelWithIcon icon={FileText} label="Trace ID" />
-                            <div className="font-mono text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded-md border border-gray-100 break-all">
-                                {traceId}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 mt-4">
