@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
     ChevronLeft,
     Mic2,
@@ -24,6 +25,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
+import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft } from "@/app/actions"
+import { Exercise, Attempt } from "@/types"
+import { PulseLoader } from "@/components/global/PulseLoader"
+import { FeedbackModal } from "@/components/dashboard/feedback-modal"
+import { useNotification } from "@/lib/contexts/notification-context"
 
 export default function SpeakingPracticePage({ params }: { params: { type: string } }) {
     const [currentQuestion, setCurrentQuestion] = React.useState(1)
@@ -31,6 +37,33 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     const [timeLeft, setTimeLeft] = React.useState(0)
     const [status, setStatus] = React.useState<"PRACTICE" | "PROCESSING" | "COMPLETE">("PRACTICE")
     const [sidebarExpanded, setSidebarExpanded] = React.useState(true)
+
+    const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [showFeedback, setShowFeedback] = React.useState(false)
+    const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
+    const { notifySuccess, notifyWarning, notifyError } = useNotification()
+    const router = useRouter()
+
+    React.useEffect(() => {
+        const init = async () => {
+            setIsLoading(true)
+            try {
+                const data = await getExerciseById(params.type)
+                setExercise(data)
+
+                const attempt = await startExerciseAttempt(params.type)
+                setCurrentAttempt(attempt)
+            } catch (err) {
+                console.error("Failed to init speaking practice:", err)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        init()
+    }, [params.type])
 
     const questions = [
         "Do you like advertisements?",
@@ -226,6 +259,50 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                                 <span className="text-lg font-black font-outfit text-slate-600">
                                     {formatTime(timeLeft)}
                                 </span>
+                            </div>
+
+                            <div className="pt-4 flex flex-col items-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={async () => {
+                                        if (!currentAttempt) return;
+                                        setIsSubmitting(true);
+                                        try {
+                                            // In a real speaking app, we'd upload audio here
+                                            // But for this mock/proto, we'll just save the draft
+                                            await saveAttemptDraft(currentAttempt.id, "Audio recording placeholder");
+                                            notifySuccess("Draft Saved", "Your speaking practice has been saved. You can request evaluation later from the Reports tab.");
+                                            router.push("/dashboard/reports");
+                                        } catch (error) {
+                                            console.error("Save failed:", error);
+                                            notifyError("Save Failed", "We couldn't save your draft. Please try again.");
+                                        } finally {
+                                            setIsSubmitting(false);
+                                        }
+                                    }}
+                                    disabled={isSubmitting || isRecording}
+                                    className="px-10 rounded-2xl font-bold border-2"
+                                >
+                                    Evaluate Later
+                                </Button>
+                                {currentQuestion === questions.length && !isRecording && timeLeft > 0 && (
+                                    <Button
+                                        onClick={async () => {
+                                            if (!currentAttempt) return;
+                                            // Redirect or trigger similar logic to writing finish
+                                            notifyWarning("Finish Session", "Ready to get feedback on your speaking?", "Evaluate Now", async () => {
+                                                // Optimistic decrement animation
+                                                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+
+                                                setStatus("PROCESSING");
+                                                setTimeout(() => setStatus("COMPLETE"), 2000);
+                                            });
+                                        }}
+                                        className="bg-primary text-white px-10 rounded-2xl font-black"
+                                    >
+                                        Finish and Get Feedback <Sparkles className="ml-2 h-4 w-4 fill-white" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>

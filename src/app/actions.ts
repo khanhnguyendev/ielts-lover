@@ -112,6 +112,24 @@ export async function submitAttempt(attemptId: string, content: string) {
     }, generateTraceId());
 }
 
+export async function saveAttemptDraft(attemptId: string, content: string) {
+    return withTrace(async () => {
+        const user = await getCurrentUser();
+        if (!user) throw new Error("User not authenticated");
+
+        const attempt = await attemptService.getAttempt(attemptId);
+        if (!attempt) throw new Error("Attempt not found");
+
+        await attemptService.updateAttempt(attemptId, {
+            content,
+            state: "SUBMITTED",
+            submitted_at: new Date().toISOString()
+        });
+
+        return { success: true };
+    }, generateTraceId());
+}
+
 export async function reevaluateAttempt(attemptId: string) {
     return withTrace(async () => {
         const user = await getCurrentUser();

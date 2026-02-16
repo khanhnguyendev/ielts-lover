@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
     ChevronDown,
     Search,
@@ -46,6 +47,7 @@ export default function ReportsPage() {
     const [isLoading, setIsLoading] = React.useState(true)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const { notifySuccess, notifyError, notifyWarning } = useNotification()
+    const router = useRouter()
 
     const fetchReports = React.useCallback(async () => {
         setIsLoading(true)
@@ -70,6 +72,9 @@ export default function ReportsPage() {
             "Get AI Feedback",
             async () => {
                 setReevaluatingId(id)
+                // Optimistic decrement animation
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+
                 try {
                     const result = await reevaluateAttempt(id)
                     if (result.success) {
@@ -78,8 +83,12 @@ export default function ReportsPage() {
                             "Your report has been updated with the latest AI feedback. You can now view your score and detailed analysis.",
                             "View Report"
                         )
+                        router.refresh()
                         await fetchReports()
                     } else {
+                        // Refund animation if failed
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+
                         if (result.reason === "INSUFFICIENT_CREDITS") {
                             notifyWarning(
                                 "Insufficient Credits",
@@ -97,6 +106,8 @@ export default function ReportsPage() {
                     }
                 } catch (error) {
                     console.error("Re-evaluation failed:", error)
+                    // Refund animation on system error
+                    window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
 
                     const errorObj = error as any;
                     const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);

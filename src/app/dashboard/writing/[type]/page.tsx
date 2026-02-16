@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
     ChevronLeft,
     Clock,
@@ -19,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { getExerciseById, startExerciseAttempt, submitAttempt } from "@/app/actions"
+import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft } from "@/app/actions"
 import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/PulseLoader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
@@ -39,6 +40,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
     const { notifySuccess, notifyWarning, notifyError } = useNotification()
+    const router = useRouter()
 
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
 
@@ -304,14 +306,39 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Auto-saved 2s ago</span>
                         </div>
 
-                        <Button
-                            onClick={handleFinish}
-                            disabled={isSubmitting || !text.trim()}
-                            className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all"
-                        >
-                            {isSubmitting ? "Evaluating..." : "Finish and Get Feedback"}
-                            {!isSubmitting && <Sparkles className="ml-2 h-5 w-5 fill-white" />}
-                        </Button>
+                        <div className="flex items-center gap-4">
+                            <Button
+                                variant="outline"
+                                onClick={async () => {
+                                    if (!currentAttempt) return;
+                                    setIsSubmitting(true);
+                                    try {
+                                        await saveAttemptDraft(currentAttempt.id, text);
+                                        notifySuccess("Draft Saved", "Your work has been saved. You can request evaluation later from the Reports tab.");
+                                        router.push("/dashboard/reports");
+                                    } catch (error) {
+                                        console.error("Submission failed:", error);
+                                        // Refund animation on system error
+                                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                                        notifyError("Save Failed", "We couldn't save your draft. Please try again.");
+                                    } finally {
+                                        setIsSubmitting(false);
+                                    }
+                                }}
+                                disabled={isSubmitting || !text.trim()}
+                                className="h-14 px-8 rounded-2xl font-bold border-2"
+                            >
+                                Evaluate Later
+                            </Button>
+                            <Button
+                                onClick={handleFinish}
+                                disabled={isSubmitting || !text.trim()}
+                                className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                            >
+                                {isSubmitting ? "Evaluating..." : "Finish and Get Feedback"}
+                                {!isSubmitting && <Sparkles className="ml-2 h-5 w-5 fill-white" />}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
