@@ -30,6 +30,9 @@ export function ErrorDetailsDialog({
     const traceIdMatch = error?.match(/\(Trace ID: ([a-f0-9-]+)\)/);
     const traceId = traceIdMatch ? traceIdMatch[1] : null;
 
+    // Remove the trace ID part from the message for cleaner display
+    const displayError = error?.replace(/\(Trace ID: [a-f0-9-]+\)/, "").trim();
+
     const handleCopy = () => {
         if (!error) return;
         navigator.clipboard.writeText(error);
@@ -52,8 +55,8 @@ export function ErrorDetailsDialog({
                 </DialogHeader>
 
                 <div className="bg-red-50 p-4 rounded-md border border-red-100 space-y-3">
-                    <p className="text-sm text-red-900 font-medium break-words">
-                        {error}
+                    <p className="text-sm text-red-900 font-medium break-words overflow-auto max-h-[200px]">
+                        {displayError}
                     </p>
                     {traceId && (
                         <div className="flex items-center gap-2 text-xs text-red-700 bg-red-100/50 p-2 rounded">
