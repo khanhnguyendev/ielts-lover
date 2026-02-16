@@ -19,37 +19,65 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { getExerciseById } from "@/app/actions"
-import { Exercise } from "@/types"
+import { getExerciseById, startExerciseAttempt, submitAttempt } from "@/app/actions"
+import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/PulseLoader"
+import { FeedbackModal } from "@/components/dashboard/feedback-modal"
+import { toast } from "sonner"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
     const exerciseId = resolvedParams.type
 
     const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [text, setText] = React.useState("")
     const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
+
+    const [showFeedback, setShowFeedback] = React.useState(false)
+    const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string }>({})
+
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
 
     React.useEffect(() => {
-        const fetchExercise = async () => {
+        const init = async () => {
             setIsLoading(true)
             try {
+                // 1. Fetch Exercise
                 const data = await getExerciseById(exerciseId)
-                if (data) {
-                    setExercise(data)
-                    // Adjust timer based on type if needed, e.g. Task 2 = 40 mins
-                    if (data.type === "writing_task2") setTimeLeft(2400)
+                if (!data) {
+                    setExercise(null)
+                    return
                 }
+                setExercise(data)
+
+                // 2. Start or Resume Attempt
+                try {
+                    const attempt = await startExerciseAttempt(exerciseId)
+                    setCurrentAttempt(attempt)
+
+                    // Resume content if any
+                    if (attempt.content) {
+                        setText(attempt.content)
+                    }
+
+                    // Adjust timer based on type if needed
+                    if (data.type === "writing_task2") setTimeLeft(2400)
+
+                } catch (err) {
+                    console.error("Failed to start attempt:", err)
+                    toast.error("Failed to initialize attempt session")
+                }
+
             } catch (error) {
                 console.error("Failed to fetch exercise:", error)
             } finally {
                 setIsLoading(false)
             }
         }
-        fetchExercise()
+        init()
     }, [exerciseId])
 
     // Timer logic
@@ -65,6 +93,31 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
         return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const handleFinish = async () => {
+        if (!currentAttempt) return;
+
+        setIsSubmitting(true)
+        try {
+            const result = await submitAttempt(currentAttempt.id, text)
+
+            if (result && result.score !== undefined) {
+                setFeedbackData({
+                    score: result.score,
+                    feedback: result.feedback
+                })
+                setShowFeedback(true)
+                toast.success("Evaluation complete!")
+            } else {
+                toast.warning("Submission received, but evaluation is pending.")
+            }
+        } catch (error) {
+            console.error("Submission failed:", error)
+            toast.error("Failed to submit attempt")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     if (isLoading) {
@@ -208,13 +261,25 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Auto-saved 2s ago</span>
                         </div>
 
-                        <Button className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all">
-                            Finish and Get Feedback
-                            <Sparkles className="ml-2 h-5 w-5 fill-white" />
+                        <Button
+                            onClick={handleFinish}
+                            disabled={isSubmitting || !text.trim()}
+                            className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                        >
+                            {isSubmitting ? "Evaluating..." : "Finish and Get Feedback"}
+                            {!isSubmitting && <Sparkles className="ml-2 h-5 w-5 fill-white" />}
                         </Button>
                     </div>
                 </div>
             </div>
+
+            <FeedbackModal
+                open={showFeedback}
+                onOpenChange={setShowFeedback}
+                score={feedbackData.score}
+                feedback={feedbackData.feedback}
+                type={exercise.type as any}
+            />
         </div>
     )
 }

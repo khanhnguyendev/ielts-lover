@@ -36,8 +36,23 @@ export async function startAttempt(userId: string, exerciseId: string) {
     return attemptService.startAttempt(userId, exerciseId);
 }
 
+export async function startExerciseAttempt(exerciseId: string) {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Check for existing in-progress attempt to resume
+    const attempts = await attemptService.getUserAttempts(user.id);
+    const existing = attempts.find(a => a.exercise_id === exerciseId && (a.state === "CREATED" || a.state === "IN_PROGRESS"));
+
+    if (existing) return existing;
+
+    return attemptService.startAttempt(user.id, exerciseId);
+}
+
 export async function submitAttempt(attemptId: string, content: string) {
-    return attemptService.submitAttempt(attemptId, content);
+    await attemptService.submitAttempt(attemptId, content);
+    // Fetch and return the updated attempt with feedback
+    return attemptService.getAttempt(attemptId);
 }
 
 export async function getAllUsers() {
