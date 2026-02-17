@@ -27,7 +27,7 @@ import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft } from "@/app/actions"
 import { Exercise, Attempt } from "@/types"
-import { PulseLoader } from "@/components/global/PulseLoader"
+import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
 

@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 
 import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
-import { PulseLoader } from "@/components/global/PulseLoader"
+import { PulseLoader } from "@/components/global/pulse-loader"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
 import { CreditPolicy } from "@/services/credit.policy"
 

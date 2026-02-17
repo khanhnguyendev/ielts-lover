@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts } from "../actions";
 import { UserProfile } from "@/types";
-import { PulseLoader } from "@/components/global/PulseLoader";
+import { PulseLoader } from "@/components/global/pulse-loader";
 import { TransactionTable } from "@/components/dashboard/transaction-table";
 import { CreditTransaction } from "@/repositories/interfaces";
 import { Badge } from "@/components/ui/badge";

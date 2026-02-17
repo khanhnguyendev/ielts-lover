@@ -23,7 +23,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { PulseLoader } from "@/components/global/PulseLoader"
+import { PulseLoader } from "@/components/global/pulse-loader"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 const CATEGORIES = [

@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { signOut } from "@/app/actions"
 import { useState } from "react"
 import { UserProfile } from "@/types"
-import { PulseLoader } from "./PulseLoader"
+import { PulseLoader } from "./pulse-loader"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 

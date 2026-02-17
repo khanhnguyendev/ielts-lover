@@ -39,7 +39,7 @@ import { cn } from "@/lib/utils"
 import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
-import { PulseLoader } from "@/components/global/PulseLoader";
+import { PulseLoader } from "@/components/global/pulse-loader";
 import { getBandScoreConfig } from "@/lib/score-utils";
 
 import {

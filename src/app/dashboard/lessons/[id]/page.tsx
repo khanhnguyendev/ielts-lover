@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { AppLoading } from "@/components/global/AppLoading"
+import { AppLoading } from "@/components/global/app-loading"
 
 import { getLessonById, getLessons, getLessonQuestions } from "@/app/actions";
 import { Lesson, LessonQuestion } from "@/types";

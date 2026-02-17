@@ -21,14 +21,14 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
-import { WritingEvaluation } from "@/components/reports/WritingEvaluation"
-import { SpeakingEvaluation } from "@/components/reports/SpeakingEvaluation"
-import { RewriterEvaluation } from "@/components/reports/RewriterEvaluation"
+import { WritingEvaluation } from "@/components/reports/writing-evaluation"
+import { SpeakingEvaluation } from "@/components/reports/speaking-evaluation"
+import { RewriterEvaluation } from "@/components/reports/rewriter-evaluation"
 import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
 import { getAttemptWithExercise } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { getBandScoreConfig } from "@/lib/score-utils"
-import { PulseLoader } from "@/components/global/PulseLoader"
+import { PulseLoader } from "@/components/global/pulse-loader"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)

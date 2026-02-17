@@ -12,7 +12,7 @@ import {
 import { getExercises } from "@/app/actions";
 import { Exercise, ExerciseType } from "@/types";
 import { Plus, Edit, Trash2, Eye, Search } from "lucide-react";
-import { PulseLoader } from "@/components/global/PulseLoader";
+import { PulseLoader } from "@/components/global/pulse-loader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";

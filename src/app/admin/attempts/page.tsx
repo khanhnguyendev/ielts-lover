@@ -20,7 +20,7 @@ import {
     Search
 } from "lucide-react";
 import { getAdminAttempts } from "../actions";
-import { PulseLoader } from "@/components/global/PulseLoader";
+import { PulseLoader } from "@/components/global/pulse-loader";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

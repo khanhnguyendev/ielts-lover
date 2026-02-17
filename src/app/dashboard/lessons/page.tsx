@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { getLessons } from "@/app/actions"
 import { Lesson } from "@/types"
-import { AppLoading } from "@/components/global/AppLoading"
+import { AppLoading } from "@/components/global/app-loading"
 
 export default function LessonsHubPage() {
     const [lessons, setLessons] = React.useState<Lesson[]>([])

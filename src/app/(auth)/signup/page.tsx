@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { signInWithGoogle } from "@/app/actions"
-import { PulseLoader } from "@/components/global/PulseLoader"
+import { PulseLoader } from "@/components/global/pulse-loader"
 
 export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false)
