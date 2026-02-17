@@ -25,6 +25,10 @@
   --color-primary: var(--foreground-accent);
   --color-primary-foreground: white;
   --color-muted-foreground: var(--foreground-muted);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--foreground-primary);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--foreground-primary);
   --color-border: var(--border-default);
   --color-input: var(--border-default);
   --color-ring: var(--border-focus);
@@ -119,10 +123,21 @@
     @apply tracking-tight;
   }
 
-  h1 { @apply text-2xl; }
-  h2 { @apply text-xl; }
-  h3 { @apply text-lg; }
-  h4 { @apply text-base; }
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  h4 {
+    @apply text-base;
+  }
 
   button,
   a {
@@ -137,16 +152,37 @@
     @apply text-foreground-secondary leading-relaxed;
   }
 }
+
 /* Loading Animations */
 @keyframes heartPulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.8; }
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
 }
 
 @keyframes logoFade {
-  0% { opacity: 0; transform: translateY(10px); filter: blur(4px); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .animate-heart-pulse {

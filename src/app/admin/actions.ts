@@ -272,3 +272,14 @@ export async function getAdminUsers() {
     await checkAdmin();
     return userRepo.listAll();
 }
+
+export async function getAdminUserTransactions(userId: string) {
+    await checkAdmin();
+    return transactionRepo.listByUserId(userId);
+}
+
+export async function getAdminUserAttempts(userId: string) {
+    await checkAdmin();
+    // Use attemptRepo to list by user
+    return attemptRepo.listByUserId(userId);
+}

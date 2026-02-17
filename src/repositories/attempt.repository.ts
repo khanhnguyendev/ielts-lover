@@ -37,16 +37,19 @@ export class AttemptRepository implements IAttemptRepository {
         if (error) throw new Error(`Failed to update attempt: ${error.message}`);
     }
 
-    async listByUserId(userId: string): Promise<Attempt[]> {
+    async listByUserId(userId: string): Promise<any[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
             .from("attempts")
-            .select("*")
+            .select(`
+                *,
+                exercises (type)
+            `)
             .eq("user_id", userId)
             .order("created_at", { ascending: false });
 
         if (error) return [];
-        return data as Attempt[];
+        return data as any[];
     }
 
     async listAll(limit: number = 20): Promise<any[]> {
