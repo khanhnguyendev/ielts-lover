@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Plus, Trash2, Save, MoveUp, MoveDown, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { NumericInput } from "@/components/global/numeric-input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -194,48 +195,28 @@ export default function AdminCreditsPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label>Credits</Label>
-                                <Input
-                                    type="number"
+                                <NumericInput
                                     value={pkg.credits}
-                                    onChange={(e) => {
-                                        const val = parseInt(e.target.value);
-                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, credits: isNaN(val) ? 0 : val } : p));
-                                    }}
-                                    onBlur={(e) => {
-                                        const val = parseInt(e.target.value);
-                                        handleUpdate(pkg.id, { credits: isNaN(val) ? 0 : val });
-                                    }}
+                                    onChange={(val) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, credits: val } : p))}
+                                    onCommit={(val) => handleUpdate(pkg.id, { credits: val })}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>Bonus Credits</Label>
-                                <Input
-                                    type="number"
+                                <NumericInput
                                     value={pkg.bonus_credits}
-                                    onChange={(e) => {
-                                        const val = parseInt(e.target.value);
-                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, bonus_credits: isNaN(val) ? 0 : val } : p));
-                                    }}
-                                    onBlur={(e) => {
-                                        const val = parseInt(e.target.value);
-                                        handleUpdate(pkg.id, { bonus_credits: isNaN(val) ? 0 : val });
-                                    }}
+                                    onChange={(val) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, bonus_credits: val } : p))}
+                                    onCommit={(val) => handleUpdate(pkg.id, { bonus_credits: val })}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>Price ($)</Label>
-                                <Input
-                                    type="number"
+                                <NumericInput
+                                    isFloat
                                     step="0.01"
                                     value={pkg.price}
-                                    onChange={(e) => {
-                                        const val = parseFloat(e.target.value);
-                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, price: isNaN(val) ? 0 : val } : p));
-                                    }}
-                                    onBlur={(e) => {
-                                        const val = parseFloat(e.target.value);
-                                        handleUpdate(pkg.id, { price: isNaN(val) ? 0 : val });
-                                    }}
+                                    onChange={(val) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, price: val } : p))}
+                                    onCommit={(val) => handleUpdate(pkg.id, { price: val })}
                                 />
                             </div>
                             <div className="md:col-span-3 space-y-2">
