@@ -11,14 +11,19 @@ import {
 } from "@/components/ui/table";
 import { getExercises } from "@/app/actions";
 import { Exercise, ExerciseType } from "@/types";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Search } from "lucide-react";
 import { PulseLoader } from "@/components/global/PulseLoader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 
 export default function ExercisesPage() {
+    const searchParams = useSearchParams();
+    const initialSearch = searchParams.get("search") || "";
+
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(initialSearch);
 
     useEffect(() => {
         async function fetchExercises() {
@@ -36,6 +41,11 @@ export default function ExercisesPage() {
         fetchExercises();
     }, []);
 
+    const filteredExercises = exercises.filter(e =>
+        e.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        e.id?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -44,6 +54,16 @@ export default function ExercisesPage() {
                     <p className="text-gray-500">Create and manage IELTS writing and speaking exercises.</p>
                 </div>
                 <div className="flex gap-2">
+                    <div className="relative mr-2">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search by Title or ID..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium w-64"
+                        />
+                    </div>
                     <Link href="/admin/exercises/create/writing">
                         <Button className="bg-purple-600 hover:bg-purple-700">
                             <Plus className="mr-2 h-4 w-4" />
