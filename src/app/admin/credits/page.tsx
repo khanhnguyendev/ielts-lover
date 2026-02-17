@@ -17,6 +17,49 @@ import {
 } from "../actions"
 import { CreditPackage } from "@/types"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function LoadingSkeleton() {
+    return (
+        <div className="p-8 space-y-8 max-w-5xl mx-auto">
+            <div className="flex justify-between items-center">
+                <div className="space-y-2">
+                    <Skeleton className="h-10 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+                <div className="flex gap-4">
+                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-10 w-32" />
+                </div>
+            </div>
+
+            <div className="grid gap-6">
+                {[1, 2, 3].map((i) => (
+                    <Card key={i} className="p-6 space-y-4">
+                        <div className="flex justify-between mb-4">
+                            <div className="flex gap-4">
+                                <Skeleton className="h-12 w-12 rounded-xl" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-6 w-32" />
+                                    <Skeleton className="h-4 w-24" />
+                                </div>
+                            </div>
+                            <Skeleton className="h-8 w-24 rounded-lg" />
+                        </div>
+                        <div className="grid md:grid-cols-4 gap-6">
+                            {[1, 2, 3, 4].map((j) => (
+                                <div key={j} className="space-y-2">
+                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="h-10 w-full rounded-xl" />
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    )
+}
 
 export default function AdminCreditsPage() {
     const { notifySuccess, notifyError } = useNotification()
@@ -91,7 +134,7 @@ export default function AdminCreditsPage() {
         }
     }
 
-    if (loading) return <div className="p-8">Loading...</div>
+    if (loading) return <LoadingSkeleton />
 
     return (
         <div className="p-8 space-y-8 max-w-5xl mx-auto">
