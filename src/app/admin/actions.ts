@@ -231,17 +231,18 @@ export async function uploadImage(formData: FormData) {
 
 export async function getAdminStats() {
     await checkAdmin();
-    const [totalUsers, premiumUsers, todayAttempts] = await Promise.all([
+    const [totalUsers, premiumUsers, todayAttempts, activeExercises] = await Promise.all([
         userRepo.getTotalCount(),
         userRepo.getPremiumCount(),
-        attemptRepo.getTodayCount()
+        attemptRepo.getTodayCount(),
+        exerciseRepo.getTotalCount()
     ]);
 
     return {
         totalUsers,
         premiumUsers,
         todayAttempts,
-        activeExercises: 48 // For now, maybe static or count later
+        activeExercises
     };
 }
 

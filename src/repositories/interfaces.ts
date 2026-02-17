@@ -14,6 +14,7 @@ export interface IExerciseRepository {
     getLatestVersion(type: ExerciseType): Promise<Exercise | null>;
     listByType(type: ExerciseType): Promise<Exercise[]>;
     createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise>;
+    getTotalCount(): Promise<number>;
 }
 
 export interface IAttemptRepository {

@@ -73,7 +73,9 @@ export default async function AdminDashboard() {
                                                 {attempt.user_profiles?.email}
                                             </p>
                                             <p className="text-[11px] font-medium text-slate-500">
-                                                Submitted {attempt.exercise_id && `exercise ${attempt.exercise_id?.substring(0, 8)}`}
+                                                Submitted {attempt.exercises?.type ? (
+                                                    <span className="font-bold border-b border-primary/20">{attempt.exercises.type.replace('_', ' ')}</span>
+                                                ) : `exercise ${attempt.exercise_id?.substring(0, 8)}`}
                                             </p>
                                         </div>
                                     </div>

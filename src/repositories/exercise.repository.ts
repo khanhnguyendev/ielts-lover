@@ -54,4 +54,15 @@ export class ExerciseRepository implements IExerciseRepository {
         if (error) throw new Error(`Failed to create exercise version: ${error.message}`);
         return data as Exercise;
     }
+
+    async getTotalCount(): Promise<number> {
+        const supabase = await createServerSupabaseClient();
+        const { count, error } = await supabase
+            .from("exercises")
+            .select("*", { count: 'exact', head: true })
+            .eq("is_published", true);
+
+        if (error) throw new Error(`Failed to get total exercise count: ${error.message}`);
+        return count || 0;
+    }
 }
