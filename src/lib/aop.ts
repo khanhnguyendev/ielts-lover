@@ -34,3 +34,20 @@ export function traceService<T extends object>(instance: T, serviceName: string)
         }
     });
 }
+
+/**
+ * Higher-order function to wrap a standalone action with tracing and error handling.
+ */
+export function traceAction<T extends any[], R>(name: string, action: (...args: T) => Promise<R>): (...args: T) => Promise<R> {
+    const logger = new Logger(name);
+    return async (...args: T) => {
+        return withTrace(async () => {
+            try {
+                return await action(...args);
+            } catch (error) {
+                logger.error(`Action ${name} failed`, { error });
+                throw error;
+            }
+        }, `ACT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+    };
+}
