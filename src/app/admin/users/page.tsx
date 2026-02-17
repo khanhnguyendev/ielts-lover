@@ -158,11 +158,7 @@ export default function UsersPage() {
 
     return (
         <div className="space-y-6 p-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-black font-outfit text-slate-900">User Management</h1>
-                    <p className="text-muted-foreground font-medium">Manage user accounts and credit balances.</p>
-                </div>
+            <div className="flex justify-end items-center">
                 <div className="flex space-x-3">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />

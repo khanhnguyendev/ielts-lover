@@ -48,35 +48,29 @@ export default function ExercisesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Exercises Management</h2>
-                    <p className="text-gray-500">Create and manage IELTS writing and speaking exercises.</p>
+            <div className="flex justify-end items-center gap-2">
+                <div className="relative mr-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                        type="text"
+                        placeholder="Search by Title or ID..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium w-64"
+                    />
                 </div>
-                <div className="flex gap-2">
-                    <div className="relative mr-2">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search by Title or ID..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium w-64"
-                        />
-                    </div>
-                    <Link href="/admin/exercises/create/writing">
-                        <Button className="bg-purple-600 hover:bg-purple-700">
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Writing
-                        </Button>
-                    </Link>
-                    <Link href="/admin/exercises/create/speaking">
-                        <Button className="bg-blue-600 hover:bg-blue-700">
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Speaking
-                        </Button>
-                    </Link>
-                </div>
+                <Link href="/admin/exercises/create/writing">
+                    <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Writing
+                    </Button>
+                </Link>
+                <Link href="/admin/exercises/create/speaking">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Speaking
+                    </Button>
+                </Link>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

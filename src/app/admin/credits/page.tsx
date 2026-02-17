@@ -139,19 +139,13 @@ export default function AdminCreditsPage() {
 
     return (
         <div className="p-8 space-y-8 max-w-5xl mx-auto">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-black font-outfit">Credit Packages</h1>
-                    <p className="text-muted-foreground">Manage purchase options for StarCredits</p>
-                </div>
-                <div className="flex gap-4">
-                    <Button variant="outline" onClick={handleSeed} className="gap-2">
-                        <Zap className="h-4 w-4" /> Seed Database
-                    </Button>
-                    <Button onClick={handleAddPackage} className="gap-2">
-                        <Plus className="h-4 w-4" /> Add Package
-                    </Button>
-                </div>
+            <div className="flex justify-end items-center gap-4">
+                <Button variant="outline" onClick={handleSeed} className="gap-2">
+                    <Zap className="h-4 w-4" /> Seed Database
+                </Button>
+                <Button onClick={handleAddPackage} className="gap-2">
+                    <Plus className="h-4 w-4" /> Add Package
+                </Button>
             </div>
 
             <div className="grid gap-6">

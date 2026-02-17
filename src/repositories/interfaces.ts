@@ -52,3 +52,18 @@ export interface ICreditTransactionRepository {
     create(transaction: Omit<CreditTransaction, "id" | "created_at">): Promise<CreditTransaction>;
     listByUserId(userId: string): Promise<CreditTransaction[]>;
 }
+
+export type SystemSetting = {
+    id: string;
+    setting_key: string;
+    setting_value: any;
+    description?: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export interface ISystemSettingsRepository {
+    getByKey<T>(key: string): Promise<T | null>;
+    listAll(): Promise<SystemSetting[]>;
+    updateSetting(key: string, value: any): Promise<void>;
+}

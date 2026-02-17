@@ -22,8 +22,6 @@ import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { PremiumBanner } from "@/components/dashboard/premium-banner"
-import { CreditPolicy } from "@/services/credit.policy"
-
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
@@ -42,17 +40,25 @@ export default function DashboardPage() {
         loadData()
     }, [])
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <PulseLoader size="lg" color="primary" />
+            </div>
+        )
+    }
+
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
             <div className="p-8 lg:p-12 space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
                 {/* 1. Daily Quota Banner */}
                 <PremiumBanner
                     title={`You have ${user?.credits_balance || 0} StarCredits available`}
-                    subtitle={`Daily grants add ${CreditPolicy.DAILY_GRANT_FREE} credits every 24 hours`}
+                    subtitle={`Daily grants add credits every 24 hours`}
                     action={user?.is_premium ? (
                         <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
                     ) : undefined}
-                    buttonText="Upgrade for higher daily grants"
+                    buttonText="Get more StarCredits"
                 />
 
                 {/* 2. IELTS Info Card */}
@@ -142,7 +148,7 @@ export default function DashboardPage() {
                         <OnboardingStep label="Add your target score" completed={true} />
                         <OnboardingStep label="Learn your speaking level" />
                         <OnboardingStep label="Learn your writing level" />
-                        <OnboardingStep label="View premium sample reports" />
+                        <OnboardingStep label="View sample reports" />
                     </div>
                 </div>
 
@@ -198,16 +204,16 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <h4 className="text-lg font-bold">You don&apos;t have any reports yet.</h4>
                             <p className="text-sm text-muted-foreground max-w-sm mx-auto font-medium leading-relaxed">
-                                Check out sample reports to see feedback examples for premium users.
+                                Check out sample reports to see feedback examples.
                             </p>
                         </div>
                         <Link href="/dashboard/samples">
-                            <Button variant="premium" size="lg" className="px-10">
-                                View Premium Sample Reports
+                            <Button variant="default" size="lg" className="px-10">
+                                View Sample Reports
                             </Button>
                         </Link>
                         <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium pt-8">
-                            Free users can see up to 5 completed records. <span className="text-primary font-bold cursor-pointer hover:underline">Upgrade</span> to see more results.
+                            Free users can see up to 5 completed records. Upgrade to see more results.
                         </p>
                     </div>
 

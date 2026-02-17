@@ -1,5 +1,4 @@
-import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository } from "../repositories/interfaces";
-import { CreditPolicy } from "./credit.policy";
+import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository } from "../repositories/interfaces";
 
 export class InsufficientFundsError extends Error {
     constructor(message: string) {
@@ -12,7 +11,8 @@ export class CreditService {
     constructor(
         private userRepo: IUserRepository,
         private pricingRepo: IFeaturePricingRepository,
-        private transactionRepo: ICreditTransactionRepository
+        private transactionRepo: ICreditTransactionRepository,
+        private settingsRepo: ISystemSettingsRepository
     ) { }
 
     /**
@@ -29,7 +29,7 @@ export class CreditService {
         const diffHours = diffMs / (1000 * 60 * 60);
 
         if (diffHours >= 24) {
-            const grantAmount = user.is_premium ? CreditPolicy.DAILY_GRANT_PREMIUM : CreditPolicy.DAILY_GRANT_FREE;
+            const grantAmount = await this.settingsRepo.getByKey<number>("DAILY_GRANT_FREE") || 5;
 
             await this.userRepo.update(userId, {
                 credits_balance: user.credits_balance + grantAmount,
@@ -116,9 +116,10 @@ export class CreditService {
      * Specific Bonus: Event Bonus
      */
     async grantEventBonus(userId: string, eventName: string): Promise<void> {
+        const amount = await this.settingsRepo.getByKey<number>("EVENT_BONUS_DEFAULT") || 5;
         await this.rewardUser(
             userId,
-            CreditPolicy.EVENT_BONUS_DEFAULT,
+            amount,
             "reward",
             `Event bonus: ${eventName}`
         );
@@ -127,10 +128,11 @@ export class CreditService {
     /**
      * Specific Bonus: System Grant / Gift Code
      */
-    async applyGiftCode(userId: string, code: string, amount: number = CreditPolicy.GIFT_CODE_DEFAULT): Promise<void> {
+    async applyGiftCode(userId: string, code: string, amount?: number): Promise<void> {
+        const giftAmount = amount ?? (await this.settingsRepo.getByKey<number>("GIFT_CODE_DEFAULT") || 20);
         await this.rewardUser(
             userId,
-            amount,
+            giftAmount,
             "gift_code",
             `Gift code Applied: ${code}`
         );
@@ -140,9 +142,10 @@ export class CreditService {
      * Specific Bonus: Welcome Grant
      */
     async grantWelcomeBonus(userId: string): Promise<void> {
+        const amount = await this.settingsRepo.getByKey<number>("SYSTEM_GRANT_WELCOME") || 10;
         await this.rewardUser(
             userId,
-            CreditPolicy.SYSTEM_GRANT_WELCOME,
+            amount,
             "reward",
             "Welcome to IELTS Lover!"
         );

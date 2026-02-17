@@ -5,14 +5,19 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
     LayoutDashboard,
-    BookOpen,
     Users,
-    BarChart3,
+    FileText,
     Settings,
-    ChevronLeft,
-    ShieldCheck,
+    Package,
     ArrowLeft,
-    Database,
+    LogOut,
+    ChevronLeft,
+    ChevronRight,
+    Search,
+    Wand2,
+    Calendar,
+    Settings2,
+    ShieldCheck,
     Zap
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -30,23 +35,17 @@ const NAV_GROUPS = [
         label: "Content Management",
         items: [
             { icon: Zap, label: "Exercises", href: "/admin/exercises" },
-            { icon: BookOpen, label: "Lessons", href: "/admin/lessons" },
-            { icon: Database, label: "Credit Packages", href: "/admin/credits" },
+            { icon: Package, label: "Credit Packages", href: "/admin/credits" },
+            { icon: Settings2, label: "System Settings", href: "/admin/settings" },
         ]
     },
     {
         label: "User Operations",
         items: [
             { icon: Users, label: "Users", href: "/admin/users" },
-            { icon: BarChart3, label: "Attempts Audit", href: "/admin/attempts" },
+            { icon: FileText, label: "Attempts Audit", href: "/admin/attempts" },
         ]
     },
-    {
-        label: "System",
-        items: [
-            { icon: Settings, label: "Settings", href: "/admin/settings" },
-        ]
-    }
 ]
 
 export function Sidebar() {

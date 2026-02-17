@@ -15,12 +15,16 @@ AI-powered IELTS preparation platform using Next.js 16, Supabase, and a strict l
    - Treatment: Fallible, asynchronous, expensive.
    - Prompts: Versioned JSON-return prompts in `ai.service.ts`.
    - Storage: Every AI response must be stored in `reports` table.
-4. **Immutability**:
+4. **Admin Console Rules**:
+    - Admin actions must be auditable, reversible, and support draft flow.
+    - AI-generated exercises require human approval.
+    - **Page Titles**: Managed centrally by `AdminDynamicTitle` in the global `Header`. Do not render titles or redundant header sections (e.g., `<h1>`, `<h2>` with page names) within individual admin pages.
+5. **Immutability**:
    - `exercises` are versioned/immutable once published.
    - `attempts` and `reports` are historical records; never edit.
-5. **Subscription**:
-   - Only `subscription.policy.ts` decides access.
-   - UI shows "Upgrade" UI based on explicit policy failure reasons.
+6. **Access Control**:
+    - Only `credit.policy.ts` defines baseline economy rules.
+    - UI shows "Upgrade" UI based on explicit credit balance or policy failure reasons.
 
 ## Stack Conventions
 - **Next.js**: Use App Router, Server Components where possible.

@@ -11,10 +11,10 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 import { LessonRepository } from "@/repositories/lesson.repository";
-import { LessonService } from "@/services/lesson.service";
-import { SubscriptionPolicy } from "@/services/subscription.policy";
-import { FeaturePricingRepository } from "@/repositories/pricing.repository";
+import { LessonService } from "@/services/lesson.service"
+import { FeaturePricingRepository } from "@/repositories/pricing.repository"
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
+import { SystemSettingsRepository } from "@/repositories/system-settings.repository";
 import { CreditService } from "@/services/credit.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 import { traceService, traceAction } from "@/lib/aop";
@@ -36,7 +36,8 @@ const lessonService = traceService(new LessonService(lessonRepo), "LessonService
 // Credit Economy
 const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricingRepository");
 const transactionRepo = traceService(new CreditTransactionRepository(), "CreditTransactionRepository");
-const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo), "CreditService");
+const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
+const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
@@ -53,7 +54,10 @@ export async function startAttempt(userId: string, exerciseId: string) {
 export async function checkFeatureAccess(feature: string, cost: number = 0) {
     const user = await getCurrentUser();
     if (!user) return false;
-    return SubscriptionPolicy.canAccessFeature(user, feature, cost);
+
+    // If it's a mock test, we can check for special cases here if needed, 
+    // but for now, we just check credits.
+    return user.credits_balance >= cost;
 }
 
 export async function startExerciseAttempt(exerciseId: string) {
@@ -62,13 +66,6 @@ export async function startExerciseAttempt(exerciseId: string) {
 
     const exercise = await exerciseService.getExercise(exerciseId);
     if (!exercise) throw new Error("Exercise not found");
-
-    // Check for premium features
-    if (exercise.title.toLowerCase().includes("mock test")) {
-        if (!SubscriptionPolicy.canAccessFeature(user, "mock_test")) {
-            throw new Error("MOCK_TEST_PREMIUM_ONLY");
-        }
-    }
 
     // Check for existing in-progress attempt to resume
     const attempts = await attemptService.getUserAttempts(user.id);
