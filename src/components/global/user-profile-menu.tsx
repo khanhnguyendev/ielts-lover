@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LogOut, User, CreditCard, Settings } from "lucide-react"
+import { LogOut, User, CreditCard, Settings, ChevronRight, Zap } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,10 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { signOut } from "@/app/actions"
 import { useState } from "react"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "./PulseLoader"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 export function UserProfileMenu({ user }: { user: UserProfile }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -47,75 +50,94 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0 ring-offset-background transition-colors hover:ring-2 hover:ring-primary/20 hover:ring-offset-2">
-                    <Avatar className="h-11 w-11 border-2 border-white shadow-sm">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 ring-offset-background transition-all hover:scale-105 active:scale-95">
+                    <Avatar className="h-10 w-10 border-2 border-slate-100 shadow-sm ring-2 ring-transparent transition-all group-hover:ring-primary/20">
                         <AvatarImage src={user.avatar_url} alt={user.full_name || "User"} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                        <AvatarFallback className="bg-primary/10 text-primary font-black text-[10px]">
                             {getInitials()}
                         </AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[280px] mt-3 p-2 shadow-2xl border-slate-100 bg-white rounded-[24px]" align="end">
-                <DropdownMenuLabel className="font-normal p-4">
-                    <div className="flex flex-col space-y-1">
-                        <div className="flex items-center gap-2">
-                            <p className="text-sm font-black text-slate-900 leading-none">
-                                {user.full_name || user.email.split("@")[0]}
-                            </p>
-                            {user.is_premium && (
-                                <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full border border-primary/20 uppercase tracking-tighter shadow-sm animate-in fade-in duration-700">Premium</span>
-                            )}
-                        </div>
-                        <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest pt-1">
-                            {user.email}
-                        </p>
-                    </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="mx-2 bg-slate-50" />
-                <div className="px-4 py-3 mx-2 my-1 rounded-2xl bg-yellow-50/50 border border-yellow-100/50 group hover:bg-yellow-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center shadow-sm shadow-yellow-200 group-hover:scale-110 transition-transform">
-                                <span className="text-white text-sm">⭐</span>
+            <DropdownMenuContent
+                className="w-[300px] mt-4 p-0 shadow-2xl border-none bg-white rounded-[32px] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                align="end"
+            >
+                {/* Header with Gradient */}
+                <div className="bg-slate-900 p-6 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-3xl" />
+                    <div className="flex items-center gap-4 relative z-10">
+                        <Avatar className="h-14 w-14 border-2 border-white/20 shadow-xl">
+                            <AvatarImage src={user.avatar_url} />
+                            <AvatarFallback className="bg-white/10 text-white font-black">{getInitials()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-base font-black truncate">{user.full_name || user.email.split("@")[0]}</h3>
+                                {user.is_premium && (
+                                    <Badge className="bg-amber-400 text-slate-900 text-[8px] font-black h-4 px-1.5 border-none shadow-sm uppercase tracking-tighter">Pro</Badge>
+                                )}
                             </div>
-                            <div>
-                                <p className="text-[10px] font-black text-yellow-600 uppercase tracking-widest leading-none mb-1">Balance</p>
-                                <p className="text-sm font-black text-yellow-700 leading-none">{user.credits_balance} StarCredits</p>
-                            </div>
+                            <p className="text-[10px] font-medium text-slate-400 truncate">{user.email}</p>
                         </div>
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100/50 p-0 px-2 rounded-lg">Top Up</Button>
                     </div>
                 </div>
-                <DropdownMenuSeparator className="mx-2 bg-slate-50" />
-                <DropdownMenuGroup className="p-1">
-                    <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 transition-colors">
-                        <User className="mr-3 h-4 w-4 text-slate-600" />
-                        <span>Account</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="rounded-xl cursor-pointer py-3 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 focus:bg-slate-50 transition-colors">
-                        <CreditCard className="mr-3 h-4 w-4 text-slate-600" />
-                        <span>My Plan</span>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator className="mx-2 bg-slate-50" />
-                <DropdownMenuItem
-                    className="rounded-xl cursor-pointer py-3 px-4 text-xs font-black text-red-500 hover:bg-red-50 focus:bg-red-50 transition-colors disabled:opacity-50"
-                    onClick={handleSignOut}
-                    disabled={isLoading}
-                >
-                    <LogOut className="mr-3 h-4 w-4" />
-                    <span className="flex items-center gap-2">
-                        {isLoading ? (
-                            <>
-                                <PulseLoader size="sm" color="red" className="flex-row gap-1" />
-                                <span>Logging out...</span>
-                            </>
-                        ) : (
-                            "Log out"
-                        )}
-                    </span>
-                </DropdownMenuItem>
+
+                <div className="p-3 pt-4">
+                    {/* StarCredits Card */}
+                    <div className="relative group overflow-hidden">
+                        <Link href="/dashboard/pricing" className="block">
+                            <div className="px-5 py-4 rounded-[24px] bg-slate-50 border border-slate-100 group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-300">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                            <span className="text-xl">⭐</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">StarCredits</p>
+                                            <p className="text-lg font-black text-slate-900 leading-none">{user.credits_balance}</p>
+                                        </div>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 group-hover:border-primary/30 group-hover:text-primary transition-all">
+                                        <ChevronRight size={16} />
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <div className="mt-3 space-y-1">
+                        <DropdownMenuGroup>
+                            <Link href="/dashboard/settings">
+                                <DropdownMenuItem className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 focus:bg-slate-50 transition-all border border-transparent whitespace-nowrap overflow-hidden">
+                                    <User className="mr-3 h-4 w-4 text-slate-400" />
+                                    <span className="flex-1">Account Settings</span>
+                                    <Badge variant="outline" className="ml-auto text-[8px] font-black uppercase text-slate-400 border-slate-200">Edit</Badge>
+                                </DropdownMenuItem>
+                            </Link>
+                            <Link href="/dashboard/transactions">
+                                <DropdownMenuItem className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 focus:bg-slate-50 transition-all border border-transparent">
+                                    <CreditCard className="mr-3 h-4 w-4 text-slate-400" />
+                                    <span>Transactions</span>
+                                </DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuGroup>
+
+                        <DropdownMenuSeparator className="mx-2 bg-slate-50 my-2" />
+
+                        <DropdownMenuItem
+                            className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-black text-rose-500 hover:bg-rose-50 focus:bg-rose-50 transition-all disabled:opacity-50"
+                            onClick={handleSignOut}
+                            disabled={isLoading}
+                        >
+                            <LogOut className="mr-3 h-4 w-4" />
+                            <span className="flex-1">
+                                {isLoading ? "Logging out..." : "Sign Out"}
+                            </span>
+                            {isLoading && <PulseLoader size="sm" color="red" />}
+                        </DropdownMenuItem>
+                    </div>
+                </div>
             </DropdownMenuContent>
         </DropdownMenu>
     )
