@@ -23,7 +23,10 @@ export class AttemptRepository implements IAttemptRepository {
             .eq("id", id)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[AttemptRepository] getById failed: ${error.message}`);
+        }
         return data as Attempt;
     }
 
@@ -48,8 +51,8 @@ export class AttemptRepository implements IAttemptRepository {
             .eq("user_id", userId)
             .order("created_at", { ascending: false });
 
-        if (error) return [];
-        return data as any[];
+        if (error) throw new Error(`[AttemptRepository] listByUserId failed: ${error.message}`);
+        return data as Attempt[];
     }
 
     async listAll(limit: number = 20): Promise<any[]> {

@@ -11,7 +11,10 @@ export class LessonRepository implements ILessonRepository {
             .eq("id", id)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[LessonRepository] getById failed: ${error.message}`);
+        }
         return data as Lesson;
     }
 
@@ -22,7 +25,7 @@ export class LessonRepository implements ILessonRepository {
             .select("*")
             .order("order_index", { ascending: true });
 
-        if (error) return [];
+        if (error) throw new Error(`[LessonRepository] listAll failed: ${error.message}`);
         return data as Lesson[];
     }
 
@@ -105,7 +108,8 @@ export class LessonRepository implements ILessonRepository {
             .eq("lesson_id", lessonId)
             .order("order_index", { ascending: true });
 
-        if (error) return [];
+        if (error) throw new Error(`[LessonRepository] getQuestionsByLessonId failed: ${error.message}`);
+
         // Parse options if they are stored as JSON b/c Supabase might return them as object/string depending on client config
         // But here we typed them as string[] in LessonQuestion, and in DB it is JSONB.
         return data.map((q: any) => ({

@@ -10,7 +10,10 @@ export class FeaturePricingRepository implements IFeaturePricingRepository {
             .eq("feature_key", key)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[FeaturePricingRepository] getByKey failed: ${error.message}`);
+        }
         return data as FeaturePricing;
     }
 
@@ -21,7 +24,7 @@ export class FeaturePricingRepository implements IFeaturePricingRepository {
             .select("*")
             .eq("is_active", true);
 
-        if (error) return [];
+        if (error) throw new Error(`[FeaturePricingRepository] listAll failed: ${error.message}`);
         return data as FeaturePricing[];
     }
 

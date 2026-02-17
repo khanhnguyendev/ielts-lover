@@ -11,7 +11,10 @@ export class UserRepository implements IUserRepository {
             .eq("id", id)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[UserRepository] getById failed: ${error.message}`);
+        }
         return data as UserProfile;
     }
 

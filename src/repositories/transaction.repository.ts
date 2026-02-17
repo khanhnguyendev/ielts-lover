@@ -22,7 +22,7 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
             .eq("user_id", userId)
             .order("created_at", { ascending: false });
 
-        if (error) return [];
+        if (error) throw new Error(`[CreditTransactionRepository] listByUserId failed: ${error.message}`);
         return data as CreditTransaction[];
     }
 }

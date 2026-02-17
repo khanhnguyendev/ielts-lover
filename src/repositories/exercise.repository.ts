@@ -11,7 +11,10 @@ export class ExerciseRepository implements IExerciseRepository {
             .eq("id", id)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[ExerciseRepository] getById failed: ${error.message}`);
+        }
         return data as Exercise;
     }
 
@@ -26,7 +29,10 @@ export class ExerciseRepository implements IExerciseRepository {
             .limit(1)
             .single();
 
-        if (error) return null;
+        if (error) {
+            if (error.code === "PGRST116") return null;
+            throw new Error(`[ExerciseRepository] getLatestVersion failed: ${error.message}`);
+        }
         return data as Exercise;
     }
 
@@ -39,7 +45,7 @@ export class ExerciseRepository implements IExerciseRepository {
             .eq("is_published", true)
             .order("created_at", { ascending: false });
 
-        if (error) return [];
+        if (error) throw new Error(`[ExerciseRepository] listAll failed: ${error.message}`);
         return data as Exercise[];
     }
 
