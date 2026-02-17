@@ -38,6 +38,7 @@ export default function AdminSettingsPage() {
         try {
             await updateSystemSetting(key, value)
             notifySuccess("Updated", `${key} updated successfully.`)
+            fetchSettings()
         } catch (error) {
             console.error(error)
             notifyError("Error", "Failed to update setting")
