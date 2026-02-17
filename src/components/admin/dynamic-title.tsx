@@ -1,33 +1,31 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
-const ROUTE_MAP: Record<string, string> = {
-    "/dashboard": "Home Overview",
-    "/dashboard/reports": "My Reports",
-    "/dashboard/writing": "Writing Tasks",
-    "/dashboard/speaking": "Speaking Tasks",
-    "/dashboard/rewriter": "IELTS Rewriter",
-    "/dashboard/samples": "Sample Reports",
-    "/dashboard/lessons": "Lessons Hub",
-    "/dashboard/credits": "Buy Credits",
-    "/dashboard/transactions": "Transactions",
-    "/dashboard/support": "Support",
+const ADMIN_ROUTE_MAP: Record<string, string> = {
+    "/admin": "Dashboard",
+    "/admin/exercises": "Exercises",
+    "/admin/lessons": "Lessons Hub",
+    "/admin/users": "User Management",
+    "/admin/attempts": "Attempts Audit",
+    "/admin/settings": "System Settings",
+    "/admin/credits": "Credit Packages",
 }
 
-export function DynamicTitle() {
+export function AdminDynamicTitle() {
     const pathname = usePathname()
 
     const getTitle = () => {
         // Exact match
-        if (ROUTE_MAP[pathname]) return ROUTE_MAP[pathname]
+        if (ADMIN_ROUTE_MAP[pathname]) return ADMIN_ROUTE_MAP[pathname]
 
-        // Handle sub-routes
-        if (pathname.startsWith("/dashboard/reports/")) return "Report Detail"
-        if (pathname.startsWith("/dashboard/writing/")) return "Writing Task"
-        if (pathname.startsWith("/dashboard/speaking/")) return "Speaking Practice"
+        // Handle nested routes (simple heuristic)
+        if (pathname.startsWith("/admin/exercises/")) return "Exercise Editor"
+        if (pathname.startsWith("/admin/lessons/")) return "Lesson Editor"
+        if (pathname.startsWith("/admin/users/")) return "User Statistics"
 
-        return "Dashboard"
+        return "Admin Console"
     }
 
     const title = getTitle()
@@ -39,7 +37,7 @@ export function DynamicTitle() {
             </h1>
             <div className="flex items-center gap-1.5 mt-1.5 opacity-60 group">
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] transition-colors group-hover:text-primary">
-                    Learning Hub
+                    Admin Hub
                 </span>
                 <span className="text-[9px] font-bold text-slate-300">/</span>
                 <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">
