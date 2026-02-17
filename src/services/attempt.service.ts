@@ -1,6 +1,9 @@
 import { Attempt, AttemptState } from "@/types";
 import { IAttemptRepository, IUserRepository, IExerciseRepository } from "../repositories/interfaces";
 import { AIService } from "./ai.service";
+import { Logger, withTrace } from "@/lib/logger";
+
+const logger = new Logger("AttemptService");
 
 export class AttemptService {
     constructor(
@@ -11,81 +14,119 @@ export class AttemptService {
     ) { }
 
     async startAttempt(userId: string, exerciseId: string): Promise<Attempt> {
-        // Business Rule: User must exist (implicit check via subscription policy later)
-        const exercise = await this.exerciseRepo.getById(exerciseId);
-        if (!exercise) throw new Error("Exercise not found");
+        return withTrace(async () => {
+            try {
+                const exercise = await this.exerciseRepo.getById(exerciseId);
+                if (!exercise) throw new Error("Exercise not found");
 
-        return this.attemptRepo.create({
-            user_id: userId,
-            exercise_id: exerciseId,
-            state: "CREATED",
-            content: ""
+                const attempt = await this.attemptRepo.create({
+                    user_id: userId,
+                    exercise_id: exerciseId,
+                    state: "CREATED",
+                    content: ""
+                });
+
+                logger.info("Attempt started", { attemptId: attempt.id, userId, exerciseId });
+                return attempt;
+            } catch (error) {
+                logger.error("Failed to start attempt", { error, userId, exerciseId });
+                throw error;
+            }
         });
     }
 
     async submitAttempt(id: string, content: string): Promise<void> {
-        const attempt = await this.attemptRepo.getById(id);
-        if (!attempt) throw new Error("Attempt not found");
-        if (attempt.state !== "CREATED" && attempt.state !== "IN_PROGRESS") {
-            throw new Error(`Invalid attempt state: ${attempt.state}`);
-        }
+        return withTrace(async () => {
+            try {
+                const attempt = await this.attemptRepo.getById(id);
+                if (!attempt) throw new Error("Attempt not found");
+                if (attempt.state !== "CREATED" && attempt.state !== "IN_PROGRESS") {
+                    throw new Error(`Invalid attempt state: ${attempt.state}`);
+                }
 
-        await this.attemptRepo.update(id, {
-            content,
-            state: "SUBMITTED",
-            submitted_at: new Date().toISOString()
+                await this.attemptRepo.update(id, {
+                    content,
+                    state: "SUBMITTED",
+                    submitted_at: new Date().toISOString()
+                });
+
+                logger.info("Attempt submitted", { attemptId: id, contentLength: content.length });
+
+                // Trigger evaluation
+                await this.evaluateAttempt(id);
+            } catch (error) {
+                logger.error("Failed to submit attempt", { error, attemptId: id });
+                throw error;
+            }
         });
-
-        // Trigger evaluation (could be async in background, but keeping it simple for now)
-        await this.evaluateAttempt(id);
     }
 
     private async evaluateAttempt(id: string): Promise<void> {
-        const attempt = await this.attemptRepo.getById(id);
-        if (!attempt || attempt.state !== "SUBMITTED") return;
+        try {
+            const attempt = await this.attemptRepo.getById(id);
+            if (!attempt || attempt.state !== "SUBMITTED") return;
 
-        const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
-        if (!exercise) throw new Error("Exercise not found for attempt");
+            const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
+            if (!exercise) throw new Error("Exercise not found for attempt");
 
-        // UI Requirement: Use generateWritingReport for detailed reports if it's a writing task
-        let feedback;
-        let score;
+            let feedback;
+            let score;
 
-        if (exercise.type === "writing_task1" || exercise.type === "writing_task2") {
-            const report = await this.aiService.generateWritingReport(exercise.type as any, attempt.content);
-            feedback = JSON.stringify(report);
-            score = report.bandScore;
-        } else {
-            // Fallback for speaking or other types
-            const simpleFeedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
-            feedback = JSON.stringify(simpleFeedback);
-            score = simpleFeedback.overall_band;
+            if (exercise.type === "writing_task1" || exercise.type === "writing_task2") {
+                const report = await this.aiService.generateWritingReport(exercise.type as any, attempt.content);
+                feedback = JSON.stringify(report);
+                score = report.bandScore;
+            } else {
+                const simpleFeedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
+                feedback = JSON.stringify(simpleFeedback);
+                score = simpleFeedback.overall_band;
+            }
+
+            await this.attemptRepo.update(id, {
+                state: "EVALUATED",
+                score,
+                feedback,
+                evaluated_at: new Date().toISOString()
+            });
+
+            logger.info("Attempt evaluated", { attemptId: id, score });
+        } catch (error) {
+            logger.error("Evaluation failed", { error, attemptId: id });
+            throw error;
         }
-
-        await this.attemptRepo.update(id, {
-            state: "EVALUATED",
-            score,
-            feedback,
-            evaluated_at: new Date().toISOString()
-        });
     }
 
     async updateAttempt(id: string, data: Partial<Attempt>): Promise<void> {
-        await this.attemptRepo.update(id, data);
+        return withTrace(async () => {
+            try {
+                await this.attemptRepo.update(id, data);
+            } catch (error) {
+                logger.error("Failed to update attempt", { error, attemptId: id, data });
+                throw error;
+            }
+        });
     }
 
     async reevaluate(id: string): Promise<{ success: boolean; reason?: string }> {
-        const attempt = await this.attemptRepo.getById(id);
-        if (!attempt) throw new Error("Attempt not found");
+        return withTrace(async () => {
+            try {
+                const attempt = await this.attemptRepo.getById(id);
+                if (!attempt) throw new Error("Attempt not found");
 
-        await this.evaluateAttempt(id);
+                await this.evaluateAttempt(id);
 
-        const updated = await this.attemptRepo.getById(id);
-        if (updated?.state === "EVALUATED") {
-            return { success: true };
-        }
+                const updated = await this.attemptRepo.getById(id);
+                if (updated?.state === "EVALUATED") {
+                    logger.info("Attempt re-evaluated successfully", { attemptId: id });
+                    return { success: true };
+                }
 
-        return { success: false, reason: "EVALUATION_FAILED" };
+                return { success: false, reason: "EVALUATION_FAILED" };
+            } catch (error) {
+                logger.error("Re-evaluation failed", { error, attemptId: id });
+                throw error;
+            }
+        });
     }
 
     async getAttempt(id: string): Promise<Attempt | null> {
