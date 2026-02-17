@@ -24,6 +24,7 @@ AI-powered IELTS preparation platform using Next.js 16, Supabase, and a strict l
 
 ## Stack Conventions
 - **Next.js**: Use App Router, Server Components where possible.
+- **Naming**: Standardize all component files to **kebab-case** (e.g., `user-profile-menu.tsx`).
 - **Tailwind**: Mobile-first, strict adhering to the purple/minimalist design system.
 - **Shadcn UI**: Base components only; customize in `components/ui`.
 - **Zustand**: For ephemeral UI state (e.g., sidebar toggles, active practice state).
