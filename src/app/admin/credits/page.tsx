@@ -20,6 +20,8 @@ import { CreditPackage } from "@/types"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { PulseLoader } from "@/components/global/pulse-loader"
+
 function LoadingSkeleton() {
     return (
         <div className="p-8 space-y-8 max-w-5xl mx-auto">
@@ -66,6 +68,7 @@ export default function AdminCreditsPage() {
     const { notifySuccess, notifyError } = useNotification()
     const [packages, setPackages] = useState<CreditPackage[]>([])
     const [loading, setLoading] = useState(true)
+    const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set())
 
     useEffect(() => {
         loadPackages()
@@ -83,16 +86,24 @@ export default function AdminCreditsPage() {
     }
 
     const handleSeed = async () => {
+        setUpdatingIds(prev => new Set(prev).add('seed'))
         try {
             await seedCreditPackages()
             notifySuccess("Database Seeded", "Default credit packages have been initialized")
             loadPackages()
         } catch (error) {
             notifyError("Seed Failed", "Failed to seed credit packages database")
+        } finally {
+            setUpdatingIds(prev => {
+                const next = new Set(prev)
+                next.delete('seed')
+                return next
+            })
         }
     }
 
     const handleAddPackage = async () => {
+        setUpdatingIds(prev => new Set(prev).add('add'))
         const newPkg: Omit<CreditPackage, "id" | "created_at" | "updated_at"> = {
             name: "New Package",
             credits: 100,
@@ -110,28 +121,48 @@ export default function AdminCreditsPage() {
             loadPackages()
         } catch (error) {
             notifyError("Add Failed", "Failed to add new credit package")
+        } finally {
+            setUpdatingIds(prev => {
+                const next = new Set(prev)
+                next.delete('add')
+                return next
+            })
         }
     }
 
     const handleUpdate = async (id: string, updates: Partial<CreditPackage>) => {
+        setUpdatingIds(prev => new Set(prev).add(id))
         try {
             await updateCreditPackage(id, updates)
             notifySuccess("Package Updated", "Credit package updated successfully")
             loadPackages()
         } catch (error) {
             notifyError("Update Failed", "Failed to update credit package")
+        } finally {
+            setUpdatingIds(prev => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
         }
     }
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this package?")) return
 
+        setUpdatingIds(prev => new Set(prev).add(id))
         try {
             await deleteCreditPackage(id)
             notifySuccess("Package Deleted", "Credit package has been removed")
             loadPackages()
         } catch (error) {
             notifyError("Delete Failed", "Failed to delete credit package")
+        } finally {
+            setUpdatingIds(prev => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
         }
     }
 
@@ -140,20 +171,28 @@ export default function AdminCreditsPage() {
     return (
         <div className="p-8 space-y-8 max-w-5xl mx-auto">
             <div className="flex justify-end items-center gap-4">
-                <Button variant="outline" onClick={handleSeed} className="gap-2">
-                    <Zap className="h-4 w-4" /> Seed Database
+                <Button variant="outline" onClick={handleSeed} className="gap-2" disabled={updatingIds.has('seed')}>
+                    {updatingIds.has('seed') ? <PulseLoader size="sm" color="primary" /> : <Zap className="h-4 w-4" />}
+                    Seed Database
                 </Button>
-                <Button onClick={handleAddPackage} className="gap-2">
-                    <Plus className="h-4 w-4" /> Add Package
+                <Button onClick={handleAddPackage} className="gap-2" disabled={updatingIds.has('add')}>
+                    {updatingIds.has('add') ? <PulseLoader size="sm" color="white" /> : <Plus className="h-4 w-4" />}
+                    Add Package
                 </Button>
             </div>
 
             <div className="grid gap-6">
                 {packages.map((pkg) => (
                     <Card key={pkg.id} className={cn(
-                        "transition-all",
-                        !pkg.is_active && "opacity-60 grayscale"
+                        "transition-all relative overflow-hidden",
+                        !pkg.is_active && "opacity-60 grayscale",
+                        updatingIds.has(pkg.id) && "ring-2 ring-primary/20 shadow-lg"
                     )}>
+                        {updatingIds.has(pkg.id) && (
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center animate-in fade-in duration-300">
+                                <PulseLoader size="lg" color="primary" />
+                            </div>
+                        )}
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
                             <div className="flex items-center gap-4">
                                 <div className="space-y-1">
@@ -171,9 +210,16 @@ export default function AdminCreditsPage() {
                                         id={`active-${pkg.id}`}
                                         checked={pkg.is_active}
                                         onCheckedChange={(checked) => handleUpdate(pkg.id, { is_active: checked })}
+                                        disabled={updatingIds.has(pkg.id)}
                                     />
                                 </div>
-                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(pkg.id)}>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive"
+                                    onClick={() => handleDelete(pkg.id)}
+                                    disabled={updatingIds.has(pkg.id)}
+                                >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -185,6 +231,7 @@ export default function AdminCreditsPage() {
                                     value={pkg.name}
                                     onChange={(e) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, name: e.target.value } : p))}
                                     onBlur={(e) => handleUpdate(pkg.id, { name: e.target.value })}
+                                    disabled={updatingIds.has(pkg.id)}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -219,6 +266,7 @@ export default function AdminCreditsPage() {
                                     value={pkg.tagline}
                                     onChange={(e) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, tagline: e.target.value } : p))}
                                     onBlur={(e) => handleUpdate(pkg.id, { tagline: e.target.value })}
+                                    disabled={updatingIds.has(pkg.id)}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -227,6 +275,7 @@ export default function AdminCreditsPage() {
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     value={pkg.type}
                                     onChange={(e) => handleUpdate(pkg.id, { type: e.target.value as any })}
+                                    disabled={updatingIds.has(pkg.id)}
                                 >
                                     <option value="starter">Starter</option>
                                     <option value="pro">Pro</option>
