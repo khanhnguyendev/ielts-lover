@@ -17,6 +17,7 @@ import { FeaturePricingRepository } from "@/repositories/pricing.repository";
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { CreditService } from "@/services/credit.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
+import { traceService } from "@/lib/aop";
 
 const logger = new Logger("UserActions");
 
@@ -25,16 +26,17 @@ const exerciseRepo = new ExerciseRepository();
 const userRepo = new UserRepository();
 const attemptRepo = new AttemptRepository();
 const lessonRepo = new LessonRepository();
-const aiService = new AIService();
+const _aiService = new AIService();
+const aiService = traceService(_aiService, "AIService");
 
-const exerciseService = new ExerciseService(exerciseRepo);
-const attemptService = new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService);
-const lessonService = new LessonService(lessonRepo);
+const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
+const attemptService = traceService(new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService), "AttemptService");
+const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
 
 // Credit Economy
 const pricingRepo = new FeaturePricingRepository();
 const transactionRepo = new CreditTransactionRepository();
-const creditService = new CreditService(userRepo, pricingRepo, transactionRepo);
+const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo), "CreditService");
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);

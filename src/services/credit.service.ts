@@ -1,9 +1,5 @@
-import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository } from "@/repositories/interfaces";
-import { UserProfile } from "@/types";
+import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository } from "../repositories/interfaces";
 import { CreditPolicy } from "./credit.policy";
-import { Logger, withTrace } from "@/lib/logger";
-
-const logger = new Logger("CreditService");
 
 export class InsufficientFundsError extends Error {
     constructor(message: string) {
@@ -24,38 +20,29 @@ export class CreditService {
      * Replenishes credits if 24 hours have passed since the last grant.
      */
     async ensureDailyGrant(userId: string): Promise<void> {
-        return withTrace(async () => {
-            try {
-                const user = await this.userRepo.getById(userId);
-                if (!user) return;
+        const user = await this.userRepo.getById(userId);
+        if (!user) return;
 
-                const now = new Date();
-                const lastGrant = new Date(user.last_daily_grant_at);
-                const diffMs = now.getTime() - lastGrant.getTime();
-                const diffHours = diffMs / (1000 * 60 * 60);
+        const now = new Date();
+        const lastGrant = new Date(user.last_daily_grant_at);
+        const diffMs = now.getTime() - lastGrant.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
 
-                if (diffHours >= 24) {
-                    const grantAmount = user.is_premium ? CreditPolicy.DAILY_GRANT_PREMIUM : CreditPolicy.DAILY_GRANT_FREE;
+        if (diffHours >= 24) {
+            const grantAmount = user.is_premium ? CreditPolicy.DAILY_GRANT_PREMIUM : CreditPolicy.DAILY_GRANT_FREE;
 
-                    await this.userRepo.update(userId, {
-                        credits_balance: user.credits_balance + grantAmount,
-                        last_daily_grant_at: now.toISOString()
-                    });
+            await this.userRepo.update(userId, {
+                credits_balance: user.credits_balance + grantAmount,
+                last_daily_grant_at: now.toISOString()
+            });
 
-                    await this.transactionRepo.create({
-                        user_id: userId,
-                        amount: grantAmount,
-                        type: "daily_grant",
-                        description: "Daily StarCredits replenishment"
-                    });
-
-                    logger.info("Daily credit grant applied", { userId, amount: grantAmount });
-                }
-            } catch (error) {
-                logger.error("Failed to apply daily grant", { error, userId });
-                throw error;
-            }
-        });
+            await this.transactionRepo.create({
+                user_id: userId,
+                amount: grantAmount,
+                type: "daily_grant",
+                description: "Daily StarCredits replenishment"
+            });
+        }
     }
 
     /**
@@ -63,91 +50,66 @@ export class CreditService {
      * Includes lazy grant check.
      */
     async billUser(userId: string, featureKey: string): Promise<boolean> {
-        return withTrace(async () => {
-            try {
-                // 1. Check for daily grant first
-                await this.ensureDailyGrant(userId);
+        // 1. Check for daily grant first
+        await this.ensureDailyGrant(userId);
 
-                // 2. Get pricing
-                const pricing = await this.pricingRepo.getByKey(featureKey);
-                if (!pricing || !pricing.is_active) {
-                    throw new Error(`Feature ${featureKey} is not available for billing`);
-                }
+        // 2. Get pricing
+        const pricing = await this.pricingRepo.getByKey(featureKey);
+        if (!pricing || !pricing.is_active) {
+            throw new Error(`Feature ${featureKey} is not available for billing`);
+        }
 
-                // 3. Check user balance
-                const user = await this.userRepo.getById(userId);
-                if (!user) throw new Error("User not found");
+        // 3. Check user balance
+        const user = await this.userRepo.getById(userId);
+        if (!user) throw new Error("User not found");
 
-                if (user.credits_balance < pricing.cost_per_unit) {
-                    throw new InsufficientFundsError(`Insufficient StarCredits. Required: ${pricing.cost_per_unit}, Available: ${user.credits_balance}`);
-                }
+        if (user.credits_balance < pricing.cost_per_unit) {
+            throw new InsufficientFundsError(`Insufficient StarCredits. Required: ${pricing.cost_per_unit}, Available: ${user.credits_balance}`);
+        }
 
-                // 4. Atomic deduction
-                await (this.userRepo as any).deductCredits(userId, pricing.cost_per_unit);
-
-                // 5. Log transaction
-                const descriptionMap: Record<string, string> = {
-                    "writing_evaluation": "Writing Task Evaluation",
-                    "speaking_evaluation": "Speaking Practice Assessment",
-                    "text_rewriter": "IELTS Text Rewriter",
-                    "mock_test": "Full Mock Test Access"
-                };
-
-                const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;
-
-                await this.transactionRepo.create({
-                    user_id: userId,
-                    amount: -pricing.cost_per_unit,
-                    type: "usage",
-                    description: description
-                });
-
-                logger.info("User billed successfully", { userId, featureKey, amount: pricing.cost_per_unit });
-                return true;
-            } catch (error) {
-                if (error instanceof InsufficientFundsError) {
-                    logger.warn("User billing failed: Insufficient funds", { userId, featureKey });
-                } else {
-                    logger.error("User billing failed", { error, userId, featureKey });
-                }
-                throw error;
-            }
+        // 4. Atomic deduction
+        // Assuming userRepo has a method for this, or using update
+        await this.userRepo.update(userId, {
+            credits_balance: user.credits_balance - pricing.cost_per_unit
         });
+
+        // 5. Log transaction
+        const descriptionMap: Record<string, string> = {
+            "writing_evaluation": "Writing Task Evaluation",
+            "speaking_evaluation": "Speaking Practice Assessment",
+            "text_rewriter": "IELTS Text Rewriter",
+            "mock_test": "Full Mock Test Access"
+        };
+
+        const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;
+
+        await this.transactionRepo.create({
+            user_id: userId,
+            amount: -pricing.cost_per_unit,
+            type: "usage",
+            description: description
+        });
+
+        return true;
     }
 
     /**
      * Manual grant for rewards or gift codes.
      */
     async rewardUser(userId: string, amount: number, type: "reward" | "gift_code", description: string): Promise<void> {
-        return withTrace(async () => {
-            try {
-                await (this.userRepo as any).addCredits(userId, amount);
+        const user = await this.userRepo.getById(userId);
+        if (!user) throw new Error("User not found");
 
-                await this.transactionRepo.create({
-                    user_id: userId,
-                    amount: amount,
-                    type: type,
-                    description: description
-                });
-
-                logger.info("User rewarded successfully", { userId, amount, type });
-            } catch (error) {
-                logger.error("Failed to reward user", { error, userId, amount, type });
-                throw error;
-            }
+        await this.userRepo.update(userId, {
+            credits_balance: user.credits_balance + amount
         });
-    }
 
-    /**
-     * Specific Bonus: Invite Friend
-     */
-    async grantInviteBonus(userId: string, friendEmail: string): Promise<void> {
-        await this.rewardUser(
-            userId,
-            CreditPolicy.INVITE_FRIEND_BONUS,
-            "reward",
-            `Bonus for inviting ${friendEmail}`
-        );
+        await this.transactionRepo.create({
+            user_id: userId,
+            amount: amount,
+            type: type,
+            description: description
+        });
     }
 
     /**
@@ -184,5 +146,14 @@ export class CreditService {
             "reward",
             "Welcome to IELTS Lover!"
         );
+    }
+
+    async getBalance(userId: string): Promise<number> {
+        const user = await this.userRepo.getById(userId);
+        return user?.credits_balance || 0;
+    }
+
+    async getTransactions(userId: string) {
+        return this.transactionRepo.listByUserId(userId);
     }
 }

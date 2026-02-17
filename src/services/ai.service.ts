@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { Logger, withTrace } from "@/lib/logger";
 
 /**
  * AI Service: Orchestrates all AI calls.
@@ -7,8 +6,6 @@ import { Logger, withTrace } from "@/lib/logger";
  */
 
 export type AIPromptVersion = "v1" | "v2";
-
-const logger = new Logger("AIService");
 
 export interface AIFeedbackResponse {
     overall_band: number;
@@ -185,118 +182,89 @@ export class AIService {
     }
 
     async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
-        return withTrace(async () => {
-            const model = this.genAI.getGenerativeModel({
-                model: this.modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: AIService.RESPONSE_SCHEMA as any,
-                },
-            });
-
-            const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v1;
-            const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format.`;
-
-            try {
-                const result = await model.generateContent(prompt);
-                const responseText = result.response.text();
-                const parsed = JSON.parse(responseText);
-
-                logger.info("AI Evaluation successful", { type, version });
-                return {
-                    ...parsed,
-                    version
-                };
-            } catch (error) {
-                logger.error("AI Evaluation failed", { error, type, version });
-                // Fallback mock or rethrow
-                throw new Error("AI Evaluation failed. Please try again later.");
-            }
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.RESPONSE_SCHEMA as any,
+            },
         });
+
+        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v1;
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format.`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        const parsed = JSON.parse(responseText);
+
+        return {
+            ...parsed,
+            version
+        };
     }
 
     async rewriteContent(content: string, version: AIPromptVersion = "v1"): Promise<{ rewritten_text: string, improvements?: string }> {
-        return withTrace(async () => {
-            const model = this.genAI.getGenerativeModel({
-                model: this.modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: AIService.REWRITE_SCHEMA as any,
-                },
-            });
-
-            const promptBase = (AIService.PROMPTS.rewrite as any)[version];
-            const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the result in the requested JSON format.`;
-
-            try {
-                const result = await model.generateContent(prompt);
-                const responseText = result.response.text();
-                logger.info("AI Rewrite successful", { version });
-                return JSON.parse(responseText);
-            } catch (error) {
-                logger.error("AI Rewrite failed", { error, version });
-                throw new Error("AI Rewrite failed. Please try again later.");
-            }
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.REWRITE_SCHEMA as any,
+            },
         });
+
+        const promptBase = (AIService.PROMPTS.rewrite as any)[version];
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the result in the requested JSON format.`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
     }
 
     async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<{ title: string, prompt: string }> {
-        return withTrace(async () => {
-            const model = this.genAI.getGenerativeModel({
-                model: this.modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: AIService.OPERATION_SCHEMA as any,
-                },
-            });
-
-            const promptBase = (AIService.PROMPTS.generation as any)[type]?.[version];
-            if (!promptBase) {
-                throw new Error(`No generation prompt found for type: ${type}`);
-            }
-
-            let fullPrompt = `${promptBase}\n\n`;
-            if (topic) {
-                fullPrompt += `TOPIC / THEME: ${topic}\n\n`;
-            }
-            fullPrompt += `Return the result in the requested JSON format.`;
-
-            logger.debug("Generating exercise content", { prompt: fullPrompt });
-
-            try {
-                const result = await model.generateContent(fullPrompt);
-                const responseText = result.response.text();
-
-                logger.info("Generated exercise content", { type, topic, version });
-
-                return JSON.parse(responseText);
-            } catch (error) {
-                logger.error("AI Generation failed", { error, type, topic });
-                throw error; // Let the action handler wrap this with traceId
-            }
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.OPERATION_SCHEMA as any,
+            },
         });
+
+        const promptBase = (AIService.PROMPTS.generation as any)[type]?.[version];
+        if (!promptBase) {
+            throw new Error(`No generation prompt found for type: ${type}`);
+        }
+
+        let fullPrompt = `${promptBase}\n\n`;
+        if (topic) {
+            fullPrompt += `TOPIC / THEME: ${topic}\n\n`;
+        }
+        fullPrompt += `Return the result in the requested JSON format.`;
+
+        const result = await model.generateContent(fullPrompt);
+        const responseText = result.response.text();
+
+        return JSON.parse(responseText);
     }
 
     async generateChartData(topic?: string, chartType?: string, version: AIPromptVersion = "v1"): Promise<any> {
-        return withTrace(async () => {
-            const model = this.genAI.getGenerativeModel({
-                model: this.modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    // We use a loose schema or specific one for charts, but strict schema is better
-                },
-            });
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                // We use a loose schema or specific one for charts, but strict schema is better
+            },
+        });
 
-            const promptBase = "Generate valid JSON data for a Chart.js (v2/v3) chart representing a realistic IELTS Writing Task 1 scenario. Return a title, chart type (bar, line, pie), labels, and datasets.";
+        const promptBase = "Generate valid JSON data for a Chart.js (v2/v3) chart representing a realistic IELTS Writing Task 1 scenario. Return a title, chart type (bar, line, pie), labels, and datasets.";
 
-            let fullPrompt = `${promptBase}\n`;
-            if (topic) {
-                fullPrompt += `TOPIC: ${topic}\n`;
-            }
-            if (chartType && chartType !== "auto") {
-                fullPrompt += `REQUIRED CHART TYPE: ${chartType} (Ensure the JSON "type" field matches this exactly)\n`;
-            }
-            fullPrompt += `
+        let fullPrompt = `${promptBase}\n`;
+        if (topic) {
+            fullPrompt += `TOPIC: ${topic}\n`;
+        }
+        if (chartType && chartType !== "auto") {
+            fullPrompt += `REQUIRED CHART TYPE: ${chartType} (Ensure the JSON "type" field matches this exactly)\n`;
+        }
+        fullPrompt += `
         Required JSON Structure:
         {
             "title": "string",
@@ -313,42 +281,25 @@ export class AIService {
         }
         `;
 
-            logger.debug("Generating chart data", { prompt: fullPrompt });
-
-            try {
-                const result = await model.generateContent(fullPrompt);
-                const responseText = result.response.text();
-                logger.info("Generated chart data", { topic });
-                return JSON.parse(responseText);
-            } catch (error) {
-                logger.error("AI Chart Generation failed", { error, topic });
-                throw error;
-            }
-        });
+        const result = await model.generateContent(fullPrompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
     }
 
     async generateWritingReport(type: "writing_task1" | "writing_task2", content: string, version: AIPromptVersion = "v2"): Promise<any> {
-        return withTrace(async () => {
-            const model = this.genAI.getGenerativeModel({
-                model: this.modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: AIService.REPORT_SCHEMA as any,
-                },
-            });
-
-            const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v2;
-            const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
-
-            try {
-                const result = await model.generateContent(prompt);
-                const responseText = result.response.text();
-                logger.info("Generated detailed writing report", { type, version });
-                return JSON.parse(responseText);
-            } catch (error) {
-                logger.error("Detailed Writing Report generation failed", { error, type });
-                throw new Error("Detailed AI Evaluation failed. Please try again later.");
-            }
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.REPORT_SCHEMA as any,
+            },
         });
+
+        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v2;
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
     }
 }

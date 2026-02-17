@@ -18,6 +18,9 @@ import { AttemptRepository } from "@/repositories/attempt.repository";
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { CreditPackageRepository } from "@/repositories/credit-package.repository";
 import { CreditPackage } from "@/types";
+import { StorageService } from "@/services/storage.service";
+
+import { traceService } from "@/lib/aop";
 
 const logger = new Logger("AdminActions");
 const creditPackageRepo = new CreditPackageRepository();
@@ -26,9 +29,11 @@ const attemptRepo = new AttemptRepository();
 const transactionRepo = new CreditTransactionRepository();
 const lessonRepo = new LessonRepository();
 const exerciseRepo = new ExerciseRepository();
-const aiService = new AIService();
-const lessonService = new LessonService(lessonRepo);
-const exerciseService = new ExerciseService(exerciseRepo);
+const _aiService = new AIService();
+const aiService = traceService(_aiService, "AIService");
+const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
+const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
+const storageService = traceService(new StorageService(), "StorageService");
 
 export async function seedCreditPackages() {
     return withTrace(async () => {
@@ -250,8 +255,7 @@ export async function generateAIExercise(type: string, topic?: string, chartType
                 const imageBuffer = await ChartRenderer.render(chartData.chart_config);
 
                 // 3. Upload Image
-                const { StorageService } = await import("@/services/storage.service");
-                const imageUrl = await StorageService.upload(imageBuffer);
+                const imageUrl = await storageService.upload(imageBuffer);
 
                 return {
                     title: chartData.title,
@@ -283,8 +287,7 @@ export async function uploadImage(formData: FormData) {
     }
 
     try {
-        const { StorageService } = await import("@/services/storage.service");
-        const url = await StorageService.upload(file);
+        const url = await storageService.upload(file);
         return url;
     } catch (error) {
         logger.error("Image upload failed", { error });
