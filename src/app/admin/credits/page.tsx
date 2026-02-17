@@ -197,8 +197,14 @@ export default function AdminCreditsPage() {
                                 <Input
                                     type="number"
                                     value={pkg.credits}
-                                    onChange={(e) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, credits: parseInt(e.target.value) } : p))}
-                                    onBlur={(e) => handleUpdate(pkg.id, { credits: parseInt(e.target.value) })}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, credits: isNaN(val) ? 0 : val } : p));
+                                    }}
+                                    onBlur={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        handleUpdate(pkg.id, { credits: isNaN(val) ? 0 : val });
+                                    }}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -206,8 +212,14 @@ export default function AdminCreditsPage() {
                                 <Input
                                     type="number"
                                     value={pkg.bonus_credits}
-                                    onChange={(e) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, bonus_credits: parseInt(e.target.value) } : p))}
-                                    onBlur={(e) => handleUpdate(pkg.id, { bonus_credits: parseInt(e.target.value) })}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, bonus_credits: isNaN(val) ? 0 : val } : p));
+                                    }}
+                                    onBlur={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        handleUpdate(pkg.id, { bonus_credits: isNaN(val) ? 0 : val });
+                                    }}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -216,8 +228,14 @@ export default function AdminCreditsPage() {
                                     type="number"
                                     step="0.01"
                                     value={pkg.price}
-                                    onChange={(e) => setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, price: parseFloat(e.target.value) } : p))}
-                                    onBlur={(e) => handleUpdate(pkg.id, { price: parseFloat(e.target.value) })}
+                                    onChange={(e) => {
+                                        const val = parseFloat(e.target.value);
+                                        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, price: isNaN(val) ? 0 : val } : p));
+                                    }}
+                                    onBlur={(e) => {
+                                        const val = parseFloat(e.target.value);
+                                        handleUpdate(pkg.id, { price: isNaN(val) ? 0 : val });
+                                    }}
                                 />
                             </div>
                             <div className="md:col-span-3 space-y-2">
