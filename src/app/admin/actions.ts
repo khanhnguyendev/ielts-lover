@@ -13,11 +13,22 @@ import { Exercise, ExerciseType } from "@/types";
 import { AIService } from "@/services/ai.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 
+import { UserRepository } from "@/repositories/user.repository";
+import { AttemptRepository } from "@/repositories/attempt.repository";
+import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { CreditPackageRepository } from "@/repositories/credit-package.repository";
 import { CreditPackage } from "@/types";
 
 const logger = new Logger("AdminActions");
 const creditPackageRepo = new CreditPackageRepository();
+const userRepo = new UserRepository();
+const attemptRepo = new AttemptRepository();
+const transactionRepo = new CreditTransactionRepository();
+const lessonRepo = new LessonRepository();
+const exerciseRepo = new ExerciseRepository();
+const aiService = new AIService();
+const lessonService = new LessonService(lessonRepo);
+const exerciseService = new ExerciseService(exerciseRepo);
 
 export async function seedCreditPackages() {
     await checkAdmin();
@@ -91,13 +102,6 @@ export async function getCreditPackages() {
     await checkAdmin();
     return creditPackageRepo.listAll();
 }
-
-const lessonRepo = new LessonRepository();
-const lessonService = new LessonService(lessonRepo);
-
-const exerciseRepo = new ExerciseRepository();
-const exerciseService = new ExerciseService(exerciseRepo);
-const aiService = new AIService();
 
 async function checkAdmin() {
     const user = await getCurrentUser();
@@ -223,4 +227,48 @@ export async function uploadImage(formData: FormData) {
         logger.error("Image upload failed", { error });
         throw new Error("Failed to upload image");
     }
+}
+
+export async function getAdminStats() {
+    await checkAdmin();
+    const [totalUsers, premiumUsers, todayAttempts] = await Promise.all([
+        userRepo.getTotalCount(),
+        userRepo.getPremiumCount(),
+        attemptRepo.getTodayCount()
+    ]);
+
+    return {
+        totalUsers,
+        premiumUsers,
+        todayAttempts,
+        activeExercises: 48 // For now, maybe static or count later
+    };
+}
+
+export async function adjustUserCredits(userId: string, amount: number, reason: string) {
+    await checkAdmin();
+    const admin = await getCurrentUser();
+
+    // Adjust balance
+    await userRepo.addCredits(userId, amount);
+
+    // Log transaction
+    await transactionRepo.create({
+        user_id: userId,
+        amount,
+        type: "gift_code", // Using gift_code or adding "admin_adjustment" later
+        description: `Admin Adjustment (${admin?.email}): ${reason}`
+    });
+
+    revalidatePath("/admin/users");
+}
+
+export async function getAdminAttempts(limit?: number) {
+    await checkAdmin();
+    return attemptRepo.listAll(limit);
+}
+
+export async function getAdminUsers() {
+    await checkAdmin();
+    return userRepo.listAll();
 }
