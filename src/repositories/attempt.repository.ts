@@ -11,7 +11,7 @@ export class AttemptRepository implements IAttemptRepository {
             .select()
             .single();
 
-        if (error) throw new Error(`Failed to create attempt: ${error.message}`);
+        if (error) throw new Error(`[AttemptRepository] Failed to create attempt: ${error.message}`);
         return created as Attempt;
     }
 
@@ -34,7 +34,7 @@ export class AttemptRepository implements IAttemptRepository {
             .update(data)
             .eq("id", id);
 
-        if (error) throw new Error(`Failed to update attempt: ${error.message}`);
+        if (error) throw new Error(`[AttemptRepository] Failed to update attempt: ${error.message}`);
     }
 
     async listByUserId(userId: string): Promise<any[]> {
@@ -64,7 +64,7 @@ export class AttemptRepository implements IAttemptRepository {
             .order("created_at", { ascending: false })
             .limit(limit);
 
-        if (error) throw new Error(`Failed to list all attempts: ${error.message}`);
+        if (error) throw new Error(`[AttemptRepository] Failed to list all attempts: ${error.message}`);
         return data as any[];
     }
 
@@ -78,7 +78,7 @@ export class AttemptRepository implements IAttemptRepository {
             .select("*", { count: 'exact', head: true })
             .gte("created_at", today.toISOString());
 
-        if (error) throw new Error(`Failed to get today's attempt count: ${error.message}`);
+        if (error) throw new Error(`[AttemptRepository] Failed to get today's attempt count: ${error.message}`);
         return count || 0;
     }
 }

@@ -10,7 +10,7 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
             .select("*")
             .single();
 
-        if (error) throw new Error(`Failed to log transaction: ${error.message}`);
+        if (error) throw new Error(`[CreditTransactionRepository] Failed to log transaction: ${error.message}`);
         return data as CreditTransaction;
     }
 

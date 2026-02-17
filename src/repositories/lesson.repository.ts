@@ -34,7 +34,7 @@ export class LessonRepository implements ILessonRepository {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to create lesson: ${error.message}`);
         return data as Lesson;
     }
 
@@ -47,7 +47,7 @@ export class LessonRepository implements ILessonRepository {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to update lesson: ${error.message}`);
         return data as Lesson;
     }
 
@@ -58,7 +58,7 @@ export class LessonRepository implements ILessonRepository {
             .delete()
             .eq("id", id);
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to delete lesson: ${error.message}`);
     }
 
     // Questions
@@ -70,7 +70,7 @@ export class LessonRepository implements ILessonRepository {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to create lesson question: ${error.message}`);
         return data as LessonQuestion;
     }
 
@@ -83,7 +83,7 @@ export class LessonRepository implements ILessonRepository {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to update lesson question: ${error.message}`);
         return data as LessonQuestion;
     }
 
@@ -94,7 +94,7 @@ export class LessonRepository implements ILessonRepository {
             .delete()
             .eq("id", id);
 
-        if (error) throw error;
+        if (error) throw new Error(`[LessonRepository] Failed to delete lesson question: ${error.message}`);
     }
 
     async getQuestionsByLessonId(lessonId: string): Promise<LessonQuestion[]> {

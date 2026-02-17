@@ -22,7 +22,7 @@ export class UserRepository implements IUserRepository {
             .update(data)
             .eq("id", id);
 
-        if (error) throw new Error(`Failed to update user: ${error.message}`);
+        if (error) throw new Error(`[UserRepository] Failed to update user: ${error.message}`);
     }
 
     async incrementQuota(id: string): Promise<void> {
@@ -64,7 +64,7 @@ export class UserRepository implements IUserRepository {
             .select("*")
             .order("created_at", { ascending: false });
 
-        if (error) throw new Error(`Failed to list users: ${error.message}`);
+        if (error) throw new Error(`[UserRepository] Failed to list users: ${error.message}`);
         return data as UserProfile[];
     }
 
@@ -75,7 +75,7 @@ export class UserRepository implements IUserRepository {
             .select("*", { count: 'exact', head: true })
             .eq("is_premium", true);
 
-        if (error) throw new Error(`Failed to get premium count: ${error.message}`);
+        if (error) throw new Error(`[UserRepository] Failed to get premium count: ${error.message}`);
         return count || 0;
     }
 
@@ -85,7 +85,7 @@ export class UserRepository implements IUserRepository {
             .from("user_profiles")
             .select("*", { count: 'exact', head: true });
 
-        if (error) throw new Error(`Failed to get total count: ${error.message}`);
+        if (error) throw new Error(`[UserRepository] Failed to get total count: ${error.message}`);
         return count || 0;
     }
 }

@@ -32,6 +32,6 @@ export class FeaturePricingRepository implements IFeaturePricingRepository {
             .update({ cost_per_unit: cost, updated_at: new Date().toISOString() })
             .eq("feature_key", key);
 
-        if (error) throw new Error(`Failed to update pricing: ${error.message}`);
+        if (error) throw new Error(`[FeaturePricingRepository] Failed to update pricing: ${error.message}`);
     }
 }

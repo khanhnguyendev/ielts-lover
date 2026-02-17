@@ -37,7 +37,7 @@ export class CreditPackageRepository {
             .select()
             .single();
 
-        if (error) throw new Error(`Failed to create credit package: ${error.message}`);
+        if (error) throw new Error(`[CreditPackageRepository] Failed to create credit package: ${error.message}`);
         return data as CreditPackage;
     }
 
@@ -50,7 +50,7 @@ export class CreditPackageRepository {
             .select()
             .single();
 
-        if (error) throw new Error(`Failed to update credit package: ${error.message}`);
+        if (error) throw new Error(`[CreditPackageRepository] Failed to update credit package: ${error.message}`);
         return data as CreditPackage;
     }
 
@@ -61,6 +61,6 @@ export class CreditPackageRepository {
             .delete()
             .eq("id", id);
 
-        if (error) throw new Error(`Failed to delete credit package: ${error.message}`);
+        if (error) throw new Error(`[CreditPackageRepository] Failed to delete credit package: ${error.message}`);
     }
 }

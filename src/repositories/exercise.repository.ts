@@ -51,7 +51,7 @@ export class ExerciseRepository implements IExerciseRepository {
             .select()
             .single();
 
-        if (error) throw new Error(`Failed to create exercise version: ${error.message}`);
+        if (error) throw new Error(`[ExerciseRepository] Failed to create exercise version: ${error.message}`);
         return data as Exercise;
     }
 
@@ -62,7 +62,7 @@ export class ExerciseRepository implements IExerciseRepository {
             .select("*", { count: 'exact', head: true })
             .eq("is_published", true);
 
-        if (error) throw new Error(`Failed to get total exercise count: ${error.message}`);
+        if (error) throw new Error(`[ExerciseRepository] Failed to get total exercise count: ${error.message}`);
         return count || 0;
     }
 }
