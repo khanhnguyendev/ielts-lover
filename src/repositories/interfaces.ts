@@ -4,6 +4,9 @@ export interface IUserRepository {
     getById(id: string): Promise<UserProfile | null>;
     update(id: string, data: Partial<UserProfile>): Promise<void>;
     incrementQuota(id: string): Promise<void>;
+    listAll(): Promise<UserProfile[]>;
+    getPremiumCount(): Promise<number>;
+    getTotalCount(): Promise<number>;
 }
 
 export interface IExerciseRepository {
@@ -18,6 +21,8 @@ export interface IAttemptRepository {
     getById(id: string): Promise<Attempt | null>;
     update(id: string, data: Partial<Attempt>): Promise<void>;
     listByUserId(userId: string): Promise<Attempt[]>;
+    listAll(limit?: number): Promise<any[]>;
+    getTodayCount(): Promise<number>;
 }
 
 export type FeaturePricing = {

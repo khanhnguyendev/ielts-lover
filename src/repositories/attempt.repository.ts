@@ -48,4 +48,34 @@ export class AttemptRepository implements IAttemptRepository {
         if (error) return [];
         return data as Attempt[];
     }
+
+    async listAll(limit: number = 20): Promise<any[]> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from("attempts")
+            .select(`
+                *,
+                user_profiles (email),
+                exercises (type)
+            `)
+            .order("created_at", { ascending: false })
+            .limit(limit);
+
+        if (error) throw new Error(`Failed to list all attempts: ${error.message}`);
+        return data as any[];
+    }
+
+    async getTodayCount(): Promise<number> {
+        const supabase = await createServerSupabaseClient();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const { count, error } = await supabase
+            .from("attempts")
+            .select("*", { count: 'exact', head: true })
+            .gte("created_at", today.toISOString());
+
+        if (error) throw new Error(`Failed to get today's attempt count: ${error.message}`);
+        return count || 0;
+    }
 }

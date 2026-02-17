@@ -56,4 +56,36 @@ export class UserRepository implements IUserRepository {
             }
         }
     }
+
+    async listAll(): Promise<UserProfile[]> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from("user_profiles")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) throw new Error(`Failed to list users: ${error.message}`);
+        return data as UserProfile[];
+    }
+
+    async getPremiumCount(): Promise<number> {
+        const supabase = await createServerSupabaseClient();
+        const { count, error } = await supabase
+            .from("user_profiles")
+            .select("*", { count: 'exact', head: true })
+            .eq("is_premium", true);
+
+        if (error) throw new Error(`Failed to get premium count: ${error.message}`);
+        return count || 0;
+    }
+
+    async getTotalCount(): Promise<number> {
+        const supabase = await createServerSupabaseClient();
+        const { count, error } = await supabase
+            .from("user_profiles")
+            .select("*", { count: 'exact', head: true });
+
+        if (error) throw new Error(`Failed to get total count: ${error.message}`);
+        return count || 0;
+    }
 }
