@@ -31,71 +31,100 @@ const lessonService = new LessonService(lessonRepo);
 const exerciseService = new ExerciseService(exerciseRepo);
 
 export async function seedCreditPackages() {
-    await checkAdmin();
-    const packages: Omit<CreditPackage, "id" | "created_at" | "updated_at">[] = [
-        {
-            name: "Band Booster",
-            credits: 100,
-            bonus_credits: 0,
-            price: 5.00,
-            tagline: "Perfect for getting started.",
-            type: "starter",
-            is_active: true,
-            display_order: 1
-        },
-        {
-            name: "Band Climber",
-            credits: 500,
-            bonus_credits: 50,
-            price: 20.00,
-            tagline: "Best value for serious practice.",
-            type: "pro",
-            is_active: true,
-            display_order: 2
-        },
-        {
-            name: "Band Mastery",
-            credits: 1500,
-            bonus_credits: 200,
-            price: 50.00,
-            tagline: "Maximum power for heavy users.",
-            type: "master",
-            is_active: true,
-            display_order: 3
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const packages: Omit<CreditPackage, "id" | "created_at" | "updated_at">[] = [
+                {
+                    name: "Band Booster",
+                    credits: 100,
+                    bonus_credits: 0,
+                    price: 5.00,
+                    tagline: "Perfect for getting started.",
+                    type: "starter",
+                    is_active: true,
+                    display_order: 1
+                },
+                {
+                    name: "Band Climber",
+                    credits: 500,
+                    bonus_credits: 50,
+                    price: 20.00,
+                    tagline: "Best value for serious practice.",
+                    type: "pro",
+                    is_active: true,
+                    display_order: 2
+                },
+                {
+                    name: "Band Mastery",
+                    credits: 1500,
+                    bonus_credits: 200,
+                    price: 50.00,
+                    tagline: "Maximum power for heavy users.",
+                    type: "master",
+                    is_active: true,
+                    display_order: 3
+                }
+            ];
+
+            for (const pkg of packages) {
+                await creditPackageRepo.create(pkg);
+            }
+
+            revalidatePath("/admin/credits");
+            revalidatePath("/dashboard/pricing");
+            logger.info("Successfully seeded credit packages");
+        } catch (error) {
+            logger.error("Failed to seed credit packages", { error });
+            throw error;
         }
-    ];
-
-    for (const pkg of packages) {
-        await creditPackageRepo.create(pkg);
-    }
-
-    revalidatePath("/admin/credits");
-    revalidatePath("/dashboard/pricing");
+    });
 }
 
 // ... existing code ...
 
 export async function createCreditPackage(pkg: Omit<CreditPackage, "id" | "created_at" | "updated_at">) {
-    await checkAdmin();
-    const result = await creditPackageRepo.create(pkg);
-    revalidatePath("/admin/credits");
-    revalidatePath("/dashboard/pricing");
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await creditPackageRepo.create(pkg);
+            revalidatePath("/admin/credits");
+            revalidatePath("/dashboard/pricing");
+            return result;
+        } catch (error) {
+            logger.error("Failed to create credit package", { error, pkg });
+            throw error;
+        }
+    });
 }
 
 export async function updateCreditPackage(id: string, pkg: Partial<CreditPackage>) {
-    await checkAdmin();
-    const result = await creditPackageRepo.update(id, pkg);
-    revalidatePath("/admin/credits");
-    revalidatePath("/dashboard/pricing");
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await creditPackageRepo.update(id, pkg);
+            revalidatePath("/admin/credits");
+            revalidatePath("/dashboard/pricing");
+            return result;
+        } catch (error) {
+            logger.error("Failed to update credit package", { error, id, pkg });
+            throw error;
+        }
+    });
 }
 
 export async function deleteCreditPackage(id: string) {
-    await checkAdmin();
-    await creditPackageRepo.delete(id);
-    revalidatePath("/admin/credits");
-    revalidatePath("/dashboard/pricing");
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            await creditPackageRepo.delete(id);
+            revalidatePath("/admin/credits");
+            revalidatePath("/dashboard/pricing");
+        } catch (error) {
+            logger.error("Failed to delete credit package", { error, id });
+            throw error;
+        }
+    });
 }
 
 export async function getCreditPackages() {
@@ -111,35 +140,63 @@ async function checkAdmin() {
 }
 
 export async function createLesson(lesson: Omit<Lesson, 'id' | 'created_at'>) {
-    await checkAdmin();
-    const result = await lessonService.createLesson(lesson);
-    revalidatePath("/admin/lessons");
-    revalidatePath("/dashboard/lessons");
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await lessonService.createLesson(lesson);
+            revalidatePath("/admin/lessons");
+            revalidatePath("/dashboard/lessons");
+            return result;
+        } catch (error) {
+            logger.error("Failed to create lesson", { error, lesson });
+            throw error;
+        }
+    });
 }
 
 export async function updateLesson(id: string, lesson: Partial<Lesson>) {
-    await checkAdmin();
-    const result = await lessonService.updateLesson(id, lesson);
-    revalidatePath("/admin/lessons");
-    revalidatePath(`/admin/lessons/${id}`);
-    revalidatePath("/dashboard/lessons");
-    revalidatePath(`/dashboard/lessons/${id}`);
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await lessonService.updateLesson(id, lesson);
+            revalidatePath("/admin/lessons");
+            revalidatePath(`/admin/lessons/${id}`);
+            revalidatePath("/dashboard/lessons");
+            revalidatePath(`/dashboard/lessons/${id}`);
+            return result;
+        } catch (error) {
+            logger.error("Failed to update lesson", { error, id, lesson });
+            throw error;
+        }
+    });
 }
 
 export async function deleteLesson(id: string) {
-    await checkAdmin();
-    await lessonService.deleteLesson(id);
-    revalidatePath("/admin/lessons");
-    revalidatePath("/dashboard/lessons");
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            await lessonService.deleteLesson(id);
+            revalidatePath("/admin/lessons");
+            revalidatePath("/dashboard/lessons");
+        } catch (error) {
+            logger.error("Failed to delete lesson", { error, id });
+            throw error;
+        }
+    });
 }
 
 export async function createLessonQuestion(question: Omit<LessonQuestion, 'id' | 'created_at'>) {
-    await checkAdmin();
-    const result = await lessonService.createQuestion(question);
-    revalidatePath(`/admin/lessons/${question.lesson_id}`);
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await lessonService.createQuestion(question);
+            revalidatePath(`/admin/lessons/${question.lesson_id}`);
+            return result;
+        } catch (error) {
+            logger.error("Failed to create lesson question", { error, question });
+            throw error;
+        }
+    });
 }
 
 export async function updateLessonQuestion(id: string, question: Partial<LessonQuestion>) {
@@ -163,13 +220,19 @@ export async function getLessonQuestions(lessonId: string) {
 // Exercise Actions
 
 export async function createExercise(exercise: Omit<Exercise, "id" | "created_at" | "version">) {
-    await checkAdmin();
-    // We use createExerciseVersion because it handles versioning automatically
-    const result = await exerciseService.createExerciseVersion(exercise);
-    revalidatePath("/admin/exercises");
-    revalidatePath("/dashboard/writing");
-    revalidatePath("/dashboard/speaking");
-    return result;
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const result = await exerciseService.createExerciseVersion(exercise);
+            revalidatePath("/admin/exercises");
+            revalidatePath("/dashboard/writing");
+            revalidatePath("/dashboard/speaking");
+            return result;
+        } catch (error) {
+            logger.error("Failed to create exercise", { error, exercise });
+            throw error;
+        }
+    });
 }
 
 export async function generateAIExercise(type: string, topic?: string, chartType?: string) {
@@ -247,21 +310,29 @@ export async function getAdminStats() {
 }
 
 export async function adjustUserCredits(userId: string, amount: number, reason: string) {
-    await checkAdmin();
-    const admin = await getCurrentUser();
+    return withTrace(async () => {
+        try {
+            await checkAdmin();
+            const admin = await getCurrentUser();
 
-    // Adjust balance
-    await userRepo.addCredits(userId, amount);
+            // Adjust balance
+            await userRepo.addCredits(userId, amount);
 
-    // Log transaction
-    await transactionRepo.create({
-        user_id: userId,
-        amount,
-        type: "gift_code", // Using gift_code or adding "admin_adjustment" later
-        description: `Admin Adjustment (${admin?.email}): ${reason}`
+            // Log transaction
+            await transactionRepo.create({
+                user_id: userId,
+                amount,
+                type: "gift_code",
+                description: `Admin Adjustment (${admin?.email}): ${reason}`
+            });
+
+            revalidatePath("/admin/users");
+            logger.info("Admin manually adjusted user credits", { userId, amount, reason });
+        } catch (error) {
+            logger.error("Failed to adjust user credits", { error, userId, amount, reason });
+            throw error;
+        }
     });
-
-    revalidatePath("/admin/users");
 }
 
 export async function getAdminAttempts(limit?: number) {
