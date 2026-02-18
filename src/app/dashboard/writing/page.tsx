@@ -79,19 +79,17 @@ export default function WritingHubPage() {
         const fetchExercises = async () => {
             setIsLoading(true)
             setExercises([]) // Clear immediately to prevent leakage from previous tab
+
+            // Mock Test is coming soon
+            if (activeCategory === "Mock Test") {
+                setIsLoading(false)
+                return
+            }
+
             try {
-                // Check access if it's mock test
-                if (activeCategory === "Mock Test") {
-                    const access = await checkFeatureAccess("mock_test");
-                    setHasMockAccess(access);
-                    if (!access) {
-                        setExercises([]);
-                        setIsLoading(false);
-                        return;
-                    }
-                } else {
-                    setHasMockAccess(true);
-                }
+                // Check access if it's mock test (Legacy logic, kept for reference but unreachable for now)
+                /* if (activeCategory === "Mock Test") { ... } */
+                setHasMockAccess(true);
 
                 let type: ExerciseType = "writing_task1"
                 if (activeCategory === "Task 2") type = "writing_task2"
@@ -146,7 +144,7 @@ export default function WritingHubPage() {
                                     )}
                                 >
                                     {cat === "Mock Test" && (
-                                        <span className="absolute -top-2 -left-2 bg-[#7C3AED] text-white text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest">Beta</span>
+                                        <span className="absolute -top-2 -left-2 bg-amber-500 text-white text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest shadow-sm shadow-amber-500/20">Soon</span>
                                     )}
                                     {cat}
                                 </button>
@@ -161,7 +159,24 @@ export default function WritingHubPage() {
                     </div>
 
 
-                    {activeCategory === "Custom Question" ? (
+                    {activeCategory === "Mock Test" ? (
+                        <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200">
+                            <div className="relative">
+                                <div className="w-24 h-24 bg-white rounded-3xl shadow-sm flex items-center justify-center border border-slate-100 z-10 relative">
+                                    <Clock className="h-10 w-10 text-slate-300" />
+                                </div>
+                                <div className="absolute top-0 right-0 -mr-2 -mt-2 bg-indigo-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg border-2 border-white shadow-sm rotate-12 z-20">
+                                    Coming Soon
+                                </div>
+                            </div>
+                            <div className="space-y-2 max-w-md">
+                                <h3 className="text-xl font-black font-outfit text-slate-900">Full-Length Mock Tests</h3>
+                                <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                                    We are working hard to bring you a complete IELTS simulation experience with strict timing and instant scoring. Stay tuned!
+                                </p>
+                            </div>
+                        </div>
+                    ) : activeCategory === "Custom Question" ? (
                         <div className="space-y-8">
                             <button
                                 onClick={() => setIsAddModalOpen(true)}

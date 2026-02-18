@@ -13,10 +13,12 @@ import {
     MessageSquare,
     LayoutGrid,
     Coffee,
-    Cloud
+    Cloud,
+    Construction
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+// Dialog imports for the "Add Custom Question" modal
 import {
     Dialog,
     DialogContent,
@@ -24,7 +26,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { PulseLoader } from "@/components/global/pulse-loader"
-import { PremiumBanner } from "@/components/dashboard/premium-banner"
+// import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 const CATEGORIES = [
     "Mock Test",
@@ -48,17 +50,26 @@ interface Exercise {
 }
 
 import { getExercises, checkFeatureAccess } from "@/app/actions"
-import { Exercise as DbExercise, ExerciseType } from "@/types"
+import { ExerciseType } from "@/types"
 
 export default function SpeakingHubPage() {
+    // ---- COMING SOON OVERLAY FLAG ----
+    const IS_COMING_SOON = true;
+
+    // Original State
     const [activeCategory, setActiveCategory] = React.useState("Mock Test")
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
+    // @ts-ignore: exercises might be unused if hidden
     const [exercises, setExercises] = React.useState<any[]>([])
+    // @ts-ignore: isLoading might be unused if hidden
     const [isLoading, setIsLoading] = React.useState(true)
     const [hasMockAccess, setHasMockAccess] = React.useState(true)
 
+    // Original Effect
     React.useEffect(() => {
         async function fetchExercises() {
+            if (IS_COMING_SOON) return; // Skip fetching if hidden
+
             setIsLoading(true)
             setExercises([]) // Clear immediately to prevent leakage from previous tab
             try {
@@ -99,6 +110,43 @@ export default function SpeakingHubPage() {
         }
         fetchExercises()
     }, [activeCategory])
+
+    if (IS_COMING_SOON) {
+        return (
+            <div className="flex-1 h-full overflow-hidden flex flex-col items-center justify-center p-8 text-center space-y-8 animate-in fade-in duration-700">
+                <div className="relative">
+                    <div className="w-32 h-32 bg-indigo-50 rounded-[2rem] shadow-sm flex items-center justify-center border-4 border-white ring-1 ring-indigo-100 relative z-10">
+                        <Mic2 className="h-14 w-14 text-indigo-500" />
+                    </div>
+                    <div className="absolute top-0 right-0 -mr-4 -mt-4 bg-amber-500 text-white text-xs font-black px-3 py-1.5 rounded-xl border-[3px] border-white shadow-lg rotate-12 z-20 uppercase tracking-widest">
+                        Coming Soon
+                    </div>
+                    <div className="absolute -inset-4 bg-indigo-500/5 rounded-full blur-2xl -z-10" />
+                </div>
+
+                <div className="space-y-4 max-w-lg mx-auto">
+                    <h1 className="text-3xl lg:text-4xl font-black font-outfit text-slate-900 tracking-tight">
+                        Speaking Practice
+                    </h1>
+                    <p className="text-base lg:text-lg font-medium text-slate-500 leading-relaxed">
+                        We're building an advanced AI speaking partner that listens, evaluates, and helps you improve your pronunciation and fluency in real-time.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Under Development</p>
+                </div>
+
+                {/* HIDDEN ORIGINAL CONTENT TO PRESERVE CODE */}
+                <div className="hidden">
+                    {/* Just rendering bits to keep variables used */}
+                    <p>{activeCategory}</p>
+                    <Button onClick={() => setIsAddModalOpen(!isAddModalOpen)}>Test</Button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">

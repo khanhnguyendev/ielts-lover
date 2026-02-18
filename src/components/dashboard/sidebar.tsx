@@ -36,14 +36,32 @@ const NAV_GROUPS = [
         label: "Practice Area",
         items: [
             { icon: PenTool, label: "Writing Tasks", href: "/dashboard/writing" },
-            { icon: Mic2, label: "Speaking Practice", href: "/dashboard/speaking" },
-            { icon: RefreshCw, label: "IELTS Rewriter", href: "/dashboard/rewriter" },
+            {
+                icon: Mic2,
+                label: "Speaking Practice",
+                href: "/dashboard/speaking",
+                badge: "Soon",
+                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
+            },
+            {
+                icon: RefreshCw,
+                label: "IELTS Rewriter",
+                href: "/dashboard/rewriter",
+                badge: "Soon",
+                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
+            },
         ]
     },
     {
         label: "Resources",
         items: [
-            { icon: BookOpen, label: "Lessons Hub", href: "/dashboard/lessons" },
+            {
+                icon: BookOpen,
+                label: "Lessons Hub",
+                href: "/dashboard/lessons",
+                badge: "Soon",
+                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
+            },
             { icon: FileText, label: "Sample Reports", href: "/dashboard/samples" },
         ]
     }
@@ -100,7 +118,7 @@ export function DashboardSidebar() {
                                     {group.label}
                                 </h3>
                             )}
-                            {group.items.map((item) => {
+                            {group.items.map((item: any) => {
                                 const isActive = pathname === item.href
                                 return (
                                     <Link
@@ -114,10 +132,27 @@ export function DashboardSidebar() {
                                         )}
                                     >
                                         <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "group-hover:text-primary transition-colors")} />
-                                        {!isCollapsed && <span className="text-sm font-semibold">{item.label}</span>}
+                                        {!isCollapsed && (
+                                            <div className="flex-1 flex items-center justify-between">
+                                                <span className="text-sm font-semibold">{item.label}</span>
+                                                {item.badge && (
+                                                    <span className={cn(
+                                                        "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border",
+                                                        item.badgeColor || "bg-slate-100 text-slate-600 border-slate-200"
+                                                    )}>
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                         {isCollapsed && (
-                                            <div className="absolute left-14 bg-foreground text-background px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                            <div className="absolute left-14 bg-foreground text-background px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex items-center gap-2">
                                                 {item.label}
+                                                {item.badge && (
+                                                    <span className="text-[9px] font-bold bg-white/20 px-1 rounded">
+                                                        {item.badge}
+                                                    </span>
+                                                )}
                                             </div>
                                         )}
                                     </Link>

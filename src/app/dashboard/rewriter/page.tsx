@@ -9,16 +9,21 @@ import {
     ChevronDown,
     Wand2,
     Trash2,
-    Zap
+    Zap,
+    RefreshCw
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { PremiumBanner } from "@/components/dashboard/premium-banner"
+// import { PremiumBanner } from "@/components/dashboard/premium-banner"
 import { rewriteText } from "@/app/actions"
 import { useNotification } from "@/lib/contexts/notification-context"
 
 export default function RewriterPage() {
+    // ---- COMING SOON OVERLAY FLAG ----
+    const IS_COMING_SOON = true;
+
+    // Original State
     const [inputText, setInputText] = React.useState("")
     const [rewrittenText, setRewrittenText] = React.useState("")
     const [isRewriting, setIsRewriting] = React.useState(false)
@@ -90,6 +95,42 @@ export default function RewriterPage() {
         navigator.clipboard.writeText(rewrittenText)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
+    }
+
+    if (IS_COMING_SOON) {
+        return (
+            <div className="flex-1 h-full overflow-hidden flex flex-col items-center justify-center p-8 text-center space-y-8 animate-in fade-in duration-700">
+                <div className="relative">
+                    <div className="w-32 h-32 bg-purple-50 rounded-[2rem] shadow-sm flex items-center justify-center border-4 border-white ring-1 ring-purple-100 relative z-10">
+                        <RefreshCw className="h-14 w-14 text-purple-500" />
+                    </div>
+                    <div className="absolute top-0 right-0 -mr-4 -mt-4 bg-amber-500 text-white text-xs font-black px-3 py-1.5 rounded-xl border-[3px] border-white shadow-lg rotate-12 z-20 uppercase tracking-widest">
+                        Coming Soon
+                    </div>
+                    <div className="absolute -inset-4 bg-purple-500/5 rounded-full blur-2xl -z-10" />
+                </div>
+
+                <div className="space-y-4 max-w-lg mx-auto">
+                    <h1 className="text-3xl lg:text-4xl font-black font-outfit text-slate-900 tracking-tight">
+                        IELTS Rewriter
+                    </h1>
+                    <p className="text-base lg:text-lg font-medium text-slate-500 leading-relaxed">
+                        Instantly upgrade your vocabulary and sentence structure. We're fine-tuning the AI to rewrite your essays to a Band 9.0 standard.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">Under Development</p>
+                </div>
+
+                {/* HIDDEN ORIGINAL CONTENT */}
+                <div className="hidden">
+                    <button onClick={handleRewrite}>Test {isRewriting ? '...' : ''}</button>
+                    <button onClick={handleCopy}>{copied ? 'Copied' : 'Copy'}</button>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -183,10 +224,10 @@ export default function RewriterPage() {
                             )}
                         </div>
 
-                        <PremiumBanner
+                        {/* <PremiumBanner
                             title="Access Advanced Rewrite Modes with Premium"
                             buttonText="Upgrade"
-                        />
+                        /> */}
                     </div>
                 </div>
             </div>
