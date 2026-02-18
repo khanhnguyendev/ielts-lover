@@ -143,10 +143,12 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             "Top Up"
                         )
                     } else {
-                        notifyWarning(
-                            "Daily Limit Reached",
-                            "Your work has been saved securely, but your daily AI evaluation limit has been reached. You can request feedback for this attempt from the Reports tab once your limit resets.",
-                            "View Reports"
+                        // Refund if we didn't get a score (logic failure)
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                        notifyError(
+                            "Evaluation Problem",
+                            "Your work was saved, but we couldn't complete the AI evaluation. Your StarCredit has been refunded. Please try again from the Reports tab.",
+                            "Close"
                         )
                     }
                 } catch (error) {

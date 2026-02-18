@@ -53,7 +53,7 @@ export class AttemptService {
         if (exercise.type === EXERCISE_TYPES.WRITING_TASK1 || exercise.type === EXERCISE_TYPES.WRITING_TASK2) {
             const report = await this.aiService.generateWritingReport(exercise.type as any, attempt.content);
             feedback = JSON.stringify(report);
-            score = report.bandScore;
+            score = report.overall_score;
         } else {
             const simpleFeedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
             feedback = JSON.stringify(simpleFeedback);
