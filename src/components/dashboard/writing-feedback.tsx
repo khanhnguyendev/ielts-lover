@@ -10,34 +10,35 @@ import {
     Quote,
     Lightbulb,
     CheckCircle2,
-    Info
+    Info,
+    Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WritingFeedbackResult, CriteriaType, BandDescriptor } from "@/types/writing";
+import { WritingFeedbackResult, CriteriaType } from "@/types/writing";
 
-const CRITERIA_MAP: Record<CriteriaType, { title: string; icon: any; color: string; description: string }> = {
+const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
-        title: "Task Achievement",
+        label: "Task Achievement",
         icon: Target,
-        color: "text-blue-600 bg-blue-50 border-blue-100",
+        color: "bg-blue-600 text-white",
         description: "Covers requirements, overview, and key features."
     },
     CC: {
-        title: "Coherence & Cohesion",
+        label: "Coherence & Cohesion",
         icon: Link2,
-        color: "text-purple-600 bg-purple-50 border-purple-100",
+        color: "bg-purple-600 text-white",
         description: "Logical organization, progression, and linking words."
     },
     LR: {
-        title: "Lexical Resource",
+        label: "Lexical Resource",
         icon: BookOpen,
-        color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+        color: "bg-emerald-600 text-white",
         description: "Vocabulary range, spelling, and word formation."
     },
     GRA: {
-        title: "Grammar Range & Accuracy",
+        label: "Grammar Range & Accuracy",
         icon: PencilLine,
-        color: "text-orange-600 bg-orange-50 border-orange-100",
+        color: "bg-orange-600 text-white",
         description: "Sentence structures, grammar errors, and punctuation."
     }
 };
@@ -46,9 +47,10 @@ interface WritingFeedbackProps {
     result: WritingFeedbackResult;
     type: "writing_task1" | "writing_task2";
     hideHeader?: boolean;
+    hideScore?: boolean;
 }
 
-export function WritingFeedback({ result, type, hideHeader = false }: WritingFeedbackProps) {
+export function WritingFeedback({ result, type, hideHeader = false, hideScore = false }: WritingFeedbackProps) {
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
 
     const getScoreColor = (score: number) => {
@@ -58,33 +60,33 @@ export function WritingFeedback({ result, type, hideHeader = false }: WritingFee
         return "text-rose-600 bg-rose-50 border-rose-200";
     };
 
-    const criteriaKeys: CriteriaType[] = ["TA", "CC", "LR", "GRA"];
-
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {!hideHeader && (
-                <div className="relative overflow-hidden bg-white rounded-[40px] border-2 border-slate-100 p-10 shadow-2xl shadow-slate-200/50">
-                    <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                        <CheckCircle2 className="w-48 h-48 rotate-12" />
+                <div className="relative overflow-hidden bg-white rounded-[32px] border-2 border-slate-100 p-6 shadow-xl shadow-slate-200/50">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                        <CheckCircle2 className="w-24 h-24 rotate-12" />
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center gap-10 relative">
-                        <div className={cn(
-                            "flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 shadow-xl shrink-0 transition-all duration-500",
-                            getScoreColor(result.overall_score)
-                        )}>
-                            <span className="text-5xl font-black font-outfit">{result.overall_score.toFixed(1)}</span>
-                            <span className="text-xs uppercase font-bold tracking-widest opacity-70">Band</span>
-                        </div>
+                    <div className="flex flex-col md:flex-row items-center gap-6 relative">
+                        {!hideScore && (
+                            <div className={cn(
+                                "flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 shadow-lg shrink-0 transition-all duration-500",
+                                getScoreColor(result.overall_score)
+                            )}>
+                                <span className="text-3xl font-black font-outfit">{result.overall_score.toFixed(1)}</span>
+                                <span className="text-[9px] uppercase font-bold tracking-widest opacity-70">Band</span>
+                            </div>
+                        )}
 
-                        <div className="flex-1 space-y-4 text-center md:text-left">
+                        <div className="flex-1 space-y-2 text-center md:text-left">
                             <div>
-                                <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 mb-2 inline-block">
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[8px] font-black uppercase tracking-widest border border-slate-200 mb-1 inline-block">
                                     {result.task_type} Task 1
                                 </span>
-                                <h2 className="text-3xl font-black text-slate-900 leading-tight">Expert AI Evaluation</h2>
+                                <h2 className="text-xl font-black text-slate-900 leading-tight">Expert AI Evaluation</h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
+                            <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-4 rounded-2xl border border-dashed border-slate-200">
                                 {result.general_comment}
                             </p>
                         </div>
@@ -93,124 +95,111 @@ export function WritingFeedback({ result, type, hideHeader = false }: WritingFee
             )}
 
             {/* Criteria Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {criteriaKeys.map((key) => {
-                    const config = CRITERIA_MAP[key];
-                    const data = result.detailed_scores[key];
-                    const isActive = activeCriteria === key;
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {Object.entries(result.detailed_scores).map(([key, score]) => {
+                    const criteria = key as CriteriaType;
+                    const isActive = activeCriteria === criteria;
+                    const descriptor = CRITERIA_MAP[criteria];
 
                     return (
-                        <div
+                        <button
                             key={key}
-                            onClick={() => setActiveCriteria(key)}
+                            onClick={() => setActiveCriteria(criteria)}
                             className={cn(
-                                "group cursor-pointer bg-white rounded-[32px] border-2 p-6 transition-all duration-300",
-                                isActive ? "border-slate-900 ring-4 ring-slate-100 shadow-xl" : "border-slate-100 hover:border-slate-300 shadow-sm",
-                                "flex items-start gap-4"
+                                "flex items-start gap-3 p-3 rounded-[20px] border-2 transition-all duration-300 text-left relative overflow-hidden group",
+                                isActive
+                                    ? "bg-white border-primary shadow-md ring-2 ring-primary/5 scale-[1.01]"
+                                    : "bg-slate-50/50 border-slate-100 hover:border-slate-200 hover:bg-white"
                             )}
                         >
-                            <div className={cn("p-4 rounded-2xl shrink-0 transition-transform group-hover:scale-110", config.color)}>
-                                <config.icon className="w-6 h-6" />
+                            <div className={cn(
+                                "flex flex-col items-center justify-center w-12 h-12 rounded-xl shrink-0 transition-colors bg-white border-2",
+                                isActive ? "border-primary text-primary" : "border-slate-100 text-slate-900",
+                                getScoreColor(score.score).split(' ')[0]
+                            )}>
+                                <span className="text-lg font-black font-outfit">{score.score.toFixed(1)}</span>
+                                <span className="text-[7px] uppercase font-black tracking-tighter opacity-70">Band</span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                    <h3 className="font-black text-slate-900 truncate">
-                                        {key === "TA" ? (
-                                            type === "writing_task2" ? "Task Response" :
-                                                result.task_type === "academic" ? "Task Achievement (A)" : "Task Achievement (GT)"
-                                        ) : config.title}
-                                    </h3>
-                                    <div className={cn(
-                                        "px-2.5 py-1 rounded-lg text-sm font-black border",
-                                        getScoreColor(data.score)
-                                    )}>
-                                        {data.score.toFixed(1)}
-                                    </div>
-                                </div>
-                                <p className="text-xs text-slate-500 font-bold uppercase tracking-tight mb-2">
-                                    {config.description}
-                                </p>
-                                <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">
-                                    {data.feedback}
+
+                            <div className="flex-1 min-w-0 pr-4">
+                                <h3 className="font-black text-slate-900 text-[10px] uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+                                    {descriptor.label}
+                                    {isActive && <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />}
+                                </h3>
+                                <p className="text-[10px] text-slate-500 font-medium leading-relaxed italic">
+                                    "{score.feedback}"
                                 </p>
                             </div>
-                        </div>
-                    );
+
+                            <div className={cn(
+                                "absolute bottom-2 right-2 transition-transform duration-500",
+                                isActive ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 rotate-45"
+                            )}>
+                                <Sparkles className="w-3 h-3 text-primary/40" />
+                            </div>
+                        </button>
+                    )
                 })}
             </div>
 
-            {/* Detailed Criterion View */}
+            {/* Detailed View */}
             {activeCriteria && (
-                <div className="bg-slate-900 rounded-[40px] p-8 md:p-12 text-white shadow-2xl animate-in zoom-in-95 duration-500">
-                    <div className="flex items-start justify-between mb-10">
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                                <div className={cn("p-2 rounded-lg", CRITERIA_MAP[activeCriteria].color.replace("bg-", "bg-opacity-20 bg-"))}>
-                                    {React.createElement(CRITERIA_MAP[activeCriteria].icon, { className: "w-5 h-5" })}
-                                </div>
-                                <h3 className="text-2xl font-black">
-                                    {activeCriteria === "TA" ? (
-                                        type === "writing_task2" ? "Task Response" :
-                                            result.task_type === "academic" ? "Task Achievement (Academic)" : "Task Achievement (General Training)"
-                                    ) : CRITERIA_MAP[activeCriteria].title}
+                <div className="bg-white rounded-[24px] border-2 border-primary/10 p-5 sm:p-6 shadow-lg shadow-slate-200/50 relative overflow-hidden animate-in zoom-in-95 duration-500">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                        <Sparkles className="w-24 h-24" />
+                    </div>
+
+                    <div className="relative space-y-4">
+                        {/* Header */}
+                        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                            <div className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center text-white font-black text-lg shadow-md",
+                                getScoreColor(result.detailed_scores[activeCriteria].score).split(' ')[0].replace('text-', 'bg-')
+                            )}>
+                                {result.detailed_scores[activeCriteria].score.toFixed(1)}
+                            </div>
+                            <div>
+                                <h3 className="text-base font-black text-slate-900 tracking-tight">
+                                    {CRITERIA_MAP[activeCriteria].label}
                                 </h3>
-                            </div>
-                            <p className="text-slate-400 font-medium">Detailed breakdown and evidence from your submission.</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                            <span className="block text-4xl font-black tracking-tight">{result.detailed_scores[activeCriteria].score.toFixed(1)}</span>
-                            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500">Band Score</span>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                        {/* Evidence */}
-                        <div className="space-y-6">
-                            <h4 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-500">
-                                <Quote className="w-4 h-4 text-emerald-400" />
-                                Evidence from Text
-                            </h4>
-                            <div className="space-y-4">
-                                {result.detailed_scores[activeCriteria].evidence.map((ev, i) => (
-                                    <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:bg-white/10 transition-colors">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
-                                        <p className="text-sm leading-relaxed font-medium italic text-slate-300">"{ev}"</p>
-                                    </div>
-                                ))}
+                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                                    Detailed AI Analysis • Band {result.detailed_scores[activeCriteria].score}
+                                </p>
                             </div>
                         </div>
 
-                        {/* Tips */}
-                        <div className="space-y-6">
-                            <h4 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-500">
-                                <Lightbulb className="w-4 h-4 text-amber-400" />
-                                Path to Band {(result.detailed_scores[activeCriteria].score + 0.5)}
-                            </h4>
-                            <div className="space-y-4">
-                                {result.detailed_scores[activeCriteria].improvement_tips.map((tip, i) => (
-                                    <div key={i} className="flex gap-4 items-start bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5 hover:bg-amber-500/10 transition-colors">
-                                        <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                            <span className="text-[10px] font-black text-amber-500">{i + 1}</span>
-                                        </div>
-                                        <p className="text-sm leading-relaxed font-medium text-slate-300">{tip}</p>
-                                    </div>
-                                ))}
+                        {/* Analysis Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100/50 space-y-2">
+                                <h4 className="text-[9px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Strengths
+                                </h4>
+                                <ul className="space-y-1.5">
+                                    {result.detailed_scores[activeCriteria].evidence.map((item, idx) => (
+                                        <li key={idx} className="flex gap-2 text-[10px] text-emerald-800/80 leading-relaxed font-medium">
+                                            <div className="w-1 h-1 rounded-full bg-emerald-300 mt-1.5 shrink-0" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <div className="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100/50 space-y-2">
+                                <h4 className="text-[9px] font-black text-indigo-900 uppercase tracking-widest flex items-center gap-1.5">
+                                    <Target className="w-3 h-3" />
+                                    Improvements
+                                </h4>
+                                <ul className="space-y-1.5">
+                                    {result.detailed_scores[activeCriteria].improvement_tips.map((item, idx) => (
+                                        <li key={idx} className="flex gap-2 text-[10px] text-indigo-800/80 leading-relaxed font-medium">
+                                            <div className="w-1 h-1 rounded-full bg-indigo-300 mt-1.5 shrink-0" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="mt-12 pt-8 border-t border-white/10 flex items-center justify-between text-slate-500">
-                        <div className="flex items-center gap-2 text-xs font-bold">
-                            <Info className="w-4 h-4" />
-                            Based on official IELTS 2024 Band Descriptors
-                        </div>
-                        <button
-                            onClick={() => setActiveCriteria(null)}
-                            className="text-xs font-black uppercase tracking-widest hover:text-white transition-colors flex items-center gap-2"
-                        >
-                            Collapse Details
-                            <ChevronDown className="w-4 h-4 rotate-180" />
-                        </button>
                     </div>
                 </div>
             )}
