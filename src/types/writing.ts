@@ -13,3 +13,12 @@ export interface WritingFeedbackResult {
     detailed_scores: Record<CriteriaType, BandDescriptor>;
     general_comment: string;
 }
+
+export interface CorrectionItem {
+    idx: number
+    error: boolean
+    original_segment: string
+    fix: string
+    better_version: string
+    explanation: string
+}
