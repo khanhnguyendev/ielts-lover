@@ -289,13 +289,14 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
         await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION);
         const correction = await attemptService.unlockCorrection(attemptId);
         return { success: true, data: correction };
-    } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
-        }
-
+    } catch (errors) {
         const traceId = getCurrentTraceId()!;
-        logger.error(`unlockCorrection Error: ${attemptId}`, { error });
+        logger.error(`unlockCorrection Error: ${attemptId}`, { error: errors });
         return { success: false, reason: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
+});
+
+export const getFeaturePrice = traceAction("getFeaturePrice", async (key: string) => {
+    const pricing = await pricingRepo.getByKey(key);
+    return pricing?.cost_per_unit || 0;
 });

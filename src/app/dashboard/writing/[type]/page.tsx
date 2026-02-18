@@ -20,11 +20,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft } from "@/app/actions"
+import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft, getFeaturePrice } from "@/app/actions"
 import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { FEATURE_KEYS } from "@/lib/constants"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
@@ -36,6 +37,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [text, setText] = React.useState("")
     const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
+    const [evalCost, setEvalCost] = React.useState<number>(1) // Default 1
 
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
@@ -56,7 +58,14 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 }
                 setExercise(data)
 
-                // 2. Start or Resume Attempt
+                // 2. Fetch Pricing
+                const featureKey = data.type.startsWith("writing")
+                    ? FEATURE_KEYS.WRITING_EVALUATION
+                    : FEATURE_KEYS.SPEAKING_EVALUATION;
+                const price = await getFeaturePrice(featureKey);
+                setEvalCost(price);
+
+                // 3. Start or Resume Attempt
                 try {
                     const attempt = await startExerciseAttempt(exerciseId)
                     setCurrentAttempt(attempt)
@@ -107,19 +116,19 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
         notifyWarning(
             "Confirm Evaluation",
-            "This will use 1 StarCredit to evaluate your work and provide detailed AI feedback. Do you want to proceed?",
+            `This will use ${evalCost} StarCredit${evalCost > 1 ? 's' : ''} to evaluate your work and provide detailed AI feedback. Do you want to proceed?`,
             "Evaluate Now",
             async () => {
                 setIsSubmitting(true)
                 // Optimistic decrement animation
-                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -evalCost } }))
 
                 try {
                     const result = await submitAttempt(currentAttempt.id, text)
 
                     if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
                         // Refund animation on system error
-                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
                         notifyError(
                             "System Error",
                             "We encountered a problem while evaluating your work. Please provide the trace ID to support.",
@@ -147,7 +156,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                         )
                     } else {
                         // Refund if we didn't get a score (logic failure)
-                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
                         notifyError(
                             "Evaluation Problem",
                             "Your work was saved, but we couldn't complete the AI evaluation. Your StarCredit has been refunded. Please try again from the Reports tab.",
@@ -329,7 +338,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                     } catch (error) {
                                         console.error("Submission failed:", error);
                                         // Refund animation on system error
-                                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
                                         notifyError("Save Failed", "We couldn't save your draft. Please try again.");
                                     } finally {
                                         setIsSubmitting(false);

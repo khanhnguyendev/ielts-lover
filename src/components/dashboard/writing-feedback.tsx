@@ -20,10 +20,10 @@ import {
 import { cn } from "@/lib/utils";
 import { WritingFeedbackResult, CriteriaType } from "@/types/writing";
 import { Button } from "@/components/ui/button";
-import { unlockCorrection } from "@/app/actions";
+import { unlockCorrection, getFeaturePrice } from "@/app/actions";
 import { CorrectionList } from "./correction-list";
 import { toast } from "sonner";
-import { APP_ERROR_CODES } from "@/lib/constants";
+import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
 
 const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
@@ -77,6 +77,19 @@ export function WritingFeedback({
     const [isUnlocked, setIsUnlocked] = React.useState(initialIsUnlocked);
     const [corrections, setCorrections] = React.useState<any[] | null>(initialCorrection || null);
     const [isUnlocking, setIsUnlocking] = React.useState(false);
+    const [cost, setCost] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        async function fetchCost() {
+            try {
+                const price = await getFeaturePrice(FEATURE_KEYS.DETAILED_CORRECTION);
+                setCost(price);
+            } catch (error) {
+                console.error("Failed to fetch feature price:", error);
+            }
+        }
+        fetchCost();
+    }, []);
 
     const handleUnlock = async () => {
         if (!attemptId) return;
@@ -88,7 +101,7 @@ export function WritingFeedback({
                 setIsUnlocked(true);
                 toast.success("Detailed correction unlocked!");
             } else {
-                if (result.reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
+                if ((result as any).reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
                     toast.error("Insufficient StarCredits to unlock this feature.");
                 } else {
                     toast.error("Failed to unlock correction. Please try again.");
@@ -300,11 +313,26 @@ export function WritingFeedback({
                             <Button
                                 onClick={handleUnlock}
                                 disabled={isUnlocking}
-                                className="h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/30 font-black text-xs group"
+                                className="h-14 px-8 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 text-white shadow-xl shadow-primary/30 font-black text-sm group relative overflow-hidden transition-all hover:scale-[1.02]"
                             >
-                                <Zap className="w-3.5 h-3.5 mr-2 fill-white animate-pulse" />
-                                {isUnlocking ? "Unlocking..." : "Unlock Feedback (-15 Credits)"}
-                                <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <Zap className="w-4 h-4 mr-2 fill-white animate-pulse" />
+
+                                {isUnlocking ? (
+                                    <span>Unlocking...</span>
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        <span>Unlock Feedback</span>
+                                        <div className="flex items-center gap-1.5 bg-yellow-100 ring-1 ring-yellow-200/50 px-2.5 py-1 rounded-full shadow-sm text-yellow-700 ml-1 group-hover:bg-yellow-50 transition-colors">
+                                            <div className="flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 text-[9px] leading-none shadow-sm text-yellow-900">⭐</div>
+                                            <span className="text-[10px] font-black tracking-tight">
+                                                -{cost ?? 15}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!isUnlocking && <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform opacity-80" />}
                             </Button>
 
                             <p className="mt-5 text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 opacity-80">

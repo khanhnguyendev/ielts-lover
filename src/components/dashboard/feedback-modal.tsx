@@ -85,6 +85,7 @@ export function FeedbackModal({
                     </div>
                 ) : (
                     <div className="p-6 pb-0">
+                        <DialogTitle className="sr-only">Writing Evaluation Result</DialogTitle>
                         <ScoreOverview
                             score={score || parsedFeedback.overall_score || 1.0}
                             title="Overall Assessment"

@@ -23,7 +23,8 @@ export class FeaturePricingRepository implements IFeaturePricingRepository {
         const { data, error } = await supabase
             .from(DB_TABLES.FEATURE_PRICING)
             .select("*")
-            .eq("is_active", true);
+            .eq("is_active", true)
+            .order("feature_key", { ascending: true });
 
         if (error) throw new Error(`[FeaturePricingRepository] listAll failed: ${error.message}`);
         return data as FeaturePricing[];
