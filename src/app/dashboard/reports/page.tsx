@@ -41,6 +41,7 @@ import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import { getBandScoreConfig } from "@/lib/score-utils";
+import { ATTEMPT_STATES, APP_ERROR_CODES } from "@/lib/constants";
 
 import {
     Popover,
@@ -211,7 +212,7 @@ export default function ReportsPage() {
                                         <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
                                             <div className="space-y-1">
                                                 <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by status</div>
-                                                {['EVALUATED', 'SUBMITTED', 'IN_PROGRESS'].map((status) => (
+                                                {[ATTEMPT_STATES.EVALUATED, ATTEMPT_STATES.SUBMITTED, ATTEMPT_STATES.IN_PROGRESS].map((status) => (
                                                     <button
                                                         key={status}
                                                         onClick={() => setStatusFilter(statusFilter === status ? null : status)}

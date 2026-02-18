@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { EXERCISE_TYPES } from "@/lib/constants";
 
 /**
  * AI Service: Orchestrates all AI calls.
@@ -24,7 +25,7 @@ export class AIService {
     private genAI: GoogleGenerativeAI;
     private modelName: string;
     private static PROMPTS = {
-        writing_task1: {
+        [EXERCISE_TYPES.WRITING_TASK1]: {
             v1: "Analyze the following IELTS Writing Task 1 response and provide a score based on Task Achievement, Coherence, Lexical Resource, and Grammatical Range.",
             v2: `Analyze the following IELTS Writing Task 1 response according to official IELTS public band descriptors. 
             
@@ -35,7 +36,7 @@ export class AIService {
             
             Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback (original text fragments with corrections). 3. Detailed band score breakdown. 4. Specific mistake cards. 5. CEFR distribution.`
         },
-        writing_task2: {
+        [EXERCISE_TYPES.WRITING_TASK2]: {
             v1: "Analyze the following IELTS Writing Task 2 essay and provide a detailed band score breakdown and improvement suggestions.",
             v2: `Analyze the following IELTS Writing Task 2 essay according to official IELTS public band descriptors.
             
@@ -46,32 +47,32 @@ export class AIService {
             
             Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback. 3. Detailed band score breakdown. 4. Specific mistake cards. 5. CEFR distribution.`
         },
-        speaking_part1: {
+        [EXERCISE_TYPES.SPEAKING_PART1]: {
             v1: "Analyze the following IELTS Speaking Part 1 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
         },
-        speaking_part2: {
+        [EXERCISE_TYPES.SPEAKING_PART2]: {
             v1: "Analyze the following IELTS Speaking Part 2 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
         },
-        speaking_part3: {
+        [EXERCISE_TYPES.SPEAKING_PART3]: {
             v1: "Analyze the following IELTS Speaking Part 3 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
         },
         rewrite: {
             v1: "Rewrite the following text to be more academic and professional, suitable for IELTS Writing Band 8.0+. Improve vocabulary and sentence structure while retaining the original meaning.",
         },
         generation: {
-            writing_task1: {
+            [EXERCISE_TYPES.WRITING_TASK1]: {
                 v1: "Generate a realistic IELTS Writing Task 1 prompt. Include a title describing the chart/graph/process, and the full question prompt. NOTE: Since you cannot generate images, strictly describe what the visual data would be in the prompt text so the user knows what image to find/create.",
             },
-            writing_task2: {
+            [EXERCISE_TYPES.WRITING_TASK2]: {
                 v1: "Generate a challenging IELTS Writing Task 2 essay prompt on a common topic (e.g., Education, Environment, Technology). Include a catchy title and the full essay question.",
             },
-            speaking_part1: {
+            [EXERCISE_TYPES.SPEAKING_PART1]: {
                 v1: "Generate a set of 3-4 IELTS Speaking Part 1 questions on a specific manufacturing topic. Return a title (e.g., 'Hometown', 'Work') and the list of questions.",
             },
-            speaking_part2: {
+            [EXERCISE_TYPES.SPEAKING_PART2]: {
                 v1: "Generate an IELTS Speaking Part 2 Cue Card topic. Include the main topic title and the bullet points the candidate should cover.",
             },
-            speaking_part3: {
+            [EXERCISE_TYPES.SPEAKING_PART3]: {
                 v1: "Generate a set of 4-5 abstract IELTS Speaking Part 3 questions related to a specific theme. Return a title and the list of questions.",
             }
         }
@@ -181,7 +182,7 @@ export class AIService {
         this.modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     }
 
-    async generateFeedback(type: keyof typeof AIService.PROMPTS, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
+    async generateFeedback(type: string, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -190,7 +191,7 @@ export class AIService {
             },
         });
 
-        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v1;
+        const promptBase = (AIService.PROMPTS as any)[type]?.[version] || AIService.PROMPTS[EXERCISE_TYPES.WRITING_TASK1].v1;
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format.`;
 
         const result = await model.generateContent(prompt);
@@ -286,7 +287,7 @@ export class AIService {
         return JSON.parse(responseText);
     }
 
-    async generateWritingReport(type: "writing_task1" | "writing_task2", content: string, version: AIPromptVersion = "v2"): Promise<any> {
+    async generateWritingReport(type: typeof EXERCISE_TYPES.WRITING_TASK1 | typeof EXERCISE_TYPES.WRITING_TASK2, content: string, version: AIPromptVersion = "v2"): Promise<any> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -295,7 +296,7 @@ export class AIService {
             },
         });
 
-        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS.writing_task1.v2;
+        const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS[EXERCISE_TYPES.WRITING_TASK1].v2;
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
 
         const result = await model.generateContent(prompt);

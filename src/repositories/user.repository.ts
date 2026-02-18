@@ -1,18 +1,19 @@
 import { UserProfile } from "@/types";
 import { IUserRepository } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class UserRepository implements IUserRepository {
     async getById(id: string): Promise<UserProfile | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("user_profiles")
+            .from(DB_TABLES.USER_PROFILES)
             .select("*")
             .eq("id", id)
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[UserRepository] getById failed: ${error.message}`);
         }
         return data as UserProfile;
@@ -21,7 +22,7 @@ export class UserRepository implements IUserRepository {
     async update(id: string, data: Partial<UserProfile>): Promise<void> {
         const supabase = await createServerSupabaseClient();
         const { error } = await supabase
-            .from("user_profiles")
+            .from(DB_TABLES.USER_PROFILES)
             .update(data)
             .eq("id", id);
 
@@ -63,7 +64,7 @@ export class UserRepository implements IUserRepository {
     async listAll(): Promise<UserProfile[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("user_profiles")
+            .from(DB_TABLES.USER_PROFILES)
             .select("*")
             .order("created_at", { ascending: false });
 
@@ -74,7 +75,7 @@ export class UserRepository implements IUserRepository {
     async getPremiumCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const { count, error } = await supabase
-            .from("user_profiles")
+            .from(DB_TABLES.USER_PROFILES)
             .select("*", { count: 'exact', head: true })
             .eq("is_premium", true);
 
@@ -85,7 +86,7 @@ export class UserRepository implements IUserRepository {
     async getTotalCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const { count, error } = await supabase
-            .from("user_profiles")
+            .from(DB_TABLES.USER_PROFILES)
             .select("*", { count: 'exact', head: true });
 
         if (error) throw new Error(`[UserRepository] Failed to get total count: ${error.message}`);

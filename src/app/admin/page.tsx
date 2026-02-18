@@ -10,6 +10,8 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+import { ATTEMPT_STATES } from "@/lib/constants"
+
 export default async function AdminDashboard() {
     const statsData = await getAdminStats();
     const recentAttempts = await getAdminAttempts(5);
@@ -81,8 +83,8 @@ export default async function AdminDashboard() {
                                     </div>
                                     <div className="text-right">
                                         <div className={cn(
-                                            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg inline-block mb-1",
-                                            attempt.state === "EVALUATED" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                                            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg",
+                                            attempt.state === ATTEMPT_STATES.EVALUATED ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
                                         )}>
                                             {attempt.state}
                                         </div>

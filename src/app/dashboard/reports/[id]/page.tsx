@@ -29,6 +29,7 @@ import { getAttemptWithExercise } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { getBandScoreConfig } from "@/lib/score-utils"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
@@ -51,7 +52,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     const handleSendMessage = (content: string) => {
         if (!content.trim()) return
 
-        const userMessage = { role: "user" as const, content }
+        const userMessage = { role: USER_ROLES.USER as any, content }
         setMessages(prev => [...prev, userMessage])
         setChatInput("")
         setIsTyping(true)
@@ -201,7 +202,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         );
                     })()}
 
-                    {(isSample || (realData && realData.state === "EVALUATED")) ? (
+                    {(isSample || (realData && realData.state === ATTEMPT_STATES.EVALUATED)) ? (
                         <>
                             {displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing')) ? (
                                 <WritingEvaluation data={displayData as any} />

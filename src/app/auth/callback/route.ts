@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceSupabaseClient } from '@/lib/supabase/server';
-import { UserRepository } from '@/repositories/user.repository';
+import { DB_TABLES, TEST_TYPES, USER_ROLES } from '@/lib/constants';
 import { Logger } from '@/lib/logger';
 
 const logger = new Logger("AuthCallback");
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
                 // Ensure user profile exists using SERVICE ROLE to bypass initial RLS sync delays
                 const serviceSupabase = await createServiceSupabaseClient();
                 const { data: existingProfile } = await serviceSupabase
-                    .from("user_profiles")
+                    .from(DB_TABLES.USER_PROFILES)
                     .select("id")
                     .eq("id", user.id)
                     .single();
@@ -30,13 +30,13 @@ export async function GET(request: Request) {
                     try {
                         logger.info(`Creating profile for ${user.email}`, { userId: user.id });
                         const { error: insertError } = await serviceSupabase
-                            .from("user_profiles")
+                            .from(DB_TABLES.USER_PROFILES)
                             .insert({
                                 id: user.id,
                                 email: user.email!,
                                 target_score: 7.0,
-                                test_type: "academic",
-                                role: "user",
+                                test_type: TEST_TYPES.ACADEMIC,
+                                role: USER_ROLES.USER,
                                 is_premium: false,
                                 daily_quota_used: 0,
                                 last_quota_reset: new Date().toISOString(),

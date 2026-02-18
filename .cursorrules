@@ -99,3 +99,21 @@ Before generating any new component or utility function:
 
 ### 4. Verification
 -   If you must create a new component that looks similar to an old one, you must **justify** why the old one cannot be extended in the code comments or commit message.
+
+## 🚫 NO MAGIC STRINGS (CONSTANTS ENFORCEMENT)
+
+**Core Principle:** Never use hardcoded strings for system flags, status, types, or roles.
+
+### 1. The "Single Source of Truth" Rule
+-   Before typing a string literal like `'admin'`, `'daily_grant'`, `'pending'`, check `@lib/constants.ts` (or `@types/enums.ts`).
+-   If the constant exists, **MUST** use the import: `TRANSACTION_TYPES.DAILY_GRANT`.
+-   If it does not exist, **DO NOT** hardcode it. Instead:
+    1.  Add it to `@lib/constants.ts`.
+    2.  Import and use the new constant.
+
+### 2. Database & API
+-   When inserting data into Supabase or defining API schemas (Zod), always use the `Object.values(CONSTANTS)` to validate inputs.
+    -   *Example:* `z.enum(Object.values(TRANSACTION_TYPES) as [string, ...string[]])`
+
+### 3. Review Trigger
+-   If you see code like `if (status === 'success')`, immediately flag it as a violation and propose refactoring to `if (status === STATUS.SUCCESS)`.

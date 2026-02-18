@@ -1,17 +1,18 @@
 import { ISystemSettingsRepository, SystemSetting } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class SystemSettingsRepository implements ISystemSettingsRepository {
     async getByKey<T>(key: string): Promise<T | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("system_settings")
+            .from(DB_TABLES.SYSTEM_SETTINGS)
             .select("setting_value")
             .eq("setting_key", key)
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[SystemSettingsRepository] getByKey failed: ${error.message}`);
         }
         return data.setting_value as T;
@@ -20,7 +21,7 @@ export class SystemSettingsRepository implements ISystemSettingsRepository {
     async listAll(): Promise<SystemSetting[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("system_settings")
+            .from(DB_TABLES.SYSTEM_SETTINGS)
             .select("*")
             .order("setting_key", { ascending: true });
 
@@ -31,7 +32,7 @@ export class SystemSettingsRepository implements ISystemSettingsRepository {
     async updateSetting(key: string, value: any): Promise<void> {
         const supabase = await createServerSupabaseClient();
         const { error } = await supabase
-            .from("system_settings")
+            .from(DB_TABLES.SYSTEM_SETTINGS)
             .update({
                 setting_value: value,
                 updated_at: new Date().toISOString()

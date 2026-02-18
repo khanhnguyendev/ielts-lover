@@ -1,18 +1,19 @@
 import { Exercise, ExerciseType } from "@/types";
 import { IExerciseRepository } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class ExerciseRepository implements IExerciseRepository {
     async getById(id: string): Promise<Exercise | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("exercises")
+            .from(DB_TABLES.EXERCISES)
             .select("*")
             .eq("id", id)
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[ExerciseRepository] getById failed: ${error.message}`);
         }
         return data as Exercise;
@@ -21,7 +22,7 @@ export class ExerciseRepository implements IExerciseRepository {
     async getLatestVersion(type: ExerciseType): Promise<Exercise | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("exercises")
+            .from(DB_TABLES.EXERCISES)
             .select("*")
             .eq("type", type)
             .eq("is_published", true)
@@ -30,7 +31,7 @@ export class ExerciseRepository implements IExerciseRepository {
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[ExerciseRepository] getLatestVersion failed: ${error.message}`);
         }
         return data as Exercise;
@@ -39,7 +40,7 @@ export class ExerciseRepository implements IExerciseRepository {
     async listByType(type: ExerciseType): Promise<Exercise[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("exercises")
+            .from(DB_TABLES.EXERCISES)
             .select("*")
             .eq("type", type)
             .eq("is_published", true)
@@ -52,7 +53,7 @@ export class ExerciseRepository implements IExerciseRepository {
     async createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("exercises")
+            .from(DB_TABLES.EXERCISES)
             .insert(exercise)
             .select()
             .single();
@@ -64,7 +65,7 @@ export class ExerciseRepository implements IExerciseRepository {
     async getTotalCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const { count, error } = await supabase
-            .from("exercises")
+            .from(DB_TABLES.EXERCISES)
             .select("*", { count: 'exact', head: true })
             .eq("is_published", true);
 

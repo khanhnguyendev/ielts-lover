@@ -25,7 +25,9 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function AttemptsPage() {
+import { ATTEMPT_STATES } from "@/lib/constants"
+
+export default function AdminAttemptsPage() {
     const [attempts, setAttempts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -134,14 +136,14 @@ export default function AttemptsPage() {
                                     <TableCell className="text-center">
                                         <div className={cn(
                                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                            attempt.state === "EVALUATED"
+                                            attempt.state === ATTEMPT_STATES.EVALUATED
                                                 ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                                                : attempt.state === "SUBMITTED"
+                                                : attempt.state === ATTEMPT_STATES.SUBMITTED
                                                     ? "bg-blue-100 text-blue-700 border border-blue-200"
                                                     : "bg-slate-100 text-slate-600 border border-slate-200"
                                         )}>
-                                            {attempt.state === "EVALUATED" && <CheckCircle size={12} />}
-                                            {attempt.state === "SUBMITTED" && <Clock size={12} />}
+                                            {attempt.state === ATTEMPT_STATES.EVALUATED && <CheckCircle size={12} />}
+                                            {attempt.state === ATTEMPT_STATES.SUBMITTED && <Clock size={12} />}
                                             {attempt.state}
                                         </div>
                                     </TableCell>

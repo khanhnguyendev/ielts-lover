@@ -1,3 +1,4 @@
+import { STORAGE_FOLDERS } from '@/lib/constants';
 import { v2 as cloudinary } from 'cloudinary';
 
 export class StorageService {
@@ -16,7 +17,7 @@ export class StorageService {
         this.configured = true;
     }
 
-    async upload(file: File | Buffer | Uint8Array, folder: string = "ielts-lover/exercises"): Promise<string> {
+    async upload(file: File | Buffer | Uint8Array, folder: string = STORAGE_FOLDERS.EXERCISES): Promise<string> {
         this.configure();
 
         let buffer: Buffer;

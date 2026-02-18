@@ -1,3 +1,4 @@
+import { TransactionType } from "@/lib/constants";
 import { UserProfile, Exercise, Attempt, ExerciseType } from "@/types";
 
 export interface IUserRepository {
@@ -43,7 +44,7 @@ export type CreditTransaction = {
     id: string;
     user_id: string;
     amount: number;
-    type: "daily_grant" | "usage" | "reward" | "gift_code";
+    type: TransactionType;
     description?: string;
     created_at: string;
 };

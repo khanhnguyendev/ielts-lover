@@ -1,3 +1,4 @@
+import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS } from "@/lib/constants";
 import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository } from "../repositories/interfaces";
 
 export class InsufficientFundsError extends Error {
@@ -39,7 +40,7 @@ export class CreditService {
             await this.transactionRepo.create({
                 user_id: userId,
                 amount: grantAmount,
-                type: "daily_grant",
+                type: TRANSACTION_TYPES.DAILY_GRANT,
                 description: "Daily StarCredits replenishment"
             });
         }
@@ -75,10 +76,10 @@ export class CreditService {
 
         // 5. Log transaction
         const descriptionMap: Record<string, string> = {
-            "writing_evaluation": "Writing Task Evaluation",
-            "speaking_evaluation": "Speaking Practice Assessment",
-            "text_rewriter": "IELTS Text Rewriter",
-            "mock_test": "Full Mock Test Access"
+            [FEATURE_KEYS.WRITING_EVALUATION]: "Writing Task Evaluation",
+            [FEATURE_KEYS.SPEAKING_EVALUATION]: "Speaking Practice Assessment",
+            [FEATURE_KEYS.TEXT_REWRITER]: "IELTS Text Rewriter",
+            [FEATURE_KEYS.MOCK_TEST]: "Full Mock Test Access"
         };
 
         const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;
@@ -86,7 +87,7 @@ export class CreditService {
         await this.transactionRepo.create({
             user_id: userId,
             amount: -pricing.cost_per_unit,
-            type: "usage",
+            type: TRANSACTION_TYPES.USAGE,
             description: description
         });
 
@@ -96,7 +97,7 @@ export class CreditService {
     /**
      * Manual grant for rewards or gift codes.
      */
-    async rewardUser(userId: string, amount: number, type: "reward" | "gift_code", description: string): Promise<void> {
+    async rewardUser(userId: string, amount: number, type: TransactionType, description: string): Promise<void> {
         const user = await this.userRepo.getById(userId);
         if (!user) throw new Error("User not found");
 
@@ -120,7 +121,7 @@ export class CreditService {
         await this.rewardUser(
             userId,
             amount,
-            "reward",
+            TRANSACTION_TYPES.REWARD,
             `Event bonus: ${eventName}`
         );
     }
@@ -133,7 +134,7 @@ export class CreditService {
         await this.rewardUser(
             userId,
             giftAmount,
-            "gift_code",
+            TRANSACTION_TYPES.GIFT_CODE,
             `Gift code Applied: ${code}`
         );
     }
@@ -146,7 +147,7 @@ export class CreditService {
         await this.rewardUser(
             userId,
             amount,
-            "reward",
+            TRANSACTION_TYPES.REWARD,
             "Welcome to IELTS Lover!"
         );
     }

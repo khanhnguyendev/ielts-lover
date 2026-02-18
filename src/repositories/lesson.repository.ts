@@ -1,18 +1,19 @@
 import { ILessonRepository } from "./lesson.interface";
 import { Lesson, LessonQuestion } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class LessonRepository implements ILessonRepository {
     async getById(id: string): Promise<Lesson | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lessons")
+            .from(DB_TABLES.LESSONS)
             .select("*")
             .eq("id", id)
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[LessonRepository] getById failed: ${error.message}`);
         }
         return data as Lesson;
@@ -21,7 +22,7 @@ export class LessonRepository implements ILessonRepository {
     async listAll(): Promise<Lesson[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lessons")
+            .from(DB_TABLES.LESSONS)
             .select("*")
             .order("order_index", { ascending: true });
 
@@ -32,7 +33,7 @@ export class LessonRepository implements ILessonRepository {
     async create(lesson: Omit<Lesson, 'id' | 'created_at'>): Promise<Lesson> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lessons")
+            .from(DB_TABLES.LESSONS)
             .insert(lesson)
             .select()
             .single();
@@ -44,7 +45,7 @@ export class LessonRepository implements ILessonRepository {
     async update(id: string, lesson: Partial<Lesson>): Promise<Lesson> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lessons")
+            .from(DB_TABLES.LESSONS)
             .update(lesson)
             .eq("id", id)
             .select()
@@ -57,7 +58,7 @@ export class LessonRepository implements ILessonRepository {
     async delete(id: string): Promise<void> {
         const supabase = await createServerSupabaseClient();
         const { error } = await supabase
-            .from("lessons")
+            .from(DB_TABLES.LESSONS)
             .delete()
             .eq("id", id);
 
@@ -68,7 +69,7 @@ export class LessonRepository implements ILessonRepository {
     async createQuestion(question: Omit<LessonQuestion, 'id' | 'created_at'>): Promise<LessonQuestion> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lesson_questions")
+            .from(DB_TABLES.LESSON_QUESTIONS)
             .insert(question)
             .select()
             .single();
@@ -80,7 +81,7 @@ export class LessonRepository implements ILessonRepository {
     async updateQuestion(id: string, question: Partial<LessonQuestion>): Promise<LessonQuestion> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lesson_questions")
+            .from(DB_TABLES.LESSON_QUESTIONS)
             .update(question)
             .eq("id", id)
             .select()
@@ -93,7 +94,7 @@ export class LessonRepository implements ILessonRepository {
     async deleteQuestion(id: string): Promise<void> {
         const supabase = await createServerSupabaseClient();
         const { error } = await supabase
-            .from("lesson_questions")
+            .from(DB_TABLES.LESSON_QUESTIONS)
             .delete()
             .eq("id", id);
 
@@ -103,7 +104,7 @@ export class LessonRepository implements ILessonRepository {
     async getQuestionsByLessonId(lessonId: string): Promise<LessonQuestion[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("lesson_questions")
+            .from(DB_TABLES.LESSON_QUESTIONS)
             .select("*")
             .eq("lesson_id", lessonId)
             .order("order_index", { ascending: true });

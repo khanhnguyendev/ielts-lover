@@ -1,11 +1,12 @@
 import { ICreditTransactionRepository, CreditTransaction } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES } from "@/lib/constants";
 
 export class CreditTransactionRepository implements ICreditTransactionRepository {
     async create(transaction: Omit<CreditTransaction, "id" | "created_at">): Promise<CreditTransaction> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("credit_transactions")
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
             .insert(transaction)
             .select("*")
             .single();
@@ -17,7 +18,7 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
     async listByUserId(userId: string): Promise<CreditTransaction[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("credit_transactions")
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
             .select("*")
             .eq("user_id", userId)
             .order("created_at", { ascending: false });

@@ -1,5 +1,6 @@
 "use server";
 
+import { TRANSACTION_TYPES, TransactionType } from "@/lib/constants";
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
 import { getCurrentUser } from "@/app/actions";
@@ -249,7 +250,7 @@ export const adjustUserCredits = traceAction("adjustUserCredits", async (userId:
     await transactionRepo.create({
         user_id: userId,
         amount,
-        type: "gift_code",
+        type: TRANSACTION_TYPES.GIFT_CODE,
         description: `Admin Adjustment (${admin?.email}): ${reason}`
     });
 

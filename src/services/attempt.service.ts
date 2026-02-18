@@ -1,6 +1,7 @@
 import { Attempt } from "@/types";
 import { IAttemptRepository, IUserRepository, IExerciseRepository } from "../repositories/interfaces";
 import { AIService } from "./ai.service";
+import { ATTEMPT_STATES, EXERCISE_TYPES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class AttemptService {
     constructor(
@@ -17,7 +18,7 @@ export class AttemptService {
         return this.attemptRepo.create({
             user_id: userId,
             exercise_id: exerciseId,
-            state: "CREATED",
+            state: ATTEMPT_STATES.CREATED,
             content: ""
         });
     }
@@ -25,13 +26,13 @@ export class AttemptService {
     async submitAttempt(id: string, content: string): Promise<void> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
-        if (attempt.state !== "CREATED" && attempt.state !== "IN_PROGRESS") {
+        if (attempt.state !== ATTEMPT_STATES.CREATED && attempt.state !== ATTEMPT_STATES.IN_PROGRESS) {
             throw new Error(`Invalid attempt state: ${attempt.state}`);
         }
 
         await this.attemptRepo.update(id, {
             content,
-            state: "SUBMITTED",
+            state: ATTEMPT_STATES.SUBMITTED,
             submitted_at: new Date().toISOString()
         });
 
@@ -41,7 +42,7 @@ export class AttemptService {
 
     private async evaluateAttempt(id: string): Promise<void> {
         const attempt = await this.attemptRepo.getById(id);
-        if (!attempt || attempt.state !== "SUBMITTED") return;
+        if (!attempt || attempt.state !== ATTEMPT_STATES.SUBMITTED) return;
 
         const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
         if (!exercise) throw new Error("Exercise not found for attempt");
@@ -49,7 +50,7 @@ export class AttemptService {
         let feedback;
         let score;
 
-        if (exercise.type === "writing_task1" || exercise.type === "writing_task2") {
+        if (exercise.type === EXERCISE_TYPES.WRITING_TASK1 || exercise.type === EXERCISE_TYPES.WRITING_TASK2) {
             const report = await this.aiService.generateWritingReport(exercise.type as any, attempt.content);
             feedback = JSON.stringify(report);
             score = report.bandScore;
@@ -60,7 +61,7 @@ export class AttemptService {
         }
 
         await this.attemptRepo.update(id, {
-            state: "EVALUATED",
+            state: ATTEMPT_STATES.EVALUATED,
             score,
             feedback,
             evaluated_at: new Date().toISOString()
@@ -78,7 +79,7 @@ export class AttemptService {
         await this.evaluateAttempt(id);
 
         const updated = await this.attemptRepo.getById(id);
-        if (updated?.state === "EVALUATED") {
+        if (updated?.state === ATTEMPT_STATES.EVALUATED) {
             return { success: true };
         }
 

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { TRANSACTION_TYPES } from "@/lib/constants"
 import {
     ChevronLeft,
     ChevronRight,
@@ -60,9 +61,9 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     }, [filter])
 
     const getIcon = (type: string, amount: number) => {
-        if (type === "daily_grant") return <Gift className="h-3 w-3 text-emerald-500" />
-        if (type === "reward") return <Sparkles className="h-3 w-3 text-amber-500" />
-        if (type === "usage") return <Sparkles className="h-3 w-3 text-indigo-500" /> // AI Usage
+        if (type === TRANSACTION_TYPES.DAILY_GRANT) return <Gift className="h-3 w-3 text-emerald-500" />
+        if (type === TRANSACTION_TYPES.REWARD) return <Sparkles className="h-3 w-3 text-amber-500" />
+        if (type === TRANSACTION_TYPES.USAGE) return <Sparkles className="h-3 w-3 text-indigo-500" /> // AI Usage
         if (amount > 0) return <CreditCard className="h-3 w-3 text-emerald-500" /> // Purchase?
         return <CreditCard className="h-3 w-3 text-slate-400" />
     }

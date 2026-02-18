@@ -1,12 +1,13 @@
 import { Attempt } from "@/types";
 import { IAttemptRepository } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class AttemptRepository implements IAttemptRepository {
     async create(data: Omit<Attempt, "id" | "created_at">): Promise<Attempt> {
         const supabase = await createServerSupabaseClient();
         const { data: created, error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .insert(data)
             .select()
             .single();
@@ -18,13 +19,13 @@ export class AttemptRepository implements IAttemptRepository {
     async getById(id: string): Promise<Attempt | null> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .select("*")
             .eq("id", id)
             .single();
 
         if (error) {
-            if (error.code === "PGRST116") return null;
+            if (error.code === APP_ERROR_CODES.PGRST116) return null;
             throw new Error(`[AttemptRepository] getById failed: ${error.message}`);
         }
         return data as Attempt;
@@ -33,7 +34,7 @@ export class AttemptRepository implements IAttemptRepository {
     async update(id: string, data: Partial<Attempt>): Promise<void> {
         const supabase = await createServerSupabaseClient();
         const { error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .update(data)
             .eq("id", id);
 
@@ -43,10 +44,10 @@ export class AttemptRepository implements IAttemptRepository {
     async listByUserId(userId: string): Promise<any[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .select(`
                 *,
-                exercises (type)
+                ${DB_TABLES.EXERCISES} (type)
             `)
             .eq("user_id", userId)
             .order("created_at", { ascending: false });
@@ -58,11 +59,11 @@ export class AttemptRepository implements IAttemptRepository {
     async listAll(limit: number = 20): Promise<any[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .select(`
                 *,
-                user_profiles (email),
-                exercises (type)
+                ${DB_TABLES.USER_PROFILES} (email),
+                ${DB_TABLES.EXERCISES} (type)
             `)
             .order("created_at", { ascending: false })
             .limit(limit);
@@ -77,7 +78,7 @@ export class AttemptRepository implements IAttemptRepository {
         today.setHours(0, 0, 0, 0);
 
         const { count, error } = await supabase
-            .from("attempts")
+            .from(DB_TABLES.ATTEMPTS)
             .select("*", { count: 'exact', head: true })
             .gte("created_at", today.toISOString());
 

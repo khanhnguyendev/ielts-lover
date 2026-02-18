@@ -1,5 +1,6 @@
 "use server";
 
+import { ATTEMPT_STATES, DB_TABLES, FEATURE_KEYS, APP_ERROR_CODES } from "@/lib/constants";
 import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { AttemptRepository } from "@/repositories/attempt.repository";
@@ -69,7 +70,7 @@ export async function startExerciseAttempt(exerciseId: string) {
 
     // Check for existing in-progress attempt to resume
     const attempts = await attemptService.getUserAttempts(user.id);
-    const existing = attempts.find(a => a.exercise_id === exerciseId && (a.state === "CREATED" || a.state === "IN_PROGRESS"));
+    const existing = attempts.find(a => a.exercise_id === exerciseId && (a.state === ATTEMPT_STATES.CREATED || a.state === ATTEMPT_STATES.IN_PROGRESS));
 
     if (existing) return existing;
 
@@ -90,7 +91,7 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     const exercise = await exerciseService.getExercise(attempt.exercise_id);
     if (!exercise) throw new Error("Exercise not found");
 
-    const featureKey = exercise.type.startsWith("writing") ? "writing_evaluation" : "speaking_evaluation";
+    const featureKey = exercise.type.startsWith("writing") ? FEATURE_KEYS.WRITING_EVALUATION : FEATURE_KEYS.SPEAKING_EVALUATION;
 
     try {
         await creditService.billUser(user.id, featureKey);
@@ -99,13 +100,13 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             // If insufficient credits, we still save the work but don't evaluate
-            await attemptService.updateAttempt(attemptId, { content, state: "SUBMITTED" });
-            return { ...(await attemptService.getAttempt(attemptId)), reason: "INSUFFICIENT_CREDITS" };
+            await attemptService.updateAttempt(attemptId, { content, state: ATTEMPT_STATES.SUBMITTED });
+            return { ...(await attemptService.getAttempt(attemptId)), reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
         }
 
         const traceId = getCurrentTraceId()!;
         logger.error(`submitAttempt Error: ${attemptId}`, { error });
-        return { error: "INTERNAL_ERROR", traceId };
+        return { error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
 });
 
@@ -118,7 +119,7 @@ export const saveAttemptDraft = traceAction("saveAttemptDraft", async (attemptId
 
     await attemptService.updateAttempt(attemptId, {
         content,
-        state: "SUBMITTED",
+        state: ATTEMPT_STATES.SUBMITTED,
         submitted_at: new Date().toISOString()
     });
 
@@ -130,17 +131,17 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
     if (!user) throw new Error("User not authenticated");
 
     try {
-        await creditService.billUser(user.id, "writing_evaluation");
+        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION);
         const result = await attemptService.reevaluate(attemptId);
         return result;
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, reason: "INSUFFICIENT_CREDITS", message: error.message };
+            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS, message: error.message };
         }
 
         const traceId = getCurrentTraceId()!;
         logger.error(`reevaluateAttempt Error: ${attemptId}`, { error });
-        return { success: false, error: "INTERNAL_ERROR", traceId };
+        return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
 });
 
@@ -157,16 +158,16 @@ export async function getAttemptWithExercise(id: string) {
 
 export async function getAllUsers() {
     const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.from("user_profiles").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from(DB_TABLES.USER_PROFILES).select("*").order("created_at", { ascending: false });
     if (error) throw error;
     return data;
 }
 
 export async function getAllAttempts() {
     const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.from("attempts").select(`
+    const { data, error } = await supabase.from(DB_TABLES.ATTEMPTS).select(`
         *,
-        user_profiles (email)
+        ${DB_TABLES.USER_PROFILES} (email)
     `).order("created_at", { ascending: false });
     if (error) throw error;
     return data;
@@ -178,10 +179,10 @@ export async function getUserAttempts() {
 
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
-        .from("attempts")
+        .from(DB_TABLES.ATTEMPTS)
         .select(`
             *,
-            exercises (
+            ${DB_TABLES.EXERCISES} (
                 title,
                 type
             )
@@ -249,17 +250,17 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
     if (!user) throw new Error("User not authenticated");
 
     try {
-        await creditService.billUser(user.id, "text_rewriter");
+        await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER);
         const result = await aiService.rewriteContent(text);
         return { success: true, text: result.rewritten_text };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, reason: "INSUFFICIENT_CREDITS" };
+            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
         }
 
         const traceId = getCurrentTraceId()!;
         logger.error("rewriteText Error", { error });
-        return { success: false, error: "INTERNAL_ERROR", traceId };
+        return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
 });
 

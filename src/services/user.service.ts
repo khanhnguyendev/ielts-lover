@@ -1,3 +1,4 @@
+import { DEFAULT_QUOTAS } from "@/lib/constants";
 import { IUserRepository } from "../repositories/interfaces";
 import { UserProfile } from "@/types";
 
@@ -17,6 +18,6 @@ export class UserService {
         const user = await this.userRepo.getById(userId);
         if (!user) return false;
         if (user.is_premium) return true;
-        return user.daily_quota_used < 2;
+        return user.daily_quota_used < DEFAULT_QUOTAS.FREE_DAILY_LIMIT;
     }
 }
