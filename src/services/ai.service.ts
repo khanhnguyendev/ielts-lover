@@ -44,8 +44,20 @@ export class AIService {
             1. WORD COUNT PENALTY: Task 2 requires 250+ words. If the response is underlength, penalize the Task Response score. 
             2. INCOMPLETE RESPONSES: If the response is less than 100 words, provide an Overall Band between 1.0 and 4.0. Developer notes or casual chat are NOT Band 7.0/8.0.
             3. CEFR ALIGNMENT: Band 7.0+ (C1) requires sustained logical development and sophisticated language use.
+            4. BAND DESCRIPTORS: Provide detailed feedback for each of the 4 criteria: Task Response (TA), Coherence and Cohesion (CC), Lexical Resource (LR), and Grammatical Range and Accuracy (GRA).
             
-            Provide a detailed report including: 1. Overall band score and CEFR level. 2. Annotated feedback. 3. Detailed band score breakdown. 4. Specific mistake cards. 5. CEFR distribution.`
+            Return a JSON object matching this structure:
+            {
+              "overall_score": number,
+              "task_type": "academic", 
+              "general_comment": "string summarising the work",
+              "detailed_scores": {
+                "TA": { "score": number, "feedback": "string", "evidence": ["string"], "improvement_tips": ["string"] },
+                "CC": { "score": number, "feedback": "string", "evidence": ["string"], "improvement_tips": ["string"] },
+                "LR": { "score": number, "feedback": "string", "evidence": ["string"], "improvement_tips": ["string"] },
+                "GRA": { "score": number, "feedback": "string", "evidence": ["string"], "improvement_tips": ["string"] }
+              }
+            }`
         },
         [EXERCISE_TYPES.SPEAKING_PART1]: {
             v1: "Analyze the following IELTS Speaking Part 1 transcript and provide a score based on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.",
@@ -110,61 +122,57 @@ export class AIService {
     private static REPORT_SCHEMA = {
         type: SchemaType.OBJECT,
         properties: {
-            bandScore: { type: SchemaType.NUMBER, description: "The overall IELTS band score (e.g., 6.5)" },
-            cefrLevel: { type: SchemaType.STRING, description: "The overall CEFR level (e.g., B2, C1)" },
-            feedbackText: {
-                type: SchemaType.ARRAY,
-                items: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                        text: { type: SchemaType.STRING },
-                        cefr: { type: SchemaType.STRING, nullable: true },
-                        annotationId: { type: SchemaType.NUMBER, nullable: true },
-                        isError: { type: SchemaType.BOOLEAN, nullable: true }
+            overall_score: { type: SchemaType.NUMBER },
+            task_type: { type: SchemaType.STRING },
+            general_comment: { type: SchemaType.STRING },
+            detailed_scores: {
+                type: SchemaType.OBJECT,
+                properties: {
+                    TA: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            score: { type: SchemaType.NUMBER },
+                            feedback: { type: SchemaType.STRING },
+                            evidence: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                            improvement_tips: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+                        },
+                        required: ["score", "feedback", "evidence", "improvement_tips"]
                     },
-                    required: ["text"]
-                }
-            },
-            criteria: {
-                type: SchemaType.ARRAY,
-                items: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                        name: { type: SchemaType.STRING },
-                        score: { type: SchemaType.NUMBER },
-                        details: { type: SchemaType.STRING }
+                    CC: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            score: { type: SchemaType.NUMBER },
+                            feedback: { type: SchemaType.STRING },
+                            evidence: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                            improvement_tips: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+                        },
+                        required: ["score", "feedback", "evidence", "improvement_tips"]
                     },
-                    required: ["name", "score", "details"]
-                }
-            },
-            feedbackCards: {
-                type: SchemaType.ARRAY,
-                items: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                        id: { type: SchemaType.NUMBER },
-                        type: { type: SchemaType.STRING, description: "Task Achievement | Coherence | Grammar | Vocabulary" },
-                        original: { type: SchemaType.STRING },
-                        suggested: { type: SchemaType.STRING },
-                        explanation: { type: SchemaType.STRING },
-                        category: { type: SchemaType.STRING }
+                    LR: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            score: { type: SchemaType.NUMBER },
+                            feedback: { type: SchemaType.STRING },
+                            evidence: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                            improvement_tips: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+                        },
+                        required: ["score", "feedback", "evidence", "improvement_tips"]
                     },
-                    required: ["id", "type", "original", "suggested", "explanation", "category"]
-                }
-            },
-            cefrDistribution: {
-                type: SchemaType.ARRAY,
-                items: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                        level: { type: SchemaType.STRING },
-                        percentage: { type: SchemaType.NUMBER }
-                    },
-                    required: ["level", "percentage"]
-                }
+                    GRA: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            score: { type: SchemaType.NUMBER },
+                            feedback: { type: SchemaType.STRING },
+                            evidence: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                            improvement_tips: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+                        },
+                        required: ["score", "feedback", "evidence", "improvement_tips"]
+                    }
+                },
+                required: ["TA", "CC", "LR", "GRA"]
             }
         },
-        required: ["bandScore", "cefrLevel", "feedbackText", "criteria", "feedbackCards", "cefrDistribution"]
+        required: ["overall_score", "task_type", "general_comment", "detailed_scores"]
     };
 
     private static REWRITE_SCHEMA = {

@@ -44,9 +44,10 @@ const CRITERIA_MAP: Record<CriteriaType, { title: string; icon: any; color: stri
 
 interface WritingFeedbackProps {
     result: WritingFeedbackResult;
+    type: "writing_task1" | "writing_task2";
 }
 
-export function WritingFeedback({ result }: WritingFeedbackProps) {
+export function WritingFeedback({ result, type }: WritingFeedbackProps) {
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
 
     const getScoreColor = (score: number) => {
@@ -112,9 +113,10 @@ export function WritingFeedback({ result }: WritingFeedbackProps) {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-1">
                                     <h3 className="font-black text-slate-900 truncate">
-                                        {key === "TA" && result.task_type === "academic" ? "Task Achievement (A)" :
-                                            key === "TA" && result.task_type === "general" ? "Task Achievement (GT)" :
-                                                config.title}
+                                        {key === "TA" ? (
+                                            type === "writing_task2" ? "Task Response" :
+                                                result.task_type === "academic" ? "Task Achievement (A)" : "Task Achievement (GT)"
+                                        ) : config.title}
                                     </h3>
                                     <div className={cn(
                                         "px-2.5 py-1 rounded-lg text-sm font-black border",
@@ -145,9 +147,10 @@ export function WritingFeedback({ result }: WritingFeedbackProps) {
                                     {React.createElement(CRITERIA_MAP[activeCriteria].icon, { className: "w-5 h-5" })}
                                 </div>
                                 <h3 className="text-2xl font-black">
-                                    {activeCriteria === "TA" && result.task_type === "academic" ? "Task Achievement (Academic)" :
-                                        activeCriteria === "TA" && result.task_type === "general" ? "Task Achievement (General Training)" :
-                                            CRITERIA_MAP[activeCriteria].title}
+                                    {activeCriteria === "TA" ? (
+                                        type === "writing_task2" ? "Task Response" :
+                                            result.task_type === "academic" ? "Task Achievement (Academic)" : "Task Achievement (General Training)"
+                                    ) : CRITERIA_MAP[activeCriteria].title}
                                 </h3>
                             </div>
                             <p className="text-slate-400 font-medium">Detailed breakdown and evidence from your submission.</p>

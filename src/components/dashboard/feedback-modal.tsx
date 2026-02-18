@@ -71,7 +71,7 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
 
                 <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
                     {isStructuredWritingFeedback ? (
-                        <WritingFeedback result={parsedFeedback as WritingFeedbackResult} />
+                        <WritingFeedback result={parsedFeedback as WritingFeedbackResult} type={type} />
                     ) : (
                         <div className="space-y-4">
                             {parsedFeedback.detailed_feedback ? (
