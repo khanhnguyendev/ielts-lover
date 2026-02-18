@@ -24,10 +24,11 @@ import { cn } from "@/lib/utils"
 import { WritingEvaluation } from "@/components/reports/writing-evaluation"
 import { SpeakingEvaluation } from "@/components/reports/speaking-evaluation"
 import { RewriterEvaluation } from "@/components/reports/rewriter-evaluation"
+import { WritingFeedback } from "@/components/dashboard/writing-feedback"
+import { ScoreOverview } from "@/components/reports/score-overview"
 import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
 import { getAttemptWithExercise } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
-import { getBandScoreConfig } from "@/lib/score-utils"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
 
@@ -143,69 +144,24 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Score Overview */}
                     {(() => {
-                        const score = displayData?.bandScore || displayData?.overall_band || 1.0;
-                        const config = getBandScoreConfig(score);
+                        const score = displayData?.overall_score || displayData?.bandScore || displayData?.overall_band || 1.0;
                         return (
-                            <div className={cn(
-                                "rounded-[40px] border p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between shadow-sm relative overflow-hidden group gap-6 transition-all duration-500",
-                                config.bg,
-                                config.border
-                            )}>
-                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000">
-                                    <Sparkles className={cn("h-40 w-40", config.color)} />
-                                </div>
-
-                                <div className="flex items-center gap-8 sm:gap-12 relative z-10">
-                                    <div className="text-center">
-                                        <div className={cn("text-5xl sm:text-6xl font-black font-outfit flex items-baseline gap-1", config.color)}>
-                                            {score.toFixed(1)}
-                                            <span className="text-xl sm:text-2xl text-muted-foreground/40 font-bold">/9.0</span>
-                                        </div>
-                                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/60 mt-1">Overall Band Score</p>
-                                    </div>
-
-                                    <div className="w-px h-16 bg-muted/50 mx-2 hidden sm:block" />
-
-                                    <div className="text-center sm:text-left">
-                                        <div className={cn("text-3xl sm:text-4xl font-black font-outfit", config.color)}>
-                                            {config.cefr}
-                                        </div>
-                                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/60 mt-1">CEFR Level</p>
-                                    </div>
-                                </div>
-
-                                {!isSample && (
-                                    <Button
-                                        onClick={() => setIsCatbotOpen(true)}
-                                        className="bg-primary hover:bg-primary/90 text-white rounded-2xl h-14 px-8 font-black text-sm shadow-xl shadow-primary/20 relative z-10 w-full sm:w-auto hover:scale-[1.02] active:scale-[0.98] transition-all"
-                                    >
-                                        <MessageCircle className="mr-2 h-5 w-5 fill-white" />
-                                        Chat with your personal AI tutor
-                                    </Button>
-                                )}
-                                {isSample && (
-                                    <div className="flex items-center gap-4 relative z-10 w-full sm:w-auto">
-                                        <div className="hidden sm:flex -space-x-3">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
-                                                    {String.fromCharCode(64 + i)}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="flex-1 sm:flex-none">
-                                            <p className="text-xs font-bold text-slate-900">Expert Reviewed</p>
-                                            <p className="text-[10px] text-muted-foreground font-medium">Verified by IELTS Examiners</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            <ScoreOverview
+                                score={score}
+                                showChatButton={!isSample}
+                                onChatClick={() => setIsCatbotOpen(true)}
+                            />
                         );
                     })()}
 
                     {(isSample || (realData && realData.state === ATTEMPT_STATES.EVALUATED)) ? (
                         <>
-                            {displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing')) ? (
-                                <WritingEvaluation data={displayData as any} />
+                            {(displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing'))) ? (
+                                displayData.detailed_scores ? (
+                                    <WritingFeedback result={displayData as any} type={realData?.exercise?.type as any} />
+                                ) : (
+                                    <WritingEvaluation data={displayData as any} />
+                                )
                             ) : displayData.type === "Speaking" ? (
                                 <SpeakingEvaluation data={displayData as any} />
                             ) : (

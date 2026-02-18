@@ -45,9 +45,10 @@ const CRITERIA_MAP: Record<CriteriaType, { title: string; icon: any; color: stri
 interface WritingFeedbackProps {
     result: WritingFeedbackResult;
     type: "writing_task1" | "writing_task2";
+    hideHeader?: boolean;
 }
 
-export function WritingFeedback({ result, type }: WritingFeedbackProps) {
+export function WritingFeedback({ result, type, hideHeader = false }: WritingFeedbackProps) {
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
 
     const getScoreColor = (score: number) => {
@@ -61,34 +62,35 @@ export function WritingFeedback({ result, type }: WritingFeedbackProps) {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Overall Header */}
-            <div className="relative overflow-hidden bg-white rounded-[40px] border-2 border-slate-100 p-10 shadow-2xl shadow-slate-200/50">
-                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                    <CheckCircle2 className="w-48 h-48 rotate-12" />
-                </div>
-
-                <div className="flex flex-col md:flex-row items-center gap-10 relative">
-                    <div className={cn(
-                        "flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 shadow-xl shrink-0 transition-all duration-500",
-                        getScoreColor(result.overall_score)
-                    )}>
-                        <span className="text-5xl font-black font-outfit">{result.overall_score.toFixed(1)}</span>
-                        <span className="text-xs uppercase font-bold tracking-widest opacity-70">Band</span>
+            {!hideHeader && (
+                <div className="relative overflow-hidden bg-white rounded-[40px] border-2 border-slate-100 p-10 shadow-2xl shadow-slate-200/50">
+                    <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                        <CheckCircle2 className="w-48 h-48 rotate-12" />
                     </div>
 
-                    <div className="flex-1 space-y-4 text-center md:text-left">
-                        <div>
-                            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 mb-2 inline-block">
-                                {result.task_type} Task 1
-                            </span>
-                            <h2 className="text-3xl font-black text-slate-900 leading-tight">Expert AI Evaluation</h2>
+                    <div className="flex flex-col md:flex-row items-center gap-10 relative">
+                        <div className={cn(
+                            "flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 shadow-xl shrink-0 transition-all duration-500",
+                            getScoreColor(result.overall_score)
+                        )}>
+                            <span className="text-5xl font-black font-outfit">{result.overall_score.toFixed(1)}</span>
+                            <span className="text-xs uppercase font-bold tracking-widest opacity-70">Band</span>
                         </div>
-                        <p className="text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
-                            {result.general_comment}
-                        </p>
+
+                        <div className="flex-1 space-y-4 text-center md:text-left">
+                            <div>
+                                <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 mb-2 inline-block">
+                                    {result.task_type} Task 1
+                                </span>
+                                <h2 className="text-3xl font-black text-slate-900 leading-tight">Expert AI Evaluation</h2>
+                            </div>
+                            <p className="text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
+                                {result.general_comment}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Criteria Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

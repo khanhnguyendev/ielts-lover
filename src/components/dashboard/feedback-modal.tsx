@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, Sparkles, Award } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { WritingFeedback } from "./writing-feedback";
-import { WritingFeedbackResult } from "@/types";
+import { ScoreOverview } from "@/components/reports/score-overview";
+import { WritingFeedbackResult } from "@/types/writing";
 import { cn } from "@/lib/utils";
 
 interface FeedbackModalProps {
@@ -32,7 +33,7 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
         parsedFeedback = { raw: feedback };
     }
 
-    // Determine band score color
+    // Determine band score color (fallback for legacy UI)
     const getScoreColor = (score: number) => {
         if (score >= 8.0) return "text-emerald-600 bg-emerald-50 border-emerald-200";
         if (score >= 6.5) return "text-blue-600 bg-blue-50 border-blue-200";
@@ -40,7 +41,7 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
     };
 
     const scoreColorClass = score ? getScoreColor(score) : "";
-    const isStructuredWritingFeedback = type === "writing_task1" && parsedFeedback.detailed_scores;
+    const isStructuredWritingFeedback = (type === "writing_task1" || type === "writing_task2") && parsedFeedback.detailed_scores;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,30 +49,48 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
                 "bg-white rounded-[32px] p-0 overflow-hidden border-none shadow-2xl transition-all duration-500",
                 isStructuredWritingFeedback ? "sm:max-w-4xl" : "sm:max-w-2xl"
             )}>
-                <div className="bg-[#F9FAFB] p-8 border-b text-center space-y-4">
-                    <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border">
-                        <Award className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <div>
-                        <DialogTitle className="text-2xl font-black font-outfit text-slate-900">
-                            Evaluation Complete!
-                        </DialogTitle>
-                        <p className="text-muted-foreground font-medium text-sm mt-1">
-                            Here is the AI assessment of your {type === "writing_task1" ? "Task 1" : "Task 2"} response.
-                        </p>
-                    </div>
-
-                    {(score !== undefined && score !== null) && (
-                        <div className={`inline-flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 ${scoreColorClass}`}>
-                            <span className="text-3xl font-black">{score.toFixed(1)}</span>
-                            <span className="text-[10px] uppercase font-bold tracking-widest opacity-80">Band</span>
+                {!isStructuredWritingFeedback ? (
+                    <div className="bg-[#F9FAFB] p-8 border-b text-center space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border">
+                            <Award className="w-8 h-8 text-purple-600" />
                         </div>
-                    )}
-                </div>
+                        <div>
+                            <DialogTitle className="text-2xl font-black font-outfit text-slate-900">
+                                Evaluation Complete!
+                            </DialogTitle>
+                            <p className="text-muted-foreground font-medium text-sm mt-1">
+                                Here is the AI assessment of your {type === "writing_task1" ? "Task 1" : "Task 2"} response.
+                            </p>
+                        </div>
 
-                <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                        {(score !== undefined && score !== null) && (
+                            <div className={`inline-flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 ${scoreColorClass}`}>
+                                <span className="text-3xl font-black">{score.toFixed(1)}</span>
+                                <span className="text-[10px] uppercase font-bold tracking-widest opacity-80">Band</span>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="p-8 pb-0">
+                        <ScoreOverview
+                            score={score || parsedFeedback.overall_score || 1.0}
+                            title="Overall Assessment"
+                            subtitle="Expert Band Score"
+                            className="rounded-[32px] shadow-none border-slate-100 bg-slate-50/50"
+                        />
+                    </div>
+                )}
+
+                <div className={cn(
+                    "space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide",
+                    isStructuredWritingFeedback ? "p-8 pt-6" : "p-8"
+                )}>
                     {isStructuredWritingFeedback ? (
-                        <WritingFeedback result={parsedFeedback as WritingFeedbackResult} type={type} />
+                        <WritingFeedback
+                            result={parsedFeedback as WritingFeedbackResult}
+                            type={type}
+                            hideHeader={true}
+                        />
                     ) : (
                         <div className="space-y-4">
                             {parsedFeedback.detailed_feedback ? (
