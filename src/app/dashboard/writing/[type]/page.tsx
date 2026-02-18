@@ -133,8 +133,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                         setFeedbackData({
                             score: result.score as number,
                             feedback: result.feedback as string,
-                            attemptId: result.id
-                        })
+                            attemptId: result.id,
+                            originalText: result.content,
+                            isUnlocked: result.is_correction_unlocked,
+                            initialCorrection: result.correction_data ? JSON.parse(result.correction_data) : null
+                        } as any)
                         setShowFeedback(true)
                     } else if (result && 'reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
                         notifyWarning(
@@ -357,6 +360,9 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 feedback={feedbackData.feedback}
                 attemptId={feedbackData.attemptId}
                 type={exercise.type as any}
+                originalText={(feedbackData as any).originalText}
+                isUnlocked={(feedbackData as any).isUnlocked}
+                initialCorrection={(feedbackData as any).initialCorrection}
             />
         </div>
     )

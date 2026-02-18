@@ -54,6 +54,7 @@ export const FEATURE_KEYS = {
     TEXT_REWRITER: 'text_rewriter',
     MOCK_TEST: 'mock_test',
     AI_TUTOR_CHAT: 'ai_tutor_chat',
+    DETAILED_CORRECTION: 'detailed_correction',
 } as const;
 
 export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];

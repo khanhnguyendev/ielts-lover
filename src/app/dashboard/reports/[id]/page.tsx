@@ -158,7 +158,15 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         <>
                             {(displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing'))) ? (
                                 displayData.detailed_scores ? (
-                                    <WritingFeedback result={displayData as any} type={realData?.exercise?.type as any} hideScore={true} />
+                                    <WritingFeedback
+                                        result={displayData as any}
+                                        type={realData?.exercise?.type as any}
+                                        hideScore={true}
+                                        attemptId={realData?.id}
+                                        originalText={realData?.content}
+                                        isUnlocked={realData?.is_correction_unlocked}
+                                        initialCorrection={realData?.correction_data ? JSON.parse(realData.correction_data) : null}
+                                    />
                                 ) : (
                                     <WritingEvaluation data={displayData as any} />
                                 )

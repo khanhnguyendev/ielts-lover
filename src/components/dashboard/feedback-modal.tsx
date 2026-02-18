@@ -21,9 +21,22 @@ interface FeedbackModalProps {
     feedback?: string; // JSON string or raw text
     attemptId?: string;
     type: "writing_task1" | "writing_task2";
+    originalText?: string;
+    isUnlocked?: boolean;
+    initialCorrection?: any[];
 }
 
-export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, type }: FeedbackModalProps) {
+export function FeedbackModal({
+    open,
+    onOpenChange,
+    score,
+    feedback,
+    attemptId,
+    type,
+    originalText,
+    isUnlocked,
+    initialCorrection
+}: FeedbackModalProps) {
     const router = useRouter();
 
     let parsedFeedback: any = {};
@@ -90,6 +103,10 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
                             result={parsedFeedback as WritingFeedbackResult}
                             type={type}
                             hideHeader={true}
+                            attemptId={attemptId}
+                            originalText={originalText}
+                            isUnlocked={isUnlocked}
+                            initialCorrection={initialCorrection}
                         />
                     ) : (
                         <div className="space-y-3">

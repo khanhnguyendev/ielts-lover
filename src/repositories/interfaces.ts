@@ -5,6 +5,8 @@ export interface IUserRepository {
     getById(id: string): Promise<UserProfile | null>;
     update(id: string, data: Partial<UserProfile>): Promise<void>;
     incrementQuota(id: string): Promise<void>;
+    deductCredits(id: string, amount: number): Promise<void>;
+    addCredits(id: string, amount: number): Promise<void>;
     listAll(): Promise<UserProfile[]>;
     getPremiumCount(): Promise<number>;
     getTotalCount(): Promise<number>;

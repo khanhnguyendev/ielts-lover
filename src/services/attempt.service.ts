@@ -103,4 +103,22 @@ export class AttemptService {
     async getUserAttempts(userId: string): Promise<Attempt[]> {
         return this.attemptRepo.listByUserId(userId);
     }
+
+    async unlockCorrection(id: string): Promise<any> {
+        const attempt = await this.attemptRepo.getById(id);
+        if (!attempt) throw new Error("Attempt not found");
+
+        if (attempt.is_correction_unlocked && attempt.correction_data) {
+            return attempt.correction_data;
+        }
+
+        const correction = await this.aiService.generateCorrection(attempt.content);
+
+        await this.attemptRepo.update(id, {
+            correction_data: JSON.stringify(correction),
+            is_correction_unlocked: true
+        });
+
+        return correction;
+    }
 }

@@ -273,3 +273,29 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
 export async function getLessonQuestions(lessonId: string) {
     return lessonService.getQuestions(lessonId);
 }
+
+export const unlockCorrection = traceAction("unlockCorrection", async (attemptId: string) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const attempt = await attemptService.getAttempt(attemptId);
+    if (!attempt) throw new Error("Attempt not found");
+
+    if (attempt.is_correction_unlocked) {
+        return { success: true, data: JSON.parse(attempt.correction_data) };
+    }
+
+    try {
+        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION);
+        const correction = await attemptService.unlockCorrection(attemptId);
+        return { success: true, data: correction };
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        const traceId = getCurrentTraceId()!;
+        logger.error(`unlockCorrection Error: ${attemptId}`, { error });
+        return { success: false, reason: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    }
+});

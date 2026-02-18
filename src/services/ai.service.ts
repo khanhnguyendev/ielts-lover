@@ -87,6 +87,29 @@ export class AIService {
             [EXERCISE_TYPES.SPEAKING_PART3]: {
                 v1: "Generate a set of 4-5 abstract IELTS Speaking Part 3 questions related to a specific theme. Return a title and the list of questions.",
             }
+        },
+        correction: {
+            v1: `You are a Grammar Editor. Identify errors and improvements in the user's text.
+            Focus on: 1. Grammar mistakes (Red). 2. Academic Vocabulary upgrades (Blue/Yellow).
+            Do NOT explain general things. Be concise.
+            
+            Return a JSON Array where each item corresponds to a sentence index (0-based) that needs correction or improvement.`
+        }
+    };
+
+    private static CORRECTION_SCHEMA = {
+        type: SchemaType.ARRAY,
+        items: {
+            type: SchemaType.OBJECT,
+            properties: {
+                idx: { type: SchemaType.NUMBER, description: "Sentence index (0-based)" },
+                error: { type: SchemaType.BOOLEAN, description: "True if it's a grammar error, false if it's an improvement" },
+                original_segment: { type: SchemaType.STRING },
+                fix: { type: SchemaType.STRING, description: "The corrected version for errors" },
+                better_version: { type: SchemaType.STRING, description: "A high-level academic paraphrase" },
+                explanation: { type: SchemaType.STRING, description: "Short explanation of the fix/improvement" }
+            },
+            required: ["idx", "error", "original_segment", "fix", "better_version", "explanation"]
         }
     };
 
@@ -306,6 +329,23 @@ export class AIService {
 
         const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS[EXERCISE_TYPES.WRITING_TASK1].v2;
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
+    }
+
+    async generateCorrection(content: string, version: AIPromptVersion = "v1"): Promise<any> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.CORRECTION_SCHEMA as any,
+            },
+        });
+
+        const promptBase = (AIService.PROMPTS.correction as any)[version];
+        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the corrections in the requested JSON format.`;
 
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();

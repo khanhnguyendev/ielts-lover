@@ -11,10 +11,19 @@ import {
     Lightbulb,
     CheckCircle2,
     Info,
-    Sparkles
+    Sparkles,
+    Lock,
+    Zap,
+    ChevronRight,
+    AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WritingFeedbackResult, CriteriaType } from "@/types/writing";
+import { Button } from "@/components/ui/button";
+import { unlockCorrection } from "@/app/actions";
+import { CorrectionList } from "./correction-list";
+import { toast } from "sonner";
+import { APP_ERROR_CODES } from "@/lib/constants";
 
 const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
@@ -48,10 +57,50 @@ interface WritingFeedbackProps {
     type: "writing_task1" | "writing_task2";
     hideHeader?: boolean;
     hideScore?: boolean;
+    attemptId?: string;
+    originalText?: string;
+    isUnlocked?: boolean;
+    initialCorrection?: any[];
 }
 
-export function WritingFeedback({ result, type, hideHeader = false, hideScore = false }: WritingFeedbackProps) {
+export function WritingFeedback({
+    result,
+    type,
+    hideHeader = false,
+    hideScore = false,
+    attemptId,
+    originalText,
+    isUnlocked: initialIsUnlocked = false,
+    initialCorrection
+}: WritingFeedbackProps) {
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
+    const [isUnlocked, setIsUnlocked] = React.useState(initialIsUnlocked);
+    const [corrections, setCorrections] = React.useState<any[] | null>(initialCorrection || null);
+    const [isUnlocking, setIsUnlocking] = React.useState(false);
+
+    const handleUnlock = async () => {
+        if (!attemptId) return;
+        setIsUnlocking(true);
+        try {
+            const result = await unlockCorrection(attemptId);
+            if (result.success) {
+                setCorrections(result.data);
+                setIsUnlocked(true);
+                toast.success("Detailed correction unlocked!");
+            } else {
+                if (result.reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
+                    toast.error("Insufficient StarCredits to unlock this feature.");
+                } else {
+                    toast.error("Failed to unlock correction. Please try again.");
+                }
+            }
+        } catch (error) {
+            console.error("Unlock error:", error);
+            toast.error("An unexpected error occurred.");
+        } finally {
+            setIsUnlocking(false);
+        }
+    };
 
     const getScoreColor = (score: number) => {
         if (score >= 8.0) return "text-emerald-600 bg-emerald-50 border-emerald-200";
@@ -203,6 +252,74 @@ export function WritingFeedback({ result, type, hideHeader = false, hideScore = 
                     </div>
                 </div>
             )}
+
+            {/* Stage 2: Detailed Correction */}
+            <div className="space-y-4 pt-8 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit flex items-center gap-2">
+                            <PencilLine className="w-5 h-5 text-primary" />
+                            Detailed Correction
+                        </h3>
+                        <p className="text-[10px] text-slate-500 font-medium mt-0.5">Line-by-line grammar fixes & academic paraphrasing</p>
+                    </div>
+                    {isUnlocked && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 scale-90 sm:scale-100">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Unlocked</span>
+                        </div>
+                    )}
+                </div>
+
+                {!isUnlocked ? (
+                    <div className="relative group overflow-hidden rounded-[24px] border-2 border-slate-100 bg-white min-h-[300px]">
+                        {/* Blurry Preview */}
+                        <div className="p-10 space-y-6 opacity-20 blur-[5px] select-none pointer-events-none grayscale">
+                            <div className="space-y-3">
+                                <div className="h-3 bg-slate-200 rounded-full w-3/4" />
+                                <div className="h-3 bg-slate-200 rounded-full w-full" />
+                                <div className="h-3 bg-slate-200 rounded-full w-5/6" />
+                                <div className="h-3 bg-slate-200 rounded-full w-2/3" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="h-20 bg-rose-50 rounded-xl border border-rose-100" />
+                                <div className="h-20 bg-blue-50 rounded-xl border border-blue-100" />
+                            </div>
+                        </div>
+
+                        {/* Unlock CTA */}
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center bg-white/60 backdrop-blur-[2px]">
+                            <div className="w-12 h-12 bg-white rounded-2xl border-2 border-slate-100 shadow-lg flex items-center justify-center mb-4">
+                                <Lock className="w-6 h-6 text-slate-300" />
+                            </div>
+                            <h4 className="text-base font-black text-slate-900 font-outfit mb-1.5 leading-tight">See every mistake & upgrade</h4>
+                            <p className="text-[11px] text-slate-500 font-medium max-w-[280px] mb-6 leading-relaxed">
+                                Get line-by-line grammar corrections and Band 8.0+ vocabulary upgrades.
+                            </p>
+
+                            <Button
+                                onClick={handleUnlock}
+                                disabled={isUnlocking}
+                                className="h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/30 font-black text-xs group"
+                            >
+                                <Zap className="w-3.5 h-3.5 mr-2 fill-white animate-pulse" />
+                                {isUnlocking ? "Unlocking..." : "Unlock Feedback (-15 Credits)"}
+                                <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+
+                            <p className="mt-5 text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 opacity-80">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                AI-Powered Analysis
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <CorrectionList
+                        corrections={corrections || []}
+                        originalText={originalText || ""}
+                    />
+                )}
+            </div>
         </div>
     );
 }

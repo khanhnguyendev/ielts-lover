@@ -69,17 +69,15 @@ export class CreditService {
         }
 
         // 4. Atomic deduction
-        // Assuming userRepo has a method for this, or using update
-        await this.userRepo.update(userId, {
-            credits_balance: user.credits_balance - pricing.cost_per_unit
-        });
+        await this.userRepo.deductCredits(userId, pricing.cost_per_unit);
 
         // 5. Log transaction
         const descriptionMap: Record<string, string> = {
             [FEATURE_KEYS.WRITING_EVALUATION]: "Writing Task Evaluation",
             [FEATURE_KEYS.SPEAKING_EVALUATION]: "Speaking Practice Assessment",
             [FEATURE_KEYS.TEXT_REWRITER]: "IELTS Text Rewriter",
-            [FEATURE_KEYS.MOCK_TEST]: "Full Mock Test Access"
+            [FEATURE_KEYS.MOCK_TEST]: "Full Mock Test Access",
+            [FEATURE_KEYS.DETAILED_CORRECTION]: "Detailed Sentence Correction"
         };
 
         const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;

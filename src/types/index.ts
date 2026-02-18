@@ -41,6 +41,8 @@ export type Attempt = {
     created_at: string;
     submitted_at?: string;
     evaluated_at?: string;
+    correction_data?: any;
+    is_correction_unlocked?: boolean;
     exercises?: {
         title: string;
         type: string;

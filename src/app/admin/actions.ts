@@ -19,6 +19,7 @@ import { AttemptRepository } from "@/repositories/attempt.repository";
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { CreditPackageRepository } from "@/repositories/credit-package.repository";
 import { SystemSettingsRepository } from "@/repositories/system-settings.repository";
+import { FeaturePricingRepository } from "@/repositories/pricing.repository";
 import { CreditPackage } from "@/types";
 import { StorageService } from "@/services/storage.service";
 
@@ -32,6 +33,7 @@ const transactionRepo = traceService(new CreditTransactionRepository(), "CreditT
 const lessonRepo = traceService(new LessonRepository(), "LessonRepository");
 const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
 const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
+const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricingRepository");
 const _aiService = new AIService();
 const aiService = traceService(_aiService, "AIService");
 const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
@@ -286,5 +288,16 @@ export const getSystemSettings = traceAction("getSystemSettings", async () => {
 export const updateSystemSetting = traceAction("updateSystemSetting", async (key: string, value: any) => {
     await checkAdmin();
     await settingsRepo.updateSetting(key, value);
+    revalidatePath("/admin/settings");
+});
+
+export const getFeaturePricing = traceAction("getFeaturePricing", async () => {
+    await checkAdmin();
+    return pricingRepo.listAll();
+});
+
+export const updateFeaturePricing = traceAction("updateFeaturePricing", async (key: string, cost: number) => {
+    await checkAdmin();
+    await pricingRepo.updatePricing(key, cost);
     revalidatePath("/admin/settings");
 });
