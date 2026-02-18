@@ -34,6 +34,9 @@ export default function RewriterPage() {
             "Rewrite Now",
             async () => {
                 setIsRewriting(true)
+                // Optimistic decrement animation
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+
                 // Call Server Action
                 try {
                     const result = await rewriteText(inputText)
@@ -45,6 +48,9 @@ export default function RewriterPage() {
                             "Compare Version"
                         )
                     } else {
+                        // Refund animation if failed
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+
                         if (result.reason === "INSUFFICIENT_CREDITS") {
                             notifyError(
                                 "Insufficient Credits",

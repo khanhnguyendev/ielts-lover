@@ -111,10 +111,15 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             "Evaluate Now",
             async () => {
                 setIsSubmitting(true)
+                // Optimistic decrement animation
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+
                 try {
                     const result = await submitAttempt(currentAttempt.id, text)
 
                     if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
+                        // Refund animation on system error
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
                         notifyError(
                             "System Error",
                             "We encountered a problem while evaluating your work. Please provide the trace ID to support.",

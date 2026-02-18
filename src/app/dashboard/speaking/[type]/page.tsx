@@ -294,8 +294,16 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                                                 // Optimistic decrement animation
                                                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
 
-                                                setStatus("PROCESSING");
-                                                setTimeout(() => setStatus("COMPLETE"), 2000);
+                                                try {
+                                                    // In a real app, we'd call submitAttempt here
+                                                    // For now, we simulate success
+                                                    setStatus("PROCESSING");
+                                                    setTimeout(() => setStatus("COMPLETE"), 2000);
+                                                } catch (error) {
+                                                    // Refund animation on system error
+                                                    window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
+                                                    notifyError("Evaluation Failed", "We couldn't process your speaking evaluation. Please try again.");
+                                                }
                                             });
                                         }}
                                         className="bg-primary text-white px-10 rounded-2xl font-black"
