@@ -3,13 +3,15 @@
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, Sparkles, Award } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { WritingFeedback } from "./writing-feedback";
+import { WritingFeedbackResult } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface FeedbackModalProps {
     open: boolean;
@@ -38,10 +40,14 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
     };
 
     const scoreColorClass = score ? getScoreColor(score) : "";
+    const isStructuredWritingFeedback = type === "writing_task1" && parsedFeedback.detailed_scores;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl bg-white rounded-[32px] p-0 overflow-hidden border-none shadow-2xl">
+            <DialogContent className={cn(
+                "bg-white rounded-[32px] p-0 overflow-hidden border-none shadow-2xl transition-all duration-500",
+                isStructuredWritingFeedback ? "sm:max-w-4xl" : "sm:max-w-2xl"
+            )}>
                 <div className="bg-[#F9FAFB] p-8 border-b text-center space-y-4">
                     <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border">
                         <Award className="w-8 h-8 text-purple-600" />
@@ -63,43 +69,46 @@ export function FeedbackModal({ open, onOpenChange, score, feedback, attemptId, 
                     )}
                 </div>
 
-                <div className="p-8 space-y-6 max-h-[50vh] overflow-y-auto scrollbar-hide">
-                    <div className="space-y-4">
-
-                        {parsedFeedback.detailed_feedback ? (
-                            <div className="space-y-4">
-                                {parsedFeedback.detailed_feedback.map((item: any, idx: number) => (
-                                    <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            {item.type === "strength" ? (
-                                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                            ) : (
-                                                <AlertCircle className="w-4 h-4 text-rose-500" />
-                                            )}
-                                            <span className="font-bold text-sm text-slate-900 capitalize">{item.aspect}</span>
+                <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                    {isStructuredWritingFeedback ? (
+                        <WritingFeedback result={parsedFeedback as WritingFeedbackResult} />
+                    ) : (
+                        <div className="space-y-4">
+                            {parsedFeedback.detailed_feedback ? (
+                                <div className="space-y-4">
+                                    {parsedFeedback.detailed_feedback.map((item: any, idx: number) => (
+                                        <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                {item.type === "strength" ? (
+                                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                                ) : (
+                                                    <AlertCircle className="w-4 h-4 text-rose-500" />
+                                                )}
+                                                <span className="font-bold text-sm text-slate-900 capitalize">{item.aspect}</span>
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed">{item.comment}</p>
                                         </div>
-                                        <p className="text-sm text-slate-600 leading-relaxed">{item.comment}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-slate-50 p-6 rounded-2xl border border-dashed text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">
-                                {parsedFeedback.raw || "No detailed feedback available."}
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-slate-50 p-6 rounded-2xl border border-dashed text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">
+                                    {parsedFeedback.raw || "No detailed feedback available."}
+                                </div>
+                            )}
 
-                        {parsedFeedback.improved_sample && (
-                            <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 space-y-3">
-                                <h4 className="flex items-center gap-2 font-bold text-indigo-900 text-sm">
-                                    <Sparkles className="w-4 h-4 text-indigo-600" />
-                                    AI Improved Version
-                                </h4>
-                                <p className="text-sm text-indigo-900/80 leading-relaxed italic">
-                                    "{parsedFeedback.improved_sample}"
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                            {parsedFeedback.improved_sample && (
+                                <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 space-y-3">
+                                    <h4 className="flex items-center gap-2 font-bold text-indigo-900 text-sm">
+                                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                                        AI Improved Version
+                                    </h4>
+                                    <p className="text-sm text-indigo-900/80 leading-relaxed italic">
+                                        "{parsedFeedback.improved_sample}"
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter className="p-6 bg-slate-50 border-t flex flex-col sm:flex-row gap-3">
