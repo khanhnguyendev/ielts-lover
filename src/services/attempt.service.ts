@@ -26,6 +26,16 @@ export class AttemptService {
     async submitAttempt(id: string, content: string): Promise<void> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
+        if (attempt.state === ATTEMPT_STATES.EVALUATED) {
+            return; // Idempotent: already done
+        }
+
+        if (attempt.state === ATTEMPT_STATES.SUBMITTED) {
+            // Already submitted, maybe just trigger evaluation again if it's stuck
+            await this.evaluateAttempt(id);
+            return;
+        }
+
         if (attempt.state !== ATTEMPT_STATES.CREATED && attempt.state !== ATTEMPT_STATES.IN_PROGRESS) {
             throw new Error(`Invalid attempt state: ${attempt.state}`);
         }

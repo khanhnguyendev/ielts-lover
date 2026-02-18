@@ -93,8 +93,14 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
 
     const featureKey = exercise.type.startsWith("writing") ? FEATURE_KEYS.WRITING_EVALUATION : FEATURE_KEYS.SPEAKING_EVALUATION;
 
+    if (attempt.state === ATTEMPT_STATES.EVALUATED) {
+        return attempt;
+    }
+
     try {
-        await creditService.billUser(user.id, featureKey);
+        if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
+            await creditService.billUser(user.id, featureKey);
+        }
         await attemptService.submitAttempt(attemptId, content);
         return attemptService.getAttempt(attemptId);
     } catch (error) {
