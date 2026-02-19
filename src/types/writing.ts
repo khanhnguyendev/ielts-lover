@@ -14,6 +14,19 @@ export interface WritingFeedbackResult {
     general_comment: string;
 }
 
+export interface TextEdit {
+    original_substring: string; // The EXACT snippet from the user's text that has an issue (e.g., "The graph show")
+    suggested_fix: string;      // The corrected version (e.g., "The graph shows")
+    better_version?: string;    // Optional: A Band 8.0+ paraphrase
+    error_type: 'grammar' | 'spelling' | 'vocabulary' | 'style';
+    explanation: string;
+}
+
+export interface CorrectionResponse {
+    edits: TextEdit[];
+}
+
+// Deprecated: Moving to TextEdit
 export interface CorrectionItem {
     idx: number
     error: boolean

@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft, getFeaturePrice } from "@/app/actions"
+import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft, getFeaturePrice, getCurrentUser } from "@/app/actions"
 import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
@@ -38,6 +38,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [text, setText] = React.useState("")
     const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
     const [evalCost, setEvalCost] = React.useState<number>(1) // Default 1
+    const [targetScore, setTargetScore] = React.useState<number>(9.0);
 
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
@@ -65,7 +66,13 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 const price = await getFeaturePrice(featureKey);
                 setEvalCost(price);
 
-                // 3. Start or Resume Attempt
+                // 3. Fetch User for Target Score
+                const userProfile = await getCurrentUser();
+                if (userProfile) {
+                    setTargetScore(userProfile.target_score || 9.0);
+                }
+
+                // 4. Start or Resume Attempt
                 try {
                     const attempt = await startExerciseAttempt(exerciseId)
                     setCurrentAttempt(attempt)
@@ -372,6 +379,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 originalText={(feedbackData as any).originalText}
                 isUnlocked={(feedbackData as any).isUnlocked}
                 initialCorrection={(feedbackData as any).initialCorrection}
+                targetScore={targetScore}
             />
         </div>
     )

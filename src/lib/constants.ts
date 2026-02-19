@@ -55,6 +55,7 @@ export const FEATURE_KEYS = {
     MOCK_TEST: 'mock_test',
     AI_TUTOR_CHAT: 'ai_tutor_chat',
     DETAILED_CORRECTION: 'detailed_correction',
+    SENTENCE_IMPROVE: 'sentence_improve',
 } as const;
 
 export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];
@@ -90,6 +91,7 @@ export type TransactionFilter = typeof TRANSACTION_FILTERS[keyof typeof TRANSACT
 export const APP_ERROR_CODES = {
     INSUFFICIENT_CREDITS: 'INSUFFICIENT_CREDITS',
     INTERNAL_ERROR: 'INTERNAL_ERROR',
+    AI_SERVICE_BUSY: 'AI_SERVICE_BUSY',
     PGRST116: 'PGRST116',
 } as const;
 

@@ -71,6 +71,11 @@ export class AIService {
         rewrite: {
             v1: "Rewrite the following text to be more academic and professional, suitable for IELTS Writing Band 8.0+. Improve vocabulary and sentence structure while retaining the original meaning.",
         },
+        improve_sentence: {
+            v1: `Rewrite the following SENTENCE to be Band 9.0 Academic IELTS standard. 
+            Enhance vocabulary and grammar while strictly preserving the original meaning. 
+            Return ONLY the rewritten sentence as a string, no quotes or explanations.`
+        },
         generation: {
             [EXERCISE_TYPES.WRITING_TASK1]: {
                 v1: "Generate a realistic IELTS Writing Task 1 prompt. Include a title describing the chart/graph/process, and the full question prompt. NOTE: Since you cannot generate images, strictly describe what the visual data would be in the prompt text so the user knows what image to find/create.",
@@ -93,24 +98,38 @@ export class AIService {
             Focus on: 1. Grammar mistakes (Red). 2. Academic Vocabulary upgrades (Blue/Yellow).
             Do NOT explain general things. Be concise.
             
-            Return a JSON Array where each item corresponds to a sentence index (0-based) that needs correction or improvement.`
+            Return a JSON Array where each item corresponds to a sentence index (0-based) that needs correction or improvement.`,
+            v2: `You are a strict Grammar & Style Editor. Your goal is to identify specific text segments in the user's essay that need improvement and provide actionable fixes.
+
+            CRITICAL RULES:
+            1. EXACT MATCHING: The "original_substring" MUST be an exact, character-for-character match from the input text, including punctuation and whitespace. Do not normalize or trim it, otherwise the frontend highlighting will fail.
+            2. NO OVERLAPS: Do not provide corrections for overlapping segments. Pick the most significant error if they overlap.
+            3. IGNORE CORRECT TEXT: Only return an entry if there is a genuine grammar error, spelling mistake, or a significant opportunity to upgrade vocabulary to Band 8.0+.
+            4. PRESERVE MEANING: The "suggested_fix" should fit seamlessly into the surrounding text.
+
+            Return a detailed JSON object with a list of "edits".`
         }
     };
 
     private static CORRECTION_SCHEMA = {
-        type: SchemaType.ARRAY,
-        items: {
-            type: SchemaType.OBJECT,
-            properties: {
-                idx: { type: SchemaType.NUMBER, description: "Sentence index (0-based)" },
-                error: { type: SchemaType.BOOLEAN, description: "True if it's a grammar error, false if it's an improvement" },
-                original_segment: { type: SchemaType.STRING },
-                fix: { type: SchemaType.STRING, description: "The corrected version for errors" },
-                better_version: { type: SchemaType.STRING, description: "A high-level academic paraphrase" },
-                explanation: { type: SchemaType.STRING, description: "Short explanation of the fix/improvement" }
-            },
-            required: ["idx", "error", "original_segment", "fix", "better_version", "explanation"]
-        }
+        type: SchemaType.OBJECT,
+        properties: {
+            edits: {
+                type: SchemaType.ARRAY,
+                items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        original_substring: { type: SchemaType.STRING, description: "The EXACT text segment from the user's input that needs correction including punctuation" },
+                        suggested_fix: { type: SchemaType.STRING, description: "The corrected text segment" },
+                        better_version: { type: SchemaType.STRING, description: "An optional Band 8.0+ alternative phrasing" },
+                        error_type: { type: SchemaType.STRING, enum: ["grammar", "spelling", "vocabulary", "style"] },
+                        explanation: { type: SchemaType.STRING, description: "Brief explanation of the error or improvement" }
+                    },
+                    required: ["original_substring", "suggested_fix", "error_type", "explanation"]
+                }
+            }
+        },
+        required: ["edits"]
     };
 
     private static OPERATION_SCHEMA = {
@@ -252,6 +271,18 @@ export class AIService {
         return JSON.parse(responseText);
     }
 
+    async improveSentence(sentence: string, targetScore: number = 9.0): Promise<string> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName
+        });
+
+        const prompt = AIService.PROMPTS.improve_sentence.v1
+            .replace("Band 9.0", `Band ${targetScore.toFixed(1)}`);
+
+        const result = await model.generateContent(prompt + "\n\nSENTENCE: " + sentence);
+        return result.response.text().trim();
+    }
+
     async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<{ title: string, prompt: string }> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
@@ -335,7 +366,7 @@ export class AIService {
         return JSON.parse(responseText);
     }
 
-    async generateCorrection(content: string, version: AIPromptVersion = "v1"): Promise<any> {
+    async generateCorrection(content: string, version: AIPromptVersion = "v2"): Promise<any> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {

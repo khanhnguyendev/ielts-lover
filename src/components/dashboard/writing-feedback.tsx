@@ -60,7 +60,8 @@ interface WritingFeedbackProps {
     attemptId?: string;
     originalText?: string;
     isUnlocked?: boolean;
-    initialCorrection?: any[];
+    initialCorrection?: any[] | { edits: any[] } | null;
+    targetScore?: number;
 }
 
 export function WritingFeedback({
@@ -71,11 +72,27 @@ export function WritingFeedback({
     attemptId,
     originalText,
     isUnlocked: initialIsUnlocked = false,
-    initialCorrection
+    initialCorrection,
+    targetScore
 }: WritingFeedbackProps) {
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
     const [isUnlocked, setIsUnlocked] = React.useState(initialIsUnlocked);
-    const [corrections, setCorrections] = React.useState<any[] | null>(initialCorrection || null);
+    const [corrections, setCorrections] = React.useState<any[] | null>(() => {
+        if (!initialCorrection) return null;
+
+        const rawEdits = Array.isArray(initialCorrection) ? initialCorrection : (initialCorrection as any).edits || [];
+
+        return rawEdits.map((edit: any) => {
+            if (edit.original_substring) return edit;
+            return {
+                original_substring: edit.original_segment,
+                suggested_fix: edit.fix,
+                better_version: edit.better_version,
+                error_type: edit.error ? 'grammar' : 'style',
+                explanation: edit.explanation
+            };
+        });
+    });
     const [isUnlocking, setIsUnlocking] = React.useState(false);
     const [cost, setCost] = React.useState<number | null>(null);
 
@@ -94,20 +111,50 @@ export function WritingFeedback({
     const handleUnlock = async () => {
         if (!attemptId) return;
         setIsUnlocking(true);
+
+        // Optimistic credit deduction animation
+        const deductionAmount = -(cost || 15);
+        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: deductionAmount } }));
+
         try {
             const result = await unlockCorrection(attemptId);
             if (result.success) {
-                setCorrections(result.data);
+                // Handle both old array format (if any legacy data exists) and new object format
+                const data = result.data;
+                let edits: any[] = Array.isArray(data) ? data : data?.edits || [];
+
+                // Normalize legacy data (CorrectionItem) to new format (TextEdit)
+                edits = edits.map(edit => {
+                    if (edit.original_substring) return edit; // Already new format
+
+                    // Legacy format mapping
+                    return {
+                        original_substring: edit.original_segment,
+                        suggested_fix: edit.fix,
+                        better_version: edit.better_version,
+                        error_type: edit.error ? 'grammar' : 'style', // Approximation
+                        explanation: edit.explanation
+                    };
+                });
+
+                setCorrections(edits);
                 setIsUnlocked(true);
                 toast.success("Detailed correction unlocked!");
             } else {
-                if ((result as any).reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
+                // Refund if failed
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
+                const reason = (result as any).reason;
+                if (reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
                     toast.error("Insufficient StarCredits to unlock this feature.");
+                } else if (reason === APP_ERROR_CODES.AI_SERVICE_BUSY) {
+                    toast.error("AI Service is currently busy. Please try again in a moment.");
                 } else {
                     toast.error("Failed to unlock correction. Please try again.");
                 }
             }
         } catch (error) {
+            // Refund on exception
+            window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
             console.error("Unlock error:", error);
             toast.error("An unexpected error occurred.");
         } finally {
@@ -345,6 +392,7 @@ export function WritingFeedback({
                     <CorrectionList
                         corrections={corrections || []}
                         originalText={originalText || ""}
+                        targetScore={targetScore}
                     />
                 )}
             </div>

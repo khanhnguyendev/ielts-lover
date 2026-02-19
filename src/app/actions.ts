@@ -289,10 +289,37 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
         await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION);
         const correction = await attemptService.unlockCorrection(attemptId);
         return { success: true, data: correction };
-    } catch (errors) {
+    } catch (errors: any) {
         const traceId = getCurrentTraceId()!;
         logger.error(`unlockCorrection Error: ${attemptId}`, { error: errors });
+
+        // Handle Generative AI Overload (503)
+        if (errors?.message?.includes('503') || errors?.message?.includes('Service Unavailable') || errors?.message?.includes('high demand')) {
+            return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, traceId };
+        }
+
         return { success: false, reason: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    }
+});
+
+export const improveSentence = traceAction("improveSentence", async (sentence: string, targetScore?: number) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        await creditService.billUser(user.id, FEATURE_KEYS.SENTENCE_IMPROVE);
+        // Use provided target score or fallback to user profile or 9.0
+        const scoreToUse = targetScore || user.target_score || 9.0;
+        const result = await aiService.improveSentence(sentence, scoreToUse);
+        return { success: true, data: { improved_sentence: result } };
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        const traceId = getCurrentTraceId()!;
+        logger.error("improveSentence Error", { error });
+        return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
 });
 

@@ -23,7 +23,8 @@ interface FeedbackModalProps {
     type: "writing_task1" | "writing_task2";
     originalText?: string;
     isUnlocked?: boolean;
-    initialCorrection?: any[];
+    initialCorrection?: any[] | { edits: any[] } | null;
+    targetScore?: number;
 }
 
 export function FeedbackModal({
@@ -35,7 +36,8 @@ export function FeedbackModal({
     type,
     originalText,
     isUnlocked,
-    initialCorrection
+    initialCorrection,
+    targetScore
 }: FeedbackModalProps) {
     const router = useRouter();
 
@@ -108,6 +110,7 @@ export function FeedbackModal({
                             originalText={originalText}
                             isUnlocked={isUnlocked}
                             initialCorrection={initialCorrection}
+                            targetScore={targetScore}
                         />
                     ) : (
                         <div className="space-y-3">

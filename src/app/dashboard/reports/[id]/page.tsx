@@ -27,7 +27,7 @@ import { RewriterEvaluation } from "@/components/reports/rewriter-evaluation"
 import { WritingFeedback } from "@/components/dashboard/writing-feedback"
 import { ScoreOverview } from "@/components/reports/score-overview"
 import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
-import { getAttemptWithExercise } from "@/app/actions"
+import { getAttemptWithExercise, getCurrentUser } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
@@ -69,12 +69,20 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     const sampleData = SAMPLE_REPORTS[parseInt(id)]
     const isSample = !!sampleData
 
+    const [targetScore, setTargetScore] = React.useState<number>(9.0);
+
     React.useEffect(() => {
         if (!isSample) {
             async function fetchData() {
                 try {
-                    const data = await getAttemptWithExercise(id)
+                    const [data, user] = await Promise.all([
+                        getAttemptWithExercise(id),
+                        getCurrentUser()
+                    ]);
                     setRealData(data as any)
+                    if (user) {
+                        setTargetScore(user.target_score || 9.0);
+                    }
                 } catch (error) {
                     console.error("Failed to fetch report:", error)
                 } finally {
@@ -166,6 +174,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                         originalText={realData?.content}
                                         isUnlocked={realData?.is_correction_unlocked}
                                         initialCorrection={realData?.correction_data ? JSON.parse(realData.correction_data) : null}
+                                        targetScore={targetScore}
                                     />
                                 ) : (
                                     <WritingEvaluation data={displayData as any} />

@@ -25,6 +25,9 @@ AI-powered IELTS preparation platform using Next.js 16, Supabase, and a strict l
 6. **Access Control**:
     - Only `credit.policy.ts` defines baseline economy rules.
     - UI shows "Upgrade" UI based on explicit credit balance or policy failure reasons.
+7. **Credit Economy (Animations)**:
+    - **Optimistic Updates**: Every client-side feature that triggers a credit-deducting server action (e.g., `improveSentence`, `submitAttempt`) MUST dispatch a `CustomEvent('credit-change', { detail: { amount: -cost } })` to trigger the global UI animation in `StarsBalance.tsx`.
+    - **Reversibility**: If the action fails, a compensatory event must be dispatched to "refund" the optimistic deduction: `CustomEvent('credit-change', { detail: { amount: cost } })`.
 
 ## Stack Conventions
 - **Next.js**: Use App Router, Server Components where possible.
