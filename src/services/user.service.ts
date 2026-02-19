@@ -17,7 +17,6 @@ export class UserService {
     async checkQuota(userId: string): Promise<boolean> {
         const user = await this.userRepo.getById(userId);
         if (!user) return false;
-        if (user.is_premium) return true;
         return user.daily_quota_used < DEFAULT_QUOTAS.FREE_DAILY_LIMIT;
     }
 }

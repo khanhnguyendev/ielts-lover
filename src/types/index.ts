@@ -4,7 +4,6 @@ export type UserProfile = {
     target_score: number;
     test_type: "academic" | "general";
     exam_date?: string;
-    is_premium: boolean;
     role: "user" | "admin";
     daily_quota_used: number;
     last_quota_reset: string;

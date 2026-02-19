@@ -8,7 +8,6 @@ export interface IUserRepository {
     deductCredits(id: string, amount: number): Promise<void>;
     addCredits(id: string, amount: number): Promise<void>;
     listAll(): Promise<UserProfile[]>;
-    getPremiumCount(): Promise<number>;
     getTotalCount(): Promise<number>;
 }
 

@@ -72,17 +72,6 @@ export class UserRepository implements IUserRepository {
         return data as UserProfile[];
     }
 
-    async getPremiumCount(): Promise<number> {
-        const supabase = await createServerSupabaseClient();
-        const { count, error } = await supabase
-            .from(DB_TABLES.USER_PROFILES)
-            .select("*", { count: 'exact', head: true })
-            .eq("is_premium", true);
-
-        if (error) throw new Error(`[UserRepository] Failed to get premium count: ${error.message}`);
-        return count || 0;
-    }
-
     async getTotalCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const { count, error } = await supabase
