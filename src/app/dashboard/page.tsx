@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
-import { PremiumBanner } from "@/components/dashboard/premium-banner"
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
@@ -52,14 +51,19 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto scrollbar-hide">
             <div className="p-8 lg:p-12 space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
                 {/* 1. Daily Quota Banner */}
-                <PremiumBanner
-                    title={`You have ${user?.credits_balance || 0} StarCredits available`}
-                    subtitle={`Daily grants add credits every 24 hours`}
-                    action={user?.is_premium ? (
-                        <div className="bg-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Member</div>
-                    ) : undefined}
-                    buttonText="Get more StarCredits"
-                />
+                <div className="bg-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between text-white shadow-lg shadow-primary/20 gap-4 transition-all hover:shadow-primary/30">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="bg-white/20 p-2 rounded-xl flex-shrink-0">
+                            <Zap className="h-5 w-5 fill-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold font-outfit text-white">
+                                You have {user?.credits_balance || 0} StarCredits available
+                            </h3>
+                            <p className="text-[10px] text-white/80 font-medium mt-0.5">Daily grants add credits every 24 hours</p>
+                        </div>
+                    </div>
+                </div>
 
                 {/* 2. IELTS Info Card */}
                 <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
@@ -212,9 +216,6 @@ export default function DashboardPage() {
                                 View Sample Reports
                             </Button>
                         </Link>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium pt-8">
-                            Free users can see up to 5 completed records. Upgrade to see more results.
-                        </p>
                     </div>
 
                     <div className="pt-8 border-t text-center">

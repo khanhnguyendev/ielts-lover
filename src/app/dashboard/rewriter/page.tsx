@@ -15,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-// import { PremiumBanner } from "@/components/dashboard/premium-banner"
 import { rewriteText } from "@/app/actions"
 import { useNotification } from "@/lib/contexts/notification-context"
 
@@ -175,7 +174,7 @@ export default function RewriterPage() {
                             onClick={handleRewrite}
                             disabled={!inputText || isRewriting}
                             className="w-full"
-                            variant="premium"
+                            variant="default"
                             size="lg"
                         >
                             {isRewriting ? (
@@ -224,10 +223,6 @@ export default function RewriterPage() {
                             )}
                         </div>
 
-                        {/* <PremiumBanner
-                            title="Access Advanced Rewrite Modes with Premium"
-                            buttonText="Upgrade"
-                        /> */}
                     </div>
                 </div>
             </div>

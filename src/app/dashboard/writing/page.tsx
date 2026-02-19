@@ -38,7 +38,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { PulseLoader } from "@/components/global/pulse-loader"
-import { PremiumBanner } from "@/components/dashboard/premium-banner"
 
 const CATEGORIES = [
     "Mock Test",
@@ -210,23 +209,6 @@ export default function WritingHubPage() {
                                 Syncing Exercises...
                             </p>
                         </div>
-                    ) : !hasMockAccess ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200">
-                            <div className="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center border-2 border-primary/20">
-                                <Zap className="h-10 w-10 text-primary" />
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="text-xl font-black font-outfit text-slate-900 uppercase tracking-tight">Mock Tests are Premium Features</h3>
-                                <p className="text-sm font-medium text-muted-foreground max-w-sm mx-auto">
-                                    Unlock full length mock tests and detailed AI scoring by upgrading to premium.
-                                </p>
-                            </div>
-                            <Link href="/dashboard/credits">
-                                <Button variant="premium" size="lg" className="px-10">
-                                    Upgrade Now
-                                </Button>
-                            </Link>
-                        </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {activeCategory !== "Mock Test" && (
@@ -331,7 +313,7 @@ export default function WritingHubPage() {
                                 Cancel
                             </Button>
                             <Button
-                                variant="premium"
+                                variant="default"
                                 onClick={() => setIsAddModalOpen(false)}
                                 className="h-12 flex-[2] shadow-lg shadow-primary/20"
                             >
