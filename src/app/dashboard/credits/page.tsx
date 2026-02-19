@@ -163,32 +163,6 @@ export default function CreditsPage() {
                                 </div>
                             ))}
                         </div>
-
-                        <Button variant="link" size="sm" className="font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:text-primary">
-                            View sample premium reports
-                        </Button>
-                    </div>
-
-                    {/* Benefits Section */}
-                    <div className="flex-1 bg-[#F9FAFB] border-t p-8 md:p-16 flex flex-col items-center">
-                        <div className="w-full max-w-4xl space-y-12">
-                            <h3 className="text-xl md:text-2xl font-black font-outfit text-center">Premium Benefits</h3>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 bg-white rounded-[32px] md:rounded-[40px] border p-8 md:p-12 shadow-sm">
-                                {BENEFITS.map((benefit, i) => (
-                                    <div key={i} className="flex items-center gap-4 group">
-                                        <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0 group-hover:scale-110 transition-transform">
-                                            <Check className="h-3.5 w-3.5 stroke-[4]" />
-                                        </div>
-                                        <span className="text-sm font-bold text-slate-700">{benefit.text}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <p className="text-[10px] leading-relaxed text-muted-foreground/60 max-w-2xl mx-auto text-center font-medium italic">
-                                Fair Usage Policy: Our unlimited packages are designed to provide maximum value and flexibility. However, to ensure fair and optimal access for all users, accounts demonstrating extraordinarily high usage significantly exceeding average consumption may be reviewed and contacted to discuss their needs and explore tailored solutions.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
