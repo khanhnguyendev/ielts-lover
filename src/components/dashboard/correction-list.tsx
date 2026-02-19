@@ -49,10 +49,10 @@ export function CorrectionList({ corrections, originalText, targetScore }: Corre
             <div className="flex flex-col lg:flex-row h-full">
                 {/* Left Column: Text Area */}
                 <div className="flex-1 overflow-y-auto relative scroll-smooth bg-white">
-                    <div className="p-6 lg:p-10 pb-32 lg:pb-10 max-w-prose mx-auto">
-                        <div className="mb-6 flex items-center gap-2 lg:hidden">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            <span className="text-xs font-black uppercase tracking-widest text-slate-500">Tap a sentence to fix</span>
+                    <div className="p-5 lg:p-8 pb-32 lg:pb-8 max-w-prose mx-auto">
+                        <div className="mb-4 flex items-center gap-2 lg:hidden">
+                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tap a sentence to fix</span>
                         </div>
                         <CorrectionTextBlock
                             text={originalText}

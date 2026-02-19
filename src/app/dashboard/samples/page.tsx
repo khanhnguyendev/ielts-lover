@@ -17,12 +17,6 @@ import { cn } from "@/lib/utils"
 
 const SAMPLES = [
     { id: 1, type: "Writing", category: "Task 1", title: "Milk Consumption - Academic Task 1", score: 8.5, date: "2026-02-14" },
-    { id: 2, type: "Speaking", category: "Part 2", title: "Describe a beautiful place", score: 9.0, date: "2026-02-13" },
-    { id: 3, type: "Writing", category: "Task 2", title: "Environmental Protection - Essay", score: 7.5, date: "2026-02-12" },
-    { id: 4, type: "Writing", category: "Task 1", title: "Carbon Emissions - General Task 1", score: 8.0, date: "2026-02-11" },
-    { id: 5, type: "Speaking", category: "Part 1", title: "Talking about advertisements", score: 8.5, date: "2026-02-10" },
-    { id: 6, type: "Speaking", category: "Part 3", title: "The future of urbanization", score: 7.5, date: "2026-02-09" },
-    { id: 7, type: "Rewriter", category: "Academic", title: "Tech & Lethargy Essay", score: 9.0, date: "2026-02-08" }
 ]
 
 export default function SampleReportsPage() {
@@ -38,7 +32,7 @@ export default function SampleReportsPage() {
                 {/* Filters */}
                 <div className="flex flex-wrap items-center justify-between gap-6 pb-2">
                     <div className="flex bg-[#F9FAFB] p-1.5 rounded-2xl border w-fit">
-                        {["All", "Writing", "Speaking", "Rewriter"].map((f) => (
+                        {["All", "Writing"].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -75,24 +69,6 @@ export default function SampleReportsPage() {
                         <SampleCard key={sample.id} sample={sample} />
                     ))}
                 </div>
-
-                {/* Premium Upsell */}
-                <div className="bg-primary/5 rounded-[32px] p-10 flex flex-col items-center text-center space-y-6 border border-primary/10 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 animate-pulse" />
-                    <div className="relative z-10 space-y-4">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/10 mx-auto">
-                            <Sparkles className="h-8 w-8 text-primary fill-primary/20" />
-                        </div>
-                        <h3 className="text-xl font-black font-outfit">Unlock 500+ Curated Samples</h3>
-                        <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto">
-                            Get access to a massive library of high-scoring band 8.0-9.0 samples with detailed examiner notes.
-                        </p>
-                        <Button variant="premium" size="lg">
-                            Upgrade to Premium
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                    </div>
-                </div>
             </div>
         </div>
     )
@@ -102,13 +78,8 @@ function SampleCard({ sample }: { sample: any }) {
     return (
         <div className="bg-white border hover:border-primary/30 rounded-[32px] p-8 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group">
             <div className="flex items-center justify-between">
-                <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
-                    sample.type === "Writing" ? "bg-purple-50 text-purple-600" :
-                        sample.type === "Speaking" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
-                )}>
-                    {sample.type === "Writing" ? <FileText className="h-6 w-6" /> :
-                        sample.type === "Speaking" ? <Mic2 className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 bg-purple-50 text-purple-600">
+                    <FileText className="h-6 w-6" />
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-xl text-xs font-black">
                     <Star className="h-3.5 w-3.5 fill-current" />

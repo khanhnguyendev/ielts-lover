@@ -85,16 +85,41 @@ export function WritingFeedback({
         return rawEdits.map((edit: any) => {
             if (edit.original_substring) return edit;
             return {
-                original_substring: edit.original_segment,
-                suggested_fix: edit.fix,
+                original_substring: edit.original || edit.original_segment,
+                suggested_fix: edit.suggested || edit.fix,
                 better_version: edit.better_version,
-                error_type: edit.error ? 'grammar' : 'style',
+                error_type: (edit.type || (edit.error ? 'grammar' : 'style')).toLowerCase(),
                 explanation: edit.explanation
             };
         });
     });
     const [isUnlocking, setIsUnlocking] = React.useState(false);
     const [cost, setCost] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        setIsUnlocked(initialIsUnlocked);
+    }, [initialIsUnlocked]);
+
+    // Handle initialCorrection changes (e.g. for sample reports)
+    React.useEffect(() => {
+        if (!initialCorrection) {
+            setCorrections(null);
+            return;
+        }
+
+        const rawEdits = Array.isArray(initialCorrection) ? initialCorrection : (initialCorrection as any).edits || [];
+        const normalizedEdits = rawEdits.map((edit: any) => {
+            if (edit.original_substring) return edit;
+            return {
+                original_substring: edit.original || edit.original_segment,
+                suggested_fix: edit.suggested || edit.fix,
+                better_version: edit.better_version,
+                error_type: (edit.type || (edit.error ? 'grammar' : 'style')).toLowerCase(),
+                explanation: edit.explanation
+            };
+        });
+        setCorrections(normalizedEdits);
+    }, [initialCorrection]);
 
     React.useEffect(() => {
         async function fetchCost() {
@@ -124,20 +149,16 @@ export function WritingFeedback({
                 let edits: any[] = Array.isArray(data) ? data : data?.edits || [];
 
                 // Normalize legacy data (CorrectionItem) to new format (TextEdit)
-                edits = edits.map(edit => {
-                    if (edit.original_substring) return edit; // Already new format
-
-                    // Legacy format mapping
+                setCorrections(edits.map(edit => {
+                    if (edit.original_substring) return edit;
                     return {
-                        original_substring: edit.original_segment,
-                        suggested_fix: edit.fix,
+                        original_substring: edit.original || edit.original_segment,
+                        suggested_fix: edit.suggested || edit.fix,
                         better_version: edit.better_version,
-                        error_type: edit.error ? 'grammar' : 'style', // Approximation
+                        error_type: (edit.type || (edit.error ? 'grammar' : 'style')).toLowerCase(),
                         explanation: edit.explanation
                     };
-                });
-
-                setCorrections(edits);
+                }));
                 setIsUnlocked(true);
                 toast.success("Detailed correction unlocked!");
             } else {

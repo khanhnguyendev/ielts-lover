@@ -258,7 +258,7 @@ export default function ReportsPage() {
                                         <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
                                             <div className="space-y-1">
                                                 <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by tool</div>
-                                                {['writing', 'speaking'].map((tool) => (
+                                                {['writing'].map((tool) => (
                                                     <button
                                                         key={tool}
                                                         onClick={() => setToolFilter(toolFilter === tool ? null : tool)}
@@ -354,13 +354,8 @@ export default function ReportsPage() {
                                                     </TableCell>
                                                     <TableCell className="py-3">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={cn(
-                                                                "w-8 h-8 rounded-lg flex items-center justify-center border",
-                                                                attempt.exercises?.type?.startsWith('speaking')
-                                                                    ? "bg-cyan-50 border-cyan-100 text-cyan-600"
-                                                                    : "bg-indigo-50 border-indigo-100 text-indigo-600"
-                                                            )}>
-                                                                {attempt.exercises?.type?.startsWith('speaking') ? <Mic2 className="h-4 w-4" /> : <PenTool className="h-4 w-4" />}
+                                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center border bg-indigo-50 border-indigo-100 text-indigo-600">
+                                                                <PenTool className="h-4 w-4" />
                                                             </div>
                                                             <div className="space-y-0">
                                                                 <p className="text-[12px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
@@ -564,7 +559,7 @@ export default function ReportsPage() {
                                         <p className="text-xs font-medium text-muted-foreground">Complete your first practice to learn the one skill you need to improve for a higher band.</p>
                                     </div>
                                 </div>
-                                <Button variant="premium" size="default">
+                                <Button variant="default" size="default">
                                     Start Writing
                                 </Button>
                             </div>

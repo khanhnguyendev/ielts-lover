@@ -95,7 +95,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
         }
     }, [id, isSample])
 
-    const displayData = isSample ? sampleData : (realData?.feedback ? {
+    const displayData = isSample ? {
+        ...sampleData,
+        overall_score: sampleData.overall_score,
+        task_type: (sampleData as any).task_type || (sampleData as any).taskType?.split(' ')[0],
+        general_comment: (sampleData as any).general_comment,
+        // Map sample taskType to internal type for WritingFeedback
+        writingType: sampleData.type === "Writing" ? (sampleData as any).taskType?.toLowerCase().replace("task ", "task") : undefined
+    } : (realData?.feedback ? {
         ...JSON.parse(realData.feedback),
         id: realData.id,
         originalText: realData.content,
@@ -152,7 +159,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Score Overview */}
                     {(() => {
-                        const score = displayData?.overall_score || displayData?.bandScore || displayData?.overall_band || 1.0;
+                        const score = displayData?.overall_score || displayData?.bandScore || 1.0;
                         return (
                             <ScoreOverview
                                 score={score}
@@ -168,12 +175,12 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 displayData.detailed_scores ? (
                                     <WritingFeedback
                                         result={displayData as any}
-                                        type={realData?.exercise?.type as any}
+                                        type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
                                         hideScore={true}
-                                        attemptId={realData?.id}
-                                        originalText={realData?.content}
-                                        isUnlocked={realData?.is_correction_unlocked}
-                                        initialCorrection={realData?.correction_data ? JSON.parse(realData.correction_data) : null}
+                                        attemptId={isSample ? "sample-" + id : realData?.id}
+                                        originalText={isSample ? displayData.originalText : realData?.content}
+                                        isUnlocked={isSample ? true : realData?.is_correction_unlocked}
+                                        initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
                                         targetScore={targetScore}
                                     />
                                 ) : (

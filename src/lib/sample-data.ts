@@ -29,7 +29,7 @@ export interface WritingSampleData {
     type: "Writing"
     taskType: "Academic Task 1" | "General Task 1" | "Task 2"
     title: string
-    bandScore: number
+    overall_score: number
     cefrLevel: string
     originalText: string
     feedbackText: Array<{
@@ -38,13 +38,16 @@ export interface WritingSampleData {
         annotationId?: number
         isError?: boolean
     }>
-    criteria: Array<{
-        name: string
-        score: number
-        details: string
-    }>
+    detailed_scores: {
+        TA: { score: number; feedback: string; evidence: string[]; improvement_tips: string[] };
+        CC: { score: number; feedback: string; evidence: string[]; improvement_tips: string[] };
+        LR: { score: number; feedback: string; evidence: string[]; improvement_tips: string[] };
+        GRA: { score: number; feedback: string; evidence: string[]; improvement_tips: string[] };
+    };
     feedbackCards: FeedbackCard[]
     cefrDistribution: Array<{ level: string, percentage: number }>
+    task_type?: string
+    general_comment?: string
     prompt?: string
     imageUrl?: string
 }
@@ -53,7 +56,7 @@ export interface SpeakingSampleData {
     id: number
     type: "Speaking"
     title: string
-    bandScore: number
+    overall_score: number
     cefrLevel: string
     audioUrl: string
     transcript: Array<{
@@ -94,7 +97,7 @@ export interface RewriterSampleData {
         category: string
         description: string
     }>
-    bandScore: number
+    overall_score: number
     cefrLevel: string
     prompt?: string
     imageUrl?: string
@@ -106,26 +109,50 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
         type: "Writing",
         taskType: "Academic Task 1",
         title: "Milk Consumption - Academic Task 1",
-        bandScore: 8.5,
+        overall_score: 8.5,
         cefrLevel: "C2",
-        originalText: "The chart displays the amount of milk consumed in four different countries...",
+        task_type: "Academic",
+        general_comment: "This is an exceptionally strong response that demonstrates a near-perfect grasp of Academic Task 1 requirements. The data is synthesized effectively with high precision and sophisticated lexical choices.",
+        originalText: "The chart displays the amount of milk consumed in four different countries over a ten-year period. Milk Consumption fluctuated significantly during this timeframe.",
         feedbackText: [
             { text: "The chart " },
             { text: "illustrates", cefr: "B2", annotationId: 1 },
             { text: " the " },
-            { text: "varying patterns", cefr: "C1" },
-            { text: " of milk consumption across four " },
-            { text: "distinct nations", cefr: "C1" },
+            { text: "quantity of milk consumed", cefr: "B2", annotationId: 2 },
+            { text: " across " },
+            { text: "a quartet of diverse nations", cefr: "C1", annotationId: 3 },
             { text: " over a " },
-            { text: "ten-year period", cefr: "B1" },
-            { text: "." }
+            { text: "ten-year duration", cefr: "B1", annotationId: 4 },
+            { text: ". " },
+            { text: "Milk Consumption", cefr: "C1", annotationId: 5 },
+            { text: " fluctuated significantly during this timeframe." }
         ],
-        criteria: [
-            { name: "Task Achievement", score: 9.0, details: "The response fully satisfies all the requirements of the task." },
-            { name: "Coherence and Cohesion", score: 8.5, details: "Information and ideas are logically organized." },
-            { name: "Lexical Resource", score: 8.5, details: "Uses a wide range of vocabulary with very natural features." },
-            { name: "Grammatical Range", score: 8.5, details: "Uses a wide range of structures with full flexibility." }
-        ],
+        detailed_scores: {
+            TA: {
+                score: 9.0,
+                feedback: "The response fully satisfies all the requirements of the task.",
+                evidence: ["The overview clearly states the main trends.", "Data for all four countries is accurately reported."],
+                improvement_tips: ["Maintain this level of detail in future reports."]
+            },
+            CC: {
+                score: 8.5,
+                feedback: "Information and ideas are logically organized.",
+                evidence: ["Paragraphs are well-structured based on country comparisons.", "Effective use of cohesive devices like 'Meanwhile' and 'Conversely'."],
+                improvement_tips: ["Ensure transition words are always varied."]
+            },
+            LR: {
+                score: 8.5,
+                feedback: "Uses a wide range of vocabulary with very natural features.",
+                evidence: ["Terminologies like 'varying patterns' and 'distinct nations' are used effectively.", "Precise verbs such as 'illustrates' and 'fluctuated'."],
+                improvement_tips: ["Try to incorporate more academic collocations."]
+            },
+            GRA: {
+                score: 8.5,
+                feedback: "Uses a wide range of structures with full flexibility.",
+                evidence: ["Complex sentences are used throughout with no errors.", "Accurate use of past perfect and comparative structures."],
+                improvement_tips: ["Ensure subject-verb agreement in more complex data sets."]
+            }
+        },
         feedbackCards: [
             {
                 id: 1,
@@ -134,6 +161,38 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
                 suggested: "illustrates",
                 explanation: "'Illustrates' is more appropriate for describing visual data in Academic Task 1.",
                 category: "Word Choice"
+            },
+            {
+                id: 2,
+                type: "Grammar",
+                original: "amount of milk consumed",
+                suggested: "quantity of milk consumed",
+                explanation: "While 'amount' is acceptable for uncountable nouns, 'quantity' is often preferred in formal reports dealing with measured volume.",
+                category: "Precision"
+            },
+            {
+                id: 3,
+                type: "Coherence",
+                original: "four different countries",
+                suggested: "a quartet of diverse nations",
+                explanation: "Using more sophisticated terminology like 'quartet' and 'diverse nations' can elevate the lexical variety and coherence of the introduction.",
+                category: "Lexical Variety"
+            },
+            {
+                id: 4,
+                type: "Grammar",
+                original: "ten-year period",
+                suggested: "ten-year duration",
+                explanation: "Varying temporal descriptions helps avoid repetition within the report's introduction and summary paragraphs.",
+                category: "Academic Style"
+            },
+            {
+                id: 5,
+                type: "Vocabulary",
+                original: "Milk Consumption",
+                suggested: "Dairy Intake",
+                explanation: "Using synonyms like 'Dairy Intake' demonstrates a broader lexical resource, which is key for a higher band score.",
+                category: "Paraphrasing"
             }
         ],
         cefrDistribution: [
@@ -145,54 +204,5 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
             { level: "C2", percentage: 5 }
         ],
         prompt: "The chart below shows the amount of milk consumed in four different countries over a ten-year period. Summarize the information by selecting and reporting the main features, and make comparisons where relevant."
-    },
-    2: {
-        id: 2,
-        type: "Speaking",
-        title: "Describe a beautiful place",
-        bandScore: 9.0,
-        cefrLevel: "C2",
-        audioUrl: "/samples/speaking-1.mp3",
-        transcript: [
-            {
-                startTime: "0:00",
-                endTime: "0:15",
-                text: [
-                    { word: "Well,", cefr: "A1" },
-                    { word: "I'd", cefr: "B1" },
-                    { word: "like", cefr: "A1" },
-                    { word: "to", cefr: "A1" },
-                    { word: "talk", cefr: "A1" },
-                    { word: "about", cefr: "A1" },
-                    { word: "a", cefr: "A1" },
-                    { word: "truly", cefr: "B2" },
-                    { word: "breathtaking", cefr: "C1" },
-                    { word: "location", cefr: "B2" },
-                    { word: "in", cefr: "A1" },
-                    { word: "the", cefr: "A1" },
-                    { word: "heart", cefr: "B1" },
-                    { word: "of", cefr: "A1" },
-                    { word: "Switzerland.", cefr: "A1" }
-                ]
-            }
-        ],
-        criteria: [
-            { name: "Fluency", score: 9.0, details: "Excellent flow with no hesitation." },
-            { name: "Vocabulary", score: 9.0, details: "Sophisticated usage of idiomatic language." }
-        ]
-    },
-    7: {
-        id: 7,
-        type: "Rewriter",
-        title: "Academic Essay Refinement",
-        originalText: "I think that technology is making people more lazy nowadays because they use phones for everything.",
-        rewrittenText: "There is a growing concern that contemporary technological advancements are engendering a sense of lethargy among the populace, as individuals increasingly rely on digital devices for even the most mundane tasks.",
-        improvements: [
-            { category: "Vocabulary", description: "Replaced 'more lazy' with 'lethargy among the populace' for a more academic tone." },
-            { category: "Cohesion", description: "Used 'as' to create a logical causal link between dependency and behavior." },
-            { category: "Precision", description: "Substituted 'phones' with 'digital devices' to encompass a wider range of technology." }
-        ],
-        bandScore: 9.0,
-        cefrLevel: "C2"
     }
 }

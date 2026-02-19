@@ -19,6 +19,7 @@ import { SystemSettingsRepository } from "@/repositories/system-settings.reposit
 import { CreditService } from "@/services/credit.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 import { traceService, traceAction } from "@/lib/aop";
+import { SAMPLE_REPORTS } from "@/lib/sample-data";
 
 const logger = new Logger("UserActions");
 
@@ -194,6 +195,7 @@ export async function getUserAttempts() {
             )
         `)
         .eq("user_id", user.id)
+        .ilike(`${DB_TABLES.EXERCISES}.type`, 'writing%')
         .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -277,6 +279,18 @@ export async function getLessonQuestions(lessonId: string) {
 export const unlockCorrection = traceAction("unlockCorrection", async (attemptId: string) => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
+
+    // Handle sample reports
+    if (attemptId.startsWith("sample-")) {
+        const id = parseInt(attemptId.replace("sample-", ""));
+        const sample = SAMPLE_REPORTS[id];
+        if (sample) {
+            return {
+                success: true,
+                data: { edits: (sample as any).feedbackCards || [] }
+            };
+        }
+    }
 
     const attempt = await attemptService.getAttempt(attemptId);
     if (!attempt) throw new Error("Attempt not found");
