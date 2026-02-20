@@ -16,7 +16,8 @@ import {
     ChevronLeft,
     Search,
     ExternalLink,
-    History
+    History,
+    TrendingUp
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,7 @@ const NAV_GROUPS = [
         items: [
             { icon: Home, label: "Home", href: "/dashboard" },
             { icon: PieChart, label: "My Reports", href: "/dashboard/reports" },
+            { icon: TrendingUp, label: "Improvement", href: "/dashboard/improvement" },
             { icon: History, label: "Transactions", href: "/dashboard/transactions" },
         ]
     },

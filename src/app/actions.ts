@@ -1,6 +1,6 @@
 "use server";
 
-import { ATTEMPT_STATES, DB_TABLES, FEATURE_KEYS, APP_ERROR_CODES } from "@/lib/constants";
+import { ATTEMPT_STATES, DB_TABLES, FEATURE_KEYS, APP_ERROR_CODES, SKILL_TYPES, ERROR_CATEGORIES, SkillType } from "@/lib/constants";
 import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { AttemptRepository } from "@/repositories/attempt.repository";
@@ -20,8 +20,20 @@ import { CreditService } from "@/services/credit.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 import { traceService, traceAction } from "@/lib/aop";
 import { SAMPLE_REPORTS } from "@/lib/sample-data";
+import { MistakeRepository } from "@/repositories/mistake.repository";
+import { ActionPlanRepository } from "@/repositories/action-plan.repository";
+import { ImprovementService } from "@/services/improvement.service";
 
 const logger = new Logger("UserActions");
+
+/** Finds the sentence containing a substring from fullText. Splits on sentence boundaries (.!?) */
+function findContainingSentence(fullText: string | null | undefined, substring: string): string | undefined {
+    if (!fullText || !substring) return undefined;
+    // Split on sentence-ending punctuation, keeping the delimiter
+    const sentences = fullText.split(/(?<=[.!?])\s+/);
+    const found = sentences.find(s => s.includes(substring));
+    return found?.trim() || undefined;
+}
 
 // Dependencies Injection
 const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
@@ -40,6 +52,11 @@ const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricing
 const transactionRepo = traceService(new CreditTransactionRepository(), "CreditTransactionRepository");
 const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
 const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
+
+// Mistake Bank
+const mistakeRepo = traceService(new MistakeRepository(), "MistakeRepository");
+const actionPlanRepo = traceService(new ActionPlanRepository(), "ActionPlanRepository");
+const improvementService = traceService(new ImprovementService(mistakeRepo, actionPlanRepo, creditService, _aiService), "ImprovementService");
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
@@ -103,7 +120,12 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
             await creditService.billUser(user.id, featureKey, attempt.exercise_id);
         }
         await attemptService.submitAttempt(attemptId, content);
-        return attemptService.getAttempt(attemptId);
+        const evaluatedAttempt = await attemptService.getAttempt(attemptId);
+
+
+
+
+        return evaluatedAttempt;
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             // If insufficient credits, we still save the work but don't evaluate
@@ -305,6 +327,34 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id);
         const correction = await attemptService.unlockCorrection(attemptId);
+
+        // Extract mistakes from corrections for the Mistake Bank
+        try {
+            if (correction?.edits && Array.isArray(correction.edits)) {
+                const mistakes = correction.edits
+                    .filter((edit: any) => edit.original_substring && edit.suggested_fix)
+                    .map((edit: any) => ({
+                        user_id: user.id,
+                        source_attempt_id: attemptId,
+                        skill_type: SKILL_TYPES.WRITING as SkillType,
+                        error_category: edit.error_type === 'grammar' ? ERROR_CATEGORIES.GRAMMAR
+                            : edit.error_type === 'vocabulary' ? ERROR_CATEGORIES.VOCABULARY
+                                : edit.error_type === 'spelling' ? ERROR_CATEGORIES.GRAMMAR
+                                    : ERROR_CATEGORIES.COHERENCE,
+                        original_context: edit.original_substring,
+                        correction: edit.suggested_fix,
+                        explanation: edit.explanation,
+                        source_sentence: findContainingSentence(attempt.content, edit.original_substring),
+                    }));
+
+                if (mistakes.length > 0) {
+                    await mistakeRepo.saveMistakes(mistakes);
+                }
+            }
+        } catch (extractError) {
+            logger.error('Correction mistake extraction failed (non-blocking)', { error: extractError });
+        }
+
         return { success: true, data: correction };
     } catch (errors: any) {
         const traceId = getCurrentTraceId()!;
@@ -343,4 +393,29 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
 export const getFeaturePrice = traceAction("getFeaturePrice", async (key: string) => {
     const pricing = await pricingRepo.getByKey(key);
     return pricing?.cost_per_unit || 0;
+});
+
+// ─── Mistake Bank & Improvement ───────────────────────────────
+
+export const getMistakeDashboardData = traceAction("getMistakeDashboardData", async (skillFilter?: SkillType) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+    return improvementService.getMistakeDashboard(user.id, skillFilter);
+});
+
+export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", async () => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        const plan = await improvementService.generateAIActionPlan(user.id);
+        return { success: true, data: plan };
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+        const traceId = getCurrentTraceId()!;
+        logger.error("generateWeaknessAnalysis Error", { error });
+        return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    }
 });
