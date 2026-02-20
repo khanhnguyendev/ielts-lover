@@ -77,7 +77,8 @@ export class CreditService {
             [FEATURE_KEYS.SPEAKING_EVALUATION]: "Speaking Practice Assessment",
             [FEATURE_KEYS.TEXT_REWRITER]: "IELTS Text Rewriter",
             [FEATURE_KEYS.MOCK_TEST]: "Full Mock Test Access",
-            [FEATURE_KEYS.DETAILED_CORRECTION]: "Detailed Sentence Correction"
+            [FEATURE_KEYS.DETAILED_CORRECTION]: "Detailed Sentence Correction",
+            [FEATURE_KEYS.WEAKNESS_ANALYSIS]: "AI Weakness Analysis",
         };
 
         const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;

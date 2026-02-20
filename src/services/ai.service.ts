@@ -382,4 +382,58 @@ export class AIService {
         const responseText = result.response.text();
         return JSON.parse(responseText);
     }
+
+    /**
+     * Analyzes a user's mistake history to find patterns and generate
+     * a personalized improvement action plan.
+     */
+    async analyzeWeaknesses(mistakes: { skill_type: string; error_category: string; original_context: string; correction: string; explanation?: string }[]): Promise<{
+        top_weaknesses: { category: string; frequency: number; description: string; severity: 'high' | 'medium' | 'low' }[];
+        action_items: { title: string; description: string; category: string; priority: number; examples: { wrong: string; correct: string }[] }[];
+        summary: string;
+    }> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+            },
+        });
+
+        const mistakesSummary = mistakes.map((m, i) =>
+            `${i + 1}. [${m.skill_type}/${m.error_category}] "${m.original_context}" → "${m.correction}"${m.explanation ? ` (${m.explanation})` : ''}`
+        ).join('\n');
+
+        const prompt = `You are an expert IELTS examiner and language coach. Analyze the following ${mistakes.length} mistakes made by an IELTS student across their practice sessions.
+
+MISTAKES:
+${mistakesSummary}
+
+Your task:
+1. Identify RECURRING PATTERNS and group them into the student's TOP WEAKNESSES (max 5).
+2. For each weakness, explain WHY it matters for IELTS scoring and HOW FREQUENT it is.
+3. Create ACTIONABLE improvement items with specific examples from their mistakes.
+4. Write a brief motivational summary acknowledging effort while highlighting key areas.
+
+Return a JSON object with this exact structure:
+{
+  "top_weaknesses": [
+    { "category": "grammar|vocabulary|coherence|pronunciation", "frequency": <number of occurrences>, "description": "<clear explanation of the pattern>", "severity": "high|medium|low" }
+  ],
+  "action_items": [
+    { "title": "<short action title>", "description": "<detailed advice with IELTS band descriptors>", "category": "grammar|vocabulary|coherence|pronunciation", "priority": <1-5, 1=highest>, "examples": [{ "wrong": "<from their mistakes>", "correct": "<the fix>" }] }
+  ],
+  "summary": "<2-3 sentence personalized summary>"
+}
+
+Rules:
+- Be specific to THIS student's actual mistakes, not generic advice.
+- Reference IELTS band descriptors when explaining impact.
+- Sort weaknesses by severity (high first).
+- Sort action items by priority (1 = most urgent).
+- Maximum 5 weaknesses, maximum 7 action items.`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
+    }
 }

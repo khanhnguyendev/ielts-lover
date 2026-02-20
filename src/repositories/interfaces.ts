@@ -1,4 +1,4 @@
-import { TransactionType } from "@/lib/constants";
+import { TransactionType, SkillType, ErrorCategory } from "@/lib/constants";
 import { UserProfile, Exercise, Attempt, ExerciseType } from "@/types";
 
 export interface IUserRepository {
@@ -71,4 +71,51 @@ export interface ISystemSettingsRepository {
     getByKey<T>(key: string): Promise<T | null>;
     listAll(): Promise<SystemSetting[]>;
     updateSetting(key: string, value: any): Promise<void>;
+}
+
+export type UserMistake = {
+    id: string;
+    user_id: string;
+    source_attempt_id?: string;
+    skill_type: SkillType;
+    error_category: ErrorCategory;
+    original_context: string;
+    correction: string;
+    source_sentence?: string;
+    explanation?: string;
+    created_at: string;
+};
+
+export type UserActionPlan = {
+    id: string;
+    user_id: string;
+    plan_data: {
+        top_weaknesses: {
+            category: string;
+            frequency: number;
+            description: string;
+            severity: 'high' | 'medium' | 'low';
+        }[];
+        action_items: {
+            title: string;
+            description: string;
+            category: string;
+            priority: number;
+            examples: { wrong: string; correct: string }[];
+        }[];
+        summary: string;
+    };
+    mistakes_analyzed: number;
+    created_at: string;
+};
+
+export interface IMistakeRepository {
+    saveMistakes(mistakes: Omit<UserMistake, 'id' | 'created_at'>[]): Promise<void>;
+    getUserMistakes(userId: string, skillType?: SkillType, limit?: number): Promise<UserMistake[]>;
+    getMistakeCount(userId: string): Promise<number>;
+}
+
+export interface IActionPlanRepository {
+    save(plan: Omit<UserActionPlan, 'id' | 'created_at'>): Promise<UserActionPlan>;
+    getLatest(userId: string): Promise<UserActionPlan | null>;
 }
