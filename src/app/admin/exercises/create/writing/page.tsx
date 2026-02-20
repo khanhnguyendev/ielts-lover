@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createExercise, generateAIExercise, uploadImage } from "@/app/admin/actions";
-import { Sparkles, Loader2 } from "lucide-react";
+import { createExercise, generateAIExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions";
+import { getFeaturePrice } from "@/app/actions";
+import { Sparkles, Loader2, CheckCircle2, XCircle, ImageIcon } from "lucide-react";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
+import { CHART_TYPES, FEATURE_KEYS } from "@/lib/constants";
+import { CreditBadge } from "@/components/ui/credit-badge";
 
 export default function CreateWritingExercisePage() {
     const router = useRouter();
@@ -24,11 +27,70 @@ export default function CreateWritingExercisePage() {
     const [chartType, setChartType] = useState("auto");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+    const [chartData, setChartData] = useState<any>(null);
+    const [chartDescription, setChartDescription] = useState("");
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [imageAnalysis, setImageAnalysis] = useState<{
+        is_valid: boolean;
+        chart_type: string;
+        title: string;
+        description: string;
+        data_points: any;
+        validation_errors: string[];
+    } | null>(null);
 
     // Error Modal State
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const [isErrorOpen, setIsErrorOpen] = useState(false);
     const { notifySuccess, notifyError } = useNotification();
+
+    const CHART_TYPE_LABELS: Record<string, string> = {
+        [CHART_TYPES.LINE_GRAPH]: "📈 Line Graph",
+        [CHART_TYPES.BAR_CHART]: "📊 Bar Chart",
+        [CHART_TYPES.PIE_CHART]: "🥧 Pie Chart",
+        [CHART_TYPES.TABLE]: "📋 Table",
+        [CHART_TYPES.PROCESS_DIAGRAM]: "🔄 Process Diagram",
+        [CHART_TYPES.MAP]: "🗺️ Map",
+        [CHART_TYPES.MIXED_CHART]: "📉 Mixed Chart",
+    };
+
+    const [analysisCost, setAnalysisCost] = useState(5);
+
+    // Load analysis cost on mount
+    useEffect(() => {
+        getFeaturePrice(FEATURE_KEYS.CHART_IMAGE_ANALYSIS).then(setAnalysisCost);
+    }, []);
+
+    async function handleAnalyzeImage() {
+        if (!imageFile) return;
+        setIsAnalyzing(true);
+        setImageAnalysis(null);
+        try {
+            const reader = new FileReader();
+            const base64 = await new Promise<string>((resolve) => {
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(",")[1]);
+                };
+                reader.readAsDataURL(imageFile);
+            });
+            const analysis = await analyzeChartImage(base64, imageFile.type);
+            if (analysis.success && analysis.data) {
+                setImageAnalysis(analysis.data);
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -analysisCost } }));
+                if (analysis.data.is_valid && analysis.data.title && !title) {
+                    setTitle(analysis.data.title);
+                }
+            } else if (analysis.error === "INSUFFICIENT_CREDITS") {
+                notifyError("Insufficient Credits", "You need more StarCredits to analyze this image. Please top up to continue.", "Close");
+            }
+        } catch (err) {
+            console.error("Image analysis failed:", err);
+            notifyError("Analysis Failed", "Could not analyze the uploaded image. Please try again.", "Close");
+        } finally {
+            setIsAnalyzing(false);
+        }
+    }
 
     async function handleGenerate() {
         setIsGenerating(true);
@@ -41,6 +103,9 @@ export default function CreateWritingExercisePage() {
                 if ('image_url' in result && result.image_url) {
                     setGeneratedImageUrl(result.image_url as string);
                     setImageFile(null);
+                }
+                if ('chart_data' in result && result.chart_data) {
+                    setChartData(result.chart_data);
                 }
                 notifySuccess(
                     "Content Generated",
@@ -64,6 +129,13 @@ export default function CreateWritingExercisePage() {
         const formPrompt = formData.get("prompt") as string;
 
         try {
+            // Block save if image analysis failed validation
+            if (type === "writing_task1" && imageFile && imageAnalysis && !imageAnalysis.is_valid) {
+                notifyError("Invalid Chart Image", "The uploaded image failed validation. Please upload a valid IELTS chart/graph.", "Close");
+                setIsLoading(false);
+                return;
+            }
+
             let imageUrl = generatedImageUrl || undefined;
 
             if (type === "writing_task1" && imageFile) {
@@ -72,11 +144,17 @@ export default function CreateWritingExercisePage() {
                 imageUrl = await uploadImage(uploadFormData);
             }
 
+            // Use analysis data for uploaded images, chartData for AI-generated
+            const finalChartData = type === "writing_task1"
+                ? (chartData || (imageAnalysis?.is_valid ? imageAnalysis.data_points : null) || (chartDescription ? { description: chartDescription } : undefined))
+                : undefined;
+
             await createExercise({
                 title: formTitle,
                 type,
                 prompt: formPrompt,
                 image_url: type === "writing_task1" ? imageUrl : undefined,
+                chart_data: finalChartData,
                 is_published: true,
             });
             notifySuccess(
@@ -135,10 +213,11 @@ export default function CreateWritingExercisePage() {
                                     onChange={(e) => setChartType(e.target.value)}
                                 >
                                     <option value="auto">Auto (AI Decision)</option>
-                                    <option value="bar">Bar Chart</option>
-                                    <option value="line">Line Graph</option>
-                                    <option value="pie">Pie Chart</option>
-                                    <option value="doughnut">Doughnut Chart</option>
+                                    {Object.values(CHART_TYPES).map((ct) => (
+                                        <option key={ct} value={ct}>
+                                            {CHART_TYPE_LABELS[ct] || ct}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         )}
@@ -219,9 +298,94 @@ export default function CreateWritingExercisePage() {
                             accept="image/*"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) setImageFile(file);
+                                if (file) {
+                                    setImageFile(file);
+                                    setImageAnalysis(null);
+                                    setChartData(null);
+                                    setGeneratedImageUrl(null);
+                                }
                             }}
                         />
+                        {imageFile && !imageAnalysis && !isAnalyzing && (
+                            <Button
+                                type="button"
+                                onClick={handleAnalyzeImage}
+                                disabled={isAnalyzing}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+                            >
+                                <ImageIcon className="h-4 w-4" />
+                                Analyze Image
+                                <CreditBadge amount={-analysisCost} size="sm" />
+                            </Button>
+                        )}
+                        {isAnalyzing && (
+                            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-700 text-sm">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span className="font-medium">Analyzing image with AI Vision...</span>
+                            </div>
+                        )}
+                        {imageAnalysis && (
+                            <div className={`p-4 rounded-lg border space-y-3 ${imageAnalysis.is_valid
+                                ? "bg-emerald-50 border-emerald-200"
+                                : "bg-rose-50 border-rose-200"
+                                }`}>
+                                <div className="flex items-center gap-2">
+                                    {imageAnalysis.is_valid ? (
+                                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                    ) : (
+                                        <XCircle className="h-5 w-5 text-rose-600" />
+                                    )}
+                                    <span className={`font-bold text-sm ${imageAnalysis.is_valid ? "text-emerald-800" : "text-rose-800"}`}>
+                                        {imageAnalysis.is_valid ? "Valid IELTS Chart Detected" : "Invalid Image"}
+                                    </span>
+                                    {imageAnalysis.is_valid && (
+                                        <span className="ml-auto text-xs font-medium bg-white px-2 py-0.5 rounded-full border">
+                                            {CHART_TYPE_LABELS[imageAnalysis.chart_type] || imageAnalysis.chart_type}
+                                        </span>
+                                    )}
+                                </div>
+                                {imageAnalysis.is_valid ? (
+                                    <>
+                                        <p className="text-xs text-emerald-700">{imageAnalysis.description}</p>
+                                        <pre className="text-[11px] bg-white/80 p-3 rounded-lg border border-emerald-100 overflow-x-auto max-h-32 text-slate-600">
+                                            {JSON.stringify(imageAnalysis.data_points, null, 2)}
+                                        </pre>
+                                    </>
+                                ) : (
+                                    <div className="space-y-1">
+                                        {imageAnalysis.validation_errors.map((err, i) => (
+                                            <p key={i} className="text-xs text-rose-700">• {err}</p>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {type === "writing_task1" && (
+                    <div className="space-y-2">
+                        <Label htmlFor="chart_description">Chart Data Description</Label>
+                        <p className="text-xs text-muted-foreground">
+                            {chartData
+                                ? "✅ Chart data auto-captured from AI generation. You can override below."
+                                : "Describe the key data points in the chart/graph (e.g., values, categories, trends). This helps AI evaluate student responses accurately."
+                            }
+                        </p>
+                        {chartData && (
+                            <pre className="text-[11px] bg-slate-50 p-3 rounded-lg border border-slate-200 overflow-x-auto max-h-32 text-slate-600">
+                                {JSON.stringify(chartData, null, 2)}
+                            </pre>
+                        )}
+                        {!chartData && (
+                            <Textarea
+                                id="chart_description"
+                                placeholder="e.g., Bar chart: Coffee production (tonnes) — Brazil: 2.5M, Vietnam: 1.8M, Colombia: 0.8M (2010-2020)"
+                                className="h-24"
+                                value={chartDescription}
+                                onChange={(e) => setChartDescription(e.target.value)}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -242,7 +406,11 @@ export default function CreateWritingExercisePage() {
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={isLoading} className="bg-purple-600 hover:bg-purple-700">
+                    <Button
+                        type="submit"
+                        disabled={isLoading || (type === "writing_task1" && !!imageFile && (!imageAnalysis || !imageAnalysis.is_valid))}
+                        className="bg-purple-600 hover:bg-purple-700"
+                    >
                         {isLoading ? "Creating..." : "Create Exercise"}
                     </Button>
                 </div>

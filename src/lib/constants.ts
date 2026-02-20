@@ -57,6 +57,7 @@ export const FEATURE_KEYS = {
     DETAILED_CORRECTION: 'detailed_correction',
     SENTENCE_IMPROVE: 'sentence_improve',
     WEAKNESS_ANALYSIS: 'weakness_analysis',
+    CHART_IMAGE_ANALYSIS: 'chart_image_analysis',
 } as const;
 
 export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];
@@ -123,3 +124,15 @@ export const ERROR_CATEGORIES = {
 } as const;
 
 export type ErrorCategory = typeof ERROR_CATEGORIES[keyof typeof ERROR_CATEGORIES];
+
+export const CHART_TYPES = {
+    LINE_GRAPH: 'line_graph',
+    BAR_CHART: 'bar_chart',
+    PIE_CHART: 'pie_chart',
+    TABLE: 'table',
+    PROCESS_DIAGRAM: 'process_diagram',
+    MAP: 'map',
+    MIXED_CHART: 'mixed_chart',
+} as const;
+
+export type ChartType = typeof CHART_TYPES[keyof typeof CHART_TYPES];

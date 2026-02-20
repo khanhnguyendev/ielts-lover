@@ -40,24 +40,56 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 
 const CATEGORIES = [
-    "Mock Test",
     "Academic Task 1",
     "General Task 1",
     "Task 2",
-    "Custom Question"
 ]
 
-import { getExercises, getUserAttempts, checkFeatureAccess } from "@/app/actions"
+const CATEGORY_TO_TYPE: Record<string, ExerciseType> = {
+    "Academic Task 1": "writing_task1",
+    "General Task 1": "writing_task1",
+    "Task 2": "writing_task2",
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+    "Academic Task 1": "Academic Task 1",
+    "General Task 1": "General Task 1",
+    "Task 2": "Task 2",
+}
+
+import { getExercises, getUserAttempts, checkFeatureAccess, getFeaturePrice } from "@/app/actions"
+import { createExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions"
 import { Exercise as DbExercise, ExerciseType } from "@/types"
+import { FEATURE_KEYS } from "@/lib/constants"
+import { CreditBadge } from "@/components/ui/credit-badge"
+import { useNotification } from "@/lib/contexts/notification-context"
 
 interface Exercise {
     id: string
     title: string
     subtitle?: string
+    chartType?: string
     attempts?: number
     icon: any
     color: string
     isRecommended?: boolean
+}
+
+const CHART_TYPE_LABELS: Record<string, string> = {
+    line_graph: "📈 Line Graph",
+    bar_chart: "📊 Bar Chart",
+    pie_chart: "🥧 Pie Chart",
+    table: "📋 Table",
+    process_diagram: "🔄 Process Diagram",
+    map: "🗺️ Map",
+    mixed_chart: "📉 Mixed Chart",
+    // Short aliases from DB data
+    line: "📈 Line Graph",
+    bar: "📊 Bar Chart",
+    pie: "🥧 Pie Chart",
+    process: "🔄 Process Diagram",
+    mixed: "📉 Mixed Chart",
+    doughnut: "🍩 Doughnut Chart",
 }
 
 const TYPE_CONFIG: Record<string, { icon: any, color: string }> = {
@@ -68,11 +100,101 @@ const TYPE_CONFIG: Record<string, { icon: any, color: string }> = {
 }
 
 export default function WritingHubPage() {
-    const [activeCategory, setActiveCategory] = React.useState("Mock Test")
+    const [activeCategory, setActiveCategory] = React.useState("Academic Task 1")
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
     const [exercises, setExercises] = React.useState<Exercise[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [hasMockAccess, setHasMockAccess] = React.useState(true)
+    const [refreshKey, setRefreshKey] = React.useState(0)
+    const [chartTypeFilter, setChartTypeFilter] = React.useState<string>("all")
+    const { notifySuccess, notifyError } = useNotification()
+
+    // Custom Task dialog state
+    const [customTitle, setCustomTitle] = React.useState("")
+    const [customPrompt, setCustomPrompt] = React.useState("")
+    const [customImage, setCustomImage] = React.useState<File | null>(null)
+    const [customImagePreview, setCustomImagePreview] = React.useState<string | null>(null)
+    const [isAnalyzing, setIsAnalyzing] = React.useState(false)
+    const [imageAnalysis, setImageAnalysis] = React.useState<any>(null)
+    const [isCreating, setIsCreating] = React.useState(false)
+    const [analysisCost, setAnalysisCost] = React.useState(5)
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+    React.useEffect(() => {
+        getFeaturePrice(FEATURE_KEYS.CHART_IMAGE_ANALYSIS).then(setAnalysisCost)
+    }, [])
+
+    function resetCustomTaskForm() {
+        setCustomTitle("")
+        setCustomPrompt("")
+        setCustomImage(null)
+        setCustomImagePreview(null)
+        setImageAnalysis(null)
+    }
+
+    async function handleAnalyzeCustomImage() {
+        if (!customImage) return
+        setIsAnalyzing(true)
+        setImageAnalysis(null)
+        try {
+            const reader = new FileReader()
+            const base64 = await new Promise<string>((resolve) => {
+                reader.onload = () => {
+                    const result = reader.result as string
+                    resolve(result.split(",")[1])
+                }
+                reader.readAsDataURL(customImage)
+            })
+            const analysis = await analyzeChartImage(base64, customImage.type)
+            if (analysis.success && analysis.data) {
+                setImageAnalysis(analysis.data)
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -analysisCost } }))
+                if (analysis.data.is_valid && analysis.data.title && !customTitle) {
+                    setCustomTitle(analysis.data.title)
+                }
+            } else if (analysis.error === "INSUFFICIENT_CREDITS") {
+                notifyError("Insufficient Credits", "You need more StarCredits to analyze this image.", "Close")
+            }
+        } catch (err) {
+            console.error("Image analysis failed:", err)
+            notifyError("Analysis Failed", "Could not analyze the uploaded image.", "Close")
+        } finally {
+            setIsAnalyzing(false)
+        }
+    }
+
+    async function handleCreateCustomTask() {
+        if (!customTitle || !customPrompt) return
+        const isTask1 = activeCategory !== "Task 2"
+        if (isTask1 && (!customImage || !imageAnalysis?.is_valid)) return
+        setIsCreating(true)
+        try {
+            let imageUrl: string | undefined
+            if (customImage) {
+                const uploadFormData = new FormData()
+                uploadFormData.append("file", customImage)
+                imageUrl = await uploadImage(uploadFormData)
+            }
+
+            await createExercise({
+                title: customTitle,
+                type: CATEGORY_TO_TYPE[activeCategory] || "writing_task1",
+                prompt: customPrompt,
+                ...(imageUrl && { image_url: imageUrl }),
+                ...(imageAnalysis?.data_points && { chart_data: imageAnalysis.data_points }),
+                is_published: true,
+            })
+            notifySuccess("Task Created", "Your custom task has been added successfully!", "Done")
+            resetCustomTaskForm()
+            setIsAddModalOpen(false)
+            setRefreshKey(k => k + 1) // Trigger list reload
+        } catch (err) {
+            console.error("Failed to create custom task:", err)
+            notifyError("Creation Failed", "Could not create the exercise. Please try again.", "Close")
+        } finally {
+            setIsCreating(false)
+        }
+    }
 
     React.useEffect(() => {
         const fetchExercises = async () => {
@@ -86,12 +208,9 @@ export default function WritingHubPage() {
             }
 
             try {
-                // Check access if it's mock test (Legacy logic, kept for reference but unreachable for now)
-                /* if (activeCategory === "Mock Test") { ... } */
                 setHasMockAccess(true);
 
-                let type: ExerciseType = "writing_task1"
-                if (activeCategory === "Task 2") type = "writing_task2"
+                const type = CATEGORY_TO_TYPE[activeCategory] || "writing_task1"
 
                 // Fetch both exercises and attempts
                 const [exercisesData, attemptsData] = await Promise.all([
@@ -107,6 +226,7 @@ export default function WritingHubPage() {
                         id: db.id,
                         title: db.title,
                         subtitle: db.type.replace("_", " ").toUpperCase(),
+                        chartType: db.chart_data?.chart_type || db.chart_data?.type || undefined,
                         attempts: attemptCount,
                         icon: TYPE_CONFIG[db.type]?.icon || Cat,
                         color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50"
@@ -122,7 +242,18 @@ export default function WritingHubPage() {
         }
 
         fetchExercises()
-    }, [activeCategory])
+    }, [activeCategory, refreshKey])
+
+    // Derive unique chart types from current exercises for filter
+    const availableChartTypes = React.useMemo(() => {
+        const types = exercises.filter(e => e.chartType).map(e => e.chartType!)
+        return [...new Set(types)]
+    }, [exercises])
+
+    const filteredExercises = React.useMemo(() => {
+        if (chartTypeFilter === "all") return exercises
+        return exercises.filter(e => e.chartType === chartTypeFilter)
+    }, [exercises, chartTypeFilter])
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -210,114 +341,263 @@ export default function WritingHubPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {activeCategory !== "Mock Test" && (
-                                <button
-                                    onClick={() => setIsAddModalOpen(true)}
-                                    className="bg-card border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-center"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
-                                        <Plus className="h-5 w-5" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-bold text-slate-900">Add Custom Task</p>
-                                        <p className="text-[10px] text-muted-foreground font-medium">Add a question you've found elsewhere</p>
-                                    </div>
-                                </button>
+                        <div className="space-y-5">
+                            {/* Chart type filter chips (Task 1 only) */}
+                            {(activeCategory === "Academic Task 1" || activeCategory === "General Task 1") && availableChartTypes.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5">
+                                    <button
+                                        onClick={() => setChartTypeFilter("all")}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider",
+                                            chartTypeFilter === "all"
+                                                ? "bg-primary text-white shadow-sm"
+                                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        All types
+                                    </button>
+                                    {availableChartTypes.map(ct => (
+                                        <button
+                                            key={ct}
+                                            onClick={() => setChartTypeFilter(ct)}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                                                chartTypeFilter === ct
+                                                    ? "bg-primary text-white shadow-sm"
+                                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                            )}
+                                        >
+                                            {CHART_TYPE_LABELS[ct] || ct}
+                                        </button>
+                                    ))}
+                                </div>
                             )}
-                            {exercises.map((ex, i) => (
-                                <ExerciseCard
-                                    key={i}
-                                    id={ex.id}
-                                    title={ex.title}
-                                    subtitle={ex.subtitle}
-                                    attempts={ex.attempts || 0}
-                                    icon={ex.icon}
-                                    color={ex.color}
-                                    isRecommended={ex.isRecommended}
-                                />
-                            ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {activeCategory !== "Mock Test" && (
+                                    <button
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="bg-card border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group text-center"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+                                            <Plus className="h-5 w-5" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-slate-900">Add Custom Task</p>
+                                            <p className="text-[10px] text-muted-foreground font-medium">Add a question you've found elsewhere</p>
+                                        </div>
+                                    </button>
+                                )}
+                                {filteredExercises.map((ex, i) => (
+                                    <ExerciseCard
+                                        key={i}
+                                        id={ex.id}
+                                        title={ex.title}
+                                        subtitle={ex.subtitle}
+                                        chartType={ex.chartType}
+                                        attempts={ex.attempts || 0}
+                                        icon={ex.icon}
+                                        color={ex.color}
+                                        isRecommended={ex.isRecommended}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
 
-                <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                    <DialogContent className="sm:max-w-lg bg-white rounded-[32px] p-0 overflow-hidden border-none shadow-2xl">
-                        <div className="bg-[#F9FAFB] p-8 border-b text-center space-y-4">
-                            <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border">
-                                <Plus className="w-8 h-8 text-primary" />
+                <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetCustomTaskForm(); }}>
+                    <DialogContent className="sm:max-w-md bg-white rounded-[24px] p-0 overflow-hidden border-none shadow-2xl">
+                        {/* Compact header */}
+                        <div className="px-6 pt-5 pb-4 border-b flex items-center gap-3">
+                            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100 shrink-0">
+                                <Plus className="w-5 h-5 text-indigo-600" />
                             </div>
                             <div>
-                                <DialogTitle className="text-2xl font-black font-outfit text-slate-900">
+                                <DialogTitle className="text-base font-black font-outfit text-slate-900">
                                     Add Custom Task
                                 </DialogTitle>
-                                <p className="text-muted-foreground font-medium text-sm mt-1">
-                                    Add a question you've found elsewhere or created yourself.
+                                <p className="text-muted-foreground text-xs mt-0.5">
+                                    {activeCategory !== "Task 2"
+                                        ? "Upload a chart & create your own Writing Task 1"
+                                        : "Create your own Writing Task 2 question"
+                                    }
                                 </p>
                             </div>
                         </div>
 
-                        <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
-                            {/* Writing task type */}
-                            <div className="space-y-2.5">
-                                <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Writing task type</label>
-                                <button className="w-full h-14 px-6 rounded-2xl border bg-slate-50/50 flex items-center justify-between text-sm font-bold text-slate-900 hover:border-primary/40 hover:bg-white transition-all group outline-none">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-primary" />
-                                        Academic Task 1
-                                    </div>
-                                    <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
-                                </button>
+                        <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto scrollbar-hide">
+                            {/* Task type — static badge */}
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                <span className="text-xs font-bold text-slate-700">{CATEGORY_LABELS[activeCategory] || activeCategory}</span>
                             </div>
 
-                            {/* Question title */}
-                            <div className="space-y-2.5">
-                                <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Question title</label>
+                            {/* Title */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400">Title</label>
                                 <input
                                     type="text"
-                                    className="w-full h-14 px-6 rounded-2xl border bg-slate-50/50 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 outline-none"
-                                    placeholder="Example: Smartphone Ownership Trends"
+                                    className="w-full h-10 px-4 rounded-xl border bg-slate-50/50 text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 placeholder:font-normal outline-none"
+                                    placeholder="e.g. Coffee Exports by Region"
+                                    value={customTitle}
+                                    onChange={(e) => setCustomTitle(e.target.value)}
                                 />
                             </div>
 
-                            {/* Question */}
-                            <div className="space-y-2.5">
-                                <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">Question content</label>
+                            {/* Prompt */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400">Question prompt</label>
                                 <textarea
-                                    className="w-full min-h-[160px] p-6 rounded-2xl border bg-slate-50/50 text-sm font-medium leading-relaxed text-slate-700 resize-none focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 outline-none"
-                                    placeholder="Example: The diagram below illustrates the daily routine of a highly professional house cat..."
+                                    className="w-full min-h-[80px] p-4 rounded-xl border bg-slate-50/50 text-sm font-medium leading-relaxed text-slate-700 resize-none focus:ring-2 focus:ring-primary/10 focus:bg-white focus:border-primary/40 transition-all placeholder:text-slate-400 outline-none"
+                                    placeholder="The chart below shows..."
+                                    value={customPrompt}
+                                    onChange={(e) => setCustomPrompt(e.target.value)}
                                 />
                             </div>
 
-                            {/* Add visual */}
-                            <div className="space-y-2.5">
-                                <label className="text-[11px] uppercase font-black tracking-widest text-slate-500 ml-1">
-                                    Add visual <span className="text-rose-500">*</span>
-                                </label>
-                                <div className="border-2 border-dashed rounded-[24px] p-8 bg-slate-50/50 flex flex-col items-center gap-4 text-center group hover:bg-primary/[0.02] hover:border-primary/30 transition-all cursor-pointer border-slate-200">
-                                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform">
-                                        <Upload className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-bold text-slate-900">Click to upload image</p>
-                                        <p className="text-[10px] font-medium text-slate-500 max-w-[240px]">
-                                            Support JPG, PNG or WebP. Max size 5MB.
-                                        </p>
-                                    </div>
+                            {/* Image upload — Task 1 only */}
+                            {activeCategory !== "Task 2" && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                                        Chart image <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                if (file.size > 5 * 1024 * 1024) {
+                                                    notifyError("File Too Large", "Maximum file size is 5MB.", "Close")
+                                                    return
+                                                }
+                                                setCustomImage(file)
+                                                setImageAnalysis(null)
+                                                setCustomImagePreview(URL.createObjectURL(file))
+                                            }
+                                        }}
+                                    />
+                                    {customImagePreview ? (
+                                        <div className="relative rounded-xl border overflow-hidden bg-slate-50">
+                                            <img src={customImagePreview} alt="Chart" className="w-full max-h-36 object-contain" />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setCustomImage(null)
+                                                    setCustomImagePreview(null)
+                                                    setImageAnalysis(null)
+                                                    if (fileInputRef.current) fileInputRef.current.value = ""
+                                                }}
+                                                className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1 shadow border hover:bg-rose-50 transition-colors"
+                                            >
+                                                <X className="h-3.5 w-3.5 text-rose-600" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="border-2 border-dashed rounded-xl p-5 bg-slate-50/50 flex items-center gap-4 hover:bg-primary/[0.02] hover:border-primary/30 transition-all cursor-pointer border-slate-200 group"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border shrink-0 group-hover:scale-105 transition-transform">
+                                                <Upload className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-900">Click to upload</p>
+                                                <p className="text-[10px] text-slate-500">JPG, PNG, WebP · Max 5MB</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Analyze button */}
+                                    {customImage && !imageAnalysis && !isAnalyzing && (
+                                        <div className="space-y-2">
+                                            <div className="flex gap-2 p-2.5 bg-amber-50/80 rounded-xl border border-amber-200/60">
+                                                <Info className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+                                                <p className="text-[11px] text-amber-800 leading-relaxed">
+                                                    AI will verify this is a valid IELTS chart and extract its data so we can score your writing accurately.
+                                                </p>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                onClick={handleAnalyzeCustomImage}
+                                                className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white gap-2 text-xs font-bold shadow-md shadow-indigo-600/15"
+                                            >
+                                                <Search className="h-3.5 w-3.5" />
+                                                Analyze Chart
+                                                <CreditBadge amount={-analysisCost} size="sm" />
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Analyzing */}
+                                    {isAnalyzing && (
+                                        <div className="flex items-center justify-center gap-2 py-3 px-4 bg-blue-50 rounded-xl border border-blue-200 text-blue-700 text-xs">
+                                            <PulseLoader size="sm" color="primary" />
+                                            <span className="font-bold">Analyzing with AI Vision...</span>
+                                        </div>
+                                    )}
+
+                                    {/* Result */}
+                                    {imageAnalysis && (
+                                        <div className={`p-3 rounded-xl border space-y-2 ${imageAnalysis.is_valid
+                                            ? "bg-emerald-50/80 border-emerald-200"
+                                            : "bg-rose-50/80 border-rose-200"}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {imageAnalysis.is_valid ? (
+                                                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                                                        <Star className="h-2.5 w-2.5 text-white fill-white" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center shrink-0">
+                                                        <X className="h-2.5 w-2.5 text-white" />
+                                                    </div>
+                                                )}
+                                                <span className={`font-black text-xs ${imageAnalysis.is_valid ? "text-emerald-800" : "text-rose-800"}`}>
+                                                    {imageAnalysis.is_valid ? "Valid IELTS Chart" : "Invalid Image"}
+                                                </span>
+                                                {imageAnalysis.is_valid && imageAnalysis.chart_type && (
+                                                    <span className="ml-auto text-[9px] font-bold bg-white px-2 py-0.5 rounded-full border uppercase tracking-wider">
+                                                        {imageAnalysis.chart_type.replace("_", " ")}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {imageAnalysis.is_valid ? (
+                                                <p className="text-[11px] text-emerald-700 leading-relaxed">{imageAnalysis.description}</p>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {imageAnalysis.validation_errors?.map((err: string, i: number) => (
+                                                        <p key={i} className="text-[11px] text-rose-700">• {err}</p>
+                                                    ))}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setImageAnalysis(null)}
+                                                        className="mt-1 text-[11px] font-bold text-rose-600 underline underline-offset-2 hover:text-rose-800"
+                                                    >
+                                                        Re-analyze
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
 
-                        <div className="p-6 bg-slate-50 border-t flex flex-col sm:flex-row gap-3">
-                            <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="rounded-xl h-12 font-bold flex-1">
+                        {/* Footer */}
+                        <div className="px-6 py-4 bg-slate-50/80 border-t flex gap-2.5">
+                            <Button variant="outline" onClick={() => { setIsAddModalOpen(false); resetCustomTaskForm(); }} className="rounded-xl h-10 text-xs font-bold flex-1">
                                 Cancel
                             </Button>
                             <Button
                                 variant="default"
-                                onClick={() => setIsAddModalOpen(false)}
-                                className="h-12 flex-[2] shadow-lg shadow-primary/20"
+                                onClick={handleCreateCustomTask}
+                                disabled={isCreating || !customTitle || !customPrompt || (activeCategory !== "Task 2" && (!customImage || !imageAnalysis?.is_valid))}
+                                className="h-10 flex-[2] shadow-md shadow-primary/15 text-xs font-bold"
                             >
-                                Create Question
+                                {isCreating ? "Creating..." : "Create Question"}
                             </Button>
                         </div>
                     </DialogContent>
@@ -334,6 +614,7 @@ function ExerciseCard({
     id,
     title,
     subtitle,
+    chartType,
     attempts,
     icon: Icon,
     color,
@@ -342,6 +623,7 @@ function ExerciseCard({
     id: string,
     title: string,
     subtitle?: string,
+    chartType?: string,
     attempts: number,
     icon: any,
     color: string,
@@ -361,13 +643,20 @@ function ExerciseCard({
                         <Icon className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary pr-2">{title}</h4>
-                            {subtitle && (
-                                <span className="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-bold border border-indigo-100/50">
-                                    {subtitle}
-                                </span>
-                            )}
+                            <div className="flex flex-wrap gap-1">
+                                {subtitle && (
+                                    <span className="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-bold border border-indigo-100/50">
+                                        {subtitle}
+                                    </span>
+                                )}
+                                {chartType && (
+                                    <span className="inline-block px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 text-[9px] font-bold border border-amber-100/50">
+                                        {CHART_TYPE_LABELS[chartType] || chartType}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -349,7 +349,12 @@ export class AIService {
         return JSON.parse(responseText);
     }
 
-    async generateWritingReport(type: typeof EXERCISE_TYPES.WRITING_TASK1 | typeof EXERCISE_TYPES.WRITING_TASK2, content: string, version: AIPromptVersion = "v2"): Promise<any> {
+    async generateWritingReport(
+        type: typeof EXERCISE_TYPES.WRITING_TASK1 | typeof EXERCISE_TYPES.WRITING_TASK2,
+        content: string,
+        version: AIPromptVersion = "v2",
+        exerciseContext?: { prompt?: string; chartData?: any }
+    ): Promise<any> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -359,7 +364,17 @@ export class AIService {
         });
 
         const promptBase = (AIService.PROMPTS[type] as any)[version] || AIService.PROMPTS[EXERCISE_TYPES.WRITING_TASK1].v2;
-        const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
+
+        let contextBlock = '';
+        if (exerciseContext?.prompt) {
+            contextBlock += `\n\nEXERCISE PROMPT (the question the student was asked):\n${exerciseContext.prompt}`;
+        }
+        if (exerciseContext?.chartData) {
+            contextBlock += `\n\nCHART DATA (structured data from the chart/graph the student should describe):\n${JSON.stringify(exerciseContext.chartData, null, 2)}`;
+            contextBlock += `\n\nIMPORTANT: Use this chart data to verify that the student has accurately reported the key figures, trends, and comparisons. Penalize Task Achievement if the student misreports data or ignores significant features.`;
+        }
+
+        const prompt = `${promptBase}${contextBlock}\n\nSTUDENT RESPONSE:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
 
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
@@ -433,6 +448,77 @@ Rules:
 - Maximum 5 weaknesses, maximum 7 action items.`;
 
         const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        return JSON.parse(responseText);
+    }
+
+    /**
+     * Analyzes an uploaded chart image using Gemini Vision.
+     * Validates chart type and extracts structured data.
+     * 
+     * @returns Analysis result with chart type, validity, and extracted data.
+     */
+    async analyzeChartImage(imageBase64: string, mimeType: string): Promise<{
+        is_valid: boolean;
+        chart_type: string;
+        title: string;
+        description: string;
+        data_points: any;
+        validation_errors: string[];
+    }> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+            },
+        });
+
+        const prompt = `You are an IELTS Writing Task 1 image validator.
+
+Analyze this image and determine:
+1. Whether it is a VALID chart/graph/diagram suitable for IELTS Writing Task 1
+2. The chart type (MUST be one of: line_graph, bar_chart, pie_chart, table, process_diagram, map, mixed_chart)
+3. Extract ALL structured data visible in the image
+
+VALIDATION RULES:
+- The image MUST contain a recognizable chart, graph, table, diagram, or map
+- The data must contain at least 2 data points to be meaningful
+- Reject images that are: photos of people, random screenshots, memes, non-chart content
+- If it's a chart but data is unreadable/blurry, mark as invalid with explanation
+
+Return a JSON object with this exact structure:
+{
+  "is_valid": boolean,
+  "chart_type": "line_graph" | "bar_chart" | "pie_chart" | "table" | "process_diagram" | "map" | "mixed_chart",
+  "title": "descriptive title for the chart (e.g., 'Coffee Production by Country 2010-2020')",
+  "description": "brief description of what the chart shows",
+  "data_points": {
+    "labels": ["category1", "category2"],
+    "datasets": [
+      { "label": "series name", "data": [value1, value2] }
+    ],
+    "unit": "the measurement unit (e.g., %, million tonnes, USD)",
+    "time_period": "if applicable (e.g., 2010-2020)"
+  },
+  "validation_errors": ["list of issues if is_valid is false, empty array if valid"]
+}
+
+For process_diagram or map types, adapt data_points to describe the steps/locations instead of numerical data:
+{
+  "labels": ["Step 1 name", "Step 2 name"],
+  "datasets": [{ "label": "process", "data": ["description of step 1", "description of step 2"] }],
+  "unit": "steps",
+  "time_period": null
+}`;
+
+        const imagePart = {
+            inlineData: {
+                data: imageBase64,
+                mimeType: mimeType,
+            },
+        };
+
+        const result = await model.generateContent([prompt, imagePart]);
         const responseText = result.response.text();
         return JSON.parse(responseText);
     }

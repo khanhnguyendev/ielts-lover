@@ -79,6 +79,7 @@ export class CreditService {
             [FEATURE_KEYS.MOCK_TEST]: "Full Mock Test Access",
             [FEATURE_KEYS.DETAILED_CORRECTION]: "Detailed Sentence Correction",
             [FEATURE_KEYS.WEAKNESS_ANALYSIS]: "AI Weakness Analysis",
+            [FEATURE_KEYS.CHART_IMAGE_ANALYSIS]: "Chart Image Analysis",
         };
 
         const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;

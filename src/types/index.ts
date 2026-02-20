@@ -22,6 +22,7 @@ export type Exercise = {
     title: string;
     prompt: string;
     image_url?: string;
+    chart_data?: any;
     version: number;
     is_published: boolean;
     created_at: string;

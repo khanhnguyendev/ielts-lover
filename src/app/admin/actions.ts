@@ -1,6 +1,6 @@
 "use server";
 
-import { TRANSACTION_TYPES, TransactionType } from "@/lib/constants";
+import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS, APP_ERROR_CODES } from "@/lib/constants";
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
 import { getCurrentUser } from "@/app/actions";
@@ -22,6 +22,7 @@ import { SystemSettingsRepository } from "@/repositories/system-settings.reposit
 import { FeaturePricingRepository } from "@/repositories/pricing.repository";
 import { CreditPackage } from "@/types";
 import { StorageService } from "@/services/storage.service";
+import { CreditService } from "@/services/credit.service";
 
 import { traceService, traceAction } from "@/lib/aop";
 
@@ -39,6 +40,7 @@ const aiService = traceService(_aiService, "AIService");
 const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
 const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
 const storageService = traceService(new StorageService(), "StorageService");
+const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
 
 export const seedCreditPackages = traceAction("seedCreditPackages", async () => {
     await checkAdmin();
@@ -200,11 +202,30 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
         return {
             title: chartData.title,
             prompt: chartData.prompt,
-            image_url: imageUrl
+            image_url: imageUrl,
+            chart_data: chartData.chart_config
         };
     }
 
     return await aiService.generateExerciseContent(type, topic);
+});
+
+export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBase64: string, mimeType: string) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Bill user for chart analysis (anti-spam)
+    try {
+        await creditService.billUser(user.id, FEATURE_KEYS.CHART_IMAGE_ANALYSIS);
+    } catch (error) {
+        if (error instanceof Error && error.name === "InsufficientFundsError") {
+            return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+        throw error;
+    }
+
+    const analysis = await aiService.analyzeChartImage(imageBase64, mimeType);
+    return { success: true, data: analysis };
 });
 
 export async function uploadImage(formData: FormData) {
