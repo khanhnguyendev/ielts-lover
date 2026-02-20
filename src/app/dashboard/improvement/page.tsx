@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CreditBadge } from "@/components/ui/credit-badge"
+import { useNotification } from "@/lib/contexts/notification-context"
 
 import { cn } from "@/lib/utils"
 import {
@@ -65,7 +66,7 @@ export default function ImprovementPage() {
     const [analysisCost, setAnalysisCost] = useState(30)
     const [isLoading, setIsLoading] = useState(true)
     const [isGenerating, setIsGenerating] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const { notifyError } = useNotification()
 
     const ITEMS_PER_PAGE = 8
 
@@ -95,18 +96,42 @@ export default function ImprovementPage() {
 
     async function handleGenerateAnalysis() {
         setIsGenerating(true)
-        setError(null)
+
+        // Optimistic deduction animation
+        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -analysisCost } }))
+
         try {
             const result = await generateWeaknessAnalysis()
             if (result.success && result.data) {
                 setLatestPlan(result.data)
             } else if (result.error === "INSUFFICIENT_CREDITS") {
-                setError("Insufficient StarCredits. Please top up to continue.")
+                // Refund
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))
+                notifyError(
+                    "Insufficient Credits",
+                    "You need more StarCredits for a Deep AI Analysis. Please top up to continue.",
+                    undefined,
+                    result.traceId
+                )
             } else {
-                setError("Analysis failed. Please try again later.")
+                // Refund
+                window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))
+                notifyError(
+                    "Analysis Failed",
+                    "We encountered an issue generating your customized plan. Please try again later.",
+                    undefined,
+                    result.traceId
+                )
             }
-        } catch {
-            setError("Something went wrong. Please try again.")
+        } catch (err: any) {
+            // Refund
+            window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))
+            notifyError(
+                "Unexpected Error",
+                "Something went wrong. Please try again.",
+                undefined,
+                err?.traceId || "UNKNOWN"
+            )
         } finally {
             setIsGenerating(false)
         }
@@ -128,35 +153,44 @@ export default function ImprovementPage() {
 
                 {/* ─── AI Weakness Analyzer Section ─── */}
                 <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                            <Brain className="h-4.5 w-4.5 text-white" />
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                                <Brain className="h-4.5 w-4.5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 tracking-tight">AI Weakness Analyzer</h2>
+                                <p className="text-xs text-muted-foreground">Discover patterns in your mistakes and get a personalized action plan</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-lg font-bold text-slate-900 tracking-tight">AI Weakness Analyzer</h2>
-                            <p className="text-xs text-muted-foreground">Discover patterns in your mistakes and get a personalized action plan</p>
-                        </div>
+                        {latestPlan && (
+                            <Button
+                                size="sm"
+                                onClick={handleGenerateAnalysis}
+                                disabled={isGenerating}
+                                className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 text-xs gap-2 shrink-0 font-bold rounded-lg h-9 px-4 active:scale-95 transition-all"
+                            >
+                                {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
+                                Re-generate
+                                <CreditBadge amount={-analysisCost} size="sm" />
+                            </Button>
+                        )}
                     </div>
 
                     {latestPlan ? (
                         <div className="space-y-4">
                             {/* Summary Card */}
-                            <Card className="border-violet-100 bg-gradient-to-br from-violet-50/50 to-purple-50/30 shadow-sm">
-                                <CardContent className="p-6">
-                                    <div className="flex items-start gap-3">
-                                        <Sparkles className="h-5 w-5 text-violet-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-semibold text-violet-900 mb-1">AI Analysis Summary</p>
-                                            <p className="text-sm text-violet-700 leading-relaxed">{latestPlan.plan_data.summary}</p>
-                                            <div className="flex items-center gap-4 mt-3 text-[10px] font-medium text-violet-500 uppercase tracking-wider">
-                                                <span>{latestPlan.mistakes_analyzed} mistakes analyzed</span>
-                                                <span>·</span>
-                                                <span>Generated {new Date(latestPlan.created_at).toLocaleDateString()}</span>
-                                            </div>
-                                        </div>
+                            <div className="bg-gradient-to-r from-violet-50/80 to-purple-50/50 rounded-xl p-4 border border-violet-100/50 flex items-start gap-3 shadow-sm">
+                                <Sparkles className="h-4 w-4 text-violet-500 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm text-violet-800 leading-relaxed pr-4">{latestPlan.plan_data.summary}</p>
+                                    <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-violet-500 uppercase tracking-widest opacity-80">
+                                        <span>{latestPlan.mistakes_analyzed} mistakes analyzed</span>
+                                        <span>•</span>
+                                        <span>{new Date(latestPlan.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
 
                             {/* Top Weaknesses */}
                             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -164,21 +198,20 @@ export default function ImprovementPage() {
                                     const severity = SEVERITY_CONFIG[w.severity] || SEVERITY_CONFIG.medium
                                     const catConfig = CATEGORY_CONFIG[w.category] || CATEGORY_CONFIG.grammar
                                     return (
-                                        <Card key={i} className="border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                                            <CardContent className="p-5">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-tighter px-2 py-0.5", catConfig.bg, catConfig.border, catConfig.color)}>
-                                                        {catConfig.label}
-                                                    </Badge>
-                                                    <div className={cn("flex items-center gap-1 text-[9px] font-bold uppercase", severity.color)}>
+                                        <Card key={i} className="border-slate-200/60 shadow-none hover:border-slate-300 transition-colors">
+                                            <CardContent className="p-4">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-widest px-1.5 py-0 min-w-0 rounded-md border-transparent", catConfig.bg, catConfig.color)}>
+                                                            {catConfig.label}
+                                                        </Badge>
+                                                        <span className="text-[10px] font-bold text-muted-foreground">{w.frequency}x</span>
+                                                    </div>
+                                                    <div className={cn("flex flex-shrink-0 items-center justify-center h-5 w-5 rounded-full", severity.bg, severity.color)}>
                                                         <severity.icon className="h-3 w-3" />
-                                                        {severity.label}
                                                     </div>
                                                 </div>
-                                                <p className="text-sm text-slate-700 leading-relaxed">{w.description}</p>
-                                                <div className="mt-3 text-[10px] font-semibold text-muted-foreground">
-                                                    {w.frequency} occurrence{w.frequency > 1 ? 's' : ''} found
-                                                </div>
+                                                <p className="text-xs text-slate-700 leading-relaxed font-medium line-clamp-3">{w.description}</p>
                                             </CardContent>
                                         </Card>
                                     )
@@ -186,93 +219,86 @@ export default function ImprovementPage() {
                             </div>
 
                             {/* Action Items */}
-                            <Card className="border-slate-100 shadow-sm">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                        <Zap className="h-4 w-4 text-amber-500" />
-                                        Action Plan
-                                    </CardTitle>
+                            <Card className="border-slate-200/60 shadow-none">
+                                <CardHeader className="py-3 px-4 border-b border-slate-100/50 bg-slate-50/50">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-xs font-bold flex items-center gap-1.5 uppercase tracking-widest text-slate-700">
+                                            <Zap className="h-3.5 w-3.5 text-amber-500" />
+                                            Action Plan
+                                        </CardTitle>
+                                    </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4 pt-0">
-                                    {latestPlan.plan_data.action_items.map((item, i) => {
-                                        const catConfig = CATEGORY_CONFIG[item.category] || CATEGORY_CONFIG.grammar
-                                        return (
-                                            <div key={i} className="group relative pl-8 pb-4 border-b border-slate-50 last:border-0 last:pb-0">
-                                                <div className={cn("absolute left-0 top-0.5 h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold", catConfig.bg, catConfig.color)}>
-                                                    {item.priority}
+                                <CardContent className="p-0">
+                                    <div className="divide-y divide-slate-100/80">
+                                        {latestPlan.plan_data.action_items.map((item, i) => {
+                                            const catConfig = CATEGORY_CONFIG[item.category] || CATEGORY_CONFIG.grammar
+                                            return (
+                                                <div key={i} className="p-4 flex gap-3 hover:bg-slate-50/30 transition-colors">
+                                                    <div className={cn("flex-shrink-0 h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-black shadow-sm", catConfig.bg, catConfig.color, catConfig.border, "border")}>
+                                                        {item.priority}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-sm font-bold text-slate-800 tracking-tight leading-none">{item.title}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{item.description}</p>
+                                                        {item.examples.length > 0 && (
+                                                            <div className="mt-3 grid gap-1.5 md:grid-cols-2">
+                                                                {item.examples.slice(0, 2).map((ex, j) => (
+                                                                    <div key={j} className="flex gap-2 text-[11px] bg-slate-50 rounded p-1.5 border border-slate-100">
+                                                                        <div className="flex-1 text-slate-500 line-through truncate" title={ex.wrong}>{ex.wrong}</div>
+                                                                        <ArrowRight className="h-3 w-3 text-slate-300 flex-shrink-0 mt-0.5" />
+                                                                        <div className="flex-1 text-emerald-700 font-medium truncate" title={ex.correct}>{ex.correct}</div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                                                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.description}</p>
-                                                    {item.examples.length > 0 && (
-                                                        <div className="mt-2 space-y-1">
-                                                            {item.examples.slice(0, 2).map((ex, j) => (
-                                                                <div key={j} className="flex items-center gap-2 text-xs">
-                                                                    <span className="text-rose-500 line-through">{ex.wrong}</span>
-                                                                    <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                                                                    <span className="text-emerald-600 font-medium">{ex.correct}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+                                            )
+                                        })}
+                                    </div>
                                 </CardContent>
                             </Card>
 
-                            {/* Re-generate */}
-                            <div className="flex justify-end">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleGenerateAnalysis}
-                                    disabled={isGenerating}
-                                    className="text-xs gap-2"
-                                >
-                                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Brain className="h-3 w-3" />}
-                                    Re-generate Analysis
-                                    <CreditBadge amount={-analysisCost} size="sm" />
-                                </Button>
-                            </div>
+
                         </div>
                     ) : (
                         /* Empty State */
-                        <Card className="border-dashed border-2 border-violet-200 bg-gradient-to-br from-violet-50/30 to-purple-50/20">
-                            <CardContent className="p-12 text-center space-y-4">
-                                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center mx-auto">
-                                    <Brain className="h-8 w-8 text-violet-400" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-slate-800">Unlock Your Personalized Action Plan</h3>
-                                    <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                                        Our AI will analyze your mistake patterns, identify recurring weaknesses,
-                                        and create a prioritized improvement plan tailored to your IELTS goals.
-                                    </p>
-                                </div>
-                                {totalCount === 0 ? (
-                                    <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-block">
-                                        Complete some exercises first to build your mistake bank
+                        /* Empty State - Compact Horizontal */
+                        <Card className="border-dashed border-2 border-violet-200/60 bg-gradient-to-r from-violet-50/40 to-white overflow-hidden shadow-none">
+                            <CardContent className="p-0">
+                                <div className="flex flex-col md:flex-row items-center gap-6 p-6">
+                                    <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center shadow-inner border border-violet-200/50">
+                                        <Brain className="h-6 w-6 text-violet-500" />
                                     </div>
-                                ) : (
-                                    <Button
-                                        onClick={handleGenerateAnalysis}
-                                        disabled={isGenerating}
-                                        className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/20 gap-2"
-                                    >
-                                        {isGenerating ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                    <div className="flex-1 space-y-1 text-center md:text-left">
+                                        <h3 className="text-sm font-bold text-slate-800 tracking-tight">Unlock Your Personalized Action Plan</h3>
+                                        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
+                                            Our AI will analyze your mistake patterns across all sessions, identify recurring weaknesses,
+                                            and create a prioritized improvement plan tailored to your IELTS goals.
+                                        </p>
+                                    </div>
+                                    <div className="shrink-0">
+                                        {totalCount === 0 ? (
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                                                Record mistakes first
+                                            </div>
                                         ) : (
-                                            <Sparkles className="h-4 w-4" />
+                                            <Button
+                                                onClick={handleGenerateAnalysis}
+                                                disabled={isGenerating}
+                                                className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 gap-2 h-9 px-5 rounded-lg text-xs font-bold active:scale-95 transition-all"
+                                            >
+                                                {isGenerating ? (
+                                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                ) : (
+                                                    <Sparkles className="h-3.5 w-3.5" />
+                                                )}
+                                                Generate Analysis
+                                                <CreditBadge amount={-analysisCost} size="sm" />
+                                            </Button>
                                         )}
-                                        Generate Deep Analysis
-                                        <CreditBadge amount={-analysisCost} size="sm" />
-                                    </Button>
-                                )}
-                                {error && (
-                                    <p className="text-xs text-rose-500 mt-2">{error}</p>
-                                )}
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
                     )}
