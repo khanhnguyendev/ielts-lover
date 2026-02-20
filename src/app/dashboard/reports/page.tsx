@@ -26,14 +26,7 @@ import {
     X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from "@/components/ui/table"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { cn } from "@/lib/utils"
 
 import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
@@ -58,10 +51,9 @@ export default function ReportsPage() {
     const [isLoading, setIsLoading] = React.useState(true)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
 
-    // Filters & Pagination
+    // Filters
     const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
     const [toolFilter, setToolFilter] = React.useState<string | null>(null)
-    const [currentPage, setCurrentPage] = React.useState(1)
 
     const { notifySuccess, notifyError, notifyWarning } = useNotification()
     const router = useRouter()
@@ -94,18 +86,6 @@ export default function ReportsPage() {
             return true
         })
     }, [attempts, statusFilter, toolFilter])
-
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredAttempts.length / ITEMS_PER_PAGE)
-    const paginatedAttempts = filteredAttempts.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
-
-    // Reset page when filters change
-    React.useEffect(() => {
-        setCurrentPage(1)
-    }, [statusFilter, toolFilter])
 
     const handleReevaluate = async (id: string) => {
         notifyWarning(
@@ -299,176 +279,129 @@ export default function ReportsPage() {
 
                             {/* Table */}
                             <div className="flex-1">
-                                <Table>
-                                    <TableHeader className="bg-[#F9FAFB]">
-                                        <TableRow className="hover:bg-transparent border-none">
-                                            <TableHead className="w-[180px] py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-6">
-                                                <div className="flex items-center gap-1 cursor-pointer group">
-                                                    Time <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
-                                                </div>
-                                            </TableHead>
-                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                                <div className="flex items-center gap-1 cursor-pointer group">
-                                                    Task <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
-                                                </div>
-                                            </TableHead>
-                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                                <div className="flex items-center gap-1 cursor-pointer group">
-                                                    Status <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
-                                                </div>
-                                            </TableHead>
-                                            <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                                <div className="flex items-center gap-1 cursor-pointer group">
-                                                    Score <ArrowUpDown className="h-3 w-3 group-hover:text-primary" />
-                                                </div>
-                                            </TableHead>
-                                            <TableHead className="text-right pr-6"></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {isLoading ? (
-                                            <TableRow>
-                                                <TableCell colSpan={5} className="py-20">
-                                                    <div className="flex flex-col items-center justify-center gap-4">
-                                                        <PulseLoader size="lg" color="primary" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Syncing reports...</p>
+                                <DataTable<Attempt>
+                                    columns={[
+                                        {
+                                            key: "time",
+                                            header: "Time",
+                                            width: "w-[180px]",
+                                            sortable: true,
+                                            render: (attempt) => (
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-1 text-xs font-black text-slate-900">
+                                                        <Calendar className="h-2.5 w-2.5 text-slate-400" />
+                                                        {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ) : filteredAttempts.length === 0 ? (
-                                            <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found matching your filters.</TableCell></TableRow>
-                                        ) : (
-                                            paginatedAttempts.map((attempt) => (
-                                                <TableRow key={attempt.id} className="group hover:bg-slate-50/50 border-slate-50/50 transition-colors">
-                                                    <TableCell className="py-3 pl-6">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <div className="flex items-center gap-1 text-xs font-black text-slate-900">
-                                                                <Calendar className="h-2.5 w-2.5 text-slate-400" />
-                                                                {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                                                        <Clock className="h-2 w-2" />
+                                                        {new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                </div>
+                                            )
+                                        },
+                                        {
+                                            key: "task",
+                                            header: "Task",
+                                            sortable: true,
+                                            render: (attempt) => (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center border bg-indigo-50 border-indigo-100 text-indigo-600">
+                                                        <PenTool className="h-4 w-4" />
+                                                    </div>
+                                                    <div className="space-y-0">
+                                                        <p className="text-[12px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
+                                                            {attempt.exercises?.title || "Exercise"}
+                                                        </p>
+                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                            {attempt.exercises?.type?.replace('_', ' ') || "Practice"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )
+                                        },
+                                        {
+                                            key: "status",
+                                            header: "Status",
+                                            sortable: true,
+                                            render: (attempt) => (
+                                                <div className={cn(
+                                                    "w-fit flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border shadow-sm",
+                                                    attempt.state === "EVALUATED"
+                                                        ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+                                                        : "text-amber-700 bg-amber-50 border-amber-100"
+                                                )}>
+                                                    <div className={cn(
+                                                        "w-1.5 h-1.5 rounded-full animate-pulse",
+                                                        attempt.state === "EVALUATED" ? "bg-emerald-500" : "bg-amber-500"
+                                                    )} />
+                                                    {attempt.state}
+                                                </div>
+                                            )
+                                        },
+                                        {
+                                            key: "score",
+                                            header: "Score",
+                                            sortable: true,
+                                            render: (attempt) => {
+                                                const config = getBandScoreConfig(attempt.score);
+                                                return (
+                                                    <div className={cn(
+                                                        "w-9 h-9 rounded-xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
+                                                        config.bg, config.border, config.color
+                                                    )}>
+                                                        <span className="text-[12px] leading-none">{attempt.score || "-"}</span>
+                                                        <span className="text-[7px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
+                                                    </div>
+                                                );
+                                            }
+                                        },
+                                        {
+                                            key: "actions",
+                                            header: "",
+                                            align: "right",
+                                            render: (attempt) => (
+                                                attempt.state === "SUBMITTED" ? (
+                                                    <Button
+                                                        onClick={() => handleReevaluate(attempt.id)}
+                                                        disabled={reevaluatingId === attempt.id}
+                                                        className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
+                                                    >
+                                                        {reevaluatingId === attempt.id ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-2.5 h-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                                                Evaluating...
                                                             </div>
-                                                            <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                                                                <Clock className="h-2 w-2" />
-                                                                {new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                            </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="py-3">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center border bg-indigo-50 border-indigo-100 text-indigo-600">
-                                                                <PenTool className="h-4 w-4" />
-                                                            </div>
-                                                            <div className="space-y-0">
-                                                                <p className="text-[12px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
-                                                                    {attempt.exercises?.title || "Exercise"}
-                                                                </p>
-                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                                    {attempt.exercises?.type?.replace('_', ' ') || "Practice"}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="py-3">
-                                                        <div className={cn(
-                                                            "w-fit flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border shadow-sm",
-                                                            attempt.state === "EVALUATED"
-                                                                ? "text-emerald-700 bg-emerald-50 border-emerald-100"
-                                                                : "text-amber-700 bg-amber-50 border-amber-100"
-                                                        )}>
-                                                            <div className={cn(
-                                                                "w-1.5 h-1.5 rounded-full animate-pulse",
-                                                                attempt.state === "EVALUATED" ? "bg-emerald-500" : "bg-amber-500"
-                                                            )} />
-                                                            {attempt.state}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="py-3">
-                                                        {(() => {
-                                                            const config = getBandScoreConfig(attempt.score);
-                                                            return (
-                                                                <div className={cn(
-                                                                    "w-9 h-9 rounded-xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
-                                                                    config.bg,
-                                                                    config.border,
-                                                                    config.color
-                                                                )}>
-                                                                    <span className="text-[12px] leading-none">{attempt.score || "-"}</span>
-                                                                    <span className="text-[7px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </TableCell>
-                                                    <TableCell className="py-3 text-right pr-6">
-                                                        {attempt.state === "SUBMITTED" ? (
-                                                            <Button
-                                                                onClick={() => handleReevaluate(attempt.id)}
-                                                                disabled={reevaluatingId === attempt.id}
-                                                                className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
-                                                            >
-                                                                {reevaluatingId === attempt.id ? (
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-2.5 h-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                                                        Evaluating...
-                                                                    </div>
-                                                                ) : (
-                                                                    <>
-                                                                        AI Feedback <Sparkles className="ml-1 h-2.5 w-2.5 fill-primary" />
-                                                                    </>
-                                                                )}
-                                                            </Button>
                                                         ) : (
-                                                            <Link href={`/dashboard/reports/${attempt.id}`}>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
-                                                                >
-                                                                    View Report <ChevronRight className="ml-1 h-2.5 w-2.5" />
-                                                                </Button>
-                                                            </Link>
+                                                            <>
+                                                                AI Feedback <Sparkles className="ml-1 h-2.5 w-2.5 fill-primary" />
+                                                            </>
                                                         )}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-
-                            {/* Pagination */}
-                            <div className="px-10 py-6 flex items-center justify-between border-t border-slate-50">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                        Showing {paginatedAttempts.length} of {filteredAttempts.length} results
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center gap-8">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                        Page {currentPage} of {totalPages || 1}
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <PaginationButton
-                                            icon={ChevronsLeft}
-                                            disabled={currentPage === 1}
-                                            onClick={() => setCurrentPage(1)}
-                                        />
-                                        <PaginationButton
-                                            icon={ChevronLeft}
-                                            disabled={currentPage === 1}
-                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                        />
-                                        <PaginationButton
-                                            icon={ChevronRight}
-                                            disabled={currentPage === totalPages || totalPages === 0}
-                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                        />
-                                        <PaginationButton
-                                            icon={ChevronsRight}
-                                            disabled={currentPage === totalPages || totalPages === 0}
-                                            onClick={() => setCurrentPage(totalPages)}
-                                        />
-                                    </div>
-                                </div>
+                                                    </Button>
+                                                ) : (
+                                                    <Link href={`/dashboard/reports/${attempt.id}`}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
+                                                        >
+                                                            View Report <ChevronRight className="ml-1 h-2.5 w-2.5" />
+                                                        </Button>
+                                                    </Link>
+                                                )
+                                            )
+                                        },
+                                    ]}
+                                    data={filteredAttempts}
+                                    rowKey={(a) => a.id}
+                                    pageSize={ITEMS_PER_PAGE}
+                                    isLoading={isLoading}
+                                    loadingText="Syncing reports..."
+                                    contained={false}
+                                    emptyState={{
+                                        title: "No reports found",
+                                        description: "No reports found matching your filters."
+                                    }}
+                                />
                             </div>
                         </>
                     ) : (
@@ -666,22 +599,5 @@ export default function ReportsPage() {
                 © 2026 IELTS Lover. &nbsp; Terms · Privacy · Contact us
             </footer>
         </div>
-    )
-}
-
-function PaginationButton({ icon: Icon, disabled = false, onClick }: { icon: any, disabled?: boolean, onClick?: () => void }) {
-    return (
-        <Button
-            variant="outline"
-            size="icon"
-            disabled={disabled}
-            onClick={onClick}
-            className={cn(
-                "p-1.5",
-                disabled && "opacity-30"
-            )}
-        >
-            <Icon className="h-4 w-4" />
-        </Button>
     )
 }
