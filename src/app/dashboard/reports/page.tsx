@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import {
     ChevronDown,
     Search,
-    Globe,
     ArrowUpDown,
     Mic2,
     CheckCircle2,
@@ -36,12 +35,7 @@ import { PulseLoader } from "@/components/global/pulse-loader";
 import { getBandScoreConfig } from "@/lib/score-utils";
 import { ATTEMPT_STATES, APP_ERROR_CODES } from "@/lib/constants";
 
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import { Check } from "lucide-react"
+
 
 const ITEMS_PER_PAGE = 10
 
@@ -173,107 +167,67 @@ export default function ReportsPage() {
                     {activeTab === "Reports" ? (
                         <>
                             {/* Filters */}
-                            <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b">
-                                <div className="flex items-center gap-2">
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" size="sm" className={cn(
-                                                "h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20 data-[state=open]:border-primary/50 data-[state=open]:bg-primary/5",
-                                                statusFilter && "bg-primary/5 border-primary/30 text-primary"
-                                            )}>
-                                                {statusFilter ? (
-                                                    <span className="mr-2 text-primary font-black">Status: {statusFilter.replace('_', ' ')}</span>
-                                                ) : (
-                                                    <span className="mr-2 text-muted-foreground">+ Status</span>
-                                                )}
-                                                <ChevronDown className="ml-2 h-3.5 w-3.5 text-muted-foreground/50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
-                                            <div className="space-y-1">
-                                                <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by status</div>
-                                                {[ATTEMPT_STATES.EVALUATED, ATTEMPT_STATES.SUBMITTED, ATTEMPT_STATES.IN_PROGRESS].map((status) => (
-                                                    <button
-                                                        key={status}
-                                                        onClick={() => setStatusFilter(statusFilter === status ? null : status)}
-                                                        className={cn(
-                                                            "w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-between group transition-all",
-                                                            statusFilter === status
-                                                                ? "bg-primary/5 text-primary"
-                                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                                        )}
-                                                    >
-                                                        <span className="capitalize">{status.replace('_', ' ').toLowerCase()}</span>
-                                                        {statusFilter === status && <Check className="h-3.5 w-3.5 text-primary" />}
-                                                    </button>
-                                                ))}
-                                                {statusFilter && (
-                                                    <div className="pt-2 mt-2 border-t border-dashed">
-                                                        <button
-                                                            onClick={() => setStatusFilter(null)}
-                                                            className="w-full text-center px-2 py-1.5 rounded-md text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-rose-500 transition-colors flex items-center justify-center gap-1.5"
-                                                        >
-                                                            <X className="h-3 w-3" /> Clear Filter
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" size="sm" className={cn(
-                                                "h-9 px-4 rounded-lg text-xs font-bold border-muted-foreground/20 data-[state=open]:border-primary/50 data-[state=open]:bg-primary/5",
-                                                toolFilter && "bg-primary/5 border-primary/30 text-primary"
-                                            )}>
-                                                {toolFilter ? (
-                                                    <span className="mr-2 text-primary font-black">Tool: {toolFilter}</span>
-                                                ) : (
-                                                    <span className="mr-2 text-muted-foreground">+ Tool</span>
-                                                )}
-                                                <ChevronDown className="ml-2 h-3.5 w-3.5 text-muted-foreground/50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[220px] p-2 bg-white border-slate-100 shadow-xl" align="start">
-                                            <div className="space-y-1">
-                                                <div className="px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b mb-1">Filter by tool</div>
-                                                {['writing'].map((tool) => (
-                                                    <button
-                                                        key={tool}
-                                                        onClick={() => setToolFilter(toolFilter === tool ? null : tool)}
-                                                        className={cn(
-                                                            "w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-between group transition-all",
-                                                            toolFilter === tool
-                                                                ? "bg-primary/5 text-primary"
-                                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                                        )}
-                                                    >
-                                                        <span className="capitalize">{tool}</span>
-                                                        {toolFilter === tool && <Check className="h-3.5 w-3.5 text-primary" />}
-                                                    </button>
-                                                ))}
-                                                {toolFilter && (
-                                                    <div className="pt-2 mt-2 border-t border-dashed">
-                                                        <button
-                                                            onClick={() => setToolFilter(null)}
-                                                            className="w-full text-center px-2 py-1.5 rounded-md text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-rose-500 transition-colors flex items-center justify-center gap-1.5"
-                                                        >
-                                                            <X className="h-3 w-3" /> Clear Filter
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                            <div className="px-6 py-4 flex flex-wrap items-center gap-4 border-b">
+                                {/* Status chips */}
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Status</span>
+                                    <button
+                                        onClick={() => setStatusFilter(null)}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider",
+                                            !statusFilter
+                                                ? "bg-primary text-white shadow-sm"
+                                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        All
+                                    </button>
+                                    {[ATTEMPT_STATES.EVALUATED, ATTEMPT_STATES.SUBMITTED, ATTEMPT_STATES.IN_PROGRESS].map((status) => (
+                                        <button
+                                            key={status}
+                                            onClick={() => setStatusFilter(statusFilter === status ? null : status)}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all capitalize",
+                                                statusFilter === status
+                                                    ? "bg-primary text-white shadow-sm"
+                                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                            )}
+                                        >
+                                            {status.replace('_', ' ').toLowerCase()}
+                                        </button>
+                                    ))}
                                 </div>
 
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg border">
-                                        <Globe className="h-3.5 w-3.5" />
-                                        Feedback Language
-                                        <span className="text-foreground font-bold">English</span>
-                                    </div>
+                                <div className="w-px h-5 bg-slate-200" />
+
+                                {/* Tool chips */}
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Tool</span>
+                                    <button
+                                        onClick={() => setToolFilter(null)}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider",
+                                            !toolFilter
+                                                ? "bg-primary text-white shadow-sm"
+                                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        All
+                                    </button>
+                                    {['writing', 'speaking'].map((tool) => (
+                                        <button
+                                            key={tool}
+                                            onClick={() => setToolFilter(toolFilter === tool ? null : tool)}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all capitalize",
+                                                toolFilter === tool
+                                                    ? "bg-primary text-white shadow-sm"
+                                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                            )}
+                                        >
+                                            {tool === 'writing' ? '✍️ Writing' : '🎤 Speaking'}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
