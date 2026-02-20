@@ -56,6 +56,7 @@ export const FEATURE_KEYS = {
     AI_TUTOR_CHAT: 'ai_tutor_chat',
     DETAILED_CORRECTION: 'detailed_correction',
     SENTENCE_IMPROVE: 'sentence_improve',
+    WEAKNESS_ANALYSIS: 'weakness_analysis',
 } as const;
 
 export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];
@@ -78,6 +79,8 @@ export const DB_TABLES = {
     CREDIT_PACKAGES: 'credit_packages',
     LESSONS: 'lessons',
     LESSON_QUESTIONS: 'lesson_questions',
+    USER_MISTAKES: 'user_mistakes',
+    USER_ACTION_PLANS: 'user_action_plans',
 } as const;
 
 export const TRANSACTION_FILTERS = {
@@ -104,3 +107,19 @@ export const DEFAULT_QUOTAS = {
     FREE_DAILY_LIMIT: 2,
     FREE_DAILY_GRANT: 5,
 } as const;
+
+export const SKILL_TYPES = {
+    WRITING: 'writing',
+    SPEAKING: 'speaking',
+} as const;
+
+export type SkillType = typeof SKILL_TYPES[keyof typeof SKILL_TYPES];
+
+export const ERROR_CATEGORIES = {
+    GRAMMAR: 'grammar',
+    VOCABULARY: 'vocabulary',
+    COHERENCE: 'coherence',
+    PRONUNCIATION: 'pronunciation',
+} as const;
+
+export type ErrorCategory = typeof ERROR_CATEGORIES[keyof typeof ERROR_CATEGORIES];

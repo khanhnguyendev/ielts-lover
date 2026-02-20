@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Star } from "lucide-react"
 
 interface CreditBadgeProps {
     amount: number
@@ -25,10 +24,10 @@ export function CreditBadge({
         lg: "px-4 py-2 text-[14px] gap-2 rounded-xl"
     }
 
-    const iconSizes = {
-        sm: "h-2.5 w-2.5",
-        md: "h-3.5 w-3.5",
-        lg: "h-4 w-4"
+    const starSizes = {
+        sm: "w-3 h-3 text-[6px]",
+        md: "w-4 h-4 text-[8px]",
+        lg: "w-5 h-5 text-[10px]"
     }
 
     return (
@@ -36,15 +35,17 @@ export function CreditBadge({
             "inline-flex items-center font-black transition-all shadow-sm border",
             isPositive
                 ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                : "bg-rose-50 text-rose-600 border-rose-100",
+                : "bg-yellow-50 text-yellow-700 border-yellow-200",
             sizeClasses[size],
             className
         )}>
             {showIcon && (
-                <Star className={cn(
-                    iconSizes[size],
-                    isPositive ? "fill-emerald-500" : "fill-rose-400"
-                )} />
+                <div className={cn(
+                    "flex items-center justify-center rounded-full bg-yellow-400 shadow-sm",
+                    starSizes[size]
+                )}>
+                    <span className="leading-none select-none">⭐</span>
+                </div>
             )}
             <span className="font-mono tracking-tighter">
                 {isPositive ? "+" : ""}{amount}
