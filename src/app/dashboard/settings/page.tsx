@@ -16,6 +16,7 @@ import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { StarsBalance } from "@/components/dashboard/stars-balance"
 
 export default function SettingsPage() {
     const { notifySuccess, notifyError } = useNotification()
@@ -245,8 +246,10 @@ export default function SettingsPage() {
                             <p className="text-xs font-bold text-slate-900 capitalize">{user?.role}</p>
                         </div>
                         <div className="space-y-1">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">StarCredits</span>
-                            <p className="text-xs font-black text-primary font-mono">{user?.credits_balance ?? 0}</p>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-2">StarCredits</span>
+                            <div className="inline-block scale-110 origin-left">
+                                <StarsBalance balance={user?.credits_balance ?? 0} />
+                            </div>
                         </div>
                     </div>
                 </div>
