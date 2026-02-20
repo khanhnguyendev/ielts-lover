@@ -11,7 +11,7 @@ interface StarsBalanceProps {
 }
 
 export function StarsBalance({ balance, className }: StarsBalanceProps) {
-    const [animation, setAnimation] = React.useState<{ type: 'decrement' | 'increment', id: number } | null>(null)
+    const [animation, setAnimation] = React.useState<{ type: 'decrement' | 'increment', amount: number, id: number } | null>(null)
     const [displayBalance, setDisplayBalance] = React.useState(balance)
 
     // Sync display balance when prop changes from parent (server sync)
@@ -28,6 +28,7 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
 
             setAnimation({
                 type: amount < 0 ? 'decrement' : 'increment',
+                amount: amount,
                 id: Date.now()
             })
 
@@ -77,7 +78,7 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
                             : "bg-emerald-500 text-white shadow-emerald-500/20"
                     )}
                 >
-                    {animation.type === 'decrement' ? '-1' : '+1'}
+                    {animation.amount > 0 ? `+${animation.amount}` : animation.amount}
                 </div>
             )}
 

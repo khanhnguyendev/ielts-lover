@@ -20,7 +20,6 @@ export default async function AdminDashboard() {
         { label: "Total Users", value: statsData.totalUsers.toLocaleString(), change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
         { label: "Active Exercises", value: statsData.activeExercises.toLocaleString(), change: "+2", icon: FileText, color: "text-purple-600", bg: "bg-purple-50" },
         { label: "Today's Attempts", value: statsData.todayAttempts.toLocaleString(), change: "+24%", icon: Activity, color: "text-emerald-600", bg: "bg-emerald-50" },
-        { label: "Premium Users", value: statsData.premiumUsers.toLocaleString(), change: "+5%", icon: ShieldCheck, color: "text-amber-600", bg: "bg-amber-50" },
     ];
 
     return (

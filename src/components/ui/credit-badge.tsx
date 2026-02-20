@@ -48,7 +48,7 @@ export function CreditBadge({
                 </div>
             )}
             <span className="font-mono tracking-tighter">
-                {isPositive ? "+" : ""}{amount}
+                {isPositive ? "+" : "-"}{Math.abs(amount)}
             </span>
             <span className={cn(
                 "uppercase font-bold opacity-70 tracking-widest",
