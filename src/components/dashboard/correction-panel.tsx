@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { improveSentence, getFeaturePrice } from "@/app/actions";
 import { toast } from "sonner";
 import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
+import { useNotification } from "@/lib/contexts/notification-context";
 
 interface CorrectionPanelProps {
     sentenceText: string | null
@@ -19,6 +20,7 @@ interface CorrectionPanelProps {
 
 export function CorrectionPanel({ sentenceText, corrections, onClose, className, targetScore = 9.0 }: CorrectionPanelProps) {
     // ...
+    const { notifyError } = useNotification();
     const [isRewriting, setIsRewriting] = React.useState(false);
     const [rewrittenSentence, setRewrittenSentence] = React.useState<string | null>(null);
     const [cost, setCost] = React.useState<number | null>(null);
@@ -57,13 +59,23 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
             } else {
                 // Refund if failed
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
-                toast.error(result.error || APP_ERROR_CODES.INTERNAL_ERROR);
+                const traceId = (result as any).traceId;
+                notifyError(
+                    "Rewrite Failed",
+                    "We couldn't rewrite this sentence. Please try again later.",
+                    "Close",
+                    traceId
+                );
             }
         } catch (error) {
             // Refund on exception
             window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
             console.error("Failed to rewrite sentence:", error);
-            toast.error(APP_ERROR_CODES.INTERNAL_ERROR);
+            notifyError(
+                "Unexpected Error",
+                "An unexpected error occurred while rewriting. Please try again.",
+                "Close"
+            );
         } finally {
             setIsRewriting(false);
         }
