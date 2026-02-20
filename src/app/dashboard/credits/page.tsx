@@ -143,7 +143,7 @@ export default function CreditsPage() {
 
                                     <div className="space-y-4 pt-4">
                                         <Button
-                                            variant={pkg.popular ? "premium" : "outline"}
+                                            variant={pkg.popular ? "default" : "outline"}
                                             size="lg"
                                             onClick={() => handleBuyNow(pkg.id)}
                                             className={cn(

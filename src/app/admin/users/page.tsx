@@ -228,12 +228,12 @@ export default function UsersPage() {
                                     <TableCell className="text-center">
                                         <div className={cn(
                                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                            user.is_premium
+                                            user.role === "admin"
                                                 ? "bg-amber-100 text-amber-700 border border-amber-200"
                                                 : "bg-slate-100 text-slate-600 border border-slate-200"
                                         )}>
-                                            {user.is_premium && <ShieldCheck size={12} />}
-                                            {user.is_premium ? "Premium" : "Free Tier"}
+                                            {user.role === "admin" && <ShieldCheck size={12} />}
+                                            {user.role === "admin" ? "Admin" : "Member"}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -439,9 +439,9 @@ export default function UsersPage() {
                                 <div className="mt-2 flex gap-2">
                                     <Badge className={cn(
                                         "rounded-full text-[9px] font-black uppercase tracking-widest",
-                                        detailsUser?.is_premium ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
+                                        detailsUser?.role === "admin" ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
                                     )}>
-                                        {detailsUser?.is_premium ? "Premium" : "Free Tier"}
+                                        {detailsUser?.role === "admin" ? "Admin" : "Member"}
                                     </Badge>
                                 </div>
                             </div>

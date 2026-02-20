@@ -74,7 +74,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                         <div className="flex flex-col min-w-0">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-base font-black truncate text-white">{user.full_name || user.email.split("@")[0]}</h3>
-                                {user.is_premium && (
+                                {user.role === "admin" && (
                                     <Badge className="bg-amber-400 text-slate-900 text-[8px] font-black h-4 px-1.5 border-none shadow-sm uppercase tracking-tighter">Pro</Badge>
                                 )}
                             </div>
