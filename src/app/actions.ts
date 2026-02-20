@@ -255,6 +255,26 @@ export async function getCurrentUser() {
     } as UserProfile;
 }
 
+export async function updateUserProfile(data: {
+    full_name?: string;
+    target_score?: number;
+    test_type?: "academic" | "general";
+    exam_date?: string;
+}) {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthorized");
+
+    // Only allow safe fields
+    const allowed: Partial<UserProfile> = {};
+    if (data.full_name !== undefined) allowed.full_name = data.full_name;
+    if (data.target_score !== undefined) allowed.target_score = data.target_score;
+    if (data.test_type !== undefined) allowed.test_type = data.test_type;
+    if (data.exam_date !== undefined) allowed.exam_date = data.exam_date;
+
+    await userRepo.update(user.id, allowed);
+    return { success: true };
+}
+
 export const signInWithGoogle = traceAction("signInWithGoogle", async () => {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.auth.signInWithOAuth({

@@ -74,9 +74,6 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                         <div className="flex flex-col min-w-0">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-base font-black truncate text-white">{user.full_name || user.email.split("@")[0]}</h3>
-                                {user.role === "admin" && (
-                                    <Badge className="bg-amber-400 text-slate-900 text-[8px] font-black h-4 px-1.5 border-none shadow-sm uppercase tracking-tighter">Pro</Badge>
-                                )}
                             </div>
                             <p className="text-[10px] font-medium text-slate-300 truncate">{user.email}</p>
                         </div>
@@ -86,7 +83,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                 <div className="p-3 pt-4">
                     {/* StarCredits Card */}
                     <div className="relative group overflow-hidden">
-                        <Link href="/dashboard/pricing" className="block">
+                        <Link href="/dashboard/credits" className="block">
                             <div className="px-5 py-4 rounded-[24px] bg-slate-50 border border-slate-100 group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-300">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
