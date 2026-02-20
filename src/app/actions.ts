@@ -100,7 +100,7 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
 
     try {
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
-            await creditService.billUser(user.id, featureKey);
+            await creditService.billUser(user.id, featureKey, attempt.exercise_id);
         }
         await attemptService.submitAttempt(attemptId, content);
         return attemptService.getAttempt(attemptId);
@@ -138,7 +138,10 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
     if (!user) throw new Error("User not authenticated");
 
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION);
+        const attempt = await attemptService.getAttempt(attemptId);
+        if (!attempt) throw new Error("Attempt not found");
+
+        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id);
         const result = await attemptService.reevaluate(attemptId);
         return result;
     } catch (error) {
@@ -300,7 +303,7 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
     }
 
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION);
+        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id);
         const correction = await attemptService.unlockCorrection(attemptId);
         return { success: true, data: correction };
     } catch (errors: any) {

@@ -46,6 +46,9 @@ export type CreditTransaction = {
     user_id: string;
     amount: number;
     type: TransactionType;
+    feature_key?: string;
+    exercise_id?: string;
+    granted_by_admin?: string;
     description?: string;
     created_at: string;
 };

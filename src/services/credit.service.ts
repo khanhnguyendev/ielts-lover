@@ -50,7 +50,7 @@ export class CreditService {
      * Deducts credits based on feature pricing.
      * Includes lazy grant check.
      */
-    async billUser(userId: string, featureKey: string): Promise<boolean> {
+    async billUser(userId: string, featureKey: string, exerciseId?: string): Promise<boolean> {
         // 1. Check for daily grant first
         await this.ensureDailyGrant(userId);
 
@@ -86,6 +86,8 @@ export class CreditService {
             user_id: userId,
             amount: -pricing.cost_per_unit,
             type: TRANSACTION_TYPES.USAGE,
+            feature_key: featureKey,
+            exercise_id: exerciseId,
             description: description
         });
 
@@ -95,7 +97,7 @@ export class CreditService {
     /**
      * Manual grant for rewards or gift codes.
      */
-    async rewardUser(userId: string, amount: number, type: TransactionType, description: string): Promise<void> {
+    async rewardUser(userId: string, amount: number, type: TransactionType, description: string, grantedByAdmin?: string): Promise<void> {
         const user = await this.userRepo.getById(userId);
         if (!user) throw new Error("User not found");
 
@@ -107,7 +109,8 @@ export class CreditService {
             user_id: userId,
             amount: amount,
             type: type,
-            description: description
+            description: description,
+            granted_by_admin: grantedByAdmin
         });
     }
 

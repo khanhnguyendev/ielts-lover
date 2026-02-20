@@ -18,16 +18,23 @@ import {
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-    ArrowUpDown,
     Calendar,
     Clock,
     CreditCard,
     Gift,
     Sparkles,
     Plus,
-    Minus
+    Minus,
+    PenTool,
+    Mic2,
+    RefreshCw,
+    FileText,
+    MessageCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { CreditBadge } from "@/components/ui/credit-badge"
+import Link from "next/link"
+import { ExternalLink, User as UserIcon } from "lucide-react"
 
 interface TransactionTableProps {
     transactions: CreditTransaction[]
@@ -70,6 +77,74 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
 
     const formatType = (type: string) => {
         return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    }
+
+    const getFeatureContext = (t: CreditTransaction) => {
+        const textToAnalyze = (t.feature_key || t.description || "").toLowerCase()
+
+        if (t.amount > 0) {
+            return {
+                label: formatType(t.type),
+                icon: Sparkles,
+                bg: "bg-emerald-50/50",
+                border: "border-emerald-100",
+                text: "text-emerald-600"
+            }
+        }
+
+        if (textToAnalyze.includes("writing") || textToAnalyze.includes("sentence") || textToAnalyze.includes("correction")) {
+            return {
+                label: "Writing",
+                icon: PenTool,
+                bg: "bg-indigo-50/50",
+                border: "border-indigo-100",
+                text: "text-indigo-600"
+            }
+        }
+        if (textToAnalyze.includes("speaking")) {
+            return {
+                label: "Speaking",
+                icon: Mic2,
+                bg: "bg-amber-50/50",
+                border: "border-amber-100",
+                text: "text-amber-600"
+            }
+        }
+        if (textToAnalyze.includes("rewriter")) {
+            return {
+                label: "Rewriter",
+                icon: RefreshCw,
+                bg: "bg-blue-50/50",
+                border: "border-blue-100",
+                text: "text-blue-600"
+            }
+        }
+        if (textToAnalyze.includes("mock")) {
+            return {
+                label: "Mock Test",
+                icon: FileText,
+                bg: "bg-rose-50/50",
+                border: "border-rose-100",
+                text: "text-rose-600"
+            }
+        }
+        if (textToAnalyze.includes("tutor")) {
+            return {
+                label: "AI Tutor",
+                icon: MessageCircle,
+                bg: "bg-purple-50/50",
+                border: "border-purple-100",
+                text: "text-purple-600"
+            }
+        }
+
+        return {
+            label: "General",
+            icon: Sparkles,
+            bg: "bg-slate-50/50",
+            border: "border-slate-200",
+            text: "text-slate-500"
+        }
     }
 
     const formatDescription = (desc: string | undefined, type: string) => {
@@ -120,27 +195,27 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 <Table>
                     <TableHeader className="bg-[#F9FAFB]">
                         <TableRow className="hover:bg-transparent border-slate-100">
-                            <TableHead className="w-[180px] pl-6 py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                                <div className="flex items-center gap-1 cursor-pointer group">
-                                    Date & Time <ArrowUpDown className="h-2.5 w-2.5 group-hover:text-primary" />
-                                </div>
+                            <TableHead className="w-[160px] pl-6 py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                                Date & Time
                             </TableHead>
-                            <TableHead className="w-[140px] py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                                <div className="flex items-center gap-1 cursor-pointer group">
-                                    Amount <ArrowUpDown className="h-2.5 w-2.5 group-hover:text-primary" />
-                                </div>
+                            <TableHead className="w-[160px] py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                                Context
                             </TableHead>
                             <TableHead className="py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                                <div className="flex items-center gap-1 cursor-pointer group">
-                                    Description <ArrowUpDown className="h-2.5 w-2.5 group-hover:text-primary" />
-                                </div>
+                                Description
+                            </TableHead>
+                            <TableHead className="w-[120px] py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground text-right pr-6">
+                                Amount
+                            </TableHead>
+                            <TableHead className="w-[160px] py-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground pr-6">
+                                User / Actor
                             </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedTransactions.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-[200px] text-center">
+                                <TableCell colSpan={5} className="h-[200px] text-center">
                                     <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
                                         <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
                                             <CreditCard className="h-6 w-6 text-slate-300" />
@@ -155,7 +230,8 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                         ) : (
                             paginatedTransactions.map((t) => (
                                 <TableRow key={t.id} className="group hover:bg-slate-50/50 border-slate-50">
-                                    <TableCell className="pl-6 py-3">
+                                    {/* Column 1: Date & Time */}
+                                    <TableCell className="pl-6 py-4">
                                         <div className="flex flex-col gap-0.5">
                                             <div className="flex items-center gap-1 text-[11px] font-black text-slate-900">
                                                 <Calendar className="h-3 w-3 text-slate-400" />
@@ -167,31 +243,66 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="py-3">
-                                        <div className={cn(
-                                            "inline-flex items-center gap-1 text-[12px] font-black font-mono tracking-tight",
-                                            t.amount > 0 ? "text-emerald-600" : "text-rose-600"
-                                        )}>
-                                            {t.amount > 0 ? "+" : ""}{t.amount}
-                                            <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Credits</span>
+
+                                    {/* Column 2: Context */}
+                                    <TableCell className="py-4">
+                                        {(() => {
+                                            const context = getFeatureContext(t)
+                                            return (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "text-[9px] font-black px-2 py-0.5 uppercase tracking-tighter flex items-center gap-1.5 w-fit shadow-xs",
+                                                        context.bg,
+                                                        context.border,
+                                                        context.text
+                                                    )}
+                                                >
+                                                    <context.icon className="h-2.5 w-2.5" />
+                                                    {context.label}
+                                                </Badge>
+                                            )
+                                        })()}
+                                    </TableCell>
+
+                                    {/* Column 3: Details & Description */}
+                                    <TableCell className="py-4">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[12px] font-black text-slate-900 leading-tight">
+                                                {formatDescription(t.description, t.type)}
+                                            </span>
+                                            {t.exercise_id && (
+                                                <Link
+                                                    href={`/dashboard/reports/${t.exercise_id}`}
+                                                    className="text-[9px] font-black text-primary hover:underline flex items-center gap-0.5 w-fit"
+                                                >
+                                                    View Exercise <ExternalLink className="h-2.5 w-2.5" />
+                                                </Link>
+                                            )}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                                "w-8 h-8 rounded-lg flex items-center justify-center border shadow-sm",
-                                                t.amount > 0 ? "bg-emerald-50 border-emerald-100" : "bg-indigo-50 border-indigo-100"
-                                            )}>
-                                                {getIcon(t.type, t.amount)}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[12px] font-black text-slate-900 leading-tight">
-                                                    {formatDescription(t.description, t.type)}
+
+                                    {/* Column 4: Amount */}
+                                    <TableCell className="py-4 text-right pr-6">
+                                        <CreditBadge amount={t.amount} size="sm" />
+                                    </TableCell>
+
+                                    {/* Column 5: User / Actor */}
+                                    <TableCell className="py-4 pr-6">
+                                        <div className="flex flex-col gap-0.5">
+                                            {t.amount > 0 ? (
+                                                <span className="text-[11px] font-black text-slate-700">
+                                                    {t.granted_by_admin ? "Admin Grant" : "System Grant"}
                                                 </span>
-                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                    {formatType(t.type)}
-                                                </span>
-                                            </div>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">User Action</span>
+                                            )}
+                                            {t.granted_by_admin && (
+                                                <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-medium italic">
+                                                    <UserIcon className="h-2.5 w-2.5" />
+                                                    by {t.granted_by_admin}
+                                                </div>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>
