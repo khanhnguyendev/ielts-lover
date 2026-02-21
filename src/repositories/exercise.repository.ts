@@ -8,7 +8,7 @@ export class ExerciseRepository implements IExerciseRepository {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
             .from(DB_TABLES.EXERCISES)
-            .select("*")
+            .select("*, creator:user_profiles!created_by(full_name, email, role)")
             .eq("id", id)
             .single();
 
@@ -23,7 +23,7 @@ export class ExerciseRepository implements IExerciseRepository {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase
             .from(DB_TABLES.EXERCISES)
-            .select("*")
+            .select("*, creator:user_profiles!created_by(full_name, email, role)")
             .eq("type", type)
             .eq("is_published", true)
             .order("version", { ascending: false })
