@@ -87,7 +87,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
 
                         <div className="flex flex-col min-w-0">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-black truncate text-white tracking-tight italic">
+                                <h3 className="text-lg font-black text-white tracking-tight italic">
                                     {user.full_name || user.email.split("@")[0]}
                                 </h3>
                                 {isAdmin && (
@@ -97,7 +97,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                                     <Badge className="bg-purple-400 text-purple-950 font-black text-[8px] uppercase tracking-widest px-1.5 py-0 border-none">Tutor</Badge>
                                 )}
                             </div>
-                            <p className="text-[10px] font-medium text-slate-400 truncate tracking-wide">{user.email}</p>
+                            <p className="text-[10px] font-medium text-slate-400 tracking-wide">{user.email}</p>
                         </div>
                     </div>
                 </div>
@@ -229,13 +229,13 @@ function MenuLink({
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                        <p className={cn("text-xs font-bold truncate tracking-tight", color)}>{label}</p>
+                        <p className={cn("text-xs font-bold tracking-tight", color)}>{label}</p>
                         {badge && (
                             <Badge variant="outline" className="text-[7px] font-black uppercase tracking-tighter text-slate-400 border-slate-200 px-1 py-0">{badge}</Badge>
                         )}
                     </div>
                     {description && (
-                        <p className="text-[9px] font-medium text-slate-400 truncate tracking-wide">{description}</p>
+                        <p className="text-[9px] font-medium text-slate-400 tracking-wide">{description}</p>
                     )}
                 </div>
             </DropdownMenuItem>
