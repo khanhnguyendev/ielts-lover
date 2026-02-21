@@ -1,4 +1,3 @@
-import { DEFAULT_QUOTAS } from "@/lib/constants";
 import { IUserRepository } from "../repositories/interfaces";
 import { UserProfile } from "@/types";
 
@@ -12,11 +11,5 @@ export class UserService {
     async updateTargetScore(userId: string, score: number): Promise<void> {
         if (score < 0 || score > 9) throw new Error("Invalid IELTS score");
         await this.userRepo.update(userId, { target_score: score });
-    }
-
-    async checkQuota(userId: string): Promise<boolean> {
-        const user = await this.userRepo.getById(userId);
-        if (!user) return false;
-        return user.daily_quota_used < DEFAULT_QUOTAS.FREE_DAILY_LIMIT;
     }
 }

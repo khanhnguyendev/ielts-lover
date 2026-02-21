@@ -29,13 +29,7 @@ export class UserRepository implements IUserRepository {
         if (error) throw new Error(`[UserRepository] Failed to update user: ${error.message}`);
     }
 
-    async incrementQuota(id: string): Promise<void> {
-        // Deprecated but keeping for backward compatibility during migration
-        const user = await this.getById(id);
-        if (user) {
-            await this.update(id, { daily_quota_used: user.daily_quota_used + 1 });
-        }
-    }
+
 
     async deductCredits(id: string, amount: number): Promise<void> {
         const supabase = await createServerSupabaseClient();

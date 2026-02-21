@@ -5,8 +5,6 @@ export type UserProfile = {
     test_type: "academic" | "general";
     exam_date?: string;
     role: "user" | "admin";
-    daily_quota_used: number;
-    last_quota_reset: string;
     credits_balance: number;
     last_daily_grant_at: string;
     created_at: string;

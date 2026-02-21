@@ -20,6 +20,14 @@ export async function GET(request: Request) {
             if (user) {
                 // Ensure user profile exists using SERVICE ROLE to bypass initial RLS sync delays
                 const serviceSupabase = await createServiceSupabaseClient();
+                const metadata = user.user_metadata;
+                const profileUpdates = {
+                    id: user.id,
+                    email: user.email!,
+                    full_name: metadata.full_name || metadata.name || null,
+                    avatar_url: metadata.avatar_url || metadata.picture || null,
+                };
+
                 const { data: existingProfile } = await serviceSupabase
                     .from(DB_TABLES.USER_PROFILES)
                     .select("id")
@@ -32,21 +40,31 @@ export async function GET(request: Request) {
                         const { error: insertError } = await serviceSupabase
                             .from(DB_TABLES.USER_PROFILES)
                             .insert({
-                                id: user.id,
-                                email: user.email!,
+                                ...profileUpdates,
                                 target_score: 7.0,
                                 test_type: TEST_TYPES.ACADEMIC,
                                 role: USER_ROLES.USER,
-                                is_premium: false,
-                                daily_quota_used: 0,
-                                last_quota_reset: new Date().toISOString(),
                                 created_at: new Date().toISOString()
                             });
 
                         if (insertError) throw insertError;
                     } catch (createError) {
                         logger.error("Failed to create user profile during OAuth", { error: createError, userId: user.id });
-                        // We still redirect, but maybe with an error param if you have a way to show it
+                    }
+                } else {
+                    // Update existing profile with latest metadata
+                    try {
+                        const { error: updateError } = await serviceSupabase
+                            .from(DB_TABLES.USER_PROFILES)
+                            .update({
+                                full_name: profileUpdates.full_name,
+                                avatar_url: profileUpdates.avatar_url,
+                            })
+                            .eq("id", user.id);
+
+                        if (updateError) throw updateError;
+                    } catch (syncError) {
+                        logger.error("Failed to sync user metadata during login", { error: syncError, userId: user.id });
                     }
                 }
             }
