@@ -4,28 +4,19 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-    ChevronDown,
-    Search,
-    ArrowUpDown,
-    Mic2,
-    CheckCircle2,
-    Video,
-    PenTool,
     ChevronRight,
-    ChevronLeft,
-    ChevronsLeft,
-    ChevronsRight,
     Sparkles,
-    Info,
-    Calendar,
     Clock,
     FileText,
     Activity,
     BarChart3,
-    X
+    TrendingUp,
+    ShieldCheck,
+    History,
+    Target,
+    ArrowRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { cn } from "@/lib/utils"
 
 import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
@@ -33,11 +24,7 @@ import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import { getBandScoreConfig } from "@/lib/score-utils";
-import { ATTEMPT_STATES, APP_ERROR_CODES } from "@/lib/constants";
-
-
-
-const ITEMS_PER_PAGE = 10
+import { ATTEMPT_STATES } from "@/lib/constants";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
@@ -56,7 +43,7 @@ export default function ReportsPage() {
         setIsLoading(true)
         try {
             const data = await getUserAttempts()
-            setAttempts(data as any)
+            setAttempts(data as Attempt[])
         } catch (error) {
             console.error("Failed to fetch reports:", error)
         } finally {
@@ -88,52 +75,21 @@ export default function ReportsPage() {
             "Get AI Feedback",
             async () => {
                 setReevaluatingId(id)
-                // Optimistic decrement animation
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
 
                 try {
                     const result = await reevaluateAttempt(id)
                     if (result.success) {
-                        notifySuccess(
-                            "Evaluation Complete",
-                            "Your report has been updated with the latest AI feedback. You can now view your score and detailed analysis.",
-                            "View Report"
-                        )
+                        notifySuccess("Evaluation Complete", "Your report has been updated with the latest AI feedback.", "View Report")
                         router.refresh()
                         await fetchReports()
                     } else {
-                        // Refund animation if failed
                         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
-
-                        if (result.reason === "INSUFFICIENT_CREDITS") {
-                            notifyWarning(
-                                "Insufficient Credits",
-                                "You don't have enough StarCredits to re-evaluate this attempt. Please top up your balance.",
-                                "Top Up"
-                            )
-                        } else {
-                            notifyError(
-                                "Evaluation Failed",
-                                "We encountered an error while processing your request. Please try again in a few moments.",
-                                "Try Again",
-                                (result as any).traceId
-                            )
-                        }
+                        notifyError("Evaluation Failed", result.reason || "Try again later", "Close")
                     }
-                } catch (error) {
-                    console.error("Re-evaluation failed:", error)
-                    // Refund animation on system error
+                } catch {
                     window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
-
-                    const errorObj = error as any;
-                    const traceId = errorObj?.traceId || (typeof error === 'object' && error !== null && 'traceId' in error ? (error as any).traceId : undefined);
-
-                    notifyError(
-                        "System Error",
-                        "An unexpected error occurred. Please contact support if the issue persists.",
-                        "Close",
-                        traceId
-                    )
+                    notifyError("System Error", "Please try again later", "Close")
                 } finally {
                     setReevaluatingId(null)
                 }
@@ -142,416 +98,456 @@ export default function ReportsPage() {
         )
     }
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <PulseLoader size="lg" color="primary" />
+            </div>
+        )
+    }
+
+    const latestAttempt = filteredAttempts[0];
+    const historicalAttempts = filteredAttempts.slice(1);
+
+    // Derived Stats
+    const totalSessions = attempts.length
+    const avgScore = attempts.length > 0
+        ? (attempts.reduce((acc, curr) => acc + (curr.score || 0), 0) / attempts.length).toFixed(1)
+        : "0.0"
+    const writingCount = attempts.filter(a => a.exercises?.type?.startsWith('writing')).length
+    const speakingCount = attempts.filter(a => a.exercises?.type?.startsWith('speaking')).length
+
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-            <div className="p-8 lg:p-12 space-y-8 max-w-6xl mx-auto">
-                <div className="bg-white rounded-[32px] border shadow-sm overflow-hidden min-h-[600px] flex flex-col">
-                    {/* Tabs */}
-                    <div className="flex bg-[#F9FAFB] p-1.5 m-6 rounded-2xl w-fit border border-slate-100">
-                        {["Reports", "Progress"].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={cn(
-                                    "px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
-                                    activeTab === tab
-                                        ? "bg-white text-primary shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
-                                )}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+            <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+                {/* 1. Header Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard
+                        icon={TrendingUp}
+                        label="Average Score"
+                        value={avgScore}
+                        subLabel="Across all tasks"
+                        color="text-primary"
+                        bgColor="bg-primary/5"
+                    />
+                    <StatCard
+                        icon={History}
+                        label="Total Sessions"
+                        value={totalSessions.toString()}
+                        subLabel="Completed attempts"
+                        color="text-blue-600"
+                        bgColor="bg-blue-50"
+                    />
+                    <StatCard
+                        icon={ShieldCheck}
+                        label="Skill Split"
+                        value={`${writingCount}:${speakingCount}`}
+                        subLabel="Writing vs Speaking"
+                        color="text-emerald-600"
+                        bgColor="bg-emerald-50"
+                    />
+                    <StatCard
+                        icon={Target}
+                        label="Top Performance"
+                        value={attempts.length > 0 ? Math.max(...attempts.map(a => a.score || 0)).toFixed(1) : "0.0"}
+                        subLabel="Highest band score"
+                        color="text-amber-600"
+                        bgColor="bg-amber-50"
+                    />
+                </div>
+
+                {/* 2. Main Content */}
+                <div className="bg-white border-none rounded-[2.5rem] p-4 lg:p-8 shadow-xl shadow-slate-200/50">
+
+                    {/* Tabs & Filters */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 border-b border-slate-50 pb-8 px-2">
+                        <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100 self-start">
+                            {["Reports", "Progress"].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={cn(
+                                        "px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                        activeTab === tab
+                                            ? "bg-white text-primary shadow-sm ring-1 ring-slate-100"
+                                            : "text-slate-400 hover:text-slate-600"
+                                    )}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+
+                        {activeTab === "Reports" && (
+                            <div className="flex flex-wrap items-center gap-4">
+                                <FilterGroup
+                                    label="Status"
+                                    options={[
+                                        { value: null, label: 'All' },
+                                        { value: ATTEMPT_STATES.EVALUATED, label: 'Graded' },
+                                        { value: ATTEMPT_STATES.SUBMITTED, label: 'Pending' }
+                                    ]}
+                                    value={statusFilter}
+                                    onChange={setStatusFilter}
+                                />
+                                <div className="w-px h-6 bg-slate-100 hidden sm:block" />
+                                <FilterGroup
+                                    label="Skill"
+                                    options={[
+                                        { value: null, label: 'All' },
+                                        { value: 'writing', label: 'Writing' },
+                                        { value: 'speaking', label: 'Speaking' }
+                                    ]}
+                                    value={toolFilter}
+                                    onChange={setToolFilter}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {activeTab === "Reports" ? (
-                        <>
-                            {/* Filters */}
-                            <div className="px-6 py-4 flex flex-wrap items-center gap-4 border-b">
-                                {/* Status chips */}
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Status</span>
-                                    <button
-                                        onClick={() => setStatusFilter(null)}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider",
-                                            !statusFilter
-                                                ? "bg-primary text-white shadow-sm"
-                                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                        )}
-                                    >
-                                        All
-                                    </button>
-                                    {[ATTEMPT_STATES.EVALUATED, ATTEMPT_STATES.SUBMITTED, ATTEMPT_STATES.IN_PROGRESS].map((status) => (
-                                        <button
-                                            key={status}
-                                            onClick={() => setStatusFilter(statusFilter === status ? null : status)}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all capitalize",
-                                                statusFilter === status
-                                                    ? "bg-primary text-white shadow-sm"
-                                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                            )}
-                                        >
-                                            {status.replace('_', ' ').toLowerCase()}
-                                        </button>
-                                    ))}
+                        <div className="space-y-8 px-2">
+                            {filteredAttempts.length === 0 ? (
+                                <div className="text-center py-20 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                                    <div className="text-6xl grayscale opacity-30 mb-6 font-outfit">🐴💤</div>
+                                    <h3 className="text-lg font-black text-slate-900 leading-none mb-2">No reports match your filters</h3>
+                                    <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto">Try adjusting your skill or status filters to see your practice history.</p>
                                 </div>
+                            ) : (
+                                <>
+                                    {/* Component A: Featured Recent Report */}
+                                    {latestAttempt && (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2 px-1">
+                                                <div className="w-6 h-px bg-primary/20" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Your Latest Performance</span>
+                                            </div>
+                                            <RecentReportCard
+                                                attempt={latestAttempt}
+                                                onReevaluate={handleReevaluate}
+                                                reevaluatingId={reevaluatingId}
+                                            />
+                                        </div>
+                                    )}
 
-                                <div className="w-px h-5 bg-slate-200" />
-
-                                {/* Tool chips */}
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Tool</span>
-                                    <button
-                                        onClick={() => setToolFilter(null)}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider",
-                                            !toolFilter
-                                                ? "bg-primary text-white shadow-sm"
-                                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                        )}
-                                    >
-                                        All
-                                    </button>
-                                    {['writing', 'speaking'].map((tool) => (
-                                        <button
-                                            key={tool}
-                                            onClick={() => setToolFilter(toolFilter === tool ? null : tool)}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all capitalize",
-                                                toolFilter === tool
-                                                    ? "bg-primary text-white shadow-sm"
-                                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                            )}
-                                        >
-                                            {tool === 'writing' ? '✍️ Writing' : '🎤 Speaking'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Table */}
-                            <div className="flex-1">
-                                <DataTable<Attempt>
-                                    columns={[
-                                        {
-                                            key: "time",
-                                            header: "Time",
-                                            width: "w-[180px]",
-                                            sortable: true,
-                                            render: (attempt) => (
-                                                <div className="flex flex-col gap-0.5">
-                                                    <div className="flex items-center gap-1 text-xs font-black text-slate-900">
-                                                        <Calendar className="h-2.5 w-2.5 text-slate-400" />
-                                                        {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                                                        <Clock className="h-2 w-2" />
-                                                        {new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                            )
-                                        },
-                                        {
-                                            key: "task",
-                                            header: "Task",
-                                            sortable: true,
-                                            render: (attempt) => (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center border bg-indigo-50 border-indigo-100 text-indigo-600">
-                                                        <PenTool className="h-4 w-4" />
-                                                    </div>
-                                                    <div className="space-y-0">
-                                                        <p className="text-[12px] font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
-                                                            {attempt.exercises?.title || "Exercise"}
-                                                        </p>
-                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                            {attempt.exercises?.type?.replace('_', ' ') || "Practice"}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )
-                                        },
-                                        {
-                                            key: "status",
-                                            header: "Status",
-                                            sortable: true,
-                                            render: (attempt) => (
-                                                <div className={cn(
-                                                    "w-fit flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border shadow-sm",
-                                                    attempt.state === "EVALUATED"
-                                                        ? "text-emerald-700 bg-emerald-50 border-emerald-100"
-                                                        : "text-amber-700 bg-amber-50 border-amber-100"
-                                                )}>
-                                                    <div className={cn(
-                                                        "w-1.5 h-1.5 rounded-full animate-pulse",
-                                                        attempt.state === "EVALUATED" ? "bg-emerald-500" : "bg-amber-500"
-                                                    )} />
-                                                    {attempt.state}
-                                                </div>
-                                            )
-                                        },
-                                        {
-                                            key: "score",
-                                            header: "Score",
-                                            sortable: true,
-                                            render: (attempt) => {
-                                                const config = getBandScoreConfig(attempt.score);
-                                                return (
-                                                    <div className={cn(
-                                                        "w-9 h-9 rounded-xl flex flex-col items-center justify-center font-black border transition-all shadow-sm",
-                                                        config.bg, config.border, config.color
-                                                    )}>
-                                                        <span className="text-[12px] leading-none">{attempt.score || "-"}</span>
-                                                        <span className="text-[7px] uppercase tracking-tighter opacity-60">{config.cefr}</span>
-                                                    </div>
-                                                );
-                                            }
-                                        },
-                                        {
-                                            key: "actions",
-                                            header: "",
-                                            align: "right",
-                                            render: (attempt) => (
-                                                attempt.state === "SUBMITTED" ? (
-                                                    <Button
-                                                        onClick={() => handleReevaluate(attempt.id)}
-                                                        disabled={reevaluatingId === attempt.id}
-                                                        className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm active:scale-95 border-none"
-                                                    >
-                                                        {reevaluatingId === attempt.id ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-2.5 h-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                                                Evaluating...
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                AI Feedback <Sparkles className="ml-1 h-2.5 w-2.5 fill-primary" />
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                ) : (
-                                                    <Link href={`/dashboard/reports/${attempt.id}`}>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="h-8 px-4 rounded-lg font-black uppercase tracking-widest text-[9px] border-slate-200 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all shadow-sm active:scale-95"
-                                                        >
-                                                            View Report <ChevronRight className="ml-1 h-2.5 w-2.5" />
-                                                        </Button>
-                                                    </Link>
-                                                )
-                                            )
-                                        },
-                                    ]}
-                                    data={filteredAttempts}
-                                    rowKey={(a) => a.id}
-                                    pageSize={ITEMS_PER_PAGE}
-                                    isLoading={isLoading}
-                                    loadingText="Syncing reports..."
-                                    contained={false}
-                                    emptyState={{
-                                        title: "No reports found",
-                                        description: "No reports found matching your filters."
-                                    }}
-                                />
-                            </div>
-                        </>
+                                    {/* Component B: History List */}
+                                    {historicalAttempts.length > 0 && (
+                                        <div className="space-y-4 pt-4">
+                                            <div className="flex items-center gap-2 px-1">
+                                                <div className="w-6 h-px bg-slate-200" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Previous Sessions</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                {historicalAttempts.map((attempt) => (
+                                                    <HistoricalReportRow
+                                                        key={attempt.id}
+                                                        attempt={attempt}
+                                                        onReevaluate={handleReevaluate}
+                                                        reevaluatingId={reevaluatingId}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     ) : (
-                        <div className="flex-1 p-10 space-y-10 bg-[#F9FAFB]">
-                            {/* Summary Stats Row */}
-                            <div className="bg-white rounded-2xl border p-6 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-8">
-                                    <div>
-                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Mock Test</h4>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-black text-muted-foreground/60">— sessions</span>
-                                        </div>
+                        <div className="space-y-12 bg-slate-50/30 p-8 rounded-[2rem] border border-slate-50">
+                            {/* Analytics Summary */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Criteria Performance</h4>
+                                        <BarChart3 className="text-primary w-5 h-5" />
                                     </div>
-                                    <div className="w-px h-8 bg-slate-100" />
-                                    <div>
-                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Latest</h4>
-                                        <div className="text-xl font-black font-outfit text-slate-500">—</div>
-                                    </div>
-                                    <div className="w-px h-8 bg-slate-100" />
-                                    <div>
-                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5 flex items-center gap-1">
-                                            Avg <Info className="h-2.5 w-2.5" />
-                                        </h4>
-                                        <div className="text-xl font-black font-outfit text-slate-500">—</div>
+                                    <div className="space-y-4">
+                                        <AnalyticsProgress label="Task Achievement" value={75} color="bg-primary" />
+                                        <AnalyticsProgress label="Coherence & Cohesion" value={60} color="bg-blue-500" />
+                                        <AnalyticsProgress label="Lexical Resource" value={85} color="bg-emerald-500" />
+                                        <AnalyticsProgress label="Grammatical Accuracy" value={50} color="bg-amber-500" />
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1.5">Target</h4>
-                                    <div className="text-xl font-black font-outfit text-primary">7.5</div>
+
+                                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-6">Learning Momentum</h4>
+                                        <div className="h-32 flex items-end justify-between px-4 pb-2 border-b border-slate-50">
+                                            {[40, 70, 45, 90, 65, 80, 55].map((h, i) => (
+                                                <div key={i} className="w-3 rounded-full bg-slate-100 relative group">
+                                                    <div
+                                                        className="absolute bottom-0 w-full rounded-full bg-primary/20 group-hover:bg-primary transition-all duration-500"
+                                                        style={{ height: `${h}%` }}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="pt-4 flex items-center justify-between">
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">7 Day Progress</div>
+                                        <div className="text-xs font-black text-emerald-600">+12% Growth</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Task Specific Boxes */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-black text-slate-900">Academic Task 1</h4>
-                                        <span className="text-[9px] font-black text-muted-foreground/60">0 attempts</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
-                                        </div>
-                                        <div className="text-right space-y-0.5">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
-                                                Avg <Info className="h-2.5 w-2.5" />
-                                            </p>
-                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" className="w-full text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-3 border-t border-dashed rounded-none h-auto">
-                                        Show details <ChevronDown className="ml-1.5 h-2.5 w-2.5" />
-                                    </Button>
+                            {/* Recommendation Card */}
+                            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                                    <Sparkles size={120} className="text-primary" />
                                 </div>
-
-                                <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-black text-slate-900">Task 2</h4>
-                                        <span className="text-[9px] font-black text-muted-foreground/60">0 attempts</span>
+                                <div className="relative flex flex-col md:flex-row items-center gap-8">
+                                    <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center text-4xl border border-white/10 shadow-lg">
+                                        💡
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Latest</p>
-                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
-                                        </div>
-                                        <div className="text-right space-y-0.5">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
-                                                Avg <Info className="h-2.5 w-2.5" />
-                                            </p>
-                                            <p className="text-lg font-black font-outfit text-slate-500">—</p>
-                                        </div>
+                                    <div className="flex-1 text-center md:text-left space-y-2">
+                                        <h3 className="text-2xl font-black font-outfit">Ready for a level up?</h3>
+                                        <p className="text-slate-400 text-sm font-medium max-w-md">Our AI analyzed your recent Task 2 reports. Improving your **Coherence & Cohesion** will likely push your average score to a Band 7.5.</p>
                                     </div>
-                                    <Button variant="ghost" className="w-full text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-3 border-t border-dashed rounded-none h-auto">
-                                        Show details <ChevronDown className="ml-1.5 h-2.5 w-2.5" />
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {/* Next Step Card */}
-                            <div className="bg-[#FAF9FF] border border-primary/10 rounded-2xl p-6 flex items-center justify-between">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border shadow-sm">
-                                        <Sparkles className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-base font-black font-outfit text-slate-900">Your Next Step to a Higher Band</h4>
-                                        <p className="text-xs font-medium text-muted-foreground">Complete your first practice to learn the one skill you need to improve for a higher band.</p>
-                                    </div>
-                                </div>
-                                <Button variant="default" size="default">
-                                    Start Writing
-                                </Button>
-                            </div>
-
-                            {/* Chart Placeholder */}
-                            <div className="bg-white rounded-2xl border p-8 shadow-sm space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <h4 className="text-base font-black font-outfit text-slate-900">Progress over time</h4>
-                                        <p className="text-[10px] font-medium text-muted-foreground">Shows only the latest score for each day</p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Button variant="outline" size="xs" className="h-7 rounded-md text-[10px] font-bold border-muted-foreground/10">
-                                            <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+                                    <Link href="/dashboard/writing">
+                                        <Button className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.2em] text-[10px] px-8 py-6 rounded-2xl shadow-xl shadow-primary/20">
+                                            Start Exercise <ArrowRight className="ml-2 w-4 h-4" />
                                         </Button>
-                                        <span className="text-[10px] font-black text-slate-500">Feb 9 - Feb 15, 2026</span>
-                                        <Button variant="outline" size="xs" className="h-7 rounded-md text-[10px] font-bold border-muted-foreground/10">
-                                            Next <ChevronRight className="h-3 w-3 ml-1" />
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="h-[200px] flex items-end justify-between px-10 relative">
-                                    {/* Grid lines */}
-                                    <div className="absolute inset-0 flex flex-col justify-between py-2 border-b border-slate-100 pointer-events-none">
-                                        {[9, 6, 3, 0].map(val => (
-                                            <div key={val} className="flex items-center gap-4">
-                                                <span className="text-[10px] font-black text-slate-500 w-4">{val}</span>
-                                                <div className="flex-1 h-px bg-slate-50 relative">
-                                                    {val === 6 && <div className="absolute inset-0 border-t border-dashed border-slate-300" />}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Days */}
-                                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                                        <div key={day} className="flex flex-col items-center gap-4 relative z-10 w-full">
-                                            <div className="w-6 h-6 rounded-full bg-slate-50 border-2 border-slate-100 flex items-center justify-center">
-                                                <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                            </div>
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{day}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="flex items-center justify-center gap-6 pt-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded bg-primary/20" />
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Mock Test</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded bg-indigo-200" />
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Academic Task 1</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded bg-orange-200" />
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Task 2</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Criteria Breakdown */}
-                            <div className="space-y-8">
-                                <h4 className="text-xl font-black font-outfit text-slate-900">Criteria Performance</h4>
-                                <div className="grid grid-cols-2 gap-6">
-                                    {[
-                                        { label: "Task Achievement", color: "bg-cyan-500" },
-                                        { label: "Coherence and Cohesion", color: "bg-emerald-500" },
-                                        { label: "Lexical Resource", color: "bg-amber-500" },
-                                        { label: "Grammatical Range and accuracy", color: "bg-rose-500" }
-                                    ].map((stat, i) => (
-                                        <div key={i} className="bg-white border rounded-[32px] p-8 space-y-6 shadow-sm group hover:border-primary/20 transition-all">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={cn("w-3 h-3 rounded-full", stat.color)} />
-                                                    <span className="text-sm font-black text-slate-700">{stat.label}</span>
-                                                    <Info className="h-3 w-3 text-muted-foreground/30" />
-                                                </div>
-                                                <div className="text-xl font-black font-outfit text-slate-300">—</div>
-                                            </div>
-                                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                                <div className="space-y-1">
-                                                    <p>Latest</p>
-                                                    <p className="text-slate-500">—</p>
-                                                </div>
-                                                <div className="text-right space-y-1">
-                                                    <p>Avg</p>
-                                                    <p className="text-slate-500">—</p>
-                                                </div>
-                                            </div>
-                                            <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary pt-4 border-t border-dashed rounded-none h-auto">
-                                                Show details <ChevronDown className="ml-2 h-3 w-3" />
-                                            </Button>
-                                        </div>
-                                    ))}
+                                    </Link>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
             </div>
-            <footer className="mt-auto py-8 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em] border-t bg-white/30">
-                © 2026 IELTS Lover. &nbsp; Terms · Privacy · Contact us
+
+            <footer className="mt-auto py-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] border-t border-slate-50 bg-white/50">
+                © 2026 IELTS LOVER &nbsp; • &nbsp; AI POWERED COACHING
             </footer>
+        </div>
+    )
+}
+
+/* Redesigned Sub-Components */
+
+interface StatCardProps {
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    subLabel: string;
+    color: string;
+    bgColor: string;
+}
+
+function StatCard({ icon: Icon, label, value, subLabel, color, bgColor }: StatCardProps) {
+    return (
+        <div className="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow group">
+            <div className="flex justify-between items-start mb-3">
+                <div className={cn("p-2 rounded-xl", bgColor, color)}>
+                    <Icon size={18} />
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">
+                    {label}
+                </div>
+            </div>
+            <div className="space-y-0.5">
+                <div className="text-2xl font-black font-outfit text-slate-900">{value}</div>
+                <div className="text-[10px] font-medium text-slate-400">{subLabel}</div>
+            </div>
+        </div>
+    )
+}
+
+interface FilterGroupProps {
+    label: string;
+    options: { value: string | null; label: string }[];
+    value: string | null;
+    onChange: (val: string | null) => void;
+}
+
+function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
+    return (
+        <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
+            <div className="flex gap-1 bg-slate-50/50 p-1 rounded-xl border border-slate-100">
+                {options.map((opt) => (
+                    <button
+                        key={String(opt.value)}
+                        onClick={() => onChange(opt.value)}
+                        className={cn(
+                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all",
+                            value === opt.value
+                                ? "bg-white text-slate-900 shadow-sm shadow-slate-200 ring-1 ring-slate-100"
+                                : "text-slate-400 hover:text-slate-600"
+                        )}
+                    >
+                        {opt.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+/* Component A: The "Featured" Card */
+interface ReportComponentProps {
+    attempt: Attempt;
+    onReevaluate: (id: string) => void;
+    reevaluatingId: string | null;
+}
+
+function RecentReportCard({ attempt, onReevaluate, reevaluatingId }: ReportComponentProps) {
+    const config = getBandScoreConfig(attempt.score);
+    const dateStr = new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const isWriting = attempt.exercises?.type?.startsWith('writing');
+
+    return (
+        <div className="group relative overflow-hidden bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-xl shadow-slate-100/50 transition-all hover:shadow-2xl hover:shadow-primary/5">
+            <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                <FileText size={180} />
+            </div>
+
+            <div className="relative flex flex-col md:flex-row items-center gap-10">
+                {/* Score Orb */}
+                <div className={cn(
+                    "w-32 h-32 rounded-[2.5rem] flex flex-col items-center justify-center border-4 transition-transform group-hover:scale-105 duration-500 shadow-lg",
+                    config.bg, config.border, config.color
+                )}>
+                    <span className="text-4xl font-black font-outfit leading-none mb-1">{attempt.score || "--"}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Band Score</span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 text-center md:text-left space-y-4">
+                    <div className="space-y-1">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                            <span className={cn(
+                                "text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg",
+                                isWriting ? "bg-purple-50 text-purple-600" : "bg-blue-50 text-blue-600"
+                            )}>
+                                {isWriting ? "✍️ Writing" : "🎤 Speaking"}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dateStr}</span>
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 group-hover:text-primary transition-colors">
+                            {attempt.exercises?.title || "IELTS Practice Session"}
+                        </h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                        <DetailTag icon={Activity} label={attempt.exercises?.type?.replace('_', ' ') || "Practice"} />
+                        <DetailTag icon={Target} label={`CEFR ${config.cefr}`} />
+                        <DetailTag icon={Clock} label={new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} />
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col gap-3 min-w-[160px]">
+                    {attempt.state === "SUBMITTED" ? (
+                        <Button
+                            onClick={() => onReevaluate(attempt.id)}
+                            disabled={reevaluatingId === attempt.id}
+                            className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-14 rounded-2xl shadow-xl shadow-primary/20"
+                        >
+                            {reevaluatingId === attempt.id ? "Analyzing..." : "Get AI Feedback"}
+                        </Button>
+                    ) : (
+                        <Link href={`/dashboard/reports/${attempt.id}`}>
+                            <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-[10px] h-14 rounded-2xl shadow-xl shadow-slate-200">
+                                Full Report <ChevronRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* Component B: The "History Area" Row */
+function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId }: ReportComponentProps) {
+    const config = getBandScoreConfig(attempt.score);
+    const isWriting = attempt.exercises?.type?.startsWith('writing');
+
+    return (
+        <div className="group bg-white border border-slate-100 rounded-[1.5rem] p-4 flex items-center gap-4 transition-all hover:shadow-md hover:border-slate-200">
+            <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black font-outfit border shadow-sm",
+                config.bg, config.border, config.color
+            )}>
+                {attempt.score || "--"}
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                    <span className={cn(
+                        "text-[8px] font-black uppercase tracking-widest",
+                        isWriting ? "text-purple-600" : "text-blue-600"
+                    )}>
+                        {isWriting ? "Writing" : "Speaking"}
+                    </span>
+                    <span className="text-[8px] font-bold text-slate-400">
+                        {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                </div>
+                <h4 className="text-xs font-black text-slate-800 truncate group-hover:text-primary transition-colors">
+                    {attempt.exercises?.title || "Exercise"}
+                </h4>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-4 px-4 border-l border-slate-50">
+                <div className="text-right">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-300">Level</p>
+                    <p className="text-[10px] font-black text-slate-600">{config.cefr}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-300">Status</p>
+                    <p className={cn("text-[8px] font-bold uppercase", attempt.state === "EVALUATED" ? "text-emerald-600" : "text-amber-600")}>
+                        {attempt.state.toLowerCase()}
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                {attempt.state === "SUBMITTED" ? (
+                    <Button
+                        size="sm"
+                        onClick={() => onReevaluate(attempt.id)}
+                        disabled={reevaluatingId === attempt.id}
+                        className="h-8 rounded-lg font-black uppercase tracking-widest text-[8px] bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 shadow-none"
+                    >
+                        {reevaluatingId === attempt.id ? "..." : "Unlock"}
+                    </Button>
+                ) : (
+                    <Link href={`/dashboard/reports/${attempt.id}`}>
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="rounded-lg hover:bg-slate-50 text-slate-400 hover:text-primary transition-colors"
+                        >
+                            <ArrowRight size={16} />
+                        </Button>
+                    </Link>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function DetailTag({ icon: Icon, label }: { icon: React.ElementType, label: string }) {
+    return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+            <Icon size={12} className="text-slate-400" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-600">{label}</span>
+        </div>
+    )
+}
+
+function AnalyticsProgress({ label, value, color }: { label: string, value: number, color: string }) {
+    return (
+        <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                <span className="text-slate-500">{label}</span>
+                <span className="text-slate-900">{value}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all duration-1000", color)} style={{ width: `${value}%` }} />
+            </div>
         </div>
     )
 }
