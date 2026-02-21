@@ -146,16 +146,22 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             {isSample ? "Back to Samples" : "Back"}
                         </Link>
                         <div className="flex items-center gap-6">
-                            <span className="text-sm font-bold text-muted-foreground">
+                            <span className="text-sm font-bold text-muted-foreground flex items-center">
                                 {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
                                 <span className="text-muted-foreground/60 ml-2">
-                                    Date: {isSample ? "2026-02-14" : new Date(realData!.created_at).toLocaleDateString()}
+                                    Date: {isSample ? "2026-02-14 10:30" : new Date(realData!.created_at).toLocaleString([], {
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </span>
                                 {(isSample || realData?.exercise_id) && (
                                     <>
                                         <span className="text-muted-foreground/60 mx-2">•</span>
                                         <span className="text-muted-foreground/60">
-                                            ID: <span className="font-mono text-xs">{isSample ? `sample-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
+                                            Exercise ID: <span className="font-mono text-xs">{isSample ? `sample-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
                                         </span>
                                     </>
                                 )}
