@@ -73,6 +73,8 @@ interface Exercise {
     icon: any
     color: string
     isRecommended?: boolean
+    creatorName?: string
+    creatorRole?: string
 }
 
 const CHART_TYPE_LABELS: Record<string, string> = {
@@ -229,7 +231,9 @@ export default function WritingHubPage() {
                         chartType: db.chart_data?.chart_type || db.chart_data?.type || undefined,
                         attempts: attemptCount,
                         icon: TYPE_CONFIG[db.type]?.icon || Cat,
-                        color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50"
+                        color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50",
+                        creatorName: db.creator?.full_name || db.creator?.email,
+                        creatorRole: db.creator?.role,
                     };
                 })
 
@@ -398,6 +402,8 @@ export default function WritingHubPage() {
                                         icon={ex.icon}
                                         color={ex.color}
                                         isRecommended={ex.isRecommended}
+                                        creatorName={ex.creatorName}
+                                        creatorRole={ex.creatorRole}
                                     />
                                 ))}
                             </div>
@@ -618,7 +624,9 @@ function ExerciseCard({
     attempts,
     icon: Icon,
     color,
-    isRecommended
+    isRecommended,
+    creatorName,
+    creatorRole,
 }: {
     id: string,
     title: string,
@@ -627,7 +635,9 @@ function ExerciseCard({
     attempts: number,
     icon: any,
     color: string,
-    isRecommended?: boolean
+    isRecommended?: boolean,
+    creatorName?: string,
+    creatorRole?: string,
 }) {
     return (
         <Link href={`/dashboard/writing/${id}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
@@ -654,6 +664,16 @@ function ExerciseCard({
                                 {chartType && (
                                     <span className="inline-block px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 text-[9px] font-bold border border-amber-100/50">
                                         {CHART_TYPE_LABELS[chartType] || chartType}
+                                    </span>
+                                )}
+                                {creatorName && (
+                                    <span className={cn(
+                                        "inline-block px-2 py-0.5 rounded-lg text-[9px] font-bold border",
+                                        creatorRole === "admin"
+                                            ? "bg-rose-50 text-rose-600 border-rose-100/50"
+                                            : "bg-teal-50 text-teal-600 border-teal-100/50"
+                                    )}>
+                                        {creatorRole === "admin" ? "Admin" : "Teacher"}: {creatorName}
                                     </span>
                                 )}
                             </div>

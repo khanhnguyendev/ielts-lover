@@ -131,6 +131,7 @@ async function checkAdmin() {
     if (!AdminPolicy.canAccessAdmin(user)) {
         throw new Error("Unauthorized");
     }
+    return user!;
 }
 
 export const createLesson = traceAction("createLesson", async (lesson: Omit<Lesson, 'id' | 'created_at'>) => {
@@ -186,8 +187,8 @@ export async function getLessonQuestions(lessonId: string) {
 // Exercise Actions
 
 export const createExercise = traceAction("createExercise", async (exercise: Omit<Exercise, "id" | "created_at" | "version">) => {
-    await checkAdmin();
-    const result = await exerciseService.createExerciseVersion(exercise);
+    const user = await checkAdmin();
+    const result = await exerciseService.createExerciseVersion({ ...exercise, created_by: user.id });
     revalidatePath("/admin/exercises");
     revalidatePath("/dashboard/writing");
     revalidatePath("/dashboard/speaking");

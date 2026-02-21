@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation"
 const TEACHER_ROUTE_MAP: Record<string, string> = {
     "/teacher": "Dashboard",
     "/teacher/students": "My Students",
+    "/teacher/exercises": "Exercises",
+    "/teacher/exercises/create/writing": "Create Writing Exercise",
+    "/teacher/exercises/create/speaking": "Create Speaking Exercise",
     "/teacher/credit-requests": "Credit Requests",
 }
 

@@ -25,6 +25,8 @@ export type Exercise = {
     version: number;
     is_published: boolean;
     created_at: string;
+    created_by?: string;
+    creator?: { full_name?: string; email: string; role: string };
 };
 
 export type AttemptState = "CREATED" | "IN_PROGRESS" | "SUBMITTED" | "EVALUATED";

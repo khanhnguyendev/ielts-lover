@@ -17,4 +17,8 @@ export class AdminPolicy {
     static canAssignTeachers(user: UserProfile | null): boolean {
         return user?.role === USER_ROLES.ADMIN;
     }
+
+    static canCreateExercises(user: UserProfile | null): boolean {
+        return user?.role === USER_ROLES.TEACHER || user?.role === USER_ROLES.ADMIN;
+    }
 }

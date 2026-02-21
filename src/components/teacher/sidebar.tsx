@@ -7,6 +7,7 @@ import {
     LayoutDashboard,
     Users,
     HandCoins,
+    BookOpen,
     ArrowLeft,
     ChevronLeft,
     GraduationCap,
@@ -26,6 +27,7 @@ const NAV_GROUPS = [
         label: "Management",
         items: [
             { icon: Users, label: "My Students", href: "/teacher/students" },
+            { icon: BookOpen, label: "Exercises", href: "/teacher/exercises" },
             { icon: HandCoins, label: "Credit Requests", href: "/teacher/credit-requests" },
         ]
     },
