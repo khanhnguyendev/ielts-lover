@@ -151,6 +151,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 <span className="text-muted-foreground/60 ml-2">
                                     Date: {isSample ? "2026-02-14" : new Date(realData!.created_at).toLocaleDateString()}
                                 </span>
+                                {(isSample || realData?.exercise_id) && (
+                                    <>
+                                        <span className="text-muted-foreground/60 mx-2">•</span>
+                                        <span className="text-muted-foreground/60">
+                                            ID: <span className="font-mono text-xs">{isSample ? `sample-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
+                                        </span>
+                                    </>
+                                )}
                             </span>
                             <Button variant="ghost" size="icon" className="text-muted-foreground rounded-lg">
                                 <Share2 className="h-4 w-4" />
