@@ -23,6 +23,9 @@ import { SAMPLE_REPORTS } from "@/lib/sample-data";
 import { MistakeRepository } from "@/repositories/mistake.repository";
 import { ActionPlanRepository } from "@/repositories/action-plan.repository";
 import { ImprovementService } from "@/services/improvement.service";
+import { AIUsageMetadata } from "@/services/ai.service";
+import { AICostService } from "@/services/ai-cost.service";
+import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { evaluateLimiter, simpleAiLimiter, checkRateLimit } from "@/lib/ratelimit";
 
 const logger = new Logger("UserActions");
@@ -58,6 +61,24 @@ const creditService = traceService(new CreditService(userRepo, pricingRepo, tran
 const mistakeRepo = traceService(new MistakeRepository(), "MistakeRepository");
 const actionPlanRepo = traceService(new ActionPlanRepository(), "ActionPlanRepository");
 const improvementService = traceService(new ImprovementService(mistakeRepo, actionPlanRepo, creditService, _aiService), "ImprovementService");
+
+// AI Cost Accounting
+const aiUsageRepo = new AIUsageRepository();
+const aiCostService = new AICostService(aiUsageRepo);
+
+function recordAICost(usage: AIUsageMetadata | undefined, userId: string | null, featureKey: string, aiMethod: string, creditsCharged: number) {
+    if (!usage) return;
+    aiCostService.recordUsage({
+        userId,
+        featureKey,
+        modelName: usage.modelName,
+        promptTokens: usage.promptTokens,
+        completionTokens: usage.completionTokens,
+        aiMethod,
+        creditsCharged,
+        durationMs: usage.durationMs,
+    }).catch((err) => logger.error("AI cost recording failed (non-blocking)", { error: err }));
+}
 
 export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
@@ -121,11 +142,11 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
             await creditService.billUser(user.id, featureKey, attempt.exercise_id);
         }
-        await attemptService.submitAttempt(attemptId, content);
+        const usage = await attemptService.submitAttempt(attemptId, content);
         const evaluatedAttempt = await attemptService.getAttempt(attemptId);
 
-
-
+        const aiMethod = exercise.type.startsWith("writing") ? "generateWritingReport" : "generateFeedback";
+        recordAICost(usage, user.id, featureKey, aiMethod, 1);
 
         return evaluatedAttempt;
     } catch (error) {
@@ -170,6 +191,7 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
 
         await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id);
         const result = await attemptService.reevaluate(attemptId);
+        recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1);
         return result;
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
@@ -293,7 +315,8 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER);
         const result = await aiService.rewriteContent(text);
-        return { success: true, text: result.rewritten_text };
+        recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1);
+        return { success: true, text: result.data.rewritten_text };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
@@ -337,7 +360,8 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
 
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id);
-        const correction = await attemptService.unlockCorrection(attemptId);
+        const { data: correction, usage } = await attemptService.unlockCorrection(attemptId);
+        recordAICost(usage, user.id, FEATURE_KEYS.DETAILED_CORRECTION, "generateCorrection", 1);
 
         // Extract mistakes from corrections for the Mistake Bank
         try {
@@ -392,7 +416,8 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
         // Use provided target score or fallback to user profile or 9.0
         const scoreToUse = targetScore || user.target_score || 9.0;
         const result = await aiService.improveSentence(sentence, scoreToUse);
-        return { success: true, data: { improved_sentence: result } };
+        recordAICost(result.usage, user.id, FEATURE_KEYS.SENTENCE_IMPROVE, "improveSentence", 1);
+        return { success: true, data: { improved_sentence: result.data } };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
@@ -429,7 +454,8 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
     if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY };
 
     try {
-        const plan = await improvementService.generateAIActionPlan(user.id);
+        const { plan, usage } = await improvementService.generateAIActionPlan(user.id);
+        recordAICost(usage, user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, "analyzeWeaknesses", 1);
         return { success: true, data: plan };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {

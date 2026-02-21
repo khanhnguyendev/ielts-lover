@@ -1,6 +1,6 @@
 import { Attempt } from "@/types";
 import { IAttemptRepository, IUserRepository, IExerciseRepository } from "../repositories/interfaces";
-import { AIService } from "./ai.service";
+import { AIService, AIUsageMetadata } from "./ai.service";
 import { ATTEMPT_STATES, EXERCISE_TYPES, APP_ERROR_CODES } from "@/lib/constants";
 
 export class AttemptService {
@@ -23,7 +23,7 @@ export class AttemptService {
         });
     }
 
-    async submitAttempt(id: string, content: string): Promise<void> {
+    async submitAttempt(id: string, content: string): Promise<AIUsageMetadata | undefined> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
         if (attempt.state === ATTEMPT_STATES.EVALUATED) {
@@ -31,9 +31,7 @@ export class AttemptService {
         }
 
         if (attempt.state === ATTEMPT_STATES.SUBMITTED) {
-            // Already submitted, maybe just trigger evaluation again if it's stuck
-            await this.evaluateAttempt(id);
-            return;
+            return this.evaluateAttempt(id);
         }
 
         if (attempt.state !== ATTEMPT_STATES.CREATED && attempt.state !== ATTEMPT_STATES.IN_PROGRESS) {
@@ -46,11 +44,10 @@ export class AttemptService {
             submitted_at: new Date().toISOString()
         });
 
-        // Trigger evaluation
-        await this.evaluateAttempt(id);
+        return this.evaluateAttempt(id);
     }
 
-    private async evaluateAttempt(id: string): Promise<void> {
+    private async evaluateAttempt(id: string): Promise<AIUsageMetadata | undefined> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt || attempt.state !== ATTEMPT_STATES.SUBMITTED) return;
 
@@ -59,20 +56,23 @@ export class AttemptService {
 
         let feedback;
         let score;
+        let usage: AIUsageMetadata;
 
         if (exercise.type === EXERCISE_TYPES.WRITING_TASK1 || exercise.type === EXERCISE_TYPES.WRITING_TASK2) {
-            const report = await this.aiService.generateWritingReport(
+            const result = await this.aiService.generateWritingReport(
                 exercise.type as any,
                 attempt.content,
                 "v2",
                 { prompt: exercise.prompt, chartData: exercise.chart_data }
             );
-            feedback = JSON.stringify(report);
-            score = report.overall_score;
+            feedback = JSON.stringify(result.data);
+            score = result.data.overall_score;
+            usage = result.usage;
         } else {
-            const simpleFeedback = await this.aiService.generateFeedback(exercise.type, attempt.content);
-            feedback = JSON.stringify(simpleFeedback);
-            score = simpleFeedback.overall_band;
+            const result = await this.aiService.generateFeedback(exercise.type, attempt.content);
+            feedback = JSON.stringify(result.data);
+            score = result.data.overall_band;
+            usage = result.usage;
         }
 
         await this.attemptRepo.update(id, {
@@ -81,21 +81,23 @@ export class AttemptService {
             feedback,
             evaluated_at: new Date().toISOString()
         });
+
+        return usage;
     }
 
     async updateAttempt(id: string, data: Partial<Attempt>): Promise<void> {
         await this.attemptRepo.update(id, data);
     }
 
-    async reevaluate(id: string): Promise<{ success: boolean; reason?: string }> {
+    async reevaluate(id: string): Promise<{ success: boolean; reason?: string; usage?: AIUsageMetadata }> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
 
-        await this.evaluateAttempt(id);
+        const usage = await this.evaluateAttempt(id);
 
         const updated = await this.attemptRepo.getById(id);
         if (updated?.state === ATTEMPT_STATES.EVALUATED) {
-            return { success: true };
+            return { success: true, usage };
         }
 
         return { success: false, reason: "EVALUATION_FAILED" };
@@ -109,21 +111,21 @@ export class AttemptService {
         return this.attemptRepo.listByUserId(userId);
     }
 
-    async unlockCorrection(id: string): Promise<any> {
+    async unlockCorrection(id: string): Promise<{ data: any; usage?: AIUsageMetadata }> {
         const attempt = await this.attemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
 
         if (attempt.is_correction_unlocked && attempt.correction_data) {
-            return attempt.correction_data;
+            return { data: attempt.correction_data };
         }
 
-        const correction = await this.aiService.generateCorrection(attempt.content);
+        const result = await this.aiService.generateCorrection(attempt.content);
 
         await this.attemptRepo.update(id, {
-            correction_data: JSON.stringify(correction),
+            correction_data: JSON.stringify(result.data),
             is_correction_unlocked: true
         });
 
-        return correction;
+        return { data: result.data, usage: result.usage };
     }
 }

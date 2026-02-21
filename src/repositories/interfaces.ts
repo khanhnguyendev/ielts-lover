@@ -135,3 +135,42 @@ export interface ICreditRequestRepository {
     listAll(): Promise<CreditRequest[]>;
     updateStatus(id: string, status: CreditRequestStatus, reviewedBy: string, adminNote?: string): Promise<void>;
 }
+
+// ── AI Cost Accounting ──
+
+export type AIUsageLog = {
+    id: string;
+    user_id: string | null;
+    feature_key: string;
+    model_name: string;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    input_cost_usd: number;
+    output_cost_usd: number;
+    total_cost_usd: number;
+    credits_charged: number;
+    ai_method: string;
+    duration_ms?: number;
+    created_at: string;
+};
+
+export type AIModelPricing = {
+    id: string;
+    model_name: string;
+    input_price_per_million: number;
+    output_price_per_million: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+};
+
+export interface IAIUsageRepository {
+    logUsage(data: Omit<AIUsageLog, 'id' | 'created_at'>): Promise<AIUsageLog>;
+    getModelPricing(modelName: string): Promise<AIModelPricing | null>;
+    listModelPricing(): Promise<AIModelPricing[]>;
+    updateModelPricing(id: string, data: Partial<Pick<AIModelPricing, 'input_price_per_million' | 'output_price_per_million' | 'is_active'>>): Promise<void>;
+    getCostSummary(startDate: string, endDate: string): Promise<{ total_cost_usd: number; total_calls: number; total_tokens: number; total_credits_charged: number }>;
+    getCostByFeature(startDate: string, endDate: string): Promise<{ feature_key: string; call_count: number; avg_tokens: number; total_cost_usd: number; total_credits_charged: number }[]>;
+    getDailyTrend(startDate: string, endDate: string): Promise<{ day: string; total_cost_usd: number; call_count: number }[]>;
+}

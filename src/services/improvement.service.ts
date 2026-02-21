@@ -1,7 +1,7 @@
 import { FEATURE_KEYS, SkillType } from "@/lib/constants";
 import { IMistakeRepository, IActionPlanRepository, UserMistake, UserActionPlan } from "@/repositories/interfaces";
 import { CreditService } from "./credit.service";
-import { AIService } from "./ai.service";
+import { AIService, AIUsageMetadata } from "./ai.service";
 
 /**
  * Improvement Service: Orchestrates the Mistake Bank and AI Weakness Analysis.
@@ -48,7 +48,7 @@ export class ImprovementService {
      * 3. Calls AI to find patterns
      * 4. Stores result
      */
-    async generateAIActionPlan(userId: string): Promise<UserActionPlan> {
+    async generateAIActionPlan(userId: string): Promise<{ plan: UserActionPlan; usage?: AIUsageMetadata }> {
         // 1. Bill user (throws InsufficientFundsError if not enough credits)
         await this.creditService.billUser(userId, FEATURE_KEYS.WEAKNESS_ANALYSIS);
 
@@ -60,15 +60,15 @@ export class ImprovementService {
         }
 
         // 3. Call AI for weakness analysis
-        const planData = await this.aiService.analyzeWeaknesses(mistakes);
+        const result = await this.aiService.analyzeWeaknesses(mistakes);
 
         // 4. Store the plan
         const plan = await this.actionPlanRepo.save({
             user_id: userId,
-            plan_data: planData,
+            plan_data: result.data,
             mistakes_analyzed: mistakes.length,
         });
 
-        return plan;
+        return { plan, usage: result.usage };
     }
 }

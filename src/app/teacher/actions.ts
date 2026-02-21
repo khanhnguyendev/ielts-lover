@@ -18,7 +18,10 @@ import { StorageService } from "@/services/storage.service";
 import { traceService, traceAction } from "@/lib/aop";
 import { revalidatePath } from "next/cache";
 import { Exercise } from "@/types";
-import { FEATURE_KEYS, APP_ERROR_CODES } from "@/lib/constants";
+import { FEATURE_KEYS, APP_ERROR_CODES, AI_METHODS } from "@/lib/constants";
+import { AICostService } from "@/services/ai-cost.service";
+import { AIUsageRepository } from "@/repositories/ai-usage.repository";
+import { Logger } from "@/lib/logger";
 
 const teacherStudentRepo = traceService(new TeacherStudentRepository(), "TeacherStudentRepository");
 const creditRequestRepo = traceService(new CreditRequestRepository(), "CreditRequestRepository");
@@ -38,6 +41,10 @@ const teacherService = traceService(
     new TeacherService(teacherStudentRepo, creditRequestRepo, attemptRepo, userRepo, creditService),
     "TeacherService"
 );
+
+const logger = new Logger("TeacherActions");
+const aiUsageRepo = new AIUsageRepository();
+const aiCostService = new AICostService(aiUsageRepo);
 
 async function checkTeacher() {
     const user = await getCurrentUser();
@@ -98,7 +105,15 @@ export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise"
     await checkTeacher();
 
     if (type === "writing_task1") {
-        const chartData = await aiService.generateChartData(topic, chartType);
+        const chartResult = await aiService.generateChartData(topic, chartType);
+        const chartData = chartResult.data;
+
+        aiCostService.recordUsage({
+            userId: null, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
+            promptTokens: chartResult.usage.promptTokens, completionTokens: chartResult.usage.completionTokens,
+            aiMethod: AI_METHODS.GENERATE_CHART_DATA, creditsCharged: 0, durationMs: chartResult.usage.durationMs,
+        }).catch((err) => logger.error("AI cost recording failed", { error: err }));
+
         const { ChartRenderer } = await import("@/lib/chart-renderer");
         const imageBuffer = await ChartRenderer.render(chartData.chart_config);
         const imageUrl = await storageService.upload(imageBuffer);
@@ -111,7 +126,15 @@ export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise"
         };
     }
 
-    return await aiService.generateExerciseContent(type, topic);
+    const result = await aiService.generateExerciseContent(type, topic);
+
+    aiCostService.recordUsage({
+        userId: null, featureKey: "exercise_generation", modelName: result.usage.modelName,
+        promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
+        aiMethod: AI_METHODS.GENERATE_EXERCISE, creditsCharged: 0, durationMs: result.usage.durationMs,
+    }).catch((err) => logger.error("AI cost recording failed", { error: err }));
+
+    return result.data;
 });
 
 export async function uploadTeacherImage(formData: FormData) {
@@ -133,8 +156,15 @@ export const analyzeTeacherChartImage = traceAction("analyzeTeacherChartImage", 
         throw error;
     }
 
-    const analysis = await aiService.analyzeChartImage(imageBase64, mimeType);
-    return { success: true, data: analysis };
+    const result = await aiService.analyzeChartImage(imageBase64, mimeType);
+
+    aiCostService.recordUsage({
+        userId: user.id, featureKey: FEATURE_KEYS.CHART_IMAGE_ANALYSIS, modelName: result.usage.modelName,
+        promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
+        aiMethod: AI_METHODS.ANALYZE_CHART_IMAGE, creditsCharged: 1, durationMs: result.usage.durationMs,
+    }).catch((err) => logger.error("AI cost recording failed", { error: err }));
+
+    return { success: true, data: result.data };
 });
 
 export async function getTeacherExercises() {

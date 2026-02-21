@@ -29,6 +29,9 @@ import { TeacherService } from "@/services/teacher.service";
 
 import { traceService, traceAction } from "@/lib/aop";
 import { USER_ROLES, UserRole } from "@/lib/constants";
+import { AICostService } from "@/services/ai-cost.service";
+import { AIUsageRepository } from "@/repositories/ai-usage.repository";
+import { AI_METHODS } from "@/lib/constants";
 
 const logger = new Logger("AdminActions");
 const creditPackageRepo = traceService(new CreditPackageRepository(), "CreditPackageRepository");
@@ -51,6 +54,10 @@ const teacherService = traceService(
     new TeacherService(teacherStudentRepo, creditRequestRepo, attemptRepo, userRepo, creditService),
     "TeacherService"
 );
+
+// AI Cost Accounting
+const aiUsageRepo = new AIUsageRepository();
+const aiCostService = new AICostService(aiUsageRepo);
 
 export const seedCreditPackages = traceAction("seedCreditPackages", async () => {
     await checkAdmin();
@@ -201,7 +208,14 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
     // Special handling for Writing Task 1 to generate chart
     if (type === "writing_task1") {
         // 1. Generate Data
-        const chartData = await aiService.generateChartData(topic, chartType);
+        const chartResult = await aiService.generateChartData(topic, chartType);
+        const chartData = chartResult.data;
+
+        aiCostService.recordUsage({
+            userId: null, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
+            promptTokens: chartResult.usage.promptTokens, completionTokens: chartResult.usage.completionTokens,
+            aiMethod: AI_METHODS.GENERATE_CHART_DATA, creditsCharged: 0, durationMs: chartResult.usage.durationMs,
+        }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
         // 2. Render Image
         const { ChartRenderer } = await import("@/lib/chart-renderer");
@@ -218,7 +232,15 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
         };
     }
 
-    return await aiService.generateExerciseContent(type, topic);
+    const result = await aiService.generateExerciseContent(type, topic);
+
+    aiCostService.recordUsage({
+        userId: null, featureKey: "exercise_generation", modelName: result.usage.modelName,
+        promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
+        aiMethod: AI_METHODS.GENERATE_EXERCISE, creditsCharged: 0, durationMs: result.usage.durationMs,
+    }).catch((err) => logger.error("AI cost recording failed", { error: err }));
+
+    return result.data;
 });
 
 export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBase64: string, mimeType: string) => {
@@ -235,8 +257,15 @@ export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBa
         throw error;
     }
 
-    const analysis = await aiService.analyzeChartImage(imageBase64, mimeType);
-    return { success: true, data: analysis };
+    const result = await aiService.analyzeChartImage(imageBase64, mimeType);
+
+    aiCostService.recordUsage({
+        userId: user.id, featureKey: FEATURE_KEYS.CHART_IMAGE_ANALYSIS, modelName: result.usage.modelName,
+        promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
+        aiMethod: AI_METHODS.ANALYZE_CHART_IMAGE, creditsCharged: 1, durationMs: result.usage.durationMs,
+    }).catch((err) => logger.error("AI cost recording failed", { error: err }));
+
+    return { success: true, data: result.data };
 });
 
 export async function uploadImage(formData: FormData) {
@@ -404,4 +433,23 @@ export const rejectCreditRequest = traceAction("rejectCreditRequest", async (req
     revalidatePath("/admin/credit-requests");
     revalidatePath("/teacher/credit-requests");
     logger.info("Admin rejected credit request", { requestId });
+});
+
+// ── AI Cost Analytics ──
+
+export async function getAICostAnalytics(days?: number) {
+    await checkAdmin();
+    return aiCostService.getCostAnalytics(days);
+}
+
+export async function getModelPricingList() {
+    await checkAdmin();
+    return aiCostService.getModelPricingList();
+}
+
+export const updateModelPricing = traceAction("updateModelPricing", async (id: string, data: { input_price_per_million?: number; output_price_per_million?: number; is_active?: boolean }) => {
+    await checkAdmin();
+    await aiCostService.updateModelPricing(id, data);
+    revalidatePath("/admin/ai-costs");
+    logger.info("Admin updated model pricing", { id, data });
 });

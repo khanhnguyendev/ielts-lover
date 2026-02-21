@@ -20,6 +20,7 @@ import {
     ShieldCheck,
     Zap,
     HandCoins,
+    BarChart3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -37,6 +38,7 @@ const NAV_GROUPS = [
         items: [
             { icon: Zap, label: "Exercises", href: "/admin/exercises" },
             { icon: Package, label: "Credit Packages", href: "/admin/credits" },
+            { icon: BarChart3, label: "AI Costs", href: "/admin/ai-costs" },
             { icon: Settings2, label: "System Settings", href: "/admin/settings" },
         ]
     },

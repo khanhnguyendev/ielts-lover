@@ -86,6 +86,8 @@ export const DB_TABLES = {
     USER_ACTION_PLANS: 'user_action_plans',
     TEACHER_STUDENTS: 'teacher_students',
     CREDIT_REQUESTS: 'credit_requests',
+    AI_USAGE_LOGS: 'ai_usage_logs',
+    AI_MODEL_PRICING: 'ai_model_pricing',
 } as const;
 
 export const TRANSACTION_FILTERS = {
@@ -148,3 +150,17 @@ export const CHART_TYPES = {
 } as const;
 
 export type ChartType = typeof CHART_TYPES[keyof typeof CHART_TYPES];
+
+export const AI_METHODS = {
+    GENERATE_FEEDBACK: 'generateFeedback',
+    REWRITE_CONTENT: 'rewriteContent',
+    IMPROVE_SENTENCE: 'improveSentence',
+    GENERATE_EXERCISE: 'generateExerciseContent',
+    GENERATE_CHART_DATA: 'generateChartData',
+    GENERATE_WRITING_REPORT: 'generateWritingReport',
+    GENERATE_CORRECTION: 'generateCorrection',
+    ANALYZE_WEAKNESSES: 'analyzeWeaknesses',
+    ANALYZE_CHART_IMAGE: 'analyzeChartImage',
+} as const;
+
+export type AIMethod = typeof AI_METHODS[keyof typeof AI_METHODS];

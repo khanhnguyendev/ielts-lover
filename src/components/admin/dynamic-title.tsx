@@ -12,6 +12,7 @@ const ADMIN_ROUTE_MAP: Record<string, string> = {
     "/admin/settings": "System Settings",
     "/admin/credits": "Credit Packages",
     "/admin/credit-requests": "Credit Requests",
+    "/admin/ai-costs": "AI Costs",
 }
 
 export function AdminDynamicTitle() {

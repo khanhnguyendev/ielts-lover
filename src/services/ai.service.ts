@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerativeModel, SchemaType } from "@google/generative-ai";
 import { EXERCISE_TYPES } from "@/lib/constants";
 
 /**
@@ -7,6 +7,19 @@ import { EXERCISE_TYPES } from "@/lib/constants";
  */
 
 export type AIPromptVersion = "v1" | "v2";
+
+export interface AIUsageMetadata {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    modelName: string;
+    durationMs: number;
+}
+
+export interface AICallResult<T> {
+    data: T;
+    usage: AIUsageMetadata;
+}
 
 export interface AIFeedbackResponse {
     overall_band: number;
@@ -232,7 +245,24 @@ export class AIService {
         this.modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     }
 
-    async generateFeedback(type: string, content: string, version: AIPromptVersion = "v1"): Promise<AIFeedbackResponse> {
+    private async callModel(model: GenerativeModel, prompt: any): Promise<{ text: string; usage: AIUsageMetadata }> {
+        const start = Date.now();
+        const result = await model.generateContent(prompt);
+        const durationMs = Date.now() - start;
+
+        const meta = result.response.usageMetadata;
+        const usage: AIUsageMetadata = {
+            promptTokens: meta?.promptTokenCount ?? 0,
+            completionTokens: meta?.candidatesTokenCount ?? 0,
+            totalTokens: meta?.totalTokenCount ?? 0,
+            modelName: this.modelName,
+            durationMs,
+        };
+
+        return { text: result.response.text(), usage };
+    }
+
+    async generateFeedback(type: string, content: string, version: AIPromptVersion = "v1"): Promise<AICallResult<AIFeedbackResponse>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -244,17 +274,13 @@ export class AIService {
         const promptBase = (AIService.PROMPTS as any)[type]?.[version] || AIService.PROMPTS[EXERCISE_TYPES.WRITING_TASK1].v1;
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the evaluation in the requested JSON format.`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        const parsed = JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, prompt);
+        const parsed = JSON.parse(text);
 
-        return {
-            ...parsed,
-            version
-        };
+        return { data: { ...parsed, version }, usage };
     }
 
-    async rewriteContent(content: string, version: AIPromptVersion = "v1"): Promise<{ rewritten_text: string, improvements?: string }> {
+    async rewriteContent(content: string, version: AIPromptVersion = "v1"): Promise<AICallResult<{ rewritten_text: string, improvements?: string }>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -266,12 +292,11 @@ export class AIService {
         const promptBase = (AIService.PROMPTS.rewrite as any)[version];
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the result in the requested JSON format.`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
     }
 
-    async improveSentence(sentence: string, targetScore: number = 9.0): Promise<string> {
+    async improveSentence(sentence: string, targetScore: number = 9.0): Promise<AICallResult<string>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName
         });
@@ -279,11 +304,11 @@ export class AIService {
         const prompt = AIService.PROMPTS.improve_sentence.v1
             .replace("Band 9.0", `Band ${targetScore.toFixed(1)}`);
 
-        const result = await model.generateContent(prompt + "\n\nSENTENCE: " + sentence);
-        return result.response.text().trim();
+        const { text, usage } = await this.callModel(model, prompt + "\n\nSENTENCE: " + sentence);
+        return { data: text.trim(), usage };
     }
 
-    async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<{ title: string, prompt: string }> {
+    async generateExerciseContent(type: string, topic?: string, version: AIPromptVersion = "v1"): Promise<AICallResult<{ title: string, prompt: string }>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -303,13 +328,11 @@ export class AIService {
         }
         fullPrompt += `Return the result in the requested JSON format.`;
 
-        const result = await model.generateContent(fullPrompt);
-        const responseText = result.response.text();
-
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, fullPrompt);
+        return { data: JSON.parse(text), usage };
     }
 
-    async generateChartData(topic?: string, chartType?: string, version: AIPromptVersion = "v1"): Promise<any> {
+    async generateChartData(topic?: string, chartType?: string, version: AIPromptVersion = "v1"): Promise<AICallResult<any>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -344,9 +367,8 @@ export class AIService {
         }
         `;
 
-        const result = await model.generateContent(fullPrompt);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, fullPrompt);
+        return { data: JSON.parse(text), usage };
     }
 
     async generateWritingReport(
@@ -354,7 +376,7 @@ export class AIService {
         content: string,
         version: AIPromptVersion = "v2",
         exerciseContext?: { prompt?: string; chartData?: any }
-    ): Promise<any> {
+    ): Promise<AICallResult<any>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -376,12 +398,11 @@ export class AIService {
 
         const prompt = `${promptBase}${contextBlock}\n\nSTUDENT RESPONSE:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
     }
 
-    async generateCorrection(content: string, version: AIPromptVersion = "v2"): Promise<any> {
+    async generateCorrection(content: string, version: AIPromptVersion = "v2"): Promise<AICallResult<any>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -393,20 +414,19 @@ export class AIService {
         const promptBase = (AIService.PROMPTS.correction as any)[version];
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the corrections in the requested JSON format.`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
     }
 
     /**
      * Analyzes a user's mistake history to find patterns and generate
      * a personalized improvement action plan.
      */
-    async analyzeWeaknesses(mistakes: { skill_type: string; error_category: string; original_context: string; correction: string; explanation?: string }[]): Promise<{
+    async analyzeWeaknesses(mistakes: { skill_type: string; error_category: string; original_context: string; correction: string; explanation?: string }[]): Promise<AICallResult<{
         top_weaknesses: { category: string; frequency: number; description: string; severity: 'high' | 'medium' | 'low' }[];
         action_items: { title: string; description: string; category: string; priority: number; examples: { wrong: string; correct: string }[] }[];
         summary: string;
-    }> {
+    }>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -447,9 +467,8 @@ Rules:
 - Sort action items by priority (1 = most urgent).
 - Maximum 5 weaknesses, maximum 7 action items.`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
     }
 
     /**
@@ -458,14 +477,14 @@ Rules:
      * 
      * @returns Analysis result with chart type, validity, and extracted data.
      */
-    async analyzeChartImage(imageBase64: string, mimeType: string): Promise<{
+    async analyzeChartImage(imageBase64: string, mimeType: string): Promise<AICallResult<{
         is_valid: boolean;
         chart_type: string;
         title: string;
         description: string;
         data_points: any;
         validation_errors: string[];
-    }> {
+    }>> {
         const model = this.genAI.getGenerativeModel({
             model: this.modelName,
             generationConfig: {
@@ -518,8 +537,7 @@ For process_diagram or map types, adapt data_points to describe the steps/locati
             },
         };
 
-        const result = await model.generateContent([prompt, imagePart]);
-        const responseText = result.response.text();
-        return JSON.parse(responseText);
+        const { text, usage } = await this.callModel(model, [prompt, imagePart]);
+        return { data: JSON.parse(text), usage };
     }
 }
