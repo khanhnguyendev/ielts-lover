@@ -160,7 +160,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Original Practice Question */}
                     {displayData?.prompt && (
-                        <div className="bg-white rounded-3xl border p-8 space-y-6 shadow-sm">
+                        <div className="bg-white rounded-[32px] border p-10 space-y-8 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/10 p-2 rounded-xl">
                                     <FileText className="h-5 w-5 text-primary" />
@@ -168,18 +168,29 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 <h3 className="text-xl font-bold font-outfit">Practice Question</h3>
                             </div>
 
-                            <div className="bg-[#F9FAFB] rounded-2xl p-6 border space-y-6">
+                            <div className="bg-[#F9FAFB] rounded-[24px] p-8 border space-y-8">
                                 <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
                                     {displayData.prompt}
                                 </p>
 
                                 {displayData.imageUrl && (
-                                    <div className="relative aspect-auto min-h-[200px] max-h-[400px] bg-white rounded-xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 overflow-hidden">
-                                        <img
-                                            src={displayData.imageUrl}
-                                            alt="Task Chart"
-                                            className="w-full h-full object-contain p-4"
-                                        />
+                                    <div className="space-y-4 pt-4 border-t border-dashed">
+                                        <div className="relative aspect-auto min-h-[300px] bg-white rounded-2xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 group overflow-hidden">
+                                            <img
+                                                src={displayData.imageUrl}
+                                                alt="Task Chart"
+                                                className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
+                                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
+                                                    <Maximize2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <p className="text-center text-[10px] uppercase font-black tracking-widest text-muted-foreground/40">
+                                            Chart Visualization
+                                        </p>
                                     </div>
                                 )}
                             </div>

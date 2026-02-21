@@ -203,6 +203,7 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
             { level: "C1", percentage: 10 },
             { level: "C2", percentage: 5 }
         ],
-        prompt: "The chart below shows the amount of milk consumed in four different countries over a ten-year period. Summarize the information by selecting and reporting the main features, and make comparisons where relevant."
+        prompt: "The chart below shows the amount of milk consumed in four different countries over a ten-year period. Summarize the information by selecting and reporting the main features, and make comparisons where relevant.",
+        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
     }
 }
