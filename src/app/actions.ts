@@ -23,6 +23,7 @@ import { SAMPLE_REPORTS } from "@/lib/sample-data";
 import { MistakeRepository } from "@/repositories/mistake.repository";
 import { ActionPlanRepository } from "@/repositories/action-plan.repository";
 import { ImprovementService } from "@/services/improvement.service";
+import { evaluateLimiter, simpleAiLimiter, checkRateLimit } from "@/lib/ratelimit";
 
 const logger = new Logger("UserActions");
 
@@ -101,6 +102,9 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
 
+    const rateResult = await checkRateLimit(evaluateLimiter, user.id);
+    if (!rateResult.success) return { error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Too many evaluations right now. Try again in a minute." };
+
     const attempt = await attemptService.getAttempt(attemptId);
     if (!attempt) throw new Error("Attempt not found");
 
@@ -156,6 +160,9 @@ export const saveAttemptDraft = traceAction("saveAttemptDraft", async (attemptId
 export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attemptId: string) => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
+
+    const rateResult = await checkRateLimit(evaluateLimiter, user.id);
+    if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
     try {
         const attempt = await attemptService.getAttempt(attemptId);
@@ -280,6 +287,9 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
 
+    const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
+    if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
+
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER);
         const result = await aiService.rewriteContent(text);
@@ -314,6 +324,9 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
             };
         }
     }
+
+    const rateResult = await checkRateLimit(evaluateLimiter, user.id);
+    if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
     const attempt = await attemptService.getAttempt(attemptId);
     if (!attempt) throw new Error("Attempt not found");
@@ -371,6 +384,9 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
 
+    const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
+    if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
+
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.SENTENCE_IMPROVE);
         // Use provided target score or fallback to user profile or 9.0
@@ -408,6 +424,9 @@ export const getMistakeDashboardData = traceAction("getMistakeDashboardData", as
 export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", async () => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
+
+    const rateResult = await checkRateLimit(evaluateLimiter, user.id);
+    if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY };
 
     try {
         const plan = await improvementService.generateAIActionPlan(user.id);
