@@ -1,18 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { Check, Star, ShieldCheck, Sparkles } from "lucide-react"
+import { Check, Star, ShieldCheck, Sparkles, CreditCard, Zap, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { getAvailablePackages, createCheckoutSession } from "./actions"
+import { getAvailablePackages } from "./actions"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { CreditPackage } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 
-const TYPE_CONFIG: Record<string, { icon: string; accent: string; badge?: string }> = {
-    starter: { icon: "🌱", accent: "border-slate-200" },
-    pro: { icon: "🚀", accent: "border-purple-500 ring-2 ring-purple-500/10", badge: "Most Popular" },
-    master: { icon: "👑", accent: "border-amber-400 ring-1 ring-amber-400/20" },
+const TYPE_CONFIG: Record<string, { icon: string; accent: string; badge?: string; lightColor: string }> = {
+    starter: { icon: "🌱", accent: "border-slate-200 hover:border-primary/20", lightColor: "bg-slate-50" },
+    pro: { icon: "🚀", accent: "border-primary ring-2 ring-primary/10 shadow-xl shadow-primary/5", badge: "Most Popular", lightColor: "bg-primary/5" },
+    master: { icon: "👑", accent: "border-amber-400/50 hover:border-amber-400 ring-1 ring-amber-400/10 hover:ring-8 transition-all duration-500", lightColor: "bg-amber-50" },
 }
 
 export default function CreditsPage() {
@@ -34,17 +34,17 @@ export default function CreditsPage() {
         load()
     }, [])
 
-    const handleBuyNow = async (pkg: CreditPackage) => {
+    const handleBuyNow = async (_pkg: CreditPackage) => {
         notifyWarning(
-            "Feature Coming Soon",
-            "We are currently integrating our secure payment gateway. Real credit purchases will be available shortly!",
-            "Got it"
+            "Final Connection Stage",
+            "We are currently finalizing the secure bridge to our payment gateway. Real StarCredits will be available to purchase within the next few days!",
+            "Notify Me"
         )
     }
 
     if (isLoading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-[400px]">
                 <PulseLoader size="lg" color="primary" />
             </div>
         )
@@ -52,105 +52,186 @@ export default function CreditsPage() {
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-            <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="text-center space-y-1.5">
-                    <h2 className="text-2xl font-black font-outfit text-slate-900">Get StarCredits</h2>
-                    <p className="text-xs text-muted-foreground font-medium">Pay only for what you use. No subscriptions.</p>
+            <div className="p-6 lg:p-12 space-y-12 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+                {/* 1. Header & Value Proposition */}
+                <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-10 md:p-14 text-center space-y-6 group">
+                    <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:opacity-15 transition-opacity pointer-events-none">
+                        <Star size={180} className="text-primary fill-primary" />
+                    </div>
+
+                    <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-primary backdrop-blur-xl">
+                                <Zap size={20} className="fill-current" />
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black font-outfit text-white tracking-tight uppercase">Get StarCredits</h2>
+                        </div>
+                        <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed">
+                            Fuel your IELTS preparation with high-performance StarCredits.
+                            Pay only for what you need, with no subscription lock-ins.
+                        </p>
+                    </div>
+
+                    <div className="relative z-10 flex flex-wrap justify-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck size={14} className="text-primary" />
+                            Secure Payments
+                        </div>
+                        <div className="w-1 h-1 bg-white/20 rounded-full mt-1.5" />
+                        <div className="flex items-center gap-2">
+                            <Sparkles size={14} className="text-primary" />
+                            Instant Activation
+                        </div>
+                        <div className="w-1 h-1 bg-white/20 rounded-full mt-1.5" />
+                        <div className="flex items-center gap-2">
+                            <Check size={14} className="text-primary" />
+                            Lifetime Validity
+                        </div>
+                    </div>
                 </div>
 
-                {/* Packages Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 2. Packages Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-4">
                     {packages.map((pkg) => {
                         const config = TYPE_CONFIG[pkg.type] || TYPE_CONFIG.starter
                         const totalCredits = pkg.credits + pkg.bonus_credits
+                        const isPro = pkg.type === "pro"
 
                         return (
                             <div
                                 key={pkg.id}
                                 className={cn(
-                                    "relative bg-white rounded-[28px] border p-6 flex flex-col gap-5 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5",
+                                    "relative bg-white rounded-[2.5rem] border p-8 flex flex-col gap-8 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 flex-1",
                                     config.accent,
-                                    pkg.type === "pro" && "md:scale-[1.03] shadow-lg z-10"
+                                    isPro && "shadow-xl shadow-primary/10"
                                 )}
                             >
                                 {config.badge && (
-                                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg shadow-purple-300 flex items-center gap-1.5 whitespace-nowrap">
-                                        <Star className="h-2.5 w-2.5 fill-current" />
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30 flex items-center gap-2 whitespace-nowrap z-20 border-4 border-white">
+                                        <Sparkles className="h-3 w-3 fill-current" />
                                         {config.badge}
                                     </div>
                                 )}
 
-                                {/* Package Info */}
-                                <div className="text-center space-y-3 pt-1">
-                                    <div className="flex flex-col items-center gap-1.5">
-                                        <span className="text-2xl">{config.icon}</span>
-                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{pkg.name}</h3>
+                                {/* Package Identity */}
+                                <div className="text-center space-y-4 flex-1">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-white", config.lightColor)}>
+                                            {config.icon}
+                                        </div>
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{pkg.name}</h3>
                                     </div>
-                                    <div>
-                                        <span className="text-4xl font-black font-outfit text-slate-900">{totalCredits}</span>
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-primary mt-0.5">StarCredits</p>
+
+                                    <div className="space-y-1">
+                                        <div className="flex items-baseline justify-center gap-3">
+                                            <span className="text-5xl font-black font-outfit text-slate-900 tracking-tight">{totalCredits}</span>
+                                            {pkg.bonus_credits > 0 && (
+                                                <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-100">
+                                                    +{pkg.bonus_credits} BONUS
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">StarCredits Total</p>
                                     </div>
-                                    <p className="text-[11px] font-medium text-slate-500 leading-relaxed">{pkg.tagline}</p>
+
+                                    <p className="text-xs font-medium text-slate-500 leading-relaxed px-2">{pkg.tagline}</p>
                                 </div>
 
-                                {/* Price */}
-                                <div className="bg-[#F9FAFB] rounded-2xl py-3 text-center">
-                                    <span className="text-xl font-black font-outfit">${pkg.price.toFixed(2)}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium ml-1">USD</span>
+                                {/* Divider */}
+                                <div className="h-px bg-slate-50 w-full" />
+
+                                {/* Benefits List */}
+                                <div className="space-y-3.5 px-2">
+                                    <BenefitItem
+                                        label={`${pkg.credits} Core Credits`}
+                                        description="Full access to all exercise types"
+                                    />
+                                    <BenefitItem
+                                        label="AI Video-Speaking Partner"
+                                        description="Unlocked and limitless"
+                                    />
+                                    <BenefitItem
+                                        label="Lifetime Validity"
+                                        description="Credits never expire"
+                                    />
+                                    <BenefitItem
+                                        label="Deep Pattern Analysis"
+                                        description="Advanced weakness reports"
+                                    />
                                 </div>
 
-                                {/* Benefits */}
-                                <div className="flex-1 space-y-2.5">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            <Check className="h-2.5 w-2.5 stroke-[4]" />
+                                {/* Price & CTA */}
+                                <div className="space-y-4 mt-auto">
+                                    <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between border border-slate-100/50">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Price</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-2xl font-black font-outfit text-slate-900">${pkg.price.toFixed(2)}</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase">USD</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-slate-600">
-                                            {pkg.credits} Credits{pkg.bonus_credits > 0 && ` + ${pkg.bonus_credits} Bonus`}
-                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            <Check className="h-2.5 w-2.5 stroke-[4]" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-600">Access to all AI features</span>
-                                    </div>
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            <Check className="h-2.5 w-2.5 stroke-[4]" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-600">No expiration date</span>
-                                    </div>
-                                </div>
 
-                                {/* CTA */}
-                                <Button
-                                    variant={pkg.type === "pro" ? "default" : "outline"}
-                                    onClick={() => handleBuyNow(pkg)}
-                                    className={cn(
-                                        "w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px]",
-                                        pkg.type !== "pro" && "border-slate-200 hover:border-primary hover:text-primary",
-                                        pkg.type === "pro" && "bg-purple-600 hover:bg-purple-700 shadow-purple-200"
-                                    )}
-                                >
-                                    Buy Now
-                                </Button>
-
-                                <div className="flex justify-center items-center gap-1.5 grayscale opacity-40">
-                                    <ShieldCheck className="h-2.5 w-2.5" />
-                                    <span className="text-[7px] font-black uppercase tracking-widest">Secure Stripe Checkout</span>
+                                    <Button
+                                        onClick={() => handleBuyNow(pkg)}
+                                        className={cn(
+                                            "w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all duration-300 active:scale-95 shadow-lg",
+                                            isPro
+                                                ? "bg-primary hover:bg-primary/90 text-white shadow-primary/30"
+                                                : "bg-white border-2 border-slate-100 hover:border-primary/20 text-slate-900 shadow-slate-100 hover:shadow-primary/5"
+                                        )}
+                                    >
+                                        Buy {pkg.name.split(' ')[0]} Now
+                                    </Button>
                                 </div>
                             </div>
                         )
                     })}
                 </div>
 
+                {/* 3. Global Trust Section */}
+                <div className="bg-slate-50/50 rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-10 border border-slate-100">
+                    <div className="flex items-center gap-5 text-center md:text-left flex-col md:flex-row">
+                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm border border-slate-100">
+                            <Shield size={28} />
+                        </div>
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">Secured Powered by Stripe</h4>
+                            <p className="text-xs text-slate-500 font-medium">Your payment details are encrypted and processed securely by Stripe. We never store your card information.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-8 grayscale opacity-40">
+                        <CreditCard size={24} />
+                        <span className="text-lg font-black font-outfit text-slate-900 italic tracking-tighter uppercase">VISA</span>
+                        <span className="text-lg font-black font-outfit text-slate-900 italic tracking-tighter uppercase">STRIPE</span>
+                    </div>
+                </div>
+
                 {packages.length === 0 && !isLoading && (
-                    <div className="text-center py-16 text-slate-400 font-bold text-sm">
-                        No credit packages available at the moment.
+                    <div className="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+                        <div className="text-4xl grayscale opacity-30 mb-4">🏪💤</div>
+                        <h4 className="text-sm font-black text-slate-600 uppercase tracking-widest">Storefront Currently Offline</h4>
+                        <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-widest">We&apos;ll be back online with fresh packs shortly.</p>
                     </div>
                 )}
+            </div>
+
+            <footer className="mt-auto py-8 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] border-t border-slate-50 bg-white/50">
+                © 2026 IELTS LOVER &nbsp; • &nbsp; SECURE CHECKOUT &nbsp; • &nbsp; STARCREDITS SYSTEM
+            </footer>
+        </div>
+    )
+}
+
+function BenefitItem({ label, description }: { label: string; description: string }) {
+    return (
+        <div className="flex items-start gap-3 group/item">
+            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-all group-hover/item:scale-110 group-hover/item:bg-primary group-hover/item:text-white mt-0.5">
+                <Check className="h-3 w-3 stroke-[4]" />
+            </div>
+            <div className="space-y-0.5">
+                <p className="text-[10px] font-black text-slate-800 uppercase tracking-tight">{label}</p>
+                <p className="text-[10px] text-slate-400 font-medium leading-none">{description}</p>
             </div>
         </div>
     )

@@ -65,7 +65,7 @@ export default function SampleReportsPage() {
                             <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Sparkles size={16} />
                             </div>
-                            <h2 className="text-xl font-black font-outfit text-slate-900 tracking-tight uppercase">Sample Library</h2>
+                            <h2 className="text-xl font-black font-outfit text-slate-900 tracking-tight uppercase">Sample Reports</h2>
                         </div>
                         <p className="text-xs font-medium text-slate-500">Expert-analyzed reports for Band 7.0 - 9.0</p>
                     </div>
