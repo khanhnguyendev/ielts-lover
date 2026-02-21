@@ -252,10 +252,11 @@ export default function UsersPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50"
+                                                disabled={user.role === "admin"}
+                                                className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 onClick={() => setSelectedUser(user)}
                                             >
-                                                <CreditCard size={14} className="text-primary" />
+                                                <CreditCard size={14} className={cn(user.role === "admin" ? "text-slate-300" : "text-primary")} />
                                                 Manual Top-Up
                                             </Button>
 
@@ -290,7 +291,10 @@ export default function UsersPage() {
                                                         Attempt History
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem className="gap-2 font-bold text-sm py-2.5 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer">
+                                                    <DropdownMenuItem
+                                                        disabled={user.role === "admin"}
+                                                        className="gap-2 font-bold text-sm py-2.5 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
                                                         <Ban size={14} />
                                                         Suspend User
                                                     </DropdownMenuItem>

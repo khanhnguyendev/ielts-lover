@@ -264,8 +264,11 @@ export const adjustUserCredits = traceAction("adjustUserCredits", async (userId:
     await checkAdmin();
     const admin = await getCurrentUser();
 
-    // Adjust balance
-    await userRepo.addCredits(userId, amount);
+    // Prevent managing other admins
+    const targetUser = await userRepo.getById(userId);
+    if (targetUser?.role === "admin") {
+        throw new Error("Admins cannot manage other admin accounts");
+    }
 
     // Log transaction
     await transactionRepo.create({
