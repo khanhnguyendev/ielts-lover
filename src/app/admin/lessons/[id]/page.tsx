@@ -149,14 +149,11 @@ export default function EditLessonPage({ params }: { params: Promise<{ id: strin
     return (
         <div className="max-w-4xl mx-auto space-y-10 pb-20">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Link href="/admin/lessons">
-                        <Button variant="ghost" size="icon">
-                            <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                    </Link>
-                    <h1 className="text-2xl font-bold">Edit Lesson</h1>
-                </div>
+                <Link href="/admin/lessons">
+                    <Button variant="ghost" size="icon">
+                        <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                </Link>
                 <Button variant="destructive" size="sm" onClick={handleDeleteLesson}>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Lesson

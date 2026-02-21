@@ -56,6 +56,25 @@ export class AttemptRepository implements IAttemptRepository {
         return data as Attempt[];
     }
 
+    async listWritingAttemptsByUserId(userId: string): Promise<any[]> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from(DB_TABLES.ATTEMPTS)
+            .select(`
+                *,
+                ${DB_TABLES.EXERCISES} (
+                    title,
+                    type
+                )
+            `)
+            .eq("user_id", userId)
+            .ilike(`${DB_TABLES.EXERCISES}.type`, 'writing%')
+            .order("created_at", { ascending: false });
+
+        if (error) throw new Error(`[AttemptRepository] listWritingAttemptsByUserId failed: ${error.message}`);
+        return data as any[];
+    }
+
     async listAll(limit: number = 20): Promise<any[]> {
         const supabase = await createServerSupabaseClient();
         const { data, error } = await supabase

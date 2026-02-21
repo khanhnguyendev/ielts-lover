@@ -1,6 +1,6 @@
 "use server";
 
-import { ATTEMPT_STATES, DB_TABLES, FEATURE_KEYS, APP_ERROR_CODES, SKILL_TYPES, ERROR_CATEGORIES, SkillType } from "@/lib/constants";
+import { ATTEMPT_STATES, FEATURE_KEYS, APP_ERROR_CODES, SKILL_TYPES, ERROR_CATEGORIES, SkillType } from "@/lib/constants";
 import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { AttemptRepository } from "@/repositories/attempt.repository";
@@ -189,42 +189,17 @@ export async function getAttemptWithExercise(id: string) {
 }
 
 export async function getAllUsers() {
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.from(DB_TABLES.USER_PROFILES).select("*").order("created_at", { ascending: false });
-    if (error) throw error;
-    return data;
+    return userRepo.listAll();
 }
 
 export async function getAllAttempts() {
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.from(DB_TABLES.ATTEMPTS).select(`
-        *,
-        ${DB_TABLES.USER_PROFILES} (email)
-    `).order("created_at", { ascending: false });
-    if (error) throw error;
-    return data;
+    return attemptRepo.listAll();
 }
 
 export async function getUserAttempts() {
     const user = await getCurrentUser();
     if (!user) return [];
-
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase
-        .from(DB_TABLES.ATTEMPTS)
-        .select(`
-            *,
-            ${DB_TABLES.EXERCISES} (
-                title,
-                type
-            )
-        `)
-        .eq("user_id", user.id)
-        .ilike(`${DB_TABLES.EXERCISES}.type`, 'writing%')
-        .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    return data;
+    return attemptRepo.listWritingAttemptsByUserId(user.id);
 }
 
 export async function getLessons() {

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts } from "../actions";
 import { UserProfile } from "@/types";
+import { USER_ROLES, ATTEMPT_STATES } from "@/lib/constants";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import { TransactionTable } from "@/components/dashboard/transaction-table";
 import { CreditTransaction } from "@/repositories/interfaces";
@@ -229,12 +230,12 @@ export default function UsersPage() {
                                     <TableCell className="text-center">
                                         <div className={cn(
                                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                            user.role === "admin"
+                                            user.role === USER_ROLES.ADMIN
                                                 ? "bg-amber-100 text-amber-700 border border-amber-200"
                                                 : "bg-slate-100 text-slate-600 border border-slate-200"
                                         )}>
-                                            {user.role === "admin" && <ShieldCheck size={12} />}
-                                            {user.role === "admin" ? "Admin" : "Member"}
+                                            {user.role === USER_ROLES.ADMIN && <ShieldCheck size={12} />}
+                                            {user.role === USER_ROLES.ADMIN ? "Admin" : "Member"}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -268,11 +269,11 @@ export default function UsersPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                disabled={user.role === "admin"}
+                                                disabled={user.role === USER_ROLES.ADMIN}
                                                 className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 onClick={() => setSelectedUser(user)}
                                             >
-                                                <CreditCard size={14} className={cn(user.role === "admin" ? "text-slate-300" : "text-primary")} />
+                                                <CreditCard size={14} className={cn(user.role === USER_ROLES.ADMIN ? "text-slate-300" : "text-primary")} />
                                                 Manual Top-Up
                                             </Button>
 
@@ -308,7 +309,7 @@ export default function UsersPage() {
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
-                                                        disabled={user.role === "admin"}
+                                                        disabled={user.role === USER_ROLES.ADMIN}
                                                         className="gap-2 font-bold text-sm py-2.5 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
                                                         <Ban size={14} />
@@ -459,9 +460,9 @@ export default function UsersPage() {
                                 <div className="mt-2 flex gap-2">
                                     <Badge className={cn(
                                         "rounded-full text-[9px] font-black uppercase tracking-widest",
-                                        detailsUser?.role === "admin" ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
+                                        detailsUser?.role === USER_ROLES.ADMIN ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
                                     )}>
-                                        {detailsUser?.role === "admin" ? "Admin" : "Member"}
+                                        {detailsUser?.role === USER_ROLES.ADMIN ? "Admin" : "Member"}
                                     </Badge>
                                 </div>
                             </div>
@@ -553,7 +554,7 @@ export default function UsersPage() {
                                                 <TableCell className="text-center">
                                                     <Badge className={cn(
                                                         "rounded-full text-[9px] font-black uppercase tracking-widest",
-                                                        attempt.state === "EVALUATED" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
+                                                        attempt.state === ATTEMPT_STATES.EVALUATED ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
                                                     )}>
                                                         {attempt.state}
                                                     </Badge>

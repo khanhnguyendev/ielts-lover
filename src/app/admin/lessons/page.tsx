@@ -8,11 +8,7 @@ export default async function AdminLessonsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Lessons</h1>
-                    <p className="text-sm text-gray-500">Manage video lessons and quizzes</p>
-                </div>
+            <div className="flex justify-end">
                 <Link href="/admin/lessons/create">
                     <Button className="bg-purple-600 hover:bg-purple-700">
                         <Plus className="w-4 h-4 mr-2" />
