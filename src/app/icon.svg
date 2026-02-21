@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" />
+      <feOffset dx="0" dy="8" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="512" height="512" rx="128" fill="url(#grad1)"/>
+  
+  <g filter="url(#shadow)">
+    <!-- Heart Shape -->
+    <path d="M256 420c-10-10-160-100-160-220 0-60 45-105 105-105 35 0 65 20 80 45 15-25 45-45 80-45 60 0 105 45 105 105 0 120-150 210-260 220z" fill="white"/>
+    
+    <!-- Stylized Graduation Cap Inside -->
+    <path d="M256 160l60 30-60 30-60-30 60-30z" fill="#7C3AED"/>
+    <path d="M196 190v30c0 0 25 20 60 20s60-20 60-20v-30" stroke="#7C3AED" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M316 190c4 10 12 10 12 30" stroke="#7C3AED" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
