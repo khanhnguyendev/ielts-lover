@@ -202,8 +202,8 @@ export default function CreditsPage() {
 
                     <div className="flex items-center gap-8 grayscale opacity-40">
                         <CreditCard size={24} />
-                        <span className="text-lg font-black font-outfit text-slate-900 italic tracking-tighter uppercase">VISA</span>
-                        <span className="text-lg font-black font-outfit text-slate-900 italic tracking-tighter uppercase">STRIPE</span>
+                        <span className="text-lg font-black font-outfit text-slate-900 tracking-tighter uppercase">VISA</span>
+                        <span className="text-lg font-black font-outfit text-slate-900 tracking-tighter uppercase">STRIPE</span>
                     </div>
                 </div>
 

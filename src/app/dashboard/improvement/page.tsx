@@ -418,7 +418,7 @@ function MistakeRow({ mistake: m }: { mistake: UserMistake }) {
                 {m.source_sentence && (
                     <div className="relative pl-8 border-l-2 border-slate-100 py-1">
                         <Quote size={20} className="absolute -left-3 -top-2 text-slate-100 fill-slate-100" />
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium italic">&quot;{m.source_sentence}&quot;</p>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium">&quot;{m.source_sentence}&quot;</p>
                     </div>
                 )}
 

@@ -131,7 +131,7 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="flex-1 text-center md:text-left space-y-2">
-                                    <h1 className="text-2xl font-black text-white tracking-tight italic">
+                                    <h1 className="text-2xl font-black text-white tracking-tight">
                                         Ready to achieve Band {user?.target_score || '7.5'}, {user?.full_name?.split(' ')[0] || 'Learner'}?
                                     </h1>
                                     <p className="text-sm font-medium text-slate-400 max-w-lg leading-relaxed">
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Onboarding</h3>
                                             <p className="text-xl font-black text-slate-900 tracking-tight">Setup Progress</p>
                                         </div>
-                                        <span className="text-primary font-black font-outfit text-3xl italic">
+                                        <span className="text-primary font-black font-outfit text-3xl">
                                             {user?.target_score ? "100%" : "33%"}
                                         </span>
                                     </div>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                                         <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full blur-xl animate-pulse" />
                                     </div>
                                     <div className="space-y-2">
-                                        <h4 className="text-lg font-black text-slate-800 tracking-tight italic">No recent activity detected</h4>
+                                        <h4 className="text-lg font-black text-slate-800 tracking-tight">No recent activity detected</h4>
                                         <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto leading-relaxed">
                                             Start practicing Writing or Speaking to see your band scores and analysis here.
                                         </p>
@@ -329,7 +329,7 @@ function ActionCard({ href, icon: Icon, label, description, theme, meta, badge }
                 </div>
 
                 <div className="space-y-1 mb-2">
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic">{label}</h3>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">{label}</h3>
                     {meta && (
                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{meta}</p>
                     )}
@@ -371,7 +371,7 @@ function StatCard({ icon: Icon, label, value, subLabel, color, bgColor, href }: 
                     </div>
                 </div>
                 <div className="space-y-1">
-                    <div className="text-3xl font-black font-outfit text-slate-900 tracking-tighter italic">{value}</div>
+                    <div className="text-3xl font-black font-outfit text-slate-900 tracking-tighter">{value}</div>
                     <div className="flex items-center justify-between">
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{subLabel}</div>
                         <ChevronRight size={12} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />

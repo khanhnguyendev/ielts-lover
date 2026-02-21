@@ -108,7 +108,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="space-y-4">
                         <h2 className="text-4xl font-black font-outfit text-[#7C3AED]">Processing...</h2>
-                        <p className="text-muted-foreground font-bold italic">Your report will be ready in a few minutes...</p>
+                        <p className="text-muted-foreground font-bold">Your report will be ready in a few minutes...</p>
                     </div>
 
                     <div className="relative mx-auto w-48 h-48 flex items-center justify-center">
@@ -156,7 +156,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="space-y-4">
                         <h2 className="text-4xl font-black font-outfit text-[#C026D3]">Task Completed 🎉</h2>
-                        <p className="text-muted-foreground font-bold italic">Your report is ready!</p>
+                        <p className="text-muted-foreground font-bold">Your report is ready!</p>
                     </div>
 
                     <div className="relative mx-auto w-40 h-40 flex items-center justify-center">

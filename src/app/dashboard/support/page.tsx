@@ -67,7 +67,7 @@ export default function SupportPage() {
                                 />
                             </div>
 
-                            <div className="pt-6 border-t border-slate-50 italic text-[11px] text-slate-400 font-medium">
+                            <div className="pt-6 border-t border-slate-50 text-[11px] text-slate-400 font-medium">
                                 * Average response time for standard inquiries is ~24 hours.
                             </div>
                         </div>
@@ -158,7 +158,7 @@ export default function SupportPage() {
                             <HelpCircle size={12} />
                             Instant Help
                         </div>
-                        <h3 className="text-3xl font-black font-outfit text-slate-900 italic">Frequently Asked Questions</h3>
+                        <h3 className="text-3xl font-black font-outfit text-slate-900">Frequently Asked Questions</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
