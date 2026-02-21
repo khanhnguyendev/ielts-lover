@@ -147,9 +147,6 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         </Link>
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col items-end gap-1">
-                                <span className="text-sm font-bold text-muted-foreground flex items-center">
-                                    {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
-                                </span>
                                 {(isSample || realData) && (
                                     <div className="flex items-center gap-2 text-xs">
                                         <span className="text-muted-foreground">
