@@ -9,12 +9,13 @@ import {
     Clock,
     FileText,
     Activity,
-    BarChart3,
     TrendingUp,
     ShieldCheck,
     History,
     Target,
-    ArrowRight
+    ArrowRight,
+    BookOpen,
+    type LucideIcon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -258,15 +259,20 @@ export default function ReportsPage() {
                             {/* Analytics Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Criteria Performance</h4>
-                                        <BarChart3 className="text-primary w-5 h-5" />
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div className="space-y-1">
+                                            <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Criteria Performance</h4>
+                                            <p className="text-[10px] font-medium text-slate-400">Based on your last 10 sessions</p>
+                                        </div>
+                                        <div className="p-2 bg-primary/5 rounded-xl text-primary">
+                                            <TrendingUp size={18} />
+                                        </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <AnalyticsProgress label="Task Achievement" value={75} color="bg-primary" />
-                                        <AnalyticsProgress label="Coherence & Cohesion" value={60} color="bg-blue-500" />
-                                        <AnalyticsProgress label="Lexical Resource" value={85} color="bg-emerald-500" />
-                                        <AnalyticsProgress label="Grammatical Accuracy" value={50} color="bg-amber-500" />
+                                        <AnalyticsProgress label="Task Achievement" value={75} color="bg-primary" icon={Sparkles} />
+                                        <AnalyticsProgress label="Coherence & Cohesion" value={60} color="bg-blue-500" icon={Activity} />
+                                        <AnalyticsProgress label="Lexical Resource" value={85} color="bg-emerald-500" icon={BookOpen} />
+                                        <AnalyticsProgress label="Grammatical Accuracy" value={50} color="bg-amber-500" icon={ShieldCheck} />
                                     </div>
                                 </div>
 
@@ -275,11 +281,17 @@ export default function ReportsPage() {
                                         <h4 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-6">Learning Momentum</h4>
                                         <div className="h-32 flex items-end justify-between px-4 pb-2 border-b border-slate-50">
                                             {[40, 70, 45, 90, 65, 80, 55].map((h, i) => (
-                                                <div key={i} className="w-3 rounded-full bg-slate-100 relative group">
+                                                <div key={i} className="w-3 rounded-full bg-slate-50 relative group">
                                                     <div
-                                                        className="absolute bottom-0 w-full rounded-full bg-primary/20 group-hover:bg-primary transition-all duration-500"
-                                                        style={{ height: `${h}%` }}
+                                                        className="absolute bottom-0 w-full rounded-full bg-primary/20 group-hover:bg-primary transition-all duration-700"
+                                                        style={{
+                                                            height: `${h}%`,
+                                                            transitionDelay: `${i * 100}ms`
+                                                        }}
                                                     />
+                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                        Band {((h / 100) * 9).toFixed(1)}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -538,15 +550,23 @@ function DetailTag({ icon: Icon, label }: { icon: React.ElementType, label: stri
     )
 }
 
-function AnalyticsProgress({ label, value, color }: { label: string, value: number, color: string }) {
+function AnalyticsProgress({ label, value, color, icon: Icon }: { label: string, value: number, color: string, icon: LucideIcon }) {
     return (
-        <div className="space-y-1.5">
-            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                <span className="text-slate-500">{label}</span>
-                <span className="text-slate-900">{value}%</span>
+        <div className="space-y-2">
+            <div className="flex justify-between items-center px-1">
+                <div className="flex items-center gap-2">
+                    <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center bg-slate-50", color.replace('bg-', 'text-'))}>
+                        <Icon size={12} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</span>
+                </div>
+                <span className="text-xs font-black text-slate-900 font-outfit">{value}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all duration-1000", color)} style={{ width: `${value}%` }} />
+            <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden p-0.5 border border-slate-100/50">
+                <div
+                    className={cn("h-full rounded-full transition-all duration-1000", color)}
+                    style={{ width: `${value}%` }}
+                />
             </div>
         </div>
     )

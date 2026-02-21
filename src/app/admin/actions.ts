@@ -278,7 +278,7 @@ export const adjustUserCredits = traceAction("adjustUserCredits", async (userId:
         userId,
         amount,
         TRANSACTION_TYPES.GIFT_CODE,
-        `Admin Adjustment (${admin.email}): ${reason}`,
+        reason || "Manual Credit Adjustment",
         admin.id
     );
 
@@ -311,9 +311,9 @@ export const getSystemSettings = traceAction("getSystemSettings", async () => {
     return settingsRepo.listAll();
 });
 
-export const updateSystemSetting = traceAction("updateSystemSetting", async (key: string, value: any) => {
+export const updateSystemSetting = traceAction("updateSystemSetting", async (key: string, value: unknown) => {
     await checkAdmin();
-    await settingsRepo.updateSetting(key, value);
+    await settingsRepo.updateSetting(key, value as any);
     revalidatePath("/admin/settings");
 });
 
@@ -333,8 +333,8 @@ export const updateFeaturePricing = traceAction("updateFeaturePricing", async (k
 export const setUserRole = traceAction("setUserRole", async (userId: string, role: string) => {
     await checkAdmin();
 
-    const validRoles = Object.values(USER_ROLES);
-    if (!validRoles.includes(role as any)) {
+    const validRoles = Object.values(USER_ROLES) as string[];
+    if (!validRoles.includes(role)) {
         throw new Error(`Invalid role: ${role}`);
     }
 

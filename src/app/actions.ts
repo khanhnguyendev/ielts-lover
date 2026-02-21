@@ -400,7 +400,11 @@ export const getFeaturePrice = traceAction("getFeaturePrice", async (key: string
 export const getMistakeDashboardData = traceAction("getMistakeDashboardData", async (skillFilter?: SkillType) => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
-    return improvementService.getMistakeDashboard(user.id, skillFilter);
+    const data = await improvementService.getMistakeDashboard(user.id, skillFilter);
+    return {
+        ...data,
+        target_score: user.target_score
+    };
 });
 
 export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", async () => {
