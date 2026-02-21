@@ -21,9 +21,22 @@ import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { useNotification } from "@/lib/contexts/notification-context"
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
+    const [chatInput, setChatInput] = React.useState("")
+    const { notifySuccess, notifyInfo } = useNotification()
+
+    const handleChatSubmit = () => {
+        if (!chatInput.trim()) return
+        notifySuccess("Message Sent", "Horsebot is thinking and will reply soon!", "Close")
+        setChatInput("")
+    }
+
+    const handleFeatureClick = (feature: string) => {
+        notifyInfo("Coming Soon", `The ${feature} feature is currently under development.`, "Close")
+    }
 
     React.useEffect(() => {
         async function loadData() {
@@ -49,7 +62,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-            <div className="p-8 lg:p-12 space-y-10 max-w-5xl mx-auto animate-in fade-in duration-700">
+            <div className="p-6 lg:p-8 space-y-8 max-w-5xl mx-auto animate-in fade-in duration-700">
                 {/* 1. Daily Quota Banner */}
                 <div className="bg-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between text-white shadow-lg shadow-primary/20 gap-4 transition-all hover:shadow-primary/30">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -66,7 +79,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 2. IELTS Info Card */}
-                <div className="bg-card rounded-2xl border p-6 flex flex-wrap gap-8 items-center justify-between shadow-sm">
+                <div className="bg-card rounded-2xl border p-5 flex flex-wrap gap-6 items-center justify-between shadow-sm">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center">
                             <Calendar className="h-6 w-6 text-muted-foreground" />
@@ -98,36 +111,44 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 3. Horsebot Greeting & AI Input */}
-                <div className="text-center space-y-6 py-8">
+                <div className="text-center space-y-4 py-4">
                     <div className="relative inline-block">
-                        <div className="w-24 h-24 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                            <span className="text-5xl">🐴</span>
+                        <div className="w-20 h-20 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
+                            <span className="text-4xl">🐴</span>
                         </div>
                         <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full animate-bounce">
                             <Sparkles className="h-4 w-4" />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl">Hi, I&apos;m your IELTS Coach!</h1>
-                        <p className="text-foreground-secondary font-medium text-lg">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl">Hi, I&apos;m your IELTS Coach!</h1>
+                        <p className="text-foreground-secondary font-medium text-base">
                             ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
                         </p>
                     </div>
 
-                    <div className="max-w-xl mx-auto relative group">
+                    <div className="max-w-xl mx-auto relative group pt-2">
                         <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="relative bg-card border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
                             <textarea
                                 placeholder="Ask anything in your language"
-                                className="w-full h-24 p-4 text-base bg-transparent border-none focus:ring-0 resize-none font-medium"
+                                className="w-full h-20 p-3 text-sm bg-transparent border-none focus:ring-0 resize-none font-medium"
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault()
+                                        handleChatSubmit()
+                                    }
+                                }}
                             />
-                            <div className="flex items-center justify-between px-2 pb-2">
+                            <div className="flex items-center justify-between px-2 pb-2 mt-1">
                                 <div className="flex gap-2">
-                                    <Button variant="soft" size="xs">Ask</Button>
-                                    <Button variant="soft" size="xs">Learn</Button>
-                                    <Button variant="soft" size="xs">Support</Button>
+                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Ask")}>Ask</Button>
+                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Learn")}>Learn</Button>
+                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Support")}>Support</Button>
                                 </div>
-                                <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110">
+                                <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110" onClick={handleChatSubmit}>
                                     <Send className="h-4 w-4 text-white" />
                                 </Button>
                             </div>
@@ -136,28 +157,30 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 4. Getting Started Progress */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between mb-2">
+                <div className="space-y-5">
+                    <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-3">
                             <div className="bg-primary/10 p-2 rounded-xl">
                                 <Zap className="h-5 w-5 text-primary" />
                             </div>
                             <h3 className="text-xl font-bold font-outfit">Getting Started</h3>
                         </div>
-                        <span className="text-lg font-black font-outfit text-primary">25%</span>
+                        <span className="text-lg font-black font-outfit text-primary">
+                            {user?.target_score ? "100%" : "25%"}
+                        </span>
                     </div>
-                    <Progress value={25} className="h-2 bg-muted rounded-full overflow-hidden" />
+                    <Progress value={user?.target_score ? 100 : 25} className="h-2 bg-muted rounded-full overflow-hidden" />
 
-                    <div className="grid grid-cols-1 gap-3 pt-4">
-                        <OnboardingStep label="Add your target score" completed={true} />
-                        <OnboardingStep label="Learn your speaking level" />
-                        <OnboardingStep label="Learn your writing level" />
-                        <OnboardingStep label="View sample reports" />
+                    <div className="grid grid-cols-1 gap-2.5 pt-2">
+                        <OnboardingStep label="Add your target score" completed={!!user?.target_score} href="/dashboard/settings" />
+                        <OnboardingStep label="Learn your speaking level" href="/dashboard/speaking" />
+                        <OnboardingStep label="Learn your writing level" href="/dashboard/writing" />
+                        <OnboardingStep label="View sample reports" href="/dashboard/samples" />
                     </div>
                 </div>
 
                 {/* 5. Start Practice Cards */}
-                <div className="space-y-6">
+                <div className="space-y-5">
                     <div className="flex items-center gap-3">
                         <div className="bg-primary/10 p-2 rounded-xl">
                             <Zap className="h-5 w-5 text-primary" />
@@ -187,7 +210,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 6. Recent Activity (Empty State) */}
-                <div className="bg-card rounded-3xl border p-8 space-y-8 shadow-sm">
+                <div className="bg-card rounded-3xl border p-6 space-y-6 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
                             <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -235,24 +258,30 @@ export default function DashboardPage() {
     )
 }
 
-function OnboardingStep({ label, completed = false }: { label: string, completed?: boolean }) {
-    return (
+function OnboardingStep({ label, completed = false, href }: { label: string, completed?: boolean, href?: string }) {
+    const content = (
         <div className={cn(
-            "flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer",
-            completed ? "bg-muted/30 border-muted opacity-60" : "bg-white border-muted hover:border-primary/20 hover:bg-primary/5"
+            "flex items-center justify-between p-3.5 rounded-xl border-2 transition-all cursor-pointer",
+            completed ? "bg-muted/30 border-muted opacity-60 hover:opacity-100" : "bg-white border-muted hover:border-primary/20 hover:bg-primary/5"
         )}>
             <div className="flex items-center gap-4">
                 <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center",
+                    "w-9 h-9 rounded-xl flex items-center justify-center",
                     completed ? "bg-green-500" : "bg-muted"
                 )}>
-                    {completed ? <CheckCircle2 className="h-5 w-5 text-white" /> : <Edit3 className="h-5 w-5 text-muted-foreground" />}
+                    {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <Edit3 className="h-4 w-4 text-muted-foreground" />}
                 </div>
                 <span className={cn("text-sm font-bold", completed && "line-through text-muted-foreground")}>{label}</span>
             </div>
             {!completed && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
         </div>
     )
+
+    if (href) {
+        return <Link href={href} className="block">{content}</Link>
+    }
+    
+    return content
 }
 
 function PracticeCard({
@@ -267,9 +296,9 @@ function PracticeCard({
     buttonText: string
 }) {
     return (
-        <div className="bg-card p-8 rounded-3xl border flex flex-col items-center text-center gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
-                <Icon className="h-7 w-7 text-primary" />
+        <div className="bg-card p-6 rounded-3xl border flex flex-col items-center text-center gap-5 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                <Icon className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
                 <h4 className="text-xl font-black font-outfit">{title}</h4>

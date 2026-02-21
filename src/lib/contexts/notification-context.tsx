@@ -19,6 +19,7 @@ interface NotificationContextType {
     notifySuccess: (title: string, description: string, actionText?: string, onAction?: () => void) => void
     notifyError: (title: string, description: string, actionText?: string, traceId?: string) => void
     notifyWarning: (title: string, description: string, actionText?: string, onAction?: () => void, cancelText?: string) => void
+    notifyInfo: (title: string, description: string, actionText?: string, onAction?: () => void) => void
 }
 
 const NotificationContext = React.createContext<NotificationContextType | undefined>(undefined)
@@ -48,8 +49,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         notify({ title, description, type: "warning", actionText, onAction, cancelText: cancelText || "Cancel" })
     }, [notify])
 
+    const notifyInfo = React.useCallback((title: string, description: string, actionText?: string, onAction?: () => void) => {
+        notify({ title, description, type: "info", actionText, onAction })
+    }, [notify])
+
     return (
-        <NotificationContext.Provider value={{ notify, notifySuccess, notifyError, notifyWarning }}>
+        <NotificationContext.Provider value={{ notify, notifySuccess, notifyError, notifyWarning, notifyInfo }}>
             {children}
             <NotificationDialog
                 open={isOpen}
