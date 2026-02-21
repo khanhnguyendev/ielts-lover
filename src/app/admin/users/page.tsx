@@ -310,11 +310,10 @@ export default function UsersPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                disabled={user.role === USER_ROLES.ADMIN}
-                                                className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50"
                                                 onClick={() => setSelectedUser(user)}
                                             >
-                                                <CreditCard size={14} className={cn(user.role === USER_ROLES.ADMIN ? "text-slate-300" : "text-primary")} />
+                                                <CreditCard size={14} className="text-primary" />
                                                 Manual Top-Up
                                             </Button>
 

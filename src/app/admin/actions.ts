@@ -272,22 +272,15 @@ export async function getAdminStats() {
 }
 
 export const adjustUserCredits = traceAction("adjustUserCredits", async (userId: string, amount: number, reason: string) => {
-    await checkAdmin();
-    const admin = await getCurrentUser();
+    const admin = await checkAdmin();
 
-    // Prevent managing other admins
-    const targetUser = await userRepo.getById(userId);
-    if (targetUser?.role === "admin") {
-        throw new Error("Admins cannot manage other admin accounts");
-    }
-
-    // Log transaction
-    await transactionRepo.create({
-        user_id: userId,
+    await creditService.rewardUser(
+        userId,
         amount,
-        type: TRANSACTION_TYPES.GIFT_CODE,
-        description: `Admin Adjustment (${admin?.email}): ${reason}`
-    });
+        TRANSACTION_TYPES.GIFT_CODE,
+        `Admin Adjustment (${admin.email}): ${reason}`,
+        admin.id
+    );
 
     revalidatePath("/admin/users");
     logger.info("Admin manually adjusted user credits", { userId, amount, reason });
