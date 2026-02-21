@@ -15,7 +15,8 @@ import {
     History,
     Maximize2,
     Send,
-    X
+    X,
+    FileText
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -156,6 +157,34 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             </Button>
                         </div>
                     </div>
+
+                    {/* Original Practice Question */}
+                    {displayData?.prompt && (
+                        <div className="bg-white rounded-3xl border p-8 space-y-6 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-primary/10 p-2 rounded-xl">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold font-outfit">Practice Question</h3>
+                            </div>
+
+                            <div className="bg-[#F9FAFB] rounded-2xl p-6 border space-y-6">
+                                <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                    {displayData.prompt}
+                                </p>
+
+                                {displayData.imageUrl && (
+                                    <div className="relative aspect-auto min-h-[200px] max-h-[400px] bg-white rounded-xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 overflow-hidden">
+                                        <img
+                                            src={displayData.imageUrl}
+                                            alt="Task Chart"
+                                            className="w-full h-full object-contain p-4"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Score Overview */}
                     {(() => {
