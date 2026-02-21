@@ -22,7 +22,24 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 export function UserProfileMenu({ user }: { user: UserProfile }) {
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = React.useState(false)
+    const [displayBalance, setDisplayBalance] = React.useState(user.credits_balance)
+
+    // Sync display balance when prop changes from parent (server sync)
+    React.useEffect(() => {
+        setDisplayBalance(user.credits_balance)
+    }, [user.credits_balance])
+
+    React.useEffect(() => {
+        const handleCreditChange = (e: any) => {
+            const { amount } = e.detail
+            // Optimistic update of the displayed number
+            setDisplayBalance(prev => prev + amount)
+        }
+
+        window.addEventListener('credit-change', handleCreditChange)
+        return () => window.removeEventListener('credit-change', handleCreditChange)
+    }, [])
 
     const handleSignOut = async () => {
         setIsLoading(true)
@@ -109,13 +126,13 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
 
                                 <div className="flex items-center justify-between relative z-10">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-all duration-500 border border-slate-50 group-hover:border-primary/10">
-                                            <Sparkles className="w-5 h-5 text-primary fill-primary/10" />
+                                        <div className="w-10 h-10 rounded-xl bg-yellow-400 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 border border-yellow-300">
+                                            <span className="text-xl leading-none select-none">⭐</span>
                                         </div>
                                         <div>
                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Your Balance</p>
                                             <div className="flex items-baseline gap-1">
-                                                <p className="text-xl font-black text-slate-900 tracking-tight">{user.credits_balance}</p>
+                                                <p className="text-xl font-black text-slate-900 tracking-tight">{displayBalance.toLocaleString()}</p>
                                                 <p className="text-[9px] font-black text-primary uppercase tracking-widest">Stars</p>
                                             </div>
                                         </div>

@@ -54,44 +54,6 @@ export default function CreditsPage() {
         <div className="flex-1 overflow-y-auto scrollbar-hide">
             <div className="p-6 lg:p-12 space-y-12 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-                {/* 1. Header & Value Proposition */}
-                <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-10 md:p-14 text-center space-y-6 group">
-                    <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:opacity-15 transition-opacity pointer-events-none">
-                        <Star size={180} className="text-primary fill-primary" />
-                    </div>
-
-                    <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
-                        <div className="flex items-center justify-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-primary backdrop-blur-xl">
-                                <Zap size={20} className="fill-current" />
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-black font-outfit text-white tracking-tight uppercase">Get StarCredits</h2>
-                        </div>
-                        <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed">
-                            Fuel your IELTS preparation with high-performance StarCredits.
-                            Pay only for what you need, with no subscription lock-ins.
-                        </p>
-                    </div>
-
-                    <div className="relative z-10 flex flex-wrap justify-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck size={14} className="text-primary" />
-                            Secure Payments
-                        </div>
-                        <div className="w-1 h-1 bg-white/20 rounded-full mt-1.5" />
-                        <div className="flex items-center gap-2">
-                            <Sparkles size={14} className="text-primary" />
-                            Instant Activation
-                        </div>
-                        <div className="w-1 h-1 bg-white/20 rounded-full mt-1.5" />
-                        <div className="flex items-center gap-2">
-                            <Check size={14} className="text-primary" />
-                            Lifetime Validity
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. Packages Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-4">
                     {packages.map((pkg) => {
                         const config = TYPE_CONFIG[pkg.type] || TYPE_CONFIG.starter
