@@ -174,7 +174,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Original Practice Question */}
                     {displayData?.prompt && (
-                        <div className="bg-white rounded-[32px] border p-10 space-y-8 shadow-sm">
+                        <div className="bg-white rounded-[32px] border p-8 lg:p-10 space-y-6 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/10 p-2 rounded-xl">
                                     <FileText className="h-5 w-5 text-primary" />
@@ -182,7 +182,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 <h3 className="text-xl font-bold font-outfit">Practice Question</h3>
                             </div>
 
-                            <div className="bg-[#F9FAFB] rounded-[24px] p-8 border space-y-8">
+                            <div className="bg-[#F9FAFB] rounded-2xl p-6 border space-y-4">
                                 <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
                                     {displayData.prompt}
                                 </p>
