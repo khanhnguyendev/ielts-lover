@@ -325,6 +325,11 @@ export async function getAdminUsers() {
     return userRepo.listAll();
 }
 
+export async function getUserLastActivityMap() {
+    await checkAdmin();
+    return transactionRepo.getLastActivityMap();
+}
+
 export async function getAdminUserTransactions(userId: string) {
     await checkAdmin();
     return transactionRepo.listByUserId(userId);

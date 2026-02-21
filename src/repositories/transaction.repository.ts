@@ -26,4 +26,22 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
         if (error) throw new Error(`[CreditTransactionRepository] listByUserId failed: ${error.message}`);
         return data as CreditTransaction[];
     }
+
+    async getLastActivityMap(): Promise<Record<string, string>> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
+            .select("user_id, created_at")
+            .order("created_at", { ascending: false });
+
+        if (error) throw new Error(`[CreditTransactionRepository] getLastActivityMap failed: ${error.message}`);
+
+        const map: Record<string, string> = {};
+        for (const row of data || []) {
+            if (!map[row.user_id]) {
+                map[row.user_id] = row.created_at;
+            }
+        }
+        return map;
+    }
 }

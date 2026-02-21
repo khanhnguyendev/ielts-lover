@@ -23,7 +23,7 @@ import {
     GraduationCap,
     UserMinus,
 } from "lucide-react";
-import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts, setUserRole } from "../actions";
+import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts, setUserRole, getUserLastActivityMap } from "../actions";
 import { UserProfile } from "@/types";
 import { USER_ROLES, ATTEMPT_STATES } from "@/lib/constants";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -84,6 +84,9 @@ export default function UsersPage() {
     // Role filter
     const [roleFilter, setRoleFilter] = useState<string>("all");
 
+    // Last activity map (derived from credit_transactions)
+    const [lastActivityMap, setLastActivityMap] = useState<Record<string, string>>({});
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -109,8 +112,12 @@ export default function UsersPage() {
     async function fetchUsers() {
         setIsLoading(true);
         try {
-            const data = await getAdminUsers();
+            const [data, activityMap] = await Promise.all([
+                getAdminUsers(),
+                getUserLastActivityMap(),
+            ]);
             setUsers(data);
+            setLastActivityMap(activityMap);
         } catch (error) {
             console.error("Failed to fetch users:", error);
             notifyError("Fetch Failed", "Could not load user profiles.");
@@ -280,14 +287,19 @@ export default function UsersPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <span className="text-xs font-bold text-slate-500">
-                                                {user.last_seen_at ? new Date(user.last_seen_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
-                                            </span>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                                {user.last_seen_at ? new Date(user.last_seen_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
-                                            </span>
-                                        </div>
+                                        {(() => {
+                                            const lastActive = lastActivityMap[user.id];
+                                            return (
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                    <span className="text-xs font-bold text-slate-500">
+                                                        {lastActive ? new Date(lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
+                                                    </span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                        {lastActive ? new Date(lastActive).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })()}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex flex-col items-center gap-0.5">

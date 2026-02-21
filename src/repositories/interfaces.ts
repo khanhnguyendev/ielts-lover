@@ -55,6 +55,7 @@ export type CreditTransaction = {
 export interface ICreditTransactionRepository {
     create(transaction: Omit<CreditTransaction, "id" | "created_at">): Promise<CreditTransaction>;
     listByUserId(userId: string): Promise<CreditTransaction[]>;
+    getLastActivityMap(): Promise<Record<string, string>>;
 }
 
 export type SystemSetting = {

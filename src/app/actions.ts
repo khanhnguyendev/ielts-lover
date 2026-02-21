@@ -250,11 +250,6 @@ export async function getCurrentUser() {
     // Attempt to get the profile, but don't fail if it doesn't exist yet (e.g., during OAuth onboarding)
     const profile = await userRepo.getById(user.id);
 
-    // Update last_seen_at in background (fire and forget)
-    if (profile) {
-        userRepo.update(user.id, { last_seen_at: new Date().toISOString() }).catch(() => { });
-    }
-
     return {
         ...(profile || { id: user.id, email: user.email }),
         avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
