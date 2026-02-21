@@ -6,20 +6,10 @@ import { usePathname } from "next/navigation"
 import {
     LayoutDashboard,
     Users,
-    FileText,
-    Settings,
-    Package,
-    ArrowLeft,
-    LogOut,
-    ChevronLeft,
-    ChevronRight,
-    Search,
-    Wand2,
-    Calendar,
-    Settings2,
-    ShieldCheck,
-    Zap,
     HandCoins,
+    ArrowLeft,
+    ChevronLeft,
+    GraduationCap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,28 +19,19 @@ const NAV_GROUPS = [
     {
         label: "Overview",
         items: [
-            { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+            { icon: LayoutDashboard, label: "Dashboard", href: "/teacher" },
         ]
     },
     {
-        label: "Content Management",
+        label: "Management",
         items: [
-            { icon: Zap, label: "Exercises", href: "/admin/exercises" },
-            { icon: Package, label: "Credit Packages", href: "/admin/credits" },
-            { icon: Settings2, label: "System Settings", href: "/admin/settings" },
-        ]
-    },
-    {
-        label: "User Operations",
-        items: [
-            { icon: Users, label: "Users", href: "/admin/users" },
-            { icon: HandCoins, label: "Credit Requests", href: "/admin/credit-requests" },
-            { icon: FileText, label: "Attempts Audit", href: "/admin/attempts" },
+            { icon: Users, label: "My Students", href: "/teacher/students" },
+            { icon: HandCoins, label: "Credit Requests", href: "/teacher/credit-requests" },
         ]
     },
 ]
 
-export function Sidebar() {
+export function TeacherSidebar() {
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = React.useState(false)
 
@@ -64,19 +45,19 @@ export function Sidebar() {
             {/* Logo Section */}
             <div className="p-4 flex items-center justify-between">
                 {!isCollapsed && (
-                    <Link href="/admin" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-lg shadow-slate-200">
-                            <ShieldCheck className="h-5 w-5 text-white" />
+                    <Link href="/teacher" className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
+                            <GraduationCap className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-sm font-black font-outfit text-slate-900 tracking-tight leading-none">ADMIN HUB</span>
+                            <span className="text-sm font-black font-outfit text-slate-900 tracking-tight leading-none">TEACHER HUB</span>
                             <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] mt-0.5 uppercase leading-none text-primary">IELTS LOVER</span>
                         </div>
                     </Link>
                 )}
                 {isCollapsed && (
-                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-200 mx-auto">
-                        <ShieldCheck className="h-6 w-6 text-white" />
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 mx-auto">
+                        <GraduationCap className="h-6 w-6 text-white" />
                     </div>
                 )}
 
@@ -101,8 +82,7 @@ export function Sidebar() {
                                 </h3>
                             )}
                             {group.items.map((item) => {
-                                // Handle sub-routes highlighting (e.g. /admin/exercises/new matches /admin/exercises)
-                                const isActive = pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href))
+                                const isActive = pathname === item.href || (item.href !== "/teacher" && pathname?.startsWith(item.href))
 
                                 return (
                                     <Link
@@ -111,11 +91,11 @@ export function Sidebar() {
                                         className={cn(
                                             "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
                                             isActive
-                                                ? "bg-primary text-white shadow-lg shadow-primary/25"
+                                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
                                                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                         )}
                                     >
-                                        <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "group-hover:text-primary transition-colors")} />
+                                        <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "group-hover:text-indigo-600 transition-colors")} />
                                         {!isCollapsed && <span className="text-sm font-bold tracking-tight">{item.label}</span>}
 
                                         {isCollapsed && (

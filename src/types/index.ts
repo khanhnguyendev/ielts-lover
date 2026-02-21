@@ -4,7 +4,7 @@ export type UserProfile = {
     target_score: number;
     test_type: "academic" | "general";
     exam_date?: string;
-    role: "user" | "admin";
+    role: "user" | "admin" | "teacher";
     credits_balance: number;
     last_daily_grant_at: string;
     created_at: string;
@@ -59,6 +59,29 @@ export type CreditPackage = {
     display_order: number;
     created_at: string;
     updated_at: string;
+};
+
+export type TeacherStudent = {
+    id: string;
+    teacher_id: string;
+    student_id: string;
+    assigned_by?: string;
+    created_at: string;
+};
+
+export type CreditRequest = {
+    id: string;
+    teacher_id: string;
+    student_id: string;
+    amount: number;
+    reason: string;
+    status: "pending" | "approved" | "rejected";
+    reviewed_by?: string;
+    reviewed_at?: string;
+    admin_note?: string;
+    created_at: string;
+    student?: { email: string; full_name?: string };
+    teacher?: { email: string; full_name?: string };
 };
 
 export * from "./lesson";

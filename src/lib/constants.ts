@@ -11,6 +11,7 @@ export const TRANSACTION_TYPES = {
     REWARD: 'reward',
     GIFT_CODE: 'gift_code',
     REFERRAL_REWARD: 'referral_reward',
+    TEACHER_GRANT: 'teacher_grant',
 } as const;
 
 export type TransactionType = typeof TRANSACTION_TYPES[keyof typeof TRANSACTION_TYPES];
@@ -18,6 +19,7 @@ export type TransactionType = typeof TRANSACTION_TYPES[keyof typeof TRANSACTION_
 export const USER_ROLES = {
     USER: 'user',
     ADMIN: 'admin',
+    TEACHER: 'teacher',
 } as const;
 
 export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
@@ -82,6 +84,8 @@ export const DB_TABLES = {
     LESSON_QUESTIONS: 'lesson_questions',
     USER_MISTAKES: 'user_mistakes',
     USER_ACTION_PLANS: 'user_action_plans',
+    TEACHER_STUDENTS: 'teacher_students',
+    CREDIT_REQUESTS: 'credit_requests',
 } as const;
 
 export const TRANSACTION_FILTERS = {
@@ -124,6 +128,14 @@ export const ERROR_CATEGORIES = {
 } as const;
 
 export type ErrorCategory = typeof ERROR_CATEGORIES[keyof typeof ERROR_CATEGORIES];
+
+export const CREDIT_REQUEST_STATUS = {
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+} as const;
+
+export type CreditRequestStatus = typeof CREDIT_REQUEST_STATUS[keyof typeof CREDIT_REQUEST_STATUS];
 
 export const CHART_TYPES = {
     LINE_GRAPH: 'line_graph',

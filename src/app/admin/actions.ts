@@ -20,11 +20,15 @@ import { CreditTransactionRepository } from "@/repositories/transaction.reposito
 import { CreditPackageRepository } from "@/repositories/credit-package.repository";
 import { SystemSettingsRepository } from "@/repositories/system-settings.repository";
 import { FeaturePricingRepository } from "@/repositories/pricing.repository";
+import { TeacherStudentRepository } from "@/repositories/teacher-student.repository";
+import { CreditRequestRepository } from "@/repositories/credit-request.repository";
 import { CreditPackage } from "@/types";
 import { StorageService } from "@/services/storage.service";
 import { CreditService } from "@/services/credit.service";
+import { TeacherService } from "@/services/teacher.service";
 
 import { traceService, traceAction } from "@/lib/aop";
+import { USER_ROLES, UserRole } from "@/lib/constants";
 
 const logger = new Logger("AdminActions");
 const creditPackageRepo = traceService(new CreditPackageRepository(), "CreditPackageRepository");
@@ -41,6 +45,12 @@ const lessonService = traceService(new LessonService(lessonRepo), "LessonService
 const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
 const storageService = traceService(new StorageService(), "StorageService");
 const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
+const teacherStudentRepo = traceService(new TeacherStudentRepository(), "TeacherStudentRepository");
+const creditRequestRepo = traceService(new CreditRequestRepository(), "CreditRequestRepository");
+const teacherService = traceService(
+    new TeacherService(teacherStudentRepo, creditRequestRepo, attemptRepo, userRepo, creditService),
+    "TeacherService"
+);
 
 export const seedCreditPackages = traceAction("seedCreditPackages", async () => {
     await checkAdmin();
@@ -322,4 +332,82 @@ export const updateFeaturePricing = traceAction("updateFeaturePricing", async (k
     await checkAdmin();
     await pricingRepo.updatePricing(key, cost);
     revalidatePath("/admin/settings");
+});
+
+// ── Teacher Management ──
+
+export const setUserRole = traceAction("setUserRole", async (userId: string, role: string) => {
+    await checkAdmin();
+
+    const validRoles = Object.values(USER_ROLES);
+    if (!validRoles.includes(role as any)) {
+        throw new Error(`Invalid role: ${role}`);
+    }
+
+    const targetUser = await userRepo.getById(userId);
+    if (targetUser?.role === USER_ROLES.ADMIN) {
+        throw new Error("Cannot change the role of an admin account");
+    }
+
+    await userRepo.update(userId, { role: role as UserRole });
+    revalidatePath("/admin/users");
+    logger.info("Admin changed user role", { userId, role });
+});
+
+export const assignTeacherStudent = traceAction("assignTeacherStudent", async (teacherId: string, studentId: string) => {
+    const admin = await getCurrentUser();
+    if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
+
+    await teacherService.assignStudent(teacherId, studentId, admin!.id);
+    revalidatePath("/admin/users");
+    logger.info("Admin assigned teacher-student link", { teacherId, studentId });
+});
+
+export const unassignTeacherStudent = traceAction("unassignTeacherStudent", async (teacherId: string, studentId: string) => {
+    await checkAdmin();
+    await teacherService.unassignStudent(teacherId, studentId);
+    revalidatePath("/admin/users");
+    logger.info("Admin removed teacher-student link", { teacherId, studentId });
+});
+
+export async function getTeacherStudents(teacherId: string) {
+    await checkAdmin();
+    return teacherStudentRepo.getStudentsByTeacher(teacherId);
+}
+
+export async function getAllUsers() {
+    await checkAdmin();
+    return userRepo.listAll();
+}
+
+// ── Credit Request Management ──
+
+export async function getPendingCreditRequests() {
+    await checkAdmin();
+    return teacherService.getPendingCreditRequests();
+}
+
+export async function getAllCreditRequests() {
+    await checkAdmin();
+    return teacherService.getAllCreditRequests();
+}
+
+export const approveCreditRequest = traceAction("approveCreditRequest", async (requestId: string, adminNote?: string) => {
+    const admin = await getCurrentUser();
+    if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
+
+    await teacherService.approveCreditRequest(requestId, admin!.id, adminNote);
+    revalidatePath("/admin/credit-requests");
+    revalidatePath("/teacher/credit-requests");
+    logger.info("Admin approved credit request", { requestId });
+});
+
+export const rejectCreditRequest = traceAction("rejectCreditRequest", async (requestId: string, adminNote?: string) => {
+    const admin = await getCurrentUser();
+    if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
+
+    await teacherService.rejectCreditRequest(requestId, admin!.id, adminNote);
+    revalidatePath("/admin/credit-requests");
+    revalidatePath("/teacher/credit-requests");
+    logger.info("Admin rejected credit request", { requestId });
 });

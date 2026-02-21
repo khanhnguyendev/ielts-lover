@@ -19,9 +19,11 @@ import {
     MoreHorizontal,
     User,
     History,
-    Ban
+    Ban,
+    GraduationCap,
+    UserMinus,
 } from "lucide-react";
-import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts } from "../actions";
+import { getAdminUsers, adjustUserCredits, getAdminUserTransactions, getAdminUserAttempts, setUserRole } from "../actions";
 import { UserProfile } from "@/types";
 import { USER_ROLES, ATTEMPT_STATES } from "@/lib/constants";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -79,6 +81,9 @@ export default function UsersPage() {
     const [userAttempts, setUserAttempts] = useState<any[]>([]);
     const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
 
+    // Role filter
+    const [roleFilter, setRoleFilter] = useState<string>("all");
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -132,10 +137,22 @@ export default function UsersPage() {
         }
     }
 
-    const filteredUsers = users.filter(u =>
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredUsers = users.filter(u => {
+        const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = roleFilter === "all" || u.role === roleFilter;
+        return matchesSearch && matchesRole;
+    });
+
+    const handleSetRole = async (userId: string, role: string) => {
+        try {
+            await setUserRole(userId, role);
+            notifySuccess("Role Updated", `User role changed to ${role}`);
+            fetchUsers();
+        } catch (error) {
+            notifyError("Role Update Failed", error instanceof Error ? error.message : "Failed to update role");
+        }
+    };
 
     const handleAdjustCredits = async () => {
         if (!selectedUser) return;
@@ -159,7 +176,28 @@ export default function UsersPage() {
 
     return (
         <div className="space-y-6 p-6">
-            <div className="flex justify-end items-center">
+            <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                    {[
+                        { label: "All", value: "all" },
+                        { label: "Students", value: USER_ROLES.USER },
+                        { label: "Teachers", value: USER_ROLES.TEACHER },
+                        { label: "Admins", value: USER_ROLES.ADMIN },
+                    ].map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => setRoleFilter(opt.value)}
+                            className={cn(
+                                "px-4 py-2 rounded-xl text-xs font-black transition-all",
+                                roleFilter === opt.value
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            )}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
                 <div className="flex space-x-3">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -232,10 +270,13 @@ export default function UsersPage() {
                                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
                                             user.role === USER_ROLES.ADMIN
                                                 ? "bg-amber-100 text-amber-700 border border-amber-200"
-                                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                                                : user.role === USER_ROLES.TEACHER
+                                                    ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
+                                                    : "bg-slate-100 text-slate-600 border border-slate-200"
                                         )}>
                                             {user.role === USER_ROLES.ADMIN && <ShieldCheck size={12} />}
-                                            {user.role === USER_ROLES.ADMIN ? "Admin" : "Member"}
+                                            {user.role === USER_ROLES.TEACHER && <GraduationCap size={12} />}
+                                            {user.role === USER_ROLES.ADMIN ? "Admin" : user.role === USER_ROLES.TEACHER ? "Teacher" : "Student"}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -307,6 +348,26 @@ export default function UsersPage() {
                                                         <History size={14} className="text-slate-400" />
                                                         Attempt History
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role Management</DropdownMenuLabel>
+                                                    {user.role === USER_ROLES.USER && (
+                                                        <DropdownMenuItem
+                                                            className="gap-2 font-bold text-sm py-2.5 text-indigo-600 focus:text-indigo-600 focus:bg-indigo-50 cursor-pointer"
+                                                            onClick={() => handleSetRole(user.id, USER_ROLES.TEACHER)}
+                                                        >
+                                                            <GraduationCap size={14} />
+                                                            Promote to Teacher
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {user.role === USER_ROLES.TEACHER && (
+                                                        <DropdownMenuItem
+                                                            className="gap-2 font-bold text-sm py-2.5 text-slate-600 focus:text-slate-600 focus:bg-slate-50 cursor-pointer"
+                                                            onClick={() => handleSetRole(user.id, USER_ROLES.USER)}
+                                                        >
+                                                            <UserMinus size={14} />
+                                                            Demote to Student
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
                                                         disabled={user.role === USER_ROLES.ADMIN}
@@ -460,9 +521,13 @@ export default function UsersPage() {
                                 <div className="mt-2 flex gap-2">
                                     <Badge className={cn(
                                         "rounded-full text-[9px] font-black uppercase tracking-widest",
-                                        detailsUser?.role === USER_ROLES.ADMIN ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
+                                        detailsUser?.role === USER_ROLES.ADMIN
+                                            ? "bg-amber-100 text-amber-700 hover:bg-amber-100"
+                                            : detailsUser?.role === USER_ROLES.TEACHER
+                                                ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-100"
+                                                : "bg-slate-100 text-slate-600 hover:bg-slate-100"
                                     )}>
-                                        {detailsUser?.role === USER_ROLES.ADMIN ? "Admin" : "Member"}
+                                        {detailsUser?.role === USER_ROLES.ADMIN ? "Admin" : detailsUser?.role === USER_ROLES.TEACHER ? "Teacher" : "Student"}
                                     </Badge>
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LogOut, User, CreditCard, Settings, ChevronRight, Zap } from "lucide-react"
+import { LogOut, User, CreditCard, Settings, ChevronRight, Zap, GraduationCap, ShieldCheck } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { signOut } from "@/app/actions"
 import { useState } from "react"
 import { UserProfile } from "@/types"
+import { USER_ROLES } from "@/lib/constants"
 import { PulseLoader } from "./pulse-loader"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -104,6 +105,26 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                     </div>
 
                     <div className="mt-3 space-y-1">
+                        {(user.role === USER_ROLES.TEACHER || user.role === USER_ROLES.ADMIN) && (
+                            <div className="mb-2">
+                                <Link href="/teacher">
+                                    <DropdownMenuItem className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-bold text-indigo-600 hover:bg-indigo-50 focus:bg-indigo-50 transition-all border border-transparent">
+                                        <GraduationCap className="mr-3 h-4 w-4" />
+                                        <span className="flex-1">Teacher Dashboard</span>
+                                    </DropdownMenuItem>
+                                </Link>
+                            </div>
+                        )}
+                        {user.role === USER_ROLES.ADMIN && (
+                            <div className="mb-2">
+                                <Link href="/admin">
+                                    <DropdownMenuItem className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-bold text-amber-600 hover:bg-amber-50 focus:bg-amber-50 transition-all border border-transparent">
+                                        <ShieldCheck className="mr-3 h-4 w-4" />
+                                        <span className="flex-1">Admin Console</span>
+                                    </DropdownMenuItem>
+                                </Link>
+                            </div>
+                        )}
                         <DropdownMenuGroup>
                             <Link href="/dashboard/settings">
                                 <DropdownMenuItem className="rounded-2xl cursor-pointer py-3.5 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 focus:bg-slate-50 transition-all border border-transparent whitespace-nowrap overflow-hidden">

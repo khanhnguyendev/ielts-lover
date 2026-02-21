@@ -1,5 +1,5 @@
-import { TransactionType, SkillType, ErrorCategory } from "@/lib/constants";
-import { UserProfile, Exercise, Attempt, ExerciseType } from "@/types";
+import { TransactionType, SkillType, ErrorCategory, CreditRequestStatus } from "@/lib/constants";
+import { UserProfile, Exercise, Attempt, ExerciseType, TeacherStudent, CreditRequest } from "@/types";
 
 export interface IUserRepository {
     getById(id: string): Promise<UserProfile | null>;
@@ -117,4 +117,21 @@ export interface IMistakeRepository {
 export interface IActionPlanRepository {
     save(plan: Omit<UserActionPlan, 'id' | 'created_at'>): Promise<UserActionPlan>;
     getLatest(userId: string): Promise<UserActionPlan | null>;
+}
+
+export interface ITeacherStudentRepository {
+    assign(teacherId: string, studentId: string, assignedBy: string): Promise<TeacherStudent>;
+    unassign(teacherId: string, studentId: string): Promise<void>;
+    getStudentsByTeacher(teacherId: string): Promise<UserProfile[]>;
+    getTeachersByStudent(studentId: string): Promise<UserProfile[]>;
+    isLinked(teacherId: string, studentId: string): Promise<boolean>;
+}
+
+export interface ICreditRequestRepository {
+    create(data: { teacher_id: string; student_id: string; amount: number; reason: string }): Promise<CreditRequest>;
+    getById(id: string): Promise<CreditRequest | null>;
+    listByTeacher(teacherId: string): Promise<CreditRequest[]>;
+    listPending(): Promise<CreditRequest[]>;
+    listAll(): Promise<CreditRequest[]>;
+    updateStatus(id: string, status: CreditRequestStatus, reviewedBy: string, adminNote?: string): Promise<void>;
 }
