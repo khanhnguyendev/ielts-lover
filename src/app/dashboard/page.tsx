@@ -6,13 +6,15 @@ import {
     Zap,
     ChevronRight,
     Calendar,
-    Edit3,
     PenTool,
     Mic2,
     CheckCircle2,
     ArrowRight,
     Send,
-    Sparkles
+    Sparkles,
+    Target,
+    TrendingUp,
+    Clock
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -22,6 +24,7 @@ import { getCurrentUser } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
+
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
@@ -62,254 +65,220 @@ export default function DashboardPage() {
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-            <div className="p-6 lg:p-8 space-y-8 max-w-5xl mx-auto animate-in fade-in duration-700">
-                {/* 1. Daily Quota Banner */}
-                <div className="bg-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between text-white shadow-lg shadow-primary/20 gap-4 transition-all hover:shadow-primary/30">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className="bg-white/20 p-2 rounded-xl flex-shrink-0">
-                            <Zap className="h-5 w-5 fill-white" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold font-outfit text-white">
-                                You have {user?.credits_balance || 0} StarCredits available
-                            </h3>
-                            <p className="text-[10px] text-white/80 font-medium mt-0.5">Daily grants add credits every 24 hours</p>
-                        </div>
-                    </div>
+            <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+                {/* 1. Quick Stats Header */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard
+                        icon={Zap}
+                        label="StarCredits"
+                        value={user?.credits_balance?.toString() || "0"}
+                        subLabel="Credits available"
+                        color="text-amber-600"
+                        bgColor="bg-amber-50"
+                    />
+                    <StatCard
+                        icon={Target}
+                        label="Target Score"
+                        value={user?.target_score?.toString() || "7.5"}
+                        subLabel={`IELTS ${user?.test_type || "Academic"}`}
+                        color="text-primary"
+                        bgColor="bg-primary/5"
+                    />
+                    <StatCard
+                        icon={Calendar}
+                        label="Exam Date"
+                        value={user?.exam_date ? new Date(user.exam_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "Not set"}
+                        subLabel={user?.exam_date ? new Date(user.exam_date).getFullYear().toString() : "Set in settings"}
+                        color="text-blue-600"
+                        bgColor="bg-blue-50"
+                    />
+                    <StatCard
+                        icon={TrendingUp}
+                        label="Practice Level"
+                        value="B2+"
+                        subLabel="Estimated Level"
+                        color="text-emerald-600"
+                        bgColor="bg-emerald-50"
+                    />
                 </div>
 
-                {/* 2. IELTS Info Card */}
-                <div className="bg-card rounded-2xl border p-5 flex flex-wrap gap-6 items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center">
-                            <Calendar className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <div>
-                            <h4 className="text-lg font-bold font-outfit uppercase">IELTS {user?.test_type || "Academic"}</h4>
-                            <p className="text-sm text-muted-foreground font-medium">{user?.exam_date || "No date selected"}</p>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Left Column: AI Coach & Actions */}
+                    <div className="lg:col-span-12 space-y-6">
 
-                    <div className="flex gap-10">
-                        <div className="text-center">
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Target Score</p>
-                            <div className="text-2xl font-black font-outfit text-primary">{user?.target_score || "7.0"}</div>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Writing</p>
-                            <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60 mb-1">Speaking</p>
-                            <div className="text-2xl font-black font-outfit text-muted-foreground/60">--</div>
-                        </div>
-                    </div>
+                        {/* AI Coach Console */}
+                        <div className="relative overflow-hidden bg-card border-none rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 group">
+                            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <Sparkles size={120} className="text-primary" />
+                            </div>
 
-                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
-                        <Edit3 className="h-5 w-5" />
-                    </Button>
-                </div>
-
-                {/* 3. Horsebot Greeting & AI Input */}
-                <div className="text-center space-y-4 py-4">
-                    <div className="relative inline-block">
-                        <div className="w-20 h-20 bg-card border-2 border-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                            <span className="text-4xl">🐴</span>
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full animate-bounce">
-                            <Sparkles className="h-4 w-4" />
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <h1 className="text-3xl">Hi, I&apos;m your IELTS Coach!</h1>
-                        <p className="text-foreground-secondary font-medium text-base">
-                            ✨ I&apos;m here to make your IELTS preparation effective and fun. ✨
-                        </p>
-                    </div>
-
-                    <div className="max-w-xl mx-auto relative group pt-2">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="relative bg-card border-2 border-muted hover:border-primary/30 transition-all rounded-2xl p-2 shadow-sm">
-                            <textarea
-                                placeholder="Ask anything in your language"
-                                className="w-full h-20 p-3 text-sm bg-transparent border-none focus:ring-0 resize-none font-medium"
-                                value={chatInput}
-                                onChange={(e) => setChatInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault()
-                                        handleChatSubmit()
-                                    }
-                                }}
-                            />
-                            <div className="flex items-center justify-between px-2 pb-2 mt-1">
-                                <div className="flex gap-2">
-                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Ask")}>Ask</Button>
-                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Learn")}>Learn</Button>
-                                    <Button variant="soft" size="xs" onClick={() => handleFeatureClick("Support")}>Support</Button>
+                            <div className="relative flex flex-col md:flex-row items-center gap-6">
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-105 transition-transform duration-500">
+                                        🐴
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 bg-primary text-white p-1 rounded-full border-2 border-white">
+                                        <Sparkles size={10} />
+                                    </div>
                                 </div>
-                                <Button size="icon-sm" className="shadow-lg shadow-primary/20 hover:scale-110" onClick={handleChatSubmit}>
-                                    <Send className="h-4 w-4 text-white" />
-                                </Button>
+
+                                <div className="flex-1 text-center md:text-left">
+                                    <h1 className="text-xl font-black text-slate-900 leading-none mb-2">Hello, {user?.full_name?.split(' ')[0] || 'Learner'}!</h1>
+                                    <p className="text-sm font-medium text-slate-500 max-w-md">I&apos;m your AI IELTS Coach. Ask me anything about writing or speaking, or let&apos;s start a practice session.</p>
+                                </div>
+
+                                <div className="w-full md:max-w-md relative group/input">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-indigo-100 rounded-2xl blur opacity-25 group-hover/input:opacity-100 transition duration-1000 group-hover/input:duration-200"></div>
+                                    <div className="relative bg-white border border-slate-100 rounded-2xl p-1.5 flex items-center shadow-sm hover:shadow-md transition-all">
+                                        <input
+                                            type="text"
+                                            placeholder="Ask Horsebot a question..."
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium px-3 py-2"
+                                            value={chatInput}
+                                            onChange={(e) => setChatInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleChatSubmit()
+                                            }}
+                                        />
+                                        <Button size="icon-sm" className="rounded-xl shadow-lg shadow-primary/20" onClick={handleChatSubmit}>
+                                            <Send size={14} className="text-white" />
+                                        </Button>
+                                    </div>
+                                    <div className="flex gap-2 mt-2 px-1">
+                                        {['Analyze Task', 'Check Grammar', 'Sample Idea'].map((hint) => (
+                                            <button
+                                                key={hint}
+                                                onClick={() => handleFeatureClick(hint)}
+                                                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors py-1 focus:outline-none"
+                                            >
+                                                {hint}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* 4. Getting Started Progress */}
-                <div className="space-y-5">
-                    <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-primary/10 p-2 rounded-xl">
-                                <Zap className="h-5 w-5 text-primary" />
+                        {/* Practice & Getting Started Split */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                            {/* Practice Writing */}
+                            <Link href="/dashboard/writing" className="group">
+                                <div className="h-full bg-white border border-slate-100 p-6 rounded-[2rem] hover:shadow-2xl hover:shadow-purple-100 hover:-translate-y-1 transition-all duration-300">
+                                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <PenTool size={22} />
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-900 mb-1">Writing</h3>
+                                    <p className="text-xs font-medium text-slate-500 mb-6">Task 1 & Task 2 exercises with instant AI grading.</p>
+                                    <div className="flex items-center text-purple-600 text-xs font-black uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                                        Start Practice <ArrowRight size={14} className="ml-2" />
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Practice Speaking */}
+                            <Link href="/dashboard/speaking" className="group">
+                                <div className="h-full bg-white border border-slate-100 p-6 rounded-[2rem] hover:shadow-2xl hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Mic2 size={22} />
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-900 mb-1">Speaking</h3>
+                                    <p className="text-xs font-medium text-slate-500 mb-6">Full mock tests or part-specific practice with voice analysis.</p>
+                                    <div className="flex items-center text-blue-600 text-xs font-black uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                                        Open Booth <ArrowRight size={14} className="ml-2" />
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Getting Started Guide */}
+                            <div className="bg-slate-900 p-6 rounded-[2rem] text-white flex flex-col justify-between">
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-black">Onboarding</h3>
+                                        <span className="text-primary font-black font-outfit text-xl">
+                                            {user?.target_score ? "100%" : "25%"}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <OnboardingItem label="Target Score" completed={!!user?.target_score} />
+                                        <OnboardingItem label="Speaking Level" />
+                                        <OnboardingItem label="Writing Level" />
+                                    </div>
+                                </div>
+                                <Progress value={user?.target_score ? 100 : 25} className="h-1 bg-white/10 mt-6" />
                             </div>
-                            <h3 className="text-xl font-bold font-outfit">Getting Started</h3>
                         </div>
-                        <span className="text-lg font-black font-outfit text-primary">
-                            {user?.target_score ? "100%" : "25%"}
-                        </span>
-                    </div>
-                    <Progress value={user?.target_score ? 100 : 25} className="h-2 bg-muted rounded-full overflow-hidden" />
 
-                    <div className="grid grid-cols-1 gap-2.5 pt-2">
-                        <OnboardingStep label="Add your target score" completed={!!user?.target_score} href="/dashboard/settings" />
-                        <OnboardingStep label="Learn your speaking level" href="/dashboard/speaking" />
-                        <OnboardingStep label="Learn your writing level" href="/dashboard/writing" />
-                        <OnboardingStep label="View sample reports" href="/dashboard/samples" />
-                    </div>
-                </div>
+                        {/* Recent Activity */}
+                        <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm overflow-hidden">
+                            <div className="flex items-center justify-between mb-6 px-1">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400">
+                                        <Clock size={16} />
+                                    </div>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-800">Recent Activity</h3>
+                                </div>
+                                <Link href="/dashboard/reports" className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:underline">
+                                    Full History
+                                </Link>
+                            </div>
 
-                {/* 5. Start Practice Cards */}
-                <div className="space-y-5">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 p-2 rounded-xl">
-                            <Zap className="h-5 w-5 text-primary" />
+                            <div className="space-y-1">
+                                <div className="text-center py-10">
+                                    <div className="text-4xl grayscale opacity-30 mb-4">🐴💤</div>
+                                    <h4 className="text-sm font-bold text-slate-600">No recent reports found</h4>
+                                    <p className="text-[10px] text-slate-400 font-medium mt-1">Start practicing to see your progress here.</p>
+                                </div>
+                            </div>
                         </div>
-                        <h3 className="text-xl font-bold font-outfit">Start Practice</h3>
-                    </div>
-                    <p className="text-sm text-foreground-secondary font-medium">Ready to improve your IELTS score? Choose a skill to practice now!</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                        <Link href="/dashboard/writing" className="flex-1">
-                            <PracticeCard
-                                title="Writing Practice"
-                                desc="Practice Task 1 & Task 2"
-                                icon={PenTool}
-                                buttonText="Start Writing"
-                            />
-                        </Link>
-                        <Link href="/dashboard/speaking" className="flex-1">
-                            <PracticeCard
-                                title="Speaking Practice"
-                                desc="Practice Part 1, Part 2, Part 3"
-                                icon={Mic2}
-                                buttonText="Start Speaking"
-                            />
-                        </Link>
-                    </div>
-                </div>
-
-                {/* 6. Recent Activity (Empty State) */}
-                <div className="bg-card rounded-3xl border p-6 space-y-6 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
-                            <Calendar className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-xl font-bold font-outfit">Recent Activity</h3>
-                    </div>
-
-                    <div className="hidden md:grid grid-cols-5 text-[10px] uppercase tracking-widest font-black text-muted-foreground/60 border-b pb-4">
-                        <div>Time</div>
-                        <div>Task</div>
-                        <div>Task Description</div>
-                        <div>Status</div>
-                        <div className="text-right">Score</div>
-                    </div>
-
-                    <div className="text-center py-12 space-y-6">
-                        <div className="text-8xl grayscale opacity-50">🐴🪴</div>
-                        <div className="space-y-2">
-                            <h4 className="text-lg font-bold">You don&apos;t have any reports yet.</h4>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto font-medium leading-relaxed">
-                                Check out sample reports to see feedback examples.
-                            </p>
-                        </div>
-                        <Link href="/dashboard/samples">
-                            <Button variant="default" size="lg" className="px-10">
-                                View Sample Reports
-                            </Button>
-                        </Link>
-                    </div>
-
-                    <div className="pt-8 border-t text-center">
-                        <Link href="/dashboard/reports">
-                            <Button variant="ghost" className="text-primary hover:bg-primary/5 group">
-                                View all in My Reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </Button>
-                        </Link>
                     </div>
                 </div>
             </div>
 
-            <footer className="mt-auto py-8 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em] border-t bg-white/30">
-                © 2026 IELTS Lover. &nbsp; Terms · Privacy · Contact us
+            <footer className="mt-auto py-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] border-t border-slate-50 bg-white/50">
+                © 2026 IELTS LOVER &nbsp; • &nbsp; AI POWERED COACHING
             </footer>
         </div>
     )
 }
 
-function OnboardingStep({ label, completed = false, href }: { label: string, completed?: boolean, href?: string }) {
-    const content = (
-        <div className={cn(
-            "flex items-center justify-between p-3.5 rounded-xl border-2 transition-all cursor-pointer",
-            completed ? "bg-muted/30 border-muted opacity-60 hover:opacity-100" : "bg-white border-muted hover:border-primary/20 hover:bg-primary/5"
-        )}>
-            <div className="flex items-center gap-4">
-                <div className={cn(
-                    "w-9 h-9 rounded-xl flex items-center justify-center",
-                    completed ? "bg-green-500" : "bg-muted"
-                )}>
-                    {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <Edit3 className="h-4 w-4 text-muted-foreground" />}
+
+function StatCard({ icon: Icon, label, value, subLabel, color, bgColor }: any) {
+    return (
+        <div className="bg-white border border-slate-100 p-5 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow group">
+            <div className="flex justify-between items-start mb-3">
+                <div className={cn("p-2 rounded-xl", bgColor, color)}>
+                    <Icon size={18} />
                 </div>
-                <span className={cn("text-sm font-bold", completed && "line-through text-muted-foreground")}>{label}</span>
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">
+                    {label}
+                </div>
             </div>
-            {!completed && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            <div className="space-y-0.5">
+                <div className="text-2xl font-black font-outfit text-slate-900">{value}</div>
+                <div className="text-[10px] font-medium text-slate-400">{subLabel}</div>
+            </div>
         </div>
     )
-
-    if (href) {
-        return <Link href={href} className="block">{content}</Link>
-    }
-    
-    return content
 }
 
-function PracticeCard({
-    title,
-    desc,
-    icon: Icon,
-    buttonText
-}: {
-    title: string,
-    desc: string,
-    icon: any,
-    buttonText: string
-}) {
+function OnboardingItem({ label, completed = false }: { label: string, completed?: boolean }) {
     return (
-        <div className="bg-card p-6 rounded-3xl border flex flex-col items-center text-center gap-5 shadow-sm hover:shadow-xl transition-all duration-300 group ring-primary/5 hover:ring-8 h-full">
-            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
-                <Icon className="h-6 w-6 text-primary" />
+        <div className="flex items-center gap-3">
+            <div className={cn(
+                "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors",
+                completed ? "bg-primary border-primary" : "border-white/20"
+            )}>
+                {completed && <CheckCircle2 size={10} className="text-slate-900" />}
             </div>
-            <div className="space-y-1">
-                <h4 className="text-xl font-black font-outfit">{title}</h4>
-                <p className="text-sm text-foreground-secondary font-medium">{desc}</p>
-            </div>
-            <Button className="w-full font-black text-sm shadow-lg shadow-primary/20 transition-all group-hover:bg-primary/90">
-                <div className="flex items-center gap-2">
-                    <PenTool className="h-4 w-4" />
-                    {buttonText}
-                </div>
-            </Button>
+            <span className={cn(
+                "text-xs font-bold transition-all",
+                completed ? "text-white/40 line-through" : "text-white"
+            )}>
+                {label}
+            </span>
         </div>
     )
 }
