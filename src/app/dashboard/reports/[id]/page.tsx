@@ -146,26 +146,32 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             {isSample ? "Back to Samples" : "Back"}
                         </Link>
                         <div className="flex items-center gap-6">
-                            <span className="text-sm font-bold text-muted-foreground flex items-center">
-                                {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
-                                <span className="text-muted-foreground/80 ml-2">
-                                    <span className="font-bold">Analysis Date:</span> {isSample ? "2026-02-14 10:30" : new Date(realData!.created_at).toLocaleString([], {
-                                        year: 'numeric',
-                                        month: 'numeric',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
+                            <div className="flex flex-col items-end gap-1">
+                                <span className="text-sm font-bold text-muted-foreground flex items-center">
+                                    {isSample ? `${sampleData.type} Sample Analysis` : "Analysis"}
                                 </span>
-                                {(isSample || realData?.exercise_id) && (
-                                    <>
-                                        <span className="text-muted-foreground/40 mx-2">•</span>
-                                        <span className="text-muted-foreground/80">
-                                            <span className="font-bold">Exercise ID:</span> <span className="font-mono text-xs font-medium">{isSample ? `sample-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
+                                {(isSample || realData) && (
+                                    <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-muted-foreground">
+                                            <span className="font-bold text-foreground/80">Analysis Date:</span> {isSample ? "2026-02-14 10:30" : new Date(realData!.created_at).toLocaleString([], {
+                                                year: 'numeric',
+                                                month: 'numeric',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
                                         </span>
-                                    </>
+                                        {(isSample || realData?.exercise_id) && (
+                                            <>
+                                                <span className="text-muted-foreground/40">•</span>
+                                                <span className="text-muted-foreground">
+                                                    <span className="font-bold text-foreground/80">Exercise ID:</span> <span className="font-mono font-medium">{isSample ? `sample-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
                                 )}
-                            </span>
+                            </div>
                             <Button variant="ghost" size="icon" className="text-muted-foreground rounded-lg">
                                 <Share2 className="h-4 w-4" />
                             </Button>
