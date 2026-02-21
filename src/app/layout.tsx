@@ -17,6 +17,10 @@ import { NotificationProvider } from "@/lib/contexts/notification-context";
 export const metadata: Metadata = {
   title: "IELTS Lover | AI-Powered IELTS Preparation",
   description: "Master the IELTS with AI-driven scoring, feedback, and personalized practice.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
