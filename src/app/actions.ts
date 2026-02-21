@@ -66,9 +66,7 @@ export async function getExerciseById(id: string) {
     return exerciseService.getExercise(id);
 }
 
-export async function startAttempt(userId: string, exerciseId: string) {
-    return attemptService.startAttempt(userId, exerciseId);
-}
+
 
 export async function checkFeatureAccess(feature: string, cost: number = 0) {
     const user = await getCurrentUser();
