@@ -26,6 +26,7 @@ export async function GET(request: Request) {
                     email: user.email!,
                     full_name: metadata.full_name || metadata.name || null,
                     avatar_url: metadata.avatar_url || metadata.picture || null,
+                    last_seen_at: new Date().toISOString()
                 };
 
                 const { data: existingProfile } = await serviceSupabase
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
                             .update({
                                 full_name: profileUpdates.full_name,
                                 avatar_url: profileUpdates.avatar_url,
+                                last_seen_at: profileUpdates.last_seen_at,
                             })
                             .eq("id", user.id);
 

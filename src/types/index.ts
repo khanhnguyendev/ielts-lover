@@ -10,6 +10,7 @@ export type UserProfile = {
     created_at: string;
     avatar_url?: string;
     full_name?: string;
+    last_seen_at: string;
 };
 
 export type ExerciseType = "writing_task1" | "writing_task2" | "speaking_part1" | "speaking_part2" | "speaking_part3";

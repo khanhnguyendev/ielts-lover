@@ -183,6 +183,7 @@ export default function UsersPage() {
                         <TableRow className="hover:bg-transparent border-slate-100">
                             <TableHead className="text-[10px] font-black uppercase tracking-widest pl-6">User Profile</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Status</TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Last Active</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Current Credits</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Joined</TableHead>
                             <TableHead className="text-right pr-6 text-[10px] font-black uppercase tracking-widest">Actions</TableHead>
@@ -238,14 +239,29 @@ export default function UsersPage() {
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex flex-col items-center gap-0.5">
+                                            <span className="text-xs font-bold text-slate-500">
+                                                {user.last_seen_at ? new Date(user.last_seen_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
+                                            </span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                {user.last_seen_at ? new Date(user.last_seen_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex flex-col items-center gap-0.5">
                                             <span className="text-sm font-black text-slate-900 font-mono">{user.credits_balance ?? 0}</span>
                                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">StarCredits</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <p className="text-xs font-bold text-slate-500">
-                                            {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </p>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <p className="text-xs font-bold text-slate-500">
+                                                {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                {new Date(user.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                            </p>
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-right pr-6">
                                         <div className="flex justify-end gap-2">
