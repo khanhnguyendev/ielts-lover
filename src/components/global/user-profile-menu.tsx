@@ -68,64 +68,60 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className="w-[320px] mt-4 p-0 shadow-2xl border border-slate-100 bg-white rounded-[2.5rem] overflow-hidden animate-in fade-in zoom-in-95 duration-300"
+                className="w-[280px] mt-4 p-0 shadow-2xl border border-slate-100 bg-white rounded-[2rem] overflow-hidden animate-in fade-in zoom-in-95 duration-300"
                 align="end"
             >
-                {/* 1. Premium Header */}
-                <div className="bg-slate-900 p-8 text-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full -mr-20 -mt-20 blur-[60px]" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full -ml-12 -mb-12 blur-[40px]" />
+                {/* 1. Premium Header (Compacted) */}
+                <div className="bg-slate-900 p-6 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-[50px]" />
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-purple-500/10 rounded-full -ml-10 -mb-10 blur-[30px]" />
 
-                    <div className="flex items-center gap-5 relative z-10">
+                    <div className="flex items-center gap-4 relative z-10">
                         <div className="relative group/avatar">
-                            <Avatar className="h-16 w-16 border-2 border-white/10 shadow-2xl transition-transform duration-500 group-hover/avatar:scale-105">
+                            <Avatar className="h-12 w-12 border-2 border-white/10 shadow-2xl transition-transform duration-500 group-hover/avatar:scale-105">
                                 <AvatarImage src={user.avatar_url} />
-                                <AvatarFallback className="bg-white/10 text-white font-black text-xs">{getInitials()}</AvatarFallback>
+                                <AvatarFallback className="bg-white/10 text-white font-black text-[10px]">{getInitials()}</AvatarFallback>
                             </Avatar>
-                            <div className="absolute inset-0 rounded-full bg-primary/20 blur opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
                         </div>
 
                         <div className="flex flex-col min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-black text-white tracking-tight italic">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                                <h3 className="text-base font-black text-white tracking-tight truncate">
                                     {user.full_name || user.email.split("@")[0]}
                                 </h3>
                                 {isAdmin && (
-                                    <Badge className="bg-amber-400 text-amber-950 font-black text-[8px] uppercase tracking-widest px-1.5 py-0 border-none">Admin</Badge>
-                                )}
-                                {isTeacher && !isAdmin && (
-                                    <Badge className="bg-purple-400 text-purple-950 font-black text-[8px] uppercase tracking-widest px-1.5 py-0 border-none">Tutor</Badge>
+                                    <Badge className="bg-amber-400 text-amber-950 font-black text-[7px] uppercase tracking-widest px-1 py-0 border-none shrink-0">Admin</Badge>
                                 )}
                             </div>
-                            <p className="text-[10px] font-medium text-slate-400 tracking-wide">{user.email}</p>
+                            <p className="text-[9px] font-medium text-slate-400 tracking-wide truncate">{user.email}</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="p-4 pt-6">
-                    {/* 2. StarCredits Wallet Card */}
-                    <div className="relative group mb-6">
+                <div className="p-3 pt-4">
+                    {/* 2. StarCredits Wallet Card (Compacted) */}
+                    <div className="relative group mb-4">
                         <Link href="/dashboard/credits" className="block">
-                            <div className="px-6 py-5 rounded-[2rem] bg-slate-50 border border-slate-100 group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-500 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                                    <Zap className="w-16 h-16 text-primary fill-primary" />
+                            <div className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-100 group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-500 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                                    <Zap className="w-12 h-12 text-primary fill-primary" />
                                 </div>
 
                                 <div className="flex items-center justify-between relative z-10">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-all duration-500 border border-slate-50 group-hover:border-primary/10">
-                                            <Sparkles className="w-6 h-6 text-primary fill-primary/10" />
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-all duration-500 border border-slate-50 group-hover:border-primary/10">
+                                            <Sparkles className="w-5 h-5 text-primary fill-primary/10" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1.5">Your Balance</p>
-                                            <div className="flex items-baseline gap-1.5">
-                                                <p className="text-2xl font-black text-slate-900 tracking-tight">{user.credits_balance}</p>
-                                                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Stars</p>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Your Balance</p>
+                                            <div className="flex items-baseline gap-1">
+                                                <p className="text-xl font-black text-slate-900 tracking-tight">{user.credits_balance}</p>
+                                                <p className="text-[9px] font-black text-primary uppercase tracking-widest">Stars</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 group-hover:border-primary/30 group-hover:text-primary transition-all duration-500 -rotate-45 group-hover:rotate-0">
-                                        <ChevronRight size={18} />
+                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 group-hover:border-primary/30 group-hover:text-primary transition-all duration-500 -rotate-45 group-hover:rotate-0">
+                                        <ChevronRight size={14} />
                                     </div>
                                 </div>
                             </div>
@@ -155,7 +151,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                             />
                         )}
 
-                        <div className="py-2">
+                        <div className="py-1">
                             <DropdownMenuSeparator className="bg-slate-50 opacity-50" />
                         </div>
 
@@ -175,20 +171,20 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                             />
                         </DropdownMenuGroup>
 
-                        <div className="py-2">
+                        <div className="py-1">
                             <DropdownMenuSeparator className="bg-slate-50 opacity-50" />
                         </div>
 
                         <DropdownMenuItem
-                            className="rounded-[1.5rem] cursor-pointer py-4 px-6 text-xs font-black text-rose-500 hover:bg-rose-50 focus:bg-rose-50 transition-all disabled:opacity-50 group/logout border border-transparent"
+                            className="rounded-xl cursor-pointer py-3 px-4 text-xs font-black text-rose-500 hover:bg-rose-50 focus:bg-rose-50 transition-all disabled:opacity-50 group/logout border border-transparent"
                             onClick={handleSignOut}
                             disabled={isLoading}
                         >
-                            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center mr-4 group-hover/logout:scale-110 transition-transform">
-                                <LogOut className="h-4 w-4" />
+                            <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center mr-3 group-hover/logout:scale-110 transition-transform">
+                                <LogOut className="h-3.5 w-3.5" />
                             </div>
                             <div className="flex-1">
-                                <p className="font-black uppercase tracking-widest text-[10px]">
+                                <p className="font-black uppercase tracking-widest text-[9px]">
                                     {isLoading ? "Logging out..." : "Sign Out"}
                                 </p>
                             </div>
@@ -221,21 +217,21 @@ function MenuLink({
     return (
         <Link href={href} className="block group/item">
             <DropdownMenuItem className={cn(
-                "rounded-[1.5rem] cursor-pointer py-3.5 px-6 transition-all border border-transparent flex items-center gap-4",
+                "rounded-xl cursor-pointer py-2.5 px-4 transition-all border border-transparent flex items-center gap-3",
                 bgColor
             )}>
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-white transition-all duration-300">
-                    <Icon className="h-4 w-4 text-slate-400 group-hover/item:text-primary" />
+                <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-white transition-all duration-300">
+                    <Icon className="h-3.5 w-3.5 text-slate-400 group-hover/item:text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                        <p className={cn("text-xs font-bold tracking-tight", color)}>{label}</p>
+                    <div className="flex items-center justify-between gap-1.5">
+                        <p className={cn("text-xs font-bold tracking-tight truncate", color)}>{label}</p>
                         {badge && (
-                            <Badge variant="outline" className="text-[7px] font-black uppercase tracking-tighter text-slate-400 border-slate-200 px-1 py-0">{badge}</Badge>
+                            <Badge variant="outline" className="text-[6px] font-black uppercase tracking-tighter text-slate-400 border-slate-200 px-1 py-0">{badge}</Badge>
                         )}
                     </div>
                     {description && (
-                        <p className="text-[9px] font-medium text-slate-400 tracking-wide">{description}</p>
+                        <p className="text-[8px] font-medium text-slate-400 tracking-wide truncate">{description}</p>
                     )}
                 </div>
             </DropdownMenuItem>
