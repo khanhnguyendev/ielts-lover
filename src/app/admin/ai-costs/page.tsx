@@ -80,6 +80,7 @@ export default function AICostsPage() {
     const [targetMargin, setTargetMargin] = useState(60)
     const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set())
     const [isGenerating, setIsGenerating] = useState(false)
+    const [customPrices, setCustomPrices] = useState<Record<number, number>>({})
     const { notifySuccess, notifyError } = useNotification()
 
     useEffect(() => {
@@ -459,10 +460,10 @@ export default function AICostsPage() {
                                 <input
                                     type="range"
                                     min="20"
-                                    max="95"
+                                    max="99"
                                     step="5"
                                     value={targetMargin}
-                                    onChange={(e) => setTargetMargin(Number(e.target.value))}
+                                    onChange={(e) => { setTargetMargin(Number(e.target.value)); setCustomPrices({}) }}
                                     className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between text-[8px] font-black text-slate-300 uppercase tracking-widest">
@@ -482,6 +483,7 @@ export default function AICostsPage() {
                                         ? Number(currentRolling?.total_cost_usd || 0) / Number(currentRolling?.total_credits_charged)
                                         : 0
                                     const suggestsPrice = (costPerCredit / (1 - (targetMargin / 100))) * stars
+                                    const displayPrice = customPrices[stars] ?? Number(suggestsPrice.toFixed(2))
 
                                     return (
                                         <div key={stars} className="flex items-center justify-between gap-4 group/item">
@@ -491,8 +493,16 @@ export default function AICostsPage() {
                                                 </div>
                                                 <span className="text-[11px] font-black text-slate-700">{stars} Stars</span>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-xs font-black text-slate-900">${suggestsPrice.toFixed(2)}</span>
+                                            <div className="flex items-center gap-0.5">
+                                                <span className="text-xs font-black text-slate-900">$</span>
+                                                <NumericInput
+                                                    value={displayPrice}
+                                                    onChange={() => { }}
+                                                    onCommit={(val) => setCustomPrices(prev => ({ ...prev, [stars]: val }))}
+                                                    isFloat={true}
+                                                    step={0.01}
+                                                    className="h-6 w-16 border-none bg-transparent focus-visible:ring-0 text-right font-black text-xs p-0 text-slate-900"
+                                                />
                                             </div>
                                         </div>
                                     )
@@ -517,10 +527,13 @@ export default function AICostsPage() {
                                         const costPerCredit = (currentRolling?.total_credits_charged || 0) > 0
                                             ? Number(currentRolling?.total_cost_usd || 0) / Number(currentRolling?.total_credits_charged)
                                             : 0
-                                        const tiers = [100, 500, 1000].map(stars => ({
-                                            credits: stars,
-                                            price: Number(((costPerCredit / (1 - (targetMargin / 100))) * stars).toFixed(2))
-                                        }))
+                                        const tiers = [100, 500, 1000].map(stars => {
+                                            const suggestsPrice = (costPerCredit / (1 - (targetMargin / 100))) * stars
+                                            return {
+                                                credits: stars,
+                                                price: customPrices[stars] ?? Number(suggestsPrice.toFixed(2))
+                                            }
+                                        })
                                         await generateAndSeedPackages(tiers)
                                         notifySuccess("Packages Created", "New credit packages generated with AI content.")
                                     } catch (error) {
