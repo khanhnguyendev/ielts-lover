@@ -101,6 +101,14 @@ export const createTeacherExercise = traceAction("createTeacherExercise", async 
     return result;
 });
 
+export const deleteTeacherExercise = traceAction("deleteTeacherExercise", async (id: string) => {
+    await checkTeacher();
+    await exerciseService.deleteExercise(id);
+    revalidatePath("/teacher/exercises");
+    revalidatePath("/dashboard/writing");
+    revalidatePath("/dashboard/speaking");
+});
+
 export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise", async (type: string, topic?: string, chartType?: string) => {
     await checkTeacher();
 

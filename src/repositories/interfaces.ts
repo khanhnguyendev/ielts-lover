@@ -15,6 +15,7 @@ export interface IExerciseRepository {
     getLatestVersion(type: ExerciseType): Promise<Exercise | null>;
     listByType(type: ExerciseType): Promise<Exercise[]>;
     createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise>;
+    delete(id: string): Promise<void>;
     getTotalCount(): Promise<number>;
 }
 

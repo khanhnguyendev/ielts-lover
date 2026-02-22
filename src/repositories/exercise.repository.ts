@@ -63,6 +63,16 @@ export class ExerciseRepository implements IExerciseRepository {
         return data as Exercise;
     }
 
+    async delete(id: string): Promise<void> {
+        const supabase = await createServerSupabaseClient();
+        const { error } = await supabase
+            .from(DB_TABLES.EXERCISES)
+            .update({ is_published: false })
+            .eq("id", id);
+
+        if (error) throw new Error(`[ExerciseRepository] delete failed: ${error.message}`);
+    }
+
     async getTotalCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const { count, error } = await supabase

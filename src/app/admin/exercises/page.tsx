@@ -9,7 +9,14 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { getExercises } from "@/app/actions";
+import { deleteExercise } from "@/app/admin/actions";
 import { Exercise, ExerciseType } from "@/types";
 import { Plus, Edit, Trash2, Eye, Search, FileText, Mic } from "lucide-react";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -27,22 +34,37 @@ function ExercisesContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [typeFilter, setTypeFilter] = useState<string>("all");
+    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+
+    async function fetchExercises() {
+        setIsLoading(true);
+        try {
+            const types: ExerciseType[] = ["writing_task1", "writing_task2", "speaking_part1", "speaking_part2", "speaking_part3"]; // Fetching common writing types
+            const allExercises = await Promise.all(types.map(t => getExercises(t)));
+            setExercises(allExercises.flat());
+        } catch (error) {
+            console.error("Failed to fetch exercises:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchExercises() {
-            setIsLoading(true);
-            try {
-                const types: ExerciseType[] = ["writing_task1", "writing_task2", "speaking_part1", "speaking_part2", "speaking_part3"]; // Fetching common writing types
-                const allExercises = await Promise.all(types.map(t => getExercises(t)));
-                setExercises(allExercises.flat());
-            } catch (error) {
-                console.error("Failed to fetch exercises:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
         fetchExercises();
     }, []);
+
+    async function handleDelete(id: string, title: string) {
+        if (!window.confirm(`Are you sure you want to delete "${title}"? This exercise will be archived and hidden from students.`)) {
+            return;
+        }
+
+        try {
+            await deleteExercise(id);
+            await fetchExercises();
+        } catch (error) {
+            console.error("Failed to delete exercise:", error);
+        }
+    }
 
     const filteredExercises = exercises.filter(e => {
         const matchesSearch = e.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -145,7 +167,7 @@ function ExercisesContent() {
                                                     {exercise.title}
                                                 </p>
                                                 <p className="text-[11px] font-medium text-slate-400 leading-tight mt-1">
-                                                    ID: {exercise.id.substring(0, 8)}...
+                                                    ID: {exercise.id}
                                                 </p>
                                             </div>
                                         </div>
@@ -202,13 +224,25 @@ function ExercisesContent() {
                                     </TableCell>
                                     <TableCell className="text-right pr-6">
                                         <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-slate-400 hover:text-primary transition-colors"
+                                                onClick={() => setSelectedExercise(exercise)}
+                                            >
                                                 <Eye size={18} />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 transition-colors">
-                                                <Edit size={18} />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 transition-colors">
+                                            <Link href={`/admin/exercises/create/${exercise.type.startsWith('writing') ? 'writing' : 'speaking'}?duplicate=${exercise.id}`}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 transition-colors">
+                                                    <Edit size={18} />
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-slate-400 hover:text-red-600 transition-colors"
+                                                onClick={() => handleDelete(exercise.id, exercise.title)}
+                                            >
                                                 <Trash2 size={18} />
                                             </Button>
                                         </div>
@@ -218,6 +252,64 @@ function ExercisesContent() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* View Details Dialog */}
+            <Dialog open={!!selectedExercise} onOpenChange={(open) => !open && setSelectedExercise(null)}>
+                <DialogContent className="sm:max-w-3xl rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
+                    <div className="bg-slate-900 p-8 text-white relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                        <DialogHeader>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center",
+                                    selectedExercise?.type.startsWith('writing') ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
+                                )}>
+                                    {selectedExercise?.type.startsWith('writing') ? <FileText size={20} /> : <Mic size={20} />}
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-2xl font-black font-outfit text-white leading-tight">
+                                        {selectedExercise?.title}
+                                    </DialogTitle>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-1">
+                                        ID: {selectedExercise?.id}
+                                    </p>
+                                </div>
+                            </div>
+                        </DialogHeader>
+                    </div>
+
+                    <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+                        <section className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Exercise Prompt</h4>
+                            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 italic text-slate-700 leading-relaxed font-medium">
+                                {selectedExercise?.prompt}
+                            </div>
+                        </section>
+
+                        {selectedExercise?.image_url && (
+                            <section className="space-y-3">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Reference Image / Chart</h4>
+                                <div className="rounded-2xl border border-slate-100 overflow-hidden bg-white p-4">
+                                    <img
+                                        src={selectedExercise.image_url}
+                                        alt={selectedExercise.title}
+                                        className="max-h-[300px] mx-auto object-contain rounded-xl"
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {selectedExercise?.chart_data && (
+                            <section className="space-y-3">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Data Points (JSON)</h4>
+                                <pre className="bg-slate-900 text-emerald-400 p-6 rounded-2xl text-[11px] font-mono overflow-x-auto shadow-inner">
+                                    {JSON.stringify(selectedExercise.chart_data, null, 2)}
+                                </pre>
+                            </section>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

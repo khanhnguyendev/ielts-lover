@@ -261,6 +261,14 @@ export const createExercise = traceAction("createExercise", async (exercise: Omi
     return result;
 });
 
+export const deleteExercise = traceAction("deleteExercise", async (id: string) => {
+    await checkAdmin();
+    await exerciseService.deleteExercise(id);
+    revalidatePath("/admin/exercises");
+    revalidatePath("/dashboard/writing");
+    revalidatePath("/dashboard/speaking");
+});
+
 export const generateAIExercise = traceAction("generateAIExercise", async (type: string, topic?: string, chartType?: string) => {
     await checkAdmin();
 

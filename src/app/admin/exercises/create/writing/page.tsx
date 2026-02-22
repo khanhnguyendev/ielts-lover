@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createExercise, generateAIExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions";
-import { getFeaturePrice } from "@/app/actions";
+import { getFeaturePrice, getExerciseById } from "@/app/actions";
 import { Sparkles, Loader2, CheckCircle2, XCircle, ImageIcon } from "lucide-react";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
@@ -15,10 +15,19 @@ import { CHART_TYPES, FEATURE_KEYS } from "@/lib/constants";
 import { CreditBadge } from "@/components/ui/credit-badge";
 
 export default function CreateWritingExercisePage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-20"><Loader2 className="animate-spin" /></div>}>
+            <CreateWritingExerciseContent />
+        </Suspense>
+    );
+}
+
+function CreateWritingExerciseContent() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"writing_task1" | "writing_task2">("writing_task1");
+    const searchParams = useSearchParams();
 
     // Controlled inputs for AI generation population
     const [title, setTitle] = useState("");
@@ -56,10 +65,24 @@ export default function CreateWritingExercisePage() {
 
     const [analysisCost, setAnalysisCost] = useState(5);
 
-    // Load analysis cost on mount
+    // Load defaults and handle duplication
     useEffect(() => {
         getFeaturePrice(FEATURE_KEYS.CHART_IMAGE_ANALYSIS).then(setAnalysisCost);
-    }, []);
+
+        const duplicateId = searchParams.get("duplicate");
+        if (duplicateId) {
+            getExerciseById(duplicateId).then(ex => {
+                if (ex) {
+                    setTitle(ex.title);
+                    setPrompt(ex.prompt);
+                    setType(ex.type as "writing_task1" | "writing_task2");
+                    if (ex.image_url) setGeneratedImageUrl(ex.image_url);
+                    if (ex.chart_data) setChartData(ex.chart_data);
+                    notifySuccess("Exercise Data Loaded", "You are creating a new version of an existing exercise.", "Continue");
+                }
+            });
+        }
+    }, [searchParams]);
 
     async function handleAnalyzeImage() {
         if (!imageFile) return;

@@ -28,4 +28,8 @@ export class ExerciseService {
 
         return result;
     }
+
+    async deleteExercise(id: string): Promise<void> {
+        await this.exerciseRepo.delete(id);
+    }
 }

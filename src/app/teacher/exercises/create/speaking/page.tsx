@@ -1,22 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createTeacherExercise, generateTeacherAIExercise } from "@/app/teacher/actions";
+import { getExerciseById } from "@/app/actions";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useNotification } from "@/lib/contexts/notification-context"
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
 
 export default function TeacherCreateSpeakingExercisePage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-20"><Loader2 className="animate-spin" /></div>}>
+            <TeacherCreateSpeakingExerciseContent />
+        </Suspense>
+    );
+}
+
+function TeacherCreateSpeakingExerciseContent() {
     const { notifySuccess, notifyError } = useNotification();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"speaking_part1" | "speaking_part2" | "speaking_part3">("speaking_part1");
+    const searchParams = useSearchParams();
 
     const [title, setTitle] = useState("");
     const [prompt, setPrompt] = useState("");
@@ -24,6 +34,20 @@ export default function TeacherCreateSpeakingExercisePage() {
 
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const [isErrorOpen, setIsErrorOpen] = useState(false);
+
+    useEffect(() => {
+        const duplicateId = searchParams.get("duplicate");
+        if (duplicateId) {
+            getExerciseById(duplicateId).then(ex => {
+                if (ex) {
+                    setTitle(ex.title);
+                    setPrompt(ex.prompt);
+                    setType(ex.type as any);
+                    notifySuccess("Exercise Data Loaded", "You are creating a new version of an existing exercise.");
+                }
+            });
+        }
+    }, [searchParams]);
 
     async function handleGenerate() {
         setIsGenerating(true);
