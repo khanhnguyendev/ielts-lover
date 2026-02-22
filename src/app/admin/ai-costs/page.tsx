@@ -103,6 +103,10 @@ export default function AICostsPage() {
     }
 
     async function handleUpdatePricing(id: string, field: "input_price_per_million" | "output_price_per_million", value: number) {
+        // Check if value actually changed
+        const currentModel = pricing.find(p => p.id === id)
+        if (currentModel && Number(currentModel[field]) === value) return
+
         setUpdatingIds(prev => new Set(prev).add(id))
         try {
             await updateModelPricing(id, { [field]: value })
@@ -202,6 +206,7 @@ export default function AICostsPage() {
                                                                 onCommit={(val) => handleUpdatePricing(model.id, "input_price_per_million", val)}
                                                                 className="h-6 border-none bg-transparent focus-visible:ring-0 transition-all text-left font-black text-sm p-0 text-white placeholder-slate-600"
                                                                 step={0.01}
+                                                                isFloat={true}
                                                             />
                                                         </div>
                                                     </div>
@@ -216,6 +221,7 @@ export default function AICostsPage() {
                                                                 onCommit={(val) => handleUpdatePricing(model.id, "output_price_per_million", val)}
                                                                 className="h-6 border-none bg-transparent focus-visible:ring-0 transition-all text-left font-black text-sm p-0 text-white placeholder-slate-600"
                                                                 step={0.01}
+                                                                isFloat={true}
                                                             />
                                                         </div>
                                                     </div>
