@@ -49,6 +49,7 @@ export type CreditTransaction = {
     feature_key?: string;
     exercise_id?: string;
     granted_by_admin?: string;
+    trace_id?: string;
     description?: string;
     created_at: string;
 };
@@ -177,6 +178,7 @@ export type AIUsageLog = {
     total_cost_usd: number;
     credits_charged: number;
     ai_method: string;
+    trace_id?: string;
     duration_ms?: number;
     created_at: string;
 };

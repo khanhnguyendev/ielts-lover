@@ -8,11 +8,12 @@ export interface RecordUsageParams {
     completionTokens: number;
     aiMethod: string;
     creditsCharged: number;
+    traceId?: string;
     durationMs?: number;
 }
 
 export class AICostService {
-    constructor(private aiUsageRepo: IAIUsageRepository) {}
+    constructor(private aiUsageRepo: IAIUsageRepository) { }
 
     async recordUsage(params: RecordUsageParams): Promise<AIUsageLog> {
         const pricing = await this.aiUsageRepo.getModelPricing(params.modelName);
@@ -36,6 +37,7 @@ export class AICostService {
             total_cost_usd: inputCostUsd + outputCostUsd,
             credits_charged: params.creditsCharged,
             ai_method: params.aiMethod,
+            trace_id: params.traceId,
             duration_ms: params.durationMs,
         });
     }

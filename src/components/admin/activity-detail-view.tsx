@@ -8,6 +8,7 @@ import {
     ExternalLink, ChevronDown, Hash,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CreditBadge } from "@/components/ui/credit-badge"
 
 function useIsMounted() {
@@ -20,6 +21,20 @@ function useIsMounted() {
 
 interface ActivityDetailViewProps {
     detail: ActivityDetail
+}
+
+function getInitials(name?: string, email?: string) {
+    if (name) {
+        const parts = name.trim().split(/\s+/)
+        if (parts.length > 1) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        }
+        return parts[0].substring(0, 2).toUpperCase()
+    }
+    if (email) {
+        return email.substring(0, 2).toUpperCase()
+    }
+    return "?"
 }
 
 function RoleBadge({ role }: { role: string }) {
@@ -82,24 +97,16 @@ export function ActivityDetailView({ detail }: ActivityDetailViewProps) {
                     <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 flex flex-col md:flex-row items-center gap-6 relative z-10 transition-all duration-500 group-hover:shadow-md">
                         <div className="relative shrink-0">
                             <div className="absolute -inset-1 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                            {avatarUrl ? (
-                                <img
+                            <Avatar className="w-16 h-16 border-2 border-white shadow-lg relative">
+                                <AvatarImage
                                     src={avatarUrl}
-                                    alt=""
-                                    className="w-16 h-16 rounded-full object-cover relative border-2 border-white shadow-lg"
-                                    onError={(e) => {
-                                        // Fallback if image fails to load
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                        (e.target as HTMLImageElement).parentElement?.querySelector('.avatar-fallback')?.classList.remove('hidden');
-                                    }}
+                                    alt={user.full_name || t.user_full_name || "User"}
+                                    className="object-cover"
                                 />
-                            ) : null}
-                            <div className={cn(
-                                "avatar-fallback w-16 h-16 rounded-full bg-slate-50 border-2 border-white shadow-md flex items-center justify-center relative",
-                                avatarUrl ? "hidden" : "flex"
-                            )}>
-                                <User className="w-6 h-6 text-slate-300 group-hover:text-primary transition-colors duration-500" />
-                            </div>
+                                <AvatarFallback className="bg-slate-50 text-slate-400 font-black text-xs">
+                                    {getInitials(user.full_name || t.user_full_name, user.email || t.user_email)}
+                                </AvatarFallback>
+                            </Avatar>
                         </div>
 
                         <div className="flex-1 text-center md:text-left space-y-1 min-w-0">

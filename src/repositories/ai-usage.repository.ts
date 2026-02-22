@@ -19,9 +19,27 @@ export class AIUsageRepository implements IAIUsageRepository {
         userId: string,
         featureKey: string,
         timestamp: string,
-        windowSeconds: number = 5
+        windowSeconds: number = 5,
+        traceId?: string
     ): Promise<AIUsageLog | null> {
         const supabase = await createServiceSupabaseClient();
+        let query = supabase
+            .from(DB_TABLES.AI_USAGE_LOGS)
+            .select("*")
+            .eq("user_id", userId)
+            .eq("feature_key", featureKey);
+
+        if (traceId) {
+            // First try exact trace_id match
+            const { data: traceData, error: traceError } = await query
+                .eq("trace_id", traceId)
+                .maybeSingle();
+
+            if (!traceError && traceData) return traceData as AIUsageLog;
+            // If traceId provided but not found, we might still want to try time-window fallback 
+            // OR we could be strict. Plan says "prioritize trace_id lookup".
+        }
+
         const ts = new Date(timestamp);
         const lowerBound = new Date(ts.getTime() - windowSeconds * 1000).toISOString();
         const upperBound = new Date(ts.getTime() + windowSeconds * 1000).toISOString();

@@ -68,7 +68,7 @@ const improvementService = traceService(new ImprovementService(mistakeRepo, acti
 const aiUsageRepo = new AIUsageRepository();
 const aiCostService = new AICostService(aiUsageRepo);
 
-function recordAICost(usage: AIUsageMetadata | undefined, userId: string | null, featureKey: string, aiMethod: string, creditsCharged: number) {
+function recordAICost(usage: AIUsageMetadata | undefined, userId: string | null, featureKey: string, aiMethod: string, creditsCharged: number, traceId?: string) {
     if (!usage) return;
     aiCostService.recordUsage({
         userId,
@@ -78,6 +78,7 @@ function recordAICost(usage: AIUsageMetadata | undefined, userId: string | null,
         completionTokens: usage.completionTokens,
         aiMethod,
         creditsCharged,
+        traceId,
         durationMs: usage.durationMs,
     }).catch((err) => logger.error("AI cost recording failed (non-blocking)", { error: err }));
 }
@@ -140,15 +141,16 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         return attempt;
     }
 
+    const traceId = crypto.randomUUID();
     try {
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
-            await creditService.billUser(user.id, featureKey, attempt.exercise_id);
+            await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId);
         }
         const usage = await attemptService.submitAttempt(attemptId, content);
         const evaluatedAttempt = await attemptService.getAttempt(attemptId);
 
         const aiMethod = exercise.type.startsWith("writing") ? "generateWritingReport" : "generateFeedback";
-        recordAICost(usage, user.id, featureKey, aiMethod, 1);
+        recordAICost(usage, user.id, featureKey, aiMethod, 1, traceId);
 
         // Notify student that evaluation is ready
         notificationService.notify(
@@ -200,20 +202,20 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
     const rateResult = await checkRateLimit(evaluateLimiter, user.id);
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
+    const traceId = crypto.randomUUID();
     try {
         const attempt = await attemptService.getAttempt(attemptId);
         if (!attempt) throw new Error("Attempt not found");
 
-        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id);
+        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id, traceId);
         const result = await attemptService.reevaluate(attemptId);
-        recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1);
+        recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1, traceId);
         return result;
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS, message: error.message };
         }
 
-        const traceId = getCurrentTraceId()!;
         logger.error(`reevaluateAttempt Error: ${attemptId}`, { error });
         return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
@@ -322,17 +324,17 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
     const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
+    const traceId = crypto.randomUUID();
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER);
+        await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER, undefined, traceId);
         const result = await aiService.rewriteContent(text);
-        recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1);
+        recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1, traceId);
         return { success: true, text: result.data.rewritten_text };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
         }
 
-        const traceId = getCurrentTraceId()!;
         logger.error("rewriteText Error", { error });
         return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
@@ -368,10 +370,11 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
         return { success: true, data: JSON.parse(attempt.correction_data) };
     }
 
+    const traceId = crypto.randomUUID();
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id);
+        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id, traceId);
         const { data: correction, usage } = await attemptService.unlockCorrection(attemptId);
-        recordAICost(usage, user.id, FEATURE_KEYS.DETAILED_CORRECTION, "generateCorrection", 1);
+        recordAICost(usage, user.id, FEATURE_KEYS.DETAILED_CORRECTION, "generateCorrection", 1, traceId);
 
         // Extract mistakes from corrections for the Mistake Bank
         try {
@@ -471,9 +474,10 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
     const rateResult = await checkRateLimit(evaluateLimiter, user.id);
     if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY };
 
+    const traceId = crypto.randomUUID();
     try {
-        const { plan, usage } = await improvementService.generateAIActionPlan(user.id);
-        recordAICost(usage, user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, "analyzeWeaknesses", 1);
+        const { plan, usage } = await improvementService.generateAIActionPlan(user.id, traceId);
+        recordAICost(usage, user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, "analyzeWeaknesses", 1, traceId);
         return { success: true, data: plan };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {

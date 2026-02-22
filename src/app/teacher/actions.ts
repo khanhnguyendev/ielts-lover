@@ -127,6 +127,8 @@ export const deleteTeacherExercise = traceAction("deleteTeacherExercise", async 
 export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise", async (type: string, topic?: string, chartType?: string) => {
     await checkTeacher();
 
+    const traceId = crypto.randomUUID();
+
     if (type === "writing_task1") {
         const chartResult = await aiService.generateChartData(topic, chartType);
         const chartData = chartResult.data;
@@ -135,6 +137,7 @@ export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise"
             userId: null, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
             promptTokens: chartResult.usage.promptTokens, completionTokens: chartResult.usage.completionTokens,
             aiMethod: AI_METHODS.GENERATE_CHART_DATA, creditsCharged: 0, durationMs: chartResult.usage.durationMs,
+            traceId,
         }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
         const { ChartRenderer } = await import("@/lib/chart-renderer");
@@ -155,6 +158,7 @@ export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise"
         userId: null, featureKey: "exercise_generation", modelName: result.usage.modelName,
         promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
         aiMethod: AI_METHODS.GENERATE_EXERCISE, creditsCharged: 0, durationMs: result.usage.durationMs,
+        traceId,
     }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
     return result.data;
@@ -170,8 +174,10 @@ export async function uploadTeacherImage(formData: FormData) {
 export const analyzeTeacherChartImage = traceAction("analyzeTeacherChartImage", async (imageBase64: string, mimeType: string) => {
     const user = await checkTeacher();
 
+    const traceId = crypto.randomUUID();
+
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.CHART_IMAGE_ANALYSIS);
+        await creditService.billUser(user.id, FEATURE_KEYS.CHART_IMAGE_ANALYSIS, undefined, traceId);
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
@@ -185,6 +191,7 @@ export const analyzeTeacherChartImage = traceAction("analyzeTeacherChartImage", 
         userId: user.id, featureKey: FEATURE_KEYS.CHART_IMAGE_ANALYSIS, modelName: result.usage.modelName,
         promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
         aiMethod: AI_METHODS.ANALYZE_CHART_IMAGE, creditsCharged: 1, durationMs: result.usage.durationMs,
+        traceId,
     }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
     return { success: true, data: result.data };

@@ -273,6 +273,8 @@ export const deleteExercise = traceAction("deleteExercise", async (id: string) =
 export const generateAIExercise = traceAction("generateAIExercise", async (type: string, topic?: string, chartType?: string) => {
     await checkAdmin();
 
+    const traceId = crypto.randomUUID();
+
     // Special handling for Writing Task 1 to generate chart
     if (type === "writing_task1") {
         // 1. Generate Data
@@ -283,6 +285,7 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
             userId: null, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
             promptTokens: chartResult.usage.promptTokens, completionTokens: chartResult.usage.completionTokens,
             aiMethod: AI_METHODS.GENERATE_CHART_DATA, creditsCharged: 0, durationMs: chartResult.usage.durationMs,
+            traceId
         }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
         // 2. Render Image
@@ -306,6 +309,7 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
         userId: null, featureKey: "exercise_generation", modelName: result.usage.modelName,
         promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
         aiMethod: AI_METHODS.GENERATE_EXERCISE, creditsCharged: 0, durationMs: result.usage.durationMs,
+        traceId,
     }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
     return result.data;
@@ -315,9 +319,10 @@ export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBa
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
 
+    const traceId = crypto.randomUUID();
     // Bill user for chart analysis (anti-spam)
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.CHART_IMAGE_ANALYSIS);
+        await creditService.billUser(user.id, FEATURE_KEYS.CHART_IMAGE_ANALYSIS, undefined, traceId);
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
@@ -331,6 +336,7 @@ export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBa
         userId: user.id, featureKey: FEATURE_KEYS.CHART_IMAGE_ANALYSIS, modelName: result.usage.modelName,
         promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
         aiMethod: AI_METHODS.ANALYZE_CHART_IMAGE, creditsCharged: 1, durationMs: result.usage.durationMs,
+        traceId,
     }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
     return { success: true, data: result.data };
@@ -612,7 +618,9 @@ export const getActivityDetail = traceAction("getActivityDetail", async (id: str
         aiUsage = await aiUsageRepo.findByCorrelation(
             transaction.user_id,
             transaction.feature_key,
-            transaction.created_at
+            transaction.created_at,
+            5,
+            transaction.trace_id
         );
     }
 

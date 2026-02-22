@@ -48,9 +48,9 @@ export class ImprovementService {
      * 3. Calls AI to find patterns
      * 4. Stores result
      */
-    async generateAIActionPlan(userId: string): Promise<{ plan: UserActionPlan; usage?: AIUsageMetadata }> {
+    async generateAIActionPlan(userId: string, traceId?: string): Promise<{ plan: UserActionPlan; usage?: AIUsageMetadata }> {
         // 1. Bill user (throws InsufficientFundsError if not enough credits)
-        await this.creditService.billUser(userId, FEATURE_KEYS.WEAKNESS_ANALYSIS);
+        await this.creditService.billUser(userId, FEATURE_KEYS.WEAKNESS_ANALYSIS, undefined, traceId);
 
         // 2. Fetch recent mistakes for analysis
         const mistakes = await this.mistakeRepo.getUserMistakes(userId, undefined, 50);
