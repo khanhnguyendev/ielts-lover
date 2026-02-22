@@ -476,7 +476,7 @@ export default function AICostsPage() {
                                     const costPerCredit = (currentRolling?.total_credits_charged || 0) > 0
                                         ? Number(currentRolling?.total_cost_usd || 0) / Number(currentRolling?.total_credits_charged)
                                         : 0
-                                    const suggestsPrice = (costPerCredit / (1 - (targetMargin / 100))) * stars
+                                    const suggestsPrice = costPerCredit * (1 + targetMargin / 100) * stars
                                     const displayPrice = customPrices[stars] ?? Number(suggestsPrice.toFixed(2))
 
                                     return (
@@ -522,7 +522,7 @@ export default function AICostsPage() {
                                             ? Number(currentRolling?.total_cost_usd || 0) / Number(currentRolling?.total_credits_charged)
                                             : 0
                                         const tiers = [100, 500, 1000].map(stars => {
-                                            const suggestsPrice = (costPerCredit / (1 - (targetMargin / 100))) * stars
+                                            const suggestsPrice = costPerCredit * (1 + targetMargin / 100) * stars
                                             return {
                                                 credits: stars,
                                                 price: customPrices[stars] ?? Number(suggestsPrice.toFixed(2))
