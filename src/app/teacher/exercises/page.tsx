@@ -106,6 +106,7 @@ function TeacherExercisesContent() {
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Type</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Version</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Status</TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Created By</TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Created At</TableHead>
                             <TableHead className="text-right pr-6 text-[10px] font-black uppercase tracking-widest">Actions</TableHead>
                         </TableRow>
@@ -113,7 +114,7 @@ function TeacherExercisesContent() {
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-24 text-center">
+                                <TableCell colSpan={7} className="py-24 text-center">
                                     <div className="flex flex-col items-center justify-center gap-4">
                                         <PulseLoader size="lg" color="primary" />
                                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Syncing Exercises...</p>
@@ -122,7 +123,7 @@ function TeacherExercisesContent() {
                             </TableRow>
                         ) : filteredExercises.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-20 text-center text-slate-400 font-bold">
+                                <TableCell colSpan={7} className="py-20 text-center text-slate-400 font-bold">
                                     No exercises match your search criteria.
                                 </TableCell>
                             </TableRow>
@@ -168,6 +169,16 @@ function TeacherExercisesContent() {
                                                 : "bg-amber-50 text-amber-700 border-amber-100"
                                         )}>
                                             {exercise.is_published ? "Published" : "Draft"}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">
+                                                {exercise.creator?.full_name || exercise.creator?.email || "System"}
+                                            </p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                {exercise.creator?.role || "Staff"}
+                                            </p>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
