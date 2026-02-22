@@ -453,23 +453,17 @@ export default function AICostsPage() {
                             </div>
 
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-3xl font-black text-primary font-outfit">{targetMargin}%</span>
-                                    <span className="text-[10px] font-black uppercase text-slate-400">Margin</span>
+                                <div className="flex items-center gap-2">
+                                    <NumericInput
+                                        value={targetMargin}
+                                        onChange={() => { }}
+                                        onCommit={(val) => { setTargetMargin(Math.max(1, val)); setCustomPrices({}) }}
+                                        className="text-3xl font-black text-primary font-outfit w-24 h-12 border-none bg-transparent focus-visible:ring-0 p-0"
+                                    />
+                                    <span className="text-2xl font-black text-primary font-outfit">%</span>
+                                    <span className="text-[10px] font-black uppercase text-slate-400 ml-auto">Margin</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    min="20"
-                                    max="99"
-                                    step="5"
-                                    value={targetMargin}
-                                    onChange={(e) => { setTargetMargin(Number(e.target.value)); setCustomPrices({}) }}
-                                    className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-primary"
-                                />
-                                <div className="flex justify-between text-[8px] font-black text-slate-300 uppercase tracking-widest">
-                                    <span>Min</span>
-                                    <span>Max</span>
-                                </div>
+                                <p className="text-[9px] font-bold text-slate-400">Enter any margin percentage. No limit.</p>
                             </div>
                         </div>
 
