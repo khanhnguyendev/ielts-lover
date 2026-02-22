@@ -176,9 +176,16 @@ function TeacherExercisesContent() {
                                             <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">
                                                 {exercise.creator?.full_name || exercise.creator?.email || "System"}
                                             </p>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            <div className={cn(
+                                                "mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
+                                                exercise.creator?.role === 'admin'
+                                                    ? "bg-amber-100 text-amber-700 border-amber-200"
+                                                    : exercise.creator?.role === 'teacher'
+                                                        ? "bg-indigo-100 text-indigo-700 border-indigo-200"
+                                                        : "bg-slate-100 text-slate-600 border-slate-200"
+                                            )}>
                                                 {exercise.creator?.role || "Staff"}
-                                            </p>
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
