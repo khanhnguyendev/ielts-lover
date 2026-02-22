@@ -112,6 +112,7 @@ export default function CreditsPage() {
                                     <BenefitItem
                                         label="AI Video-Speaking Partner"
                                         description="Unlocked and limitless"
+                                        badge="Soon"
                                     />
                                     <BenefitItem
                                         label="Lifetime Validity"
@@ -185,14 +186,19 @@ export default function CreditsPage() {
     )
 }
 
-function BenefitItem({ label, description }: { label: string; description: string }) {
+function BenefitItem({ label, description, badge }: { label: string; description: string; badge?: string }) {
     return (
         <div className="flex items-start gap-3 group/item">
             <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-all group-hover/item:scale-110 group-hover/item:bg-primary group-hover/item:text-white mt-0.5">
                 <Check className="h-3 w-3 stroke-[4]" />
             </div>
             <div className="space-y-0.5">
-                <p className="text-[10px] font-black text-slate-800 uppercase tracking-tight">{label}</p>
+                <div className="flex items-center gap-1.5">
+                    <p className="text-[10px] font-black text-slate-800 uppercase tracking-tight">{label}</p>
+                    {badge && (
+                        <span className="text-[7px] font-black uppercase tracking-widest bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">{badge}</span>
+                    )}
+                </div>
                 <p className="text-[10px] text-slate-400 font-medium leading-none">{description}</p>
             </div>
         </div>
