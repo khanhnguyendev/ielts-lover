@@ -30,6 +30,7 @@ import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { BackButton } from "@/components/global/back-button"
 
 export default function SpeakingPracticePage({ params }: { params: { type: string } }) {
     const [currentQuestion, setCurrentQuestion] = React.useState(1)
@@ -192,9 +193,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
                 <div className="h-20 flex items-center justify-between px-12 border-b bg-white">
-                    <Link href="/dashboard/speaking" className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#F9FAFB] border hover:bg-white hover:shadow-md transition-all group">
-                        <ChevronLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </Link>
+                    <BackButton href="/dashboard/speaking" label="Exit Practice" />
 
                     <div className="flex items-center gap-4">
                         {questions.map((_, i) => (

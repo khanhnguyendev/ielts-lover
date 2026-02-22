@@ -15,7 +15,8 @@ import {
     ChevronRight,
     ChevronDown,
     Monitor,
-    Layout
+    Layout,
+    X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -25,6 +26,7 @@ import { Exercise, Attempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { BackButton } from "@/components/global/back-button"
 import { FEATURE_KEYS } from "@/lib/constants"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
@@ -42,6 +44,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
+    const [isLightboxOpen, setIsLightboxOpen] = React.useState(false)
     const { notifySuccess, notifyWarning, notifyError } = useNotification()
     const router = useRouter()
 
@@ -218,151 +221,240 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }
 
     return (
-        <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-white">
-            {/* Question Side */}
-            <div className="w-1/2 overflow-y-auto p-12 border-r bg-[#F9FAFB] scrollbar-hide">
-                <div className="max-w-xl mx-auto space-y-10 pb-20">
-                    <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
-                        <Link href="/dashboard/writing" className="hover:text-primary flex items-center gap-1 transition-colors">
-                            Writing Tasks
-                        </Link>
-                        <ChevronRight className="h-3 w-3" />
-                        <span className="text-slate-900">
-                            {exercise.type === "writing_task1" ? "Academic Task 1" : "Task 2"}
-                        </span>
-                    </div>
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-white select-none">
+            {/* 1. Left Side: Question Panel */}
+            <div className="w-[45%] lg:w-[52%] flex flex-col border-r bg-slate-50/50 relative overflow-hidden">
+                {/* Decorative background element */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 opacity-20" />
 
-                    <div className="space-y-6">
-                        <h2 className="text-2xl font-black font-outfit">{exercise.title}</h2>
-                        <div className="bg-white rounded-[40px] border p-10 space-y-8 shadow-sm">
-                            <p className="text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
-                                {exercise.prompt}
-                            </p>
+                <div className="flex-1 overflow-y-auto px-6 py-10 lg:px-10 scrollbar-none">
+                    <div className="max-w-2xl mx-auto space-y-8">
+                        {/* Question Title & Prompt */}
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                            <div className="space-y-4">
+                                <h1 className="text-4xl font-black font-outfit text-slate-900 tracking-tight leading-tight">
+                                    {exercise.title}
+                                </h1>
+                                <div className="h-1.5 w-16 bg-primary rounded-full" />
+                            </div>
 
-                            {exercise.type === "writing_task1" && exercise.image_url && (
-                                <div className="space-y-4">
-                                    <div className="relative aspect-auto min-h-[300px] bg-white rounded-2xl flex items-center justify-center border-2 border-dashed border-muted-foreground/10 group overflow-hidden">
-                                        <img
-                                            src={exercise.image_url}
-                                            alt="Task 1 Chart"
-                                            className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
-                                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
-                                                <Maximize2 className="h-4 w-4" />
-                                            </Button>
+                            <div className="relative group">
+                                {/* Glass card effect */}
+                                <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-[2.5rem] blur opacity-25" />
+
+                                <div className="relative bg-white rounded-[2.5rem] border border-slate-200 p-8 lg:p-10 space-y-10 shadow-sm transition-all duration-300">
+
+                                    {/* Task Data (Chart) - Stacked on top for Task 1 */}
+                                    {exercise.type === "writing_task1" && exercise.image_url && (
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                                    <Layout className="h-4 w-4" />
+                                                    Chart Visualization
+                                                </div>
+                                                <button
+                                                    onClick={() => setIsLightboxOpen(true)}
+                                                    className="text-[10px] font-bold text-slate-400 hover:text-primary flex items-center gap-1.5 transition-colors"
+                                                >
+                                                    <Maximize2 className="h-3 w-3" />
+                                                    Full Screen
+                                                </button>
+                                            </div>
+
+                                            <div
+                                                onClick={() => setIsLightboxOpen(true)}
+                                                className="relative aspect-video bg-slate-50 rounded-3xl flex items-center justify-center border-2 border-slate-100 group/img overflow-hidden cursor-zoom-in hover:border-primary/20 transition-all hover:shadow-xl hover:shadow-primary/5"
+                                            >
+                                                <img
+                                                    src={exercise.image_url}
+                                                    alt="Task 1 Chart"
+                                                    className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover/img:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/[0.02] transition-colors" />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <p className="text-center text-[10px] uppercase font-black tracking-widest text-muted-foreground/40">
-                                        Chart Visualization
-                                    </p>
-                                </div>
-                            )}
+                                    )}
 
-                            <div className="pt-6 border-t border-dashed space-y-4">
-                                <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Minimum Requirements:</p>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100">
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
-                                        <span className="text-[10px] font-bold text-purple-700">
-                                            {exercise.type === "writing_task1" ? "150+ Words" : "250+ Words"}
-                                        </span>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                            <HelpCircle className="h-4 w-4" />
+                                            Question Prompt
+                                        </div>
+                                        <p className="text-lg font-medium text-slate-700 leading-relaxed italic selection:bg-primary/10">
+                                            "{exercise.prompt}"
+                                        </p>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                                        <Clock className="h-3.5 w-3.5 text-blue-600" />
-                                        <span className="text-[10px] font-bold text-blue-700">
-                                            {exercise.type === "writing_task1" ? "20 Minutes" : "40 Minutes"}
-                                        </span>
+
+                                    {/* Task Stats Footnote */}
+                                    <div className="flex flex-wrap items-center gap-8 pt-10 border-t border-dashed border-slate-200">
+                                        <div className="space-y-2">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Min Target</span>
+                                            <div className="flex items-center gap-2.5 text-emerald-600">
+                                                <div className="p-1 rounded-md bg-emerald-50">
+                                                    <CheckCircle2 className="h-4 w-4" />
+                                                </div>
+                                                <span className="text-sm font-black tracking-tight">{exercise.type === "writing_task1" ? "150 Words" : "250 Words"}</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-px h-10 bg-slate-100 hidden sm:block" />
+                                        <div className="space-y-2">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Recommended Time</span>
+                                            <div className="flex items-center gap-2.5 text-blue-600">
+                                                <div className="p-1 rounded-md bg-blue-50">
+                                                    <Clock className="h-4 w-4" />
+                                                </div>
+                                                <span className="text-sm font-black tracking-tight">{exercise.type === "writing_task1" ? "20 Minutes" : "40 Minutes"}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Lightbox Overlay */}
+                {isLightboxOpen && exercise.image_url && (
+                    <div
+                        className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md animate-in fade-in duration-300 flex items-center justify-center p-8 lg:p-20"
+                        onClick={() => setIsLightboxOpen(false)}
+                    >
+                        <button
+                            className="absolute top-8 right-8 text-white/40 hover:text-white transition-all hover:rotate-90"
+                            onClick={() => setIsLightboxOpen(false)}
+                        >
+                            <X className="h-10 w-10" />
+                        </button>
+                        <img
+                            src={exercise.image_url}
+                            alt="Full Screen Chart"
+                            className="max-w-full max-h-full object-contain shadow-2xl animate-in zoom-in duration-500"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                )}
             </div>
 
-            {/* Writing Side */}
-            <div className="w-1/2 flex flex-col p-12 overflow-hidden">
-                <div className="max-w-2xl mx-auto w-full flex flex-col h-full space-y-8">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-2 text-primary">
-                                <Clock className="h-5 w-5" />
-                                <span className={cn("text-xl font-black font-mono", timeLeft < 60 && "text-rose-500 animate-pulse")}>
+            {/* 2. Right Side: Writing Panel */}
+            <div className="flex-1 flex flex-col bg-white relative">
+                {/* Header: Immersive Status Bar */}
+                <div className="h-20 border-b flex items-center justify-between px-8 lg:px-12 bg-white/80 backdrop-blur-md z-40 sticky top-0">
+                    <div className="flex items-center gap-10">
+                        {/* Timer */}
+                        <div className="group flex flex-col items-center">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">Time Remaining</span>
+                            <div className={cn(
+                                "flex items-center gap-2.5 px-4 py-1.5 rounded-full border-2 transition-all duration-300",
+                                timeLeft < 60
+                                    ? "bg-rose-50 border-rose-200 text-rose-500 animate-pulse scale-105 shadow-lg shadow-rose-200/50"
+                                    : "bg-slate-50 border-slate-100 text-slate-900 group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary"
+                            )}>
+                                <Clock className={cn("h-4 w-4", timeLeft < 60 ? "animate-spin-slow" : "")} />
+                                <span className="text-lg font-black font-mono tracking-tighter">
                                     {formatTime(timeLeft)}
                                 </span>
                             </div>
-                            <div className="h-4 w-px bg-muted" />
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-muted-foreground">Word Count:</span>
-                                <span className={cn(
-                                    "text-xs font-black",
-                                    wordCount >= (exercise.type === "writing_task1" ? 150 : 250) ? "text-green-600" : "text-primary"
-                                )}>
-                                    {wordCount} / {exercise.type === "writing_task1" ? 150 : 250}
-                                </span>
+                        </div>
+
+                        <div className="h-6 w-px bg-slate-100" />
+
+                        {/* Word Count Progress */}
+                        <div className="group flex flex-col items-start min-w-[140px]">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">Word Progress</span>
+                            <div className="w-full space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className={cn(
+                                        "text-xs font-black transition-colors",
+                                        wordCount >= (exercise.type === "writing_task1" ? 150 : 250) ? "text-emerald-500" : "text-slate-900"
+                                    )}>
+                                        {wordCount} Words
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-400">/{exercise.type === "writing_task1" ? 150 : 250}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden p-[1px]">
+                                    <div
+                                        className={cn(
+                                            "h-full rounded-full transition-all duration-700",
+                                            wordCount >= (exercise.type === "writing_task1" ? 150 : 250) ? "bg-emerald-500" : "bg-primary"
+                                        )}
+                                        style={{ width: `${Math.min(100, (wordCount / (exercise.type === "writing_task1" ? 150 : 250)) * 100)}%` }}
+                                    />
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-muted-foreground">
-                                <Layout className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-muted-foreground">
-                                <HelpCircle className="h-4 w-4" />
-                            </Button>
+                    <div className="flex items-center gap-3 relative z-50">
+                        <BackButton href="/dashboard/writing" label="Back to Hub" />
+                    </div>
+                </div>
+
+                {/* Main Typing Area */}
+                <div className="flex-1 relative group/typing flex flex-col">
+                    {/* Background indicators or guidelines */}
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] flex flex-col px-12 pt-16 gap-8">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                            <div key={i} className="w-full h-px bg-slate-900 border-b border-dashed border-slate-900" />
+                        ))}
+                    </div>
+
+                    <div className="flex-1 flex flex-col z-10 px-8 py-10 lg:px-12 lg:py-12">
+                        <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
+                            <Textarea
+                                value={text}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
+                                placeholder="Once there was a horse..."
+                                className="flex-1 w-full border-none focus-visible:ring-0 text-xl md:text-2xl leading-[1.8] font-medium placeholder:text-slate-300 resize-none scrollbar-none bg-transparent selection:bg-primary/10 transition-all duration-300"
+                                autoFocus
+                            />
                         </div>
                     </div>
 
-                    <div className="flex-1 min-h-0 bg-white border-2 border-primary/5 focus-within:border-primary/20 rounded-[40px] overflow-hidden shadow-2xl shadow-primary/5 transition-all flex flex-col p-8">
-                        <Textarea
-                            value={text}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
-                            placeholder="Start writing your answer here..."
-                            className="flex-1 w-full border-none focus-visible:ring-0 text-lg leading-relaxed font-medium placeholder:text-muted-foreground/60 resize-none scrollbar-hide bg-transparent"
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-emerald-500/10 p-2 rounded-xl">
+                    {/* Footer Actions */}
+                    <div className="p-8 lg:px-12 border-t flex items-center justify-between bg-white/80 backdrop-blur-md z-20">
+                        <div className="flex items-center gap-4 group/autosave">
+                            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100 group-hover/autosave:bg-emerald-100 transition-colors">
                                 <Save className="h-4 w-4 text-emerald-600" />
                             </div>
-                            <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Auto-saved 2s ago</span>
+                            <div className="space-y-0.5">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Status</span>
+                                <span className="text-[10px] font-bold text-emerald-600 block">Cloud Sync Active</span>
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 onClick={async () => {
                                     if (!currentAttempt) return;
                                     setIsSubmitting(true);
                                     try {
                                         await saveAttemptDraft(currentAttempt.id, text);
-                                        notifySuccess("Draft Saved", "Your work has been saved. You can request evaluation later from the Reports tab.");
+                                        notifySuccess("Draft Saved", "Your work has been saved successfully.");
                                         router.push("/dashboard/reports");
                                     } catch (error) {
-                                        console.error("Submission failed:", error);
-                                        // Refund animation on system error
-                                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
-                                        notifyError("Save Failed", "We couldn't save your draft. Please try again.");
+                                        console.error("Save failed:", error);
+                                        notifyError("Save Failed", "We couldn't save your draft.");
                                     } finally {
                                         setIsSubmitting(false);
                                     }
                                 }}
                                 disabled={isSubmitting || !text.trim()}
-                                className="h-14 px-8 rounded-2xl font-bold border-2"
+                                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-400 hover:text-slate-600 transition-all"
                             >
-                                Evaluate Later
+                                Save as Draft
                             </Button>
+
                             <Button
                                 onClick={handleFinish}
                                 disabled={isSubmitting || !text.trim()}
-                                className="bg-primary hover:bg-primary/90 text-white h-14 px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                                className="group relative h-14 pl-10 pr-8 rounded-[2rem] bg-slate-900 hover:bg-primary text-white font-black text-sm shadow-2xl shadow-slate-200 transition-all duration-500 hover:translate-y-[-2px] hover:shadow-primary/30"
                             >
-                                {isSubmitting ? "Evaluating..." : "Finish and Get Feedback"}
-                                {!isSubmitting && <Sparkles className="ml-2 h-5 w-5 fill-white" />}
+                                <span className="relative z-10 flex items-center gap-3">
+                                    {isSubmitting ? "Processing..." : "Finish Analysis"}
+                                    {!isSubmitting && <Sparkles className="h-5 w-5 fill-white group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500" />}
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
                             </Button>
                         </div>
                     </div>

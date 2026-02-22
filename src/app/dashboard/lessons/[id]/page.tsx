@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { AppLoading } from "@/components/global/app-loading"
+import { BackButton } from "@/components/global/back-button"
 
 import { getLessonById, getLessons, getLessonQuestions } from "@/app/actions";
 import { Lesson, LessonQuestion } from "@/types";
@@ -82,11 +83,7 @@ export default function LessonPracticePage({ params }: { params: Promise<{ id: s
             {/* Header */}
             <header className="h-20 border-b flex items-center justify-between px-10 shrink-0">
                 <div className="flex items-center gap-6">
-                    <Link href="/dashboard/lessons">
-                        <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl hover:bg-slate-100">
-                            <ChevronLeft className="h-5 w-5" />
-                        </Button>
-                    </Link>
+                    <BackButton href="/dashboard/lessons" />
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Lesson Series • Lesson {lesson.order_index}</div>
                         <h1 className="text-lg font-black font-outfit">{lesson.title}</h1>

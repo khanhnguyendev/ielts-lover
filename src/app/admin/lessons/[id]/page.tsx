@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronLeft, Plus, Trash2, GripVertical } from "lucide-react"
+import { BackButton } from "@/components/global/back-button"
+import { Plus, Trash2, GripVertical } from "lucide-react"
 import Link from "next/link"
 import { Lesson, LessonQuestion } from "@/types"
 import { use } from "react"
@@ -149,11 +150,7 @@ export default function EditLessonPage({ params }: { params: Promise<{ id: strin
     return (
         <div className="max-w-4xl mx-auto space-y-10 pb-20">
             <div className="flex items-center justify-between">
-                <Link href="/admin/lessons">
-                    <Button variant="ghost" size="icon">
-                        <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                </Link>
+                <BackButton href="/admin/lessons" label="Back to Lessons" />
                 <Button variant="destructive" size="sm" onClick={handleDeleteLesson}>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Lesson

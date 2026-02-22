@@ -4,6 +4,7 @@ import { ATTEMPT_STATES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Target, FileText, Calendar } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "@/components/global/back-button";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -23,9 +24,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
     return (
         <div className="space-y-6 p-6">
-            <Link href="/teacher/students" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors">
-                <ArrowLeft className="h-4 w-4" /> Back to Students
-            </Link>
+            <BackButton href="/teacher/students" label="Back to Students" />
 
             {/* Student Header */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
