@@ -1,4 +1,4 @@
-import { TransactionType, SkillType, ErrorCategory, CreditRequestStatus } from "@/lib/constants";
+import { TransactionType, SkillType, ErrorCategory, CreditRequestStatus, NotificationType, NotificationEntityType } from "@/lib/constants";
 import { UserProfile, Exercise, Attempt, ExerciseType, TeacherStudent, CreditRequest } from "@/types";
 
 export interface IUserRepository {
@@ -211,4 +211,31 @@ export interface IAIUsageRepository {
     getCostByFeature(startDate: string, endDate: string): Promise<{ feature_key: string; call_count: number; avg_tokens: number; total_cost_usd: number; total_credits_charged: number }[]>;
     getDailyTrend(startDate: string, endDate: string): Promise<{ day: string; total_cost_usd: number; call_count: number }[]>;
     getRollingSummaries(): Promise<{ last7Days: AICostSummary; last30Days: AICostSummary }>;
+}
+
+// ── Notifications ──
+
+export type AppNotification = {
+    id: string;
+    recipient_id: string;
+    type: NotificationType;
+    group_key: string | null;
+    title: string;
+    body: string;
+    deep_link: string | null;
+    entity_id: string | null;
+    entity_type: NotificationEntityType | null;
+    is_read: boolean;
+    read_at: string | null;
+    metadata: Record<string, unknown>;
+    created_at: string;
+    updated_at: string;
+};
+
+export interface INotificationRepository {
+    create(data: Omit<AppNotification, 'id' | 'created_at' | 'updated_at' | 'is_read' | 'read_at'>): Promise<AppNotification>;
+    listByRecipient(userId: string, cursor?: string, limit?: number): Promise<AppNotification[]>;
+    countUnread(userId: string): Promise<number>;
+    markRead(userId: string, notificationId: string): Promise<void>;
+    markAllRead(userId: string): Promise<void>;
 }

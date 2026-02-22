@@ -29,10 +29,11 @@ import { CreditService } from "@/services/credit.service";
 import { TeacherService } from "@/services/teacher.service";
 
 import { traceService, traceAction } from "@/lib/aop";
-import { USER_ROLES, UserRole } from "@/lib/constants";
+import { USER_ROLES, UserRole, NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { AI_METHODS } from "@/lib/constants";
+import { notificationService } from "@/lib/notification-client";
 
 const logger = new Logger("AdminActions");
 const creditPackageRepo = traceService(new CreditPackageRepository(), "CreditPackageRepository");
@@ -378,6 +379,18 @@ export const adjustUserCredits = traceAction("adjustUserCredits", async (userId:
         admin.id
     );
 
+    // Notify user about credits received
+    notificationService.notify(
+        userId,
+        NOTIFICATION_TYPES.CREDITS_RECEIVED,
+        "Credits Received",
+        `You received ${amount} credits${reason ? `: ${reason}` : "."}`,
+        {
+            deepLink: "/dashboard",
+            entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_TRANSACTION,
+        }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
     revalidatePath("/admin/users");
     logger.info("Admin manually adjusted user credits", { userId, amount, reason });
 });
@@ -496,7 +509,37 @@ export const approveCreditRequest = traceAction("approveCreditRequest", async (r
     const admin = await getCurrentUser();
     if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
 
+    // Fetch request before approval to get teacher_id, student_id, amount
+    const request = await creditRequestRepo.getById(requestId);
     await teacherService.approveCreditRequest(requestId, admin!.id, adminNote);
+
+    if (request) {
+        // Notify teacher: request approved
+        notificationService.notify(
+            request.teacher_id,
+            NOTIFICATION_TYPES.CREDIT_REQUEST_APPROVED,
+            "Credit Request Approved",
+            `Your request for ${request.amount} credits has been approved.`,
+            {
+                deepLink: "/teacher/credit-requests",
+                entityId: requestId,
+                entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
+            }
+        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
+        // Notify student: credits received
+        notificationService.notify(
+            request.student_id,
+            NOTIFICATION_TYPES.CREDITS_RECEIVED,
+            "Credits Received",
+            `You received ${request.amount} credits from your teacher.`,
+            {
+                deepLink: "/dashboard",
+                entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_TRANSACTION,
+            }
+        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+    }
+
     revalidatePath("/admin/credit-requests");
     revalidatePath("/teacher/credit-requests");
     logger.info("Admin approved credit request", { requestId });
@@ -506,7 +549,25 @@ export const rejectCreditRequest = traceAction("rejectCreditRequest", async (req
     const admin = await getCurrentUser();
     if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
 
+    // Fetch request before rejection to get teacher_id
+    const request = await creditRequestRepo.getById(requestId);
     await teacherService.rejectCreditRequest(requestId, admin!.id, adminNote);
+
+    if (request) {
+        // Notify teacher: request rejected
+        notificationService.notify(
+            request.teacher_id,
+            NOTIFICATION_TYPES.CREDIT_REQUEST_REJECTED,
+            "Credit Request Rejected",
+            `Your request for ${request.amount} credits was rejected.${adminNote ? ` Note: ${adminNote}` : ""}`,
+            {
+                deepLink: "/teacher/credit-requests",
+                entityId: requestId,
+                entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
+            }
+        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+    }
+
     revalidatePath("/admin/credit-requests");
     revalidatePath("/teacher/credit-requests");
     logger.info("Admin rejected credit request", { requestId });

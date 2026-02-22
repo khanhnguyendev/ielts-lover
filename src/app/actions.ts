@@ -27,6 +27,8 @@ import { AIUsageMetadata } from "@/services/ai.service";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { evaluateLimiter, simpleAiLimiter, checkRateLimit } from "@/lib/ratelimit";
+import { notificationService } from "@/lib/notification-client";
+import { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 
 const logger = new Logger("UserActions");
 
@@ -147,6 +149,19 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
 
         const aiMethod = exercise.type.startsWith("writing") ? "generateWritingReport" : "generateFeedback";
         recordAICost(usage, user.id, featureKey, aiMethod, 1);
+
+        // Notify student that evaluation is ready
+        notificationService.notify(
+            user.id,
+            NOTIFICATION_TYPES.EVALUATION_COMPLETE,
+            "Evaluation Ready",
+            `Your ${exercise.type.startsWith("writing") ? "writing" : "speaking"} submission has been evaluated.`,
+            {
+                deepLink: `/dashboard/reports/${attemptId}`,
+                entityId: attemptId,
+                entityType: NOTIFICATION_ENTITY_TYPES.ATTEMPT,
+            }
+        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
 
         return evaluatedAttempt;
     } catch (error) {

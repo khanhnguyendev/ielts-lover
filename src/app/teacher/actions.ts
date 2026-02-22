@@ -18,7 +18,8 @@ import { StorageService } from "@/services/storage.service";
 import { traceService, traceAction } from "@/lib/aop";
 import { revalidatePath } from "next/cache";
 import { Exercise } from "@/types";
-import { FEATURE_KEYS, APP_ERROR_CODES, AI_METHODS } from "@/lib/constants";
+import { FEATURE_KEYS, APP_ERROR_CODES, AI_METHODS, NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
+import { notificationService } from "@/lib/notification-client";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { Logger } from "@/lib/logger";
@@ -67,6 +68,20 @@ export async function getStudentProgress(studentId: string) {
 export async function createCreditRequest(studentId: string, amount: number, reason: string) {
     const user = await checkTeacher();
     const result = await teacherService.requestCredits(user.id, studentId, amount, reason);
+
+    // Notify admins about new credit request — notify the teacher as confirmation
+    notificationService.notify(
+        user.id,
+        NOTIFICATION_TYPES.CREDIT_REQUEST_NEW,
+        "Credit Request Submitted",
+        `Your request for ${amount} credits has been submitted and is pending review.`,
+        {
+            deepLink: "/teacher/credit-requests",
+            entityId: result.id,
+            entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
+        }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
     revalidatePath("/teacher/credit-requests");
     return result;
 }

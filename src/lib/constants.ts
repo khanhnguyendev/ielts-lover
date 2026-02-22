@@ -90,6 +90,7 @@ export const DB_TABLES = {
     AI_MODEL_PRICING: 'ai_model_pricing',
     AI_COST_SUMMARY_7_DAYS: 'ai_cost_summary_7_days',
     AI_COST_SUMMARY_30_DAYS: 'ai_cost_summary_30_days',
+    NOTIFICATIONS: 'notifications',
 } as const;
 
 export const TRANSACTION_FILTERS = {
@@ -166,3 +167,27 @@ export const AI_METHODS = {
 } as const;
 
 export type AIMethod = typeof AI_METHODS[keyof typeof AI_METHODS];
+
+// ── Notifications ──
+
+export const NOTIFICATION_TYPES = {
+    EVALUATION_COMPLETE: 'evaluation_complete',
+    CREDITS_RECEIVED: 'credits_received',
+    CREDITS_LOW: 'credits_low',
+    CREDIT_REQUEST_APPROVED: 'credit_request_approved',
+    CREDIT_REQUEST_REJECTED: 'credit_request_rejected',
+    CREDIT_REQUEST_NEW: 'credit_request_new',
+    WELCOME: 'welcome',
+    SYSTEM: 'system',
+} as const;
+
+export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES];
+
+export const NOTIFICATION_ENTITY_TYPES = {
+    ATTEMPT: 'attempt',
+    CREDIT_TRANSACTION: 'credit_transaction',
+    CREDIT_REQUEST: 'credit_request',
+    USER: 'user',
+} as const;
+
+export type NotificationEntityType = typeof NOTIFICATION_ENTITY_TYPES[keyof typeof NOTIFICATION_ENTITY_TYPES];

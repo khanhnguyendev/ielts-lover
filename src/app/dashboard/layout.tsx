@@ -27,7 +27,7 @@ export default async function DashboardLayout({
                     <div className="flex items-center gap-3">
                         <StarsBalance balance={user.credits_balance} />
                         <div className="h-4 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
-                        <NotificationOverlay />
+                        <NotificationOverlay userId={user.id} />
                         <UserProfileMenu user={user} />
                     </div>
                 </header>

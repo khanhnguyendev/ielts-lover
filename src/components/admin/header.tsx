@@ -1,10 +1,10 @@
 "use client"
 
 import { UserProfileMenu } from "../global/user-profile-menu";
+import { NotificationOverlay } from "../global/notification-overlay";
 import { UserProfile } from "@/types";
 import { AdminDynamicTitle } from "./dynamic-title";
-import { Search, Bell, ShieldCheck } from "lucide-react";
-import { Button } from "../ui/button";
+import { Search, ShieldCheck } from "lucide-react";
 
 export function Header({ user }: { user: UserProfile }) {
     return (
@@ -25,10 +25,7 @@ export function Header({ user }: { user: UserProfile }) {
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 pr-6 border-r border-slate-100">
-                    <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
-                        <Bell className="h-5 w-5" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-                    </Button>
+                    <NotificationOverlay userId={user.id} />
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-lg">
                         <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
                         <span className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Super Admin</span>
