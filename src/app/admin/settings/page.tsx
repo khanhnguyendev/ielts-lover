@@ -4,12 +4,56 @@ import React, { useEffect, useState } from "react"
 import { AdminDynamicTitle } from "@/components/admin/dynamic-title"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Settings, Save, AlertCircle, Coins, Zap } from "lucide-react"
+import {
+    Settings,
+    Save,
+    AlertCircle,
+    Coins,
+    Zap,
+    PenTool,
+    Mic2,
+    MessageSquare,
+    BarChart3,
+    ShieldCheck,
+    Globe,
+    Sparkles,
+    ChevronRight,
+    ArrowRight,
+    Search,
+    Filter,
+    LayoutGrid,
+    Target,
+    Image,
+    FileText,
+    RefreshCw
+} from "lucide-react"
 import { getSystemSettings, updateSystemSetting, getFeaturePricing, updateFeaturePricing } from "../actions"
 import { SystemSetting, FeaturePricing } from "@/repositories/interfaces"
 import { NumericInput } from "@/components/global/numeric-input"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { FEATURE_KEYS } from "@/lib/constants"
+
+function getFeatureConfig(key: string) {
+    if (key.includes('writing') || key.includes('correction') || key.includes('sentence')) {
+        return { icon: PenTool, color: "text-purple-600", bg: "bg-purple-50", category: "Writing" }
+    }
+    if (key.includes('speaking')) {
+        return { icon: Mic2, color: "text-blue-600", bg: "bg-blue-50", category: "Speaking" }
+    }
+    if (key.includes('chat') || key.includes('tutor')) {
+        return { icon: MessageSquare, color: "text-sky-600", bg: "bg-sky-50", category: "AI Assistant" }
+    }
+    if (key.includes('weakness') || key.includes('chart') || key.includes('test')) {
+        return { icon: Target, color: "text-emerald-600", bg: "bg-emerald-50", category: "Analytics & Tools" }
+    }
+    if (key.includes('rewriter')) {
+        return { icon: RefreshCw, color: "text-indigo-600", bg: "bg-indigo-50", category: "Writing" }
+    }
+    return { icon: Zap, color: "text-amber-600", bg: "bg-amber-50", category: "Others" }
+}
 
 export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<SystemSetting[]>([])
@@ -81,131 +125,183 @@ export default function AdminSettingsPage() {
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-5xl mx-auto space-y-12">
-                <div className="space-y-8">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <div key={i} className="flex items-center justify-between gap-8 py-4 border-b border-slate-50">
-                            <div className="space-y-2 flex-1">
-                                <Skeleton className="h-4 w-1/3" />
-                                <Skeleton className="h-3 w-1/2" />
-                            </div>
-                            <Skeleton className="h-10 w-32" />
-                        </div>
+            <div className="p-8 max-w-6xl mx-auto space-y-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-slate-100/50">
+                    <div className="space-y-1">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-3 w-48" />
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="h-32 bg-slate-50 rounded-2xl border border-slate-100 animate-pulse" />
                     ))}
                 </div>
             </div>
         )
     }
 
+    // Categorize features
+    const categories: Record<string, FeaturePricing[]> = {}
+    pricing.forEach(p => {
+        const { category } = getFeatureConfig(p.feature_key)
+        if (!categories[category]) categories[category] = []
+        categories[category].push(p)
+    })
+
     return (
-        <div className="p-8 max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="flex items-center justify-between pb-6 border-b border-slate-100/50">
-                <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
-                    <AlertCircle className="w-3 h-3 text-slate-400" />
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Platform Configuration</span>
+        <div className="p-8 max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1.5 border-b border-slate-100/50">
+                <div className="space-y-0.5">
+                    <div className="flex items-center gap-2 mb-0.5">
+                        <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <ShieldCheck size={14} strokeWidth={2.5} />
+                        </div>
+                        <h1 className="text-2xl font-black font-outfit text-slate-900 tracking-tight">Platform Settings</h1>
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-400">Configure feature costs and system-wide policies</p>
                 </div>
-                <div className="flex items-center gap-2 opacity-50">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Live Sync</span>
+
+                <div className="flex items-center gap-2 self-start md:self-auto opacity-50">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Live Guard Active</span>
                 </div>
             </div>
 
             {/* Feature Pricing Section */}
-            <section className="space-y-6">
-                <div className="flex items-center gap-2">
-                    <Coins className="w-4 h-4 text-amber-500" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 font-outfit">Feature Costs (StarCredits)</h2>
+            <div className="space-y-6">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+                        <Coins size={14} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-black font-outfit text-slate-900 tracking-tight">Feature Economics</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">StarCredits Spend Units</p>
+                    </div>
                 </div>
-                <div className="space-y-0">
-                    {pricing.map((item) => (
-                        <div
-                            key={item.id}
-                            className="group flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-slate-50 transition-all hover:bg-slate-50/50 -mx-4 px-4 rounded-lg"
-                        >
-                            <div className="space-y-0.5 flex-1">
-                                <h4 className="font-black text-[9px] uppercase tracking-[0.15em] text-amber-600/80 flex items-center gap-2">
-                                    <Zap className="w-3 h-3" />
-                                    {item.feature_key.replace(/_/g, ' ')}
-                                </h4>
-                                <p className="text-[11px] font-semibold text-slate-500 max-w-lg leading-snug">
-                                    Cost for using this feature per unit.
-                                </p>
+
+                <div className="space-y-8">
+                    {Object.entries(categories).map(([catName, items]) => (
+                        <div key={catName} className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 shrink-0">{catName}</h3>
+                                <div className="h-px w-full bg-slate-50" />
                             </div>
-                            <div className="w-full md:w-24 flex items-center justify-end">
-                                {updatingKeys.has(item.feature_key) ? (
-                                    <div className="h-8 flex items-center justify-center w-full">
-                                        <PulseLoader size="sm" color="primary" />
-                                    </div>
-                                ) : (
-                                    <div className="relative group/input w-full">
-                                        <NumericInput
-                                            value={item.cost_per_unit}
-                                            onChange={() => { }}
-                                            onCommit={(val) => handleUpdatePricing(item.feature_key, val)}
-                                            className="h-8 border-none bg-transparent focus-visible:ring-0 transition-all text-center font-black text-sm p-0 text-amber-700"
-                                        />
-                                        <div className="absolute inset-x-2 -bottom-px h-px bg-amber-100 group-focus-within/input:bg-amber-500 transition-colors" />
-                                    </div>
-                                )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {items.map((item) => {
+                                    const config = getFeatureConfig(item.feature_key)
+                                    const Icon = config.icon
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className="group bg-white rounded-xl border border-slate-100 p-2.5 px-3 transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/40 relative overflow-hidden flex items-center gap-3"
+                                        >
+                                            <div className={cn(
+                                                "w-8 h-8 rounded-lg flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 shrink-0 relative z-10",
+                                                config.bg, config.color
+                                            )}>
+                                                <Icon size={14} strokeWidth={2.5} />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0 relative z-10">
+                                                <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-tight truncate leading-none mb-0.5">
+                                                    {item.feature_key.replace(/_/g, ' ')}
+                                                </h4>
+                                                <div className="flex items-center gap-1 opacity-40">
+                                                    <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest truncate">AI Cost Unit</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="w-16 shrink-0 relative z-10">
+                                                {updatingKeys.has(item.feature_key) ? (
+                                                    <div className="h-7 flex items-center justify-center">
+                                                        <PulseLoader size="sm" color="primary" />
+                                                    </div>
+                                                ) : (
+                                                    <NumericInput
+                                                        value={item.cost_per_unit}
+                                                        onChange={() => { }}
+                                                        onCommit={(val) => handleUpdatePricing(item.feature_key, val)}
+                                                        className="h-7 border-none bg-slate-50/80 rounded-md focus-visible:ring-0 text-center font-black text-xs p-0 text-slate-900 shadow-inner group-hover:bg-white border group-hover:border-slate-100"
+                                                    />
+                                                )}
+                                            </div>
+
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     ))}
                 </div>
-            </section>
+            </div>
 
-            {/* System Settings Section */}
-            <section className="space-y-6 pt-10">
-                <div className="flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 font-outfit">System Policies</h2>
+            {/* System Policies Section */}
+            <div className="space-y-6 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+                        <Globe size={14} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-black font-outfit text-slate-900 tracking-tight">Global Policies</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Platform limits & issuance rules</p>
+                    </div>
                 </div>
-                <div className="space-y-0">
+
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
                     {settings.filter(s => s.setting_key !== 'DAILY_GRANT_PREMIUM').map((setting) => (
                         <div
                             key={setting.id}
-                            className="group flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-slate-50 transition-all hover:bg-slate-50/50 -mx-4 px-4 rounded-lg"
+                            className="group flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 hover:bg-slate-50/50 transition-colors"
                         >
                             <div className="space-y-0.5 flex-1">
-                                <h4 className="font-black text-[9px] uppercase tracking-[0.15em] text-primary/60">
-                                    {setting.setting_key.replace(/_/g, ' ')}
-                                </h4>
-                                <p className="text-[11px] font-semibold text-slate-500 max-w-lg leading-snug">
+                                <div className="flex items-center gap-1.5">
+                                    <h4 className="font-black text-[9px] uppercase tracking-[0.15em] text-slate-400">
+                                        {setting.setting_key.replace(/_/g, ' ')}
+                                    </h4>
+                                    <Badge variant="outline" className="rounded-full h-3.5 px-1.5 text-[7px] font-black uppercase text-slate-300 border-slate-100">Active</Badge>
+                                </div>
+                                <p className="text-[12px] font-bold text-slate-500 leading-snug">
                                     {setting.description}
                                 </p>
                             </div>
-                            <div className="w-full md:w-24 flex items-center justify-end">
+
+                            <div className="w-full md:w-24">
                                 {updatingKeys.has(setting.setting_key) ? (
-                                    <div className="h-8 flex items-center justify-center w-full">
+                                    <div className="h-9 flex items-center justify-center">
                                         <PulseLoader size="sm" color="primary" />
                                     </div>
                                 ) : (
-                                    <div className="relative group/input w-full">
+                                    <div className="relative group/input">
                                         <NumericInput
                                             value={Number(setting.setting_value)}
                                             onChange={() => { }}
                                             onCommit={(val) => handleUpdateSetting(setting.setting_key, val)}
-                                            className="h-8 border-none bg-transparent focus-visible:ring-0 transition-all text-center font-black text-sm p-0"
+                                            className="h-9 border-none bg-slate-50 rounded-lg focus-visible:ring-0 transition-all text-center font-black text-sm p-0 text-slate-900"
                                         />
-                                        <div className="absolute inset-x-2 -bottom-px h-px bg-slate-100 group-focus-within/input:bg-primary transition-colors" />
+                                        <div className="absolute inset-x-2 -bottom-px h-px bg-slate-200 group-focus-within/input:bg-primary transition-colors" />
                                     </div>
                                 )}
                             </div>
                         </div>
                     ))}
                 </div>
-            </section>
+            </div>
 
+            {/* Footer */}
             <div className="pt-6 flex items-center justify-between opacity-30">
-                <div className="flex items-center gap-2">
-                    <div className="w-1 h-1 rounded-full bg-slate-400" />
-                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">
-                        Admin Audit Active
+                <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" />
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                        Admin Protocol: Secure
                     </p>
                 </div>
-                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">
-                    IELTS Lover v1.0
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    IELTS Lover v1.25
                 </p>
             </div>
-        </div>
+        </div >
     )
 }
