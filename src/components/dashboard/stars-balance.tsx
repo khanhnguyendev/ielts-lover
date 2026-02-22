@@ -55,7 +55,7 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
 
                 <div className="flex items-center gap-1.5">
                     <span className="text-xs font-black text-yellow-700 tracking-tight">
-                        {displayBalance.toLocaleString()}
+                        {(displayBalance || 0).toLocaleString()}
                     </span>
 
                     <div className="flex items-center justify-center w-4 h-4 rounded-full bg-yellow-500/10 group-hover:bg-yellow-500 transition-colors">

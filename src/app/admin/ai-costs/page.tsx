@@ -152,7 +152,7 @@ export default function AICostsPage() {
                                                 </span>
                                             </td>
                                             <td className="text-right px-4 py-3 font-bold text-slate-700">{f.call_count}</td>
-                                            <td className="text-right px-4 py-3 font-bold text-slate-500">{f.avg_tokens.toLocaleString()}</td>
+                                            <td className="text-right px-4 py-3 font-bold text-slate-500">{(Number(f.avg_tokens) || 0).toLocaleString()}</td>
                                             <td className="text-right px-4 py-3 font-black text-red-600">${f.total_cost_usd.toFixed(4)}</td>
                                             <td className="text-right px-4 py-3 font-bold text-amber-600">{f.total_credits_charged}</td>
                                             <td className="text-right px-4 py-3 font-bold text-blue-600">${costPerCredit.toFixed(6)}</td>

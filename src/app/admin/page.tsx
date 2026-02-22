@@ -17,9 +17,9 @@ export default async function AdminDashboard() {
     const recentAttempts = await getAdminAttempts(5);
 
     const stats = [
-        { label: "Total Users", value: statsData.totalUsers.toLocaleString(), change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-        { label: "Active Exercises", value: statsData.activeExercises.toLocaleString(), change: "+2", icon: FileText, color: "text-purple-600", bg: "bg-purple-50" },
-        { label: "Today's Attempts", value: statsData.todayAttempts.toLocaleString(), change: "+24%", icon: Activity, color: "text-emerald-600", bg: "bg-emerald-50" },
+        { label: "Total Users", value: (statsData.totalUsers || 0).toLocaleString(), change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+        { label: "Active Exercises", value: (statsData.activeExercises || 0).toLocaleString(), change: "+2", icon: FileText, color: "text-purple-600", bg: "bg-purple-50" },
+        { label: "Today's Attempts", value: (statsData.todayAttempts || 0).toLocaleString(), change: "+24%", icon: Activity, color: "text-emerald-600", bg: "bg-emerald-50" },
     ];
 
     return (

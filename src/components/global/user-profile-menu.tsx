@@ -132,7 +132,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                                         <div>
                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Your Balance</p>
                                             <div className="flex items-baseline gap-1">
-                                                <p className="text-xl font-black text-slate-900 tracking-tight">{displayBalance.toLocaleString()}</p>
+                                                <p className="text-xl font-black text-slate-900 tracking-tight">{(displayBalance || 0).toLocaleString()}</p>
                                                 <p className="text-[9px] font-black text-primary uppercase tracking-widest">Stars</p>
                                             </div>
                                         </div>
