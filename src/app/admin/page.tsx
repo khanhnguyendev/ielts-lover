@@ -1,4 +1,4 @@
-import { getAdminStats, getAdminAttempts } from "./actions";
+import { getAdminStats, getRecentPlatformActivity } from "./actions";
 import {
     Users,
     FileText,
@@ -9,12 +9,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-import { ATTEMPT_STATES } from "@/lib/constants"
+import { AdminActivityItem } from "@/components/admin/admin-activity-item";
+import { AICostSummaryDialog } from "@/components/admin/ai-cost-summary-dialog";
 
 export default async function AdminDashboard() {
     const statsData = await getAdminStats();
-    const recentAttempts = await getAdminAttempts(5);
+    const recentActivity = await getRecentPlatformActivity();
 
     const stats = [
         { label: "Total Users", value: (statsData.totalUsers || 0).toLocaleString(), change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
@@ -55,50 +55,37 @@ export default async function AdminDashboard() {
                 {/* Recent Activity */}
                 <div className="lg:col-span-2 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-black font-outfit text-slate-900">Recent Activity</h2>
-                        <Link href="/admin/attempts" className="text-xs font-black text-primary hover:underline flex items-center gap-1">
-                            View All <ChevronRight className="h-3 w-3" />
-                        </Link>
+                        <div>
+                            <h2 className="text-xl font-black font-outfit text-slate-900 tracking-tight">Recent Activity</h2>
+                            <p className="text-[11px] font-semibold text-slate-400">Live platform credit transactions & usage</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <AICostSummaryDialog />
+                            <Link href="/admin/attempts" className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-slate-100/80 transition-all border border-slate-100">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary">View All</span>
+                                <ChevronRight className="h-3 w-3 text-primary group-hover:translate-x-0.5 transition-transform" />
+                            </Link>
+                        </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                        <div className="divide-y divide-slate-50">
-                            {recentAttempts.map((attempt) => (
-                                <div key={attempt.id} className="p-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs uppercase">
-                                            {attempt.user_profiles?.email?.substring(0, 2)}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-900 leading-none mb-1">
-                                                {attempt.user_profiles?.email}
-                                            </p>
-                                            <p className="text-[11px] font-medium text-slate-500">
-                                                Submitted {attempt.exercises?.type ? (
-                                                    <span className="font-bold border-b border-primary/20">{attempt.exercises.type.replace('_', ' ')}</span>
-                                                ) : `exercise ${attempt.exercise_id?.substring(0, 8)}`}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className={cn(
-                                            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg",
-                                            attempt.state === ATTEMPT_STATES.EVALUATED ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
-                                        )}>
-                                            {attempt.state}
-                                        </div>
-                                        <p className="text-[10px] font-bold text-slate-400">
-                                            {new Date(attempt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                            {recentAttempts.length === 0 && (
-                                <div className="p-12 text-center text-slate-400 font-medium">
-                                    No recent activity found.
-                                </div>
-                            )}
-                        </div>
+                    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative group/panel">
+                        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
+
+                        {recentActivity.length > 0 ? (
+                            <div className="divide-y divide-slate-50 relative z-10">
+                                {recentActivity.map((t) => (
+                                    <AdminActivityItem key={t.id} transaction={t} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-16 text-center">
+                                <Activity className="w-10 h-10 text-slate-200 mx-auto mb-4" />
+                                <p className="text-sm font-bold text-slate-600 mb-1">No Recent Activity</p>
+                                <p className="text-[11px] font-medium text-slate-400 max-w-[200px] mx-auto">
+                                    When users interact or consume credits, they will appear here.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

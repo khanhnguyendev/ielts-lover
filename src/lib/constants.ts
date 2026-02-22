@@ -88,6 +88,8 @@ export const DB_TABLES = {
     CREDIT_REQUESTS: 'credit_requests',
     AI_USAGE_LOGS: 'ai_usage_logs',
     AI_MODEL_PRICING: 'ai_model_pricing',
+    AI_COST_SUMMARY_7_DAYS: 'ai_cost_summary_7_days',
+    AI_COST_SUMMARY_30_DAYS: 'ai_cost_summary_30_days',
 } as const;
 
 export const TRANSACTION_FILTERS = {

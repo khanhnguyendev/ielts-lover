@@ -1,13 +1,15 @@
-import { getTeacherStats, getMyStudents } from "./actions";
-import { Users, HandCoins, FileText, ChevronRight } from "lucide-react";
+import { getTeacherStats, getMyStudents, getStudentRecentActivity } from "./actions";
+import { Users, HandCoins, FileText, ChevronRight, Activity } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { StudentCard } from "@/components/teacher/student-card";
+import { ActivityItem } from "@/components/dashboard/activity-item";
 
 export default async function TeacherDashboard() {
-    const [stats, students] = await Promise.all([
+    const [stats, students, recentActivity] = await Promise.all([
         getTeacherStats(),
         getMyStudents(),
+        getStudentRecentActivity(),
     ]);
 
     const statCards = [
@@ -37,6 +39,26 @@ export default async function TeacherDashboard() {
                 ))}
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Student Activity */}
+            <div className="lg:col-span-2 space-y-4">
+                <h2 className="text-xl font-black font-outfit text-slate-900">Student Activity</h2>
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-2">
+                    {recentActivity.length > 0 ? (
+                        <div className="divide-y divide-slate-50">
+                            {recentActivity.map((t) => (
+                                <ActivityItem key={t.id} transaction={t} showUser />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-12 text-center">
+                            <Activity className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-400 font-medium">No student activity yet.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* Recent Students */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -55,12 +77,13 @@ export default async function TeacherDashboard() {
                         <p className="text-sm text-slate-400 mt-1">Ask your admin to link students to your account.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {students.slice(0, 6).map((student) => (
+                    <div className="space-y-3">
+                        {students.slice(0, 4).map((student) => (
                             <StudentCard key={student.id} student={student} />
                         ))}
                     </div>
                 )}
+            </div>
             </div>
         </div>
     );

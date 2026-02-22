@@ -26,6 +26,7 @@ export function AdminDynamicTitle() {
         if (pathname.startsWith("/admin/exercises/")) return "Exercise Editor"
         if (pathname.startsWith("/admin/lessons/")) return "Lesson Editor"
         if (pathname.startsWith("/admin/users/")) return "User Statistics"
+        if (pathname.startsWith("/admin/activity/")) return "Activity Detail"
 
         return "Admin Console"
     }

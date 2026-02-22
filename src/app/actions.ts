@@ -429,6 +429,14 @@ export const getFeaturePrice = traceAction("getFeaturePrice", async (key: string
     return pricing?.cost_per_unit || 0;
 });
 
+// ─── Recent Activity ─────────────────────────────────────────
+
+export async function getRecentActivity() {
+    const user = await getCurrentUser();
+    if (!user) return [];
+    return transactionRepo.getRecentByUserId(user.id, 5);
+}
+
 // ─── Mistake Bank & Improvement ───────────────────────────────
 
 export const getMistakeDashboardData = traceAction("getMistakeDashboardData", async (skillFilter?: SkillType) => {

@@ -52,10 +52,34 @@ export type CreditTransaction = {
     created_at: string;
 };
 
+export type CreditTransactionWithUser = CreditTransaction & {
+    user_email?: string;
+    user_full_name?: string;
+    user_avatar_url?: string;
+};
+
+export type ActivityDetail = {
+    transaction: CreditTransactionWithUser;
+    user: {
+        id: string;
+        email: string;
+        full_name?: string;
+        avatar_url?: string;
+        role: string;
+        credits_balance: number;
+        created_at: string;
+    } | null;
+    aiUsage: AIUsageLog | null;
+};
+
 export interface ICreditTransactionRepository {
     create(transaction: Omit<CreditTransaction, "id" | "created_at">): Promise<CreditTransaction>;
+    getById(id: string): Promise<CreditTransactionWithUser | null>;
     listByUserId(userId: string): Promise<CreditTransaction[]>;
     getLastActivityMap(): Promise<Record<string, string>>;
+    getRecentByUserId(userId: string, limit: number): Promise<CreditTransaction[]>;
+    getRecentAll(limit: number): Promise<CreditTransactionWithUser[]>;
+    getRecentByUserIds(userIds: string[], limit: number): Promise<CreditTransactionWithUser[]>;
 }
 
 export type SystemSetting = {
@@ -166,12 +190,24 @@ export type AIModelPricing = {
     updated_at: string;
 };
 
+export type AICostSummary = {
+    total_calls: number;
+    total_prompt_tokens: number;
+    total_completion_tokens: number;
+    total_tokens: number;
+    total_cost_usd: number;
+    total_credits_charged: number;
+    avg_duration_ms: number;
+};
+
 export interface IAIUsageRepository {
     logUsage(data: Omit<AIUsageLog, 'id' | 'created_at'>): Promise<AIUsageLog>;
+    findByCorrelation(userId: string, featureKey: string, timestamp: string, windowSeconds?: number): Promise<AIUsageLog | null>;
     getModelPricing(modelName: string): Promise<AIModelPricing | null>;
     listModelPricing(): Promise<AIModelPricing[]>;
     updateModelPricing(id: string, data: Partial<Pick<AIModelPricing, 'input_price_per_million' | 'output_price_per_million' | 'is_active'>>): Promise<void>;
     getCostSummary(startDate: string, endDate: string): Promise<{ total_cost_usd: number; total_calls: number; total_tokens: number; total_credits_charged: number }>;
     getCostByFeature(startDate: string, endDate: string): Promise<{ feature_key: string; call_count: number; avg_tokens: number; total_cost_usd: number; total_credits_charged: number }[]>;
     getDailyTrend(startDate: string, endDate: string): Promise<{ day: string; total_cost_usd: number; call_count: number }[]>;
+    getRollingSummaries(): Promise<{ last7Days: AICostSummary; last30Days: AICostSummary }>;
 }

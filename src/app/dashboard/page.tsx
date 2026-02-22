@@ -23,13 +23,16 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
-import { getCurrentUser } from "@/app/actions"
+import { getCurrentUser, getRecentActivity } from "@/app/actions"
 import { UserProfile } from "@/types"
+import { CreditTransaction } from "@/repositories/interfaces"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { ActivityItem } from "@/components/dashboard/activity-item"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
+    const [recentActivity, setRecentActivity] = React.useState<CreditTransaction[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [chatInput, setChatInput] = React.useState("")
     const { notifySuccess, notifyInfo } = useNotification()
@@ -47,8 +50,12 @@ export default function DashboardPage() {
     React.useEffect(() => {
         async function loadData() {
             try {
-                const userData = await getCurrentUser()
+                const [userData, activityData] = await Promise.all([
+                    getCurrentUser(),
+                    getRecentActivity(),
+                ])
                 setUser(userData as UserProfile)
+                setRecentActivity(activityData)
             } catch (error) {
                 console.error("Failed to load dashboard data:", error)
             } finally {
@@ -239,33 +246,41 @@ export default function DashboardPage() {
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historical Progress</p>
                                     </div>
                                 </div>
-                                <Link href="/dashboard/reports" className="group/link flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary transition-all">
+                                <Link href="/dashboard/transactions" className="group/link flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary transition-all">
                                     Full History <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
                                 </Link>
                             </div>
 
                             <div className="space-y-1">
-                                <div className="py-16 flex flex-col items-center text-center space-y-5 animate-in fade-in zoom-in-95 duration-1000">
-                                    <div className="relative">
-                                        <div className="text-6xl filter grayscale opacity-20 transition-all group-hover:grayscale-0 group-hover:opacity-40 hover:scale-110 duration-700 cursor-default">
-                                            📊
+                                {recentActivity.length > 0 ? (
+                                    <div className="divide-y divide-slate-50">
+                                        {recentActivity.map((t) => (
+                                            <ActivityItem key={t.id} transaction={t} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-16 flex flex-col items-center text-center space-y-5 animate-in fade-in zoom-in-95 duration-1000">
+                                        <div className="relative">
+                                            <div className="text-6xl filter grayscale opacity-20 transition-all group-hover:grayscale-0 group-hover:opacity-40 hover:scale-110 duration-700 cursor-default">
+                                                📊
+                                            </div>
+                                            <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full blur-xl animate-pulse" />
                                         </div>
-                                        <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full blur-xl animate-pulse" />
+                                        <div className="space-y-2">
+                                            <h4 className="text-lg font-black text-slate-800 tracking-tight">No recent activity detected</h4>
+                                            <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto leading-relaxed">
+                                                Start practicing Writing or Speaking to see your band scores and analysis here.
+                                            </p>
+                                        </div>
+                                        <div className="pt-2">
+                                            <Link href="/dashboard/writing">
+                                                <Button variant="outline" className="rounded-2xl border-slate-200 px-8 font-black uppercase tracking-widest text-[10px] hover:border-primary/30 hover:bg-primary/5 transition-all">
+                                                    Start Practice Session
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <h4 className="text-lg font-black text-slate-800 tracking-tight">No recent activity detected</h4>
-                                        <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto leading-relaxed">
-                                            Start practicing Writing or Speaking to see your band scores and analysis here.
-                                        </p>
-                                    </div>
-                                    <div className="pt-2">
-                                        <Link href="/dashboard/writing">
-                                            <Button variant="outline" className="rounded-2xl border-slate-200 px-8 font-black uppercase tracking-widest text-[10px] hover:border-primary/30 hover:bg-primary/5 transition-all">
-                                                Start Practice Session
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 

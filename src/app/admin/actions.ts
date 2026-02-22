@@ -1,6 +1,7 @@
 "use server";
 
 import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS, APP_ERROR_CODES } from "@/lib/constants";
+import { ActivityDetail, AIUsageLog } from "@/repositories/interfaces";
 import { LessonRepository } from "@/repositories/lesson.repository";
 import { LessonService } from "@/services/lesson.service";
 import { getCurrentUser } from "@/app/actions";
@@ -56,7 +57,7 @@ const teacherService = traceService(
 );
 
 // AI Cost Accounting
-const aiUsageRepo = new AIUsageRepository();
+const aiUsageRepo = traceService(new AIUsageRepository(), "AIUsageRepository");
 const aiCostService = new AICostService(aiUsageRepo);
 
 export const seedCreditPackages = traceAction("seedCreditPackages", async () => {
@@ -330,6 +331,11 @@ export async function getUserLastActivityMap() {
     return transactionRepo.getLastActivityMap();
 }
 
+export async function getRecentPlatformActivity() {
+    await checkAdmin();
+    return transactionRepo.getRecentAll(10);
+}
+
 export async function getAdminUserTransactions(userId: string) {
     await checkAdmin();
     return transactionRepo.listByUserId(userId);
@@ -457,4 +463,43 @@ export const updateModelPricing = traceAction("updateModelPricing", async (id: s
     await aiCostService.updateModelPricing(id, data);
     revalidatePath("/admin/ai-costs");
     logger.info("Admin updated model pricing", { id, data });
+});
+
+export async function getRollingAICostSummaries() {
+    await checkAdmin();
+    return aiUsageRepo.getRollingSummaries();
+}
+
+// ── Activity Detail ──
+
+export const getActivityDetail = traceAction("getActivityDetail", async (id: string): Promise<ActivityDetail | null> => {
+    await checkAdmin();
+
+    const transaction = await transactionRepo.getById(id);
+    if (!transaction) return null;
+
+    const user = transaction.user_id ? await userRepo.getById(transaction.user_id) : null;
+
+    let aiUsage: AIUsageLog | null = null;
+    if (transaction.feature_key && transaction.user_id) {
+        aiUsage = await aiUsageRepo.findByCorrelation(
+            transaction.user_id,
+            transaction.feature_key,
+            transaction.created_at
+        );
+    }
+
+    return {
+        transaction,
+        user: user ? {
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            avatar_url: user.avatar_url,
+            role: user.role,
+            credits_balance: user.credits_balance,
+            created_at: user.created_at,
+        } : null,
+        aiUsage,
+    };
 });

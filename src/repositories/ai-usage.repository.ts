@@ -15,6 +15,32 @@ export class AIUsageRepository implements IAIUsageRepository {
         return row as AIUsageLog;
     }
 
+    async findByCorrelation(
+        userId: string,
+        featureKey: string,
+        timestamp: string,
+        windowSeconds: number = 5
+    ): Promise<AIUsageLog | null> {
+        const supabase = await createServiceSupabaseClient();
+        const ts = new Date(timestamp);
+        const lowerBound = new Date(ts.getTime() - windowSeconds * 1000).toISOString();
+        const upperBound = new Date(ts.getTime() + windowSeconds * 1000).toISOString();
+
+        const { data, error } = await supabase
+            .from(DB_TABLES.AI_USAGE_LOGS)
+            .select("*")
+            .eq("user_id", userId)
+            .eq("feature_key", featureKey)
+            .gte("created_at", lowerBound)
+            .lte("created_at", upperBound)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw new Error(`[AIUsageRepository] findByCorrelation failed: ${error.message}`);
+        return data as AIUsageLog | null;
+    }
+
     async getModelPricing(modelName: string): Promise<AIModelPricing | null> {
         const supabase = await createServiceSupabaseClient();
         const { data, error } = await supabase
@@ -117,5 +143,22 @@ export class AIUsageRepository implements IAIUsageRepository {
         }, {} as Record<string, { day: string; total_cost_usd: number; call_count: number }>);
 
         return Object.values(grouped);
+    }
+
+    async getRollingSummaries(): Promise<{ last7Days: any; last30Days: any }> {
+        const supabase = await createServiceSupabaseClient();
+
+        const [res7, res30] = await Promise.all([
+            supabase.from(DB_TABLES.AI_COST_SUMMARY_7_DAYS).select("*").single(),
+            supabase.from(DB_TABLES.AI_COST_SUMMARY_30_DAYS).select("*").single()
+        ]);
+
+        if (res7.error) throw new Error(`[AIUsageRepository] Failed to fetch 7-day summary: ${res7.error.message}`);
+        if (res30.error) throw new Error(`[AIUsageRepository] Failed to fetch 30-day summary: ${res30.error.message}`);
+
+        return {
+            last7Days: res7.data,
+            last30Days: res30.data
+        };
     }
 }

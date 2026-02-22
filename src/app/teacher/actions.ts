@@ -167,6 +167,14 @@ export const analyzeTeacherChartImage = traceAction("analyzeTeacherChartImage", 
     return { success: true, data: result.data };
 });
 
+export async function getStudentRecentActivity() {
+    const user = await checkTeacher();
+    const students = await teacherStudentRepo.getStudentsByTeacher(user.id);
+    const studentIds = students.map(s => s.id);
+    if (studentIds.length === 0) return [];
+    return transactionRepo.getRecentByUserIds(studentIds, 10);
+}
+
 export async function getTeacherExercises() {
     await checkTeacher();
     const types = ["writing_task1", "writing_task2", "speaking_part1", "speaking_part2", "speaking_part3"] as const;
