@@ -104,6 +104,64 @@ export const seedCreditPackages = traceAction("seedCreditPackages", async () => 
     logger.info("Successfully seeded credit packages");
 });
 
+export const generateAndSeedPackages = traceAction("generateAndSeedPackages", async (
+    tiers: { credits: number; price: number }[]
+) => {
+    await checkAdmin();
+
+    // 1. Generate AI content for package names and taglines
+    const aiService = new AIService();
+    const aiResult = await aiService.generatePackageContent(tiers);
+
+    // Log AI usage
+    const aiUsageRepo = traceService(new AIUsageRepository(), "AIUsageRepository");
+    const currentUser = await getCurrentUser();
+    await aiUsageRepo.logUsage({
+        user_id: currentUser?.id ?? null,
+        feature_key: "generate_package_content",
+        ai_method: "generate_package_content",
+        model_name: aiResult.usage.modelName,
+        prompt_tokens: aiResult.usage.promptTokens,
+        completion_tokens: aiResult.usage.completionTokens,
+        total_tokens: aiResult.usage.totalTokens,
+        input_cost_usd: 0,
+        output_cost_usd: 0,
+        total_cost_usd: 0,
+        duration_ms: aiResult.usage.durationMs,
+        credits_charged: 0,
+    });
+
+    // 2. Delete all existing packages
+    const existingPackages = await creditPackageRepo.listAll();
+    for (const pkg of existingPackages) {
+        await creditPackageRepo.delete(pkg.id);
+    }
+
+    // 3. Create new packages with AI-generated content
+    const typeMap: ("starter" | "pro" | "master")[] = ["starter", "pro", "master"];
+    const generatedContent = aiResult.data;
+
+    for (let i = 0; i < tiers.length; i++) {
+        const tier = tiers[i];
+        const content = generatedContent[i];
+        await creditPackageRepo.create({
+            name: content.name,
+            credits: tier.credits,
+            bonus_credits: content.bonus_credits || 0,
+            price: Number(tier.price.toFixed(2)),
+            tagline: content.tagline,
+            type: typeMap[i] || "starter",
+            is_active: true,
+            display_order: i + 1,
+        });
+    }
+
+    revalidatePath("/admin/credits");
+    revalidatePath("/dashboard/credits");
+    revalidatePath("/dashboard/pricing");
+    logger.info("Successfully generated and seeded credit packages with AI content", { tiers: tiers.length });
+});
+
 // ... existing code ...
 
 export const createCreditPackage = traceAction("createCreditPackage", async (pkg: Omit<CreditPackage, "id" | "created_at" | "updated_at">) => {

@@ -540,4 +540,38 @@ For process_diagram or map types, adapt data_points to describe the steps/locati
         const { text, usage } = await this.callModel(model, [prompt, imagePart]);
         return { data: JSON.parse(text), usage };
     }
+
+    /**
+     * Generates creative package names and taglines for credit packages.
+     * Used by the admin Pricing Strategy to auto-create attractive packages.
+     */
+    async generatePackageContent(
+        packages: { credits: number; price: number }[]
+    ): Promise<AICallResult<{ name: string; tagline: string; bonus_credits: number }[]>> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+            },
+        });
+
+        const prompt = `You are a creative marketing copywriter for "IELTS Lover", an AI-powered IELTS preparation platform.
+
+Generate creative, compelling package names and taglines for the following credit tiers. Each package lets users spend "Stars" (credits) on AI writing evaluations, speaking practice, and more.
+
+Tiers:
+${packages.map((p, i) => `${i + 1}. ${p.credits} Stars at $${p.price.toFixed(2)}`).join("\n")}
+
+Rules:
+- Names should be IELTS-themed, motivational, and memorable (e.g., "Band Booster", "Score Surge", "IELTS Ace")
+- Taglines should be short (under 10 words), compelling, and action-oriented
+- Suggest bonus_credits: 0 for the smallest tier, 5-15% for mid tier, 10-20% for top tier (round to nice numbers)
+- Each name must be unique and progressively more premium
+
+Return a JSON array with exactly ${packages.length} objects:
+[{ "name": "...", "tagline": "...", "bonus_credits": 0 }]`;
+
+        const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
+    }
 }

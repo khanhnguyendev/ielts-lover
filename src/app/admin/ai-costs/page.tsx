@@ -24,9 +24,11 @@ import {
     FileText,
     Calculator,
     Sparkles,
-    Settings2
+    Settings2,
+    Package,
+    Loader2
 } from "lucide-react"
-import { getAICostAnalytics, getModelPricingList, updateModelPricing, getRollingAICostSummaries } from "../actions"
+import { getAICostAnalytics, getModelPricingList, updateModelPricing, getRollingAICostSummaries, generateAndSeedPackages } from "../actions"
 import { AIModelPricing, AICostSummary } from "@/repositories/interfaces"
 import { NumericInput } from "@/components/global/numeric-input"
 import { useNotification } from "@/lib/contexts/notification-context"
@@ -77,6 +79,7 @@ export default function AICostsPage() {
     const [activePeriod, setActivePeriod] = useState<7 | 30>(7)
     const [targetMargin, setTargetMargin] = useState(60)
     const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set())
+    const [isGenerating, setIsGenerating] = useState(false)
     const { notifySuccess, notifyError } = useNotification()
 
     useEffect(() => {
@@ -504,6 +507,36 @@ export default function AICostsPage() {
                                     Prevents negative margin.
                                 </p>
                             </div>
+
+                            <Button
+                                className="w-full rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest gap-2 h-10 shadow-sm"
+                                disabled={isGenerating}
+                                onClick={async () => {
+                                    setIsGenerating(true)
+                                    try {
+                                        const costPerCredit = (currentRolling?.total_credits_charged || 0) > 0
+                                            ? Number(currentRolling?.total_cost_usd || 0) / Number(currentRolling?.total_credits_charged)
+                                            : 0
+                                        const tiers = [100, 500, 1000].map(stars => ({
+                                            credits: stars,
+                                            price: Number(((costPerCredit / (1 - (targetMargin / 100))) * stars).toFixed(2))
+                                        }))
+                                        await generateAndSeedPackages(tiers)
+                                        notifySuccess("Packages Created", "New credit packages generated with AI content.")
+                                    } catch (error) {
+                                        console.error(error)
+                                        notifyError("Error", "Failed to generate packages.")
+                                    } finally {
+                                        setIsGenerating(false)
+                                    }
+                                }}
+                            >
+                                {isGenerating ? (
+                                    <><Loader2 size={14} className="animate-spin" /> Generating...</>
+                                ) : (
+                                    <><Package size={14} /> Generate Packages</>
+                                )}
+                            </Button>
                         </div>
                     </div>
                 </div>
