@@ -4,7 +4,7 @@ import { ExerciseRepository } from "@/repositories/exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { AIService } from "@/services/ai.service";
 import { AttemptService } from "@/services/attempt.service";
-import { AICostService, RecordUsageParams } from "@/services/ai-cost.service";
+import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { CreditService } from "@/services/credit.service";
 import { FeaturePricingRepository } from "@/repositories/pricing.repository";

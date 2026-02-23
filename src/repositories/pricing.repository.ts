@@ -4,7 +4,7 @@ import { DB_TABLES, APP_ERROR_CODES } from "@/lib/constants";
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-let pricingCache: Map<string, { data: FeaturePricing; expiresAt: number }> = new Map();
+const pricingCache: Map<string, { data: FeaturePricing; expiresAt: number }> = new Map();
 
 export class FeaturePricingRepository implements IFeaturePricingRepository {
     async getByKey(key: string): Promise<FeaturePricing | null> {
