@@ -105,6 +105,7 @@ export const APP_ERROR_CODES = {
     INSUFFICIENT_CREDITS: 'INSUFFICIENT_CREDITS',
     INTERNAL_ERROR: 'INTERNAL_ERROR',
     AI_SERVICE_BUSY: 'AI_SERVICE_BUSY',
+    CONTENT_TOO_LONG: 'CONTENT_TOO_LONG',
     PGRST116: 'PGRST116',
 } as const;
 
@@ -116,6 +117,12 @@ export const STORAGE_FOLDERS = {
 export const DEFAULT_QUOTAS = {
     FREE_DAILY_LIMIT: 2,
     FREE_DAILY_GRANT: 5,
+} as const;
+
+export const CONTENT_LIMITS = {
+    MAX_ESSAY_LENGTH: 15_000,       // ~3000 words, well above IELTS Task 2 max
+    MAX_SENTENCE_LENGTH: 1_000,     // single sentence for improve/rewrite
+    MAX_REWRITE_LENGTH: 15_000,
 } as const;
 
 export const SKILL_TYPES = {
