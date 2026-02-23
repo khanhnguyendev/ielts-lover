@@ -32,8 +32,7 @@ import { getSystemSettings, updateSystemSetting, getFeaturePricing, updateFeatur
 import { SystemSetting, FeaturePricing } from "@/repositories/interfaces"
 import { NumericInput } from "@/components/global/numeric-input"
 import { Switch } from "@/components/ui/switch"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { NotificationDialog } from "@/components/global/notification-dialog"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { Badge } from "@/components/ui/badge"
@@ -382,27 +381,16 @@ export default function AdminSettingsPage() {
             </div>
 
             {/* Maintenance Confirmation Dialog */}
-            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <div className="mx-auto w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
-                            <Construction size={22} strokeWidth={2.5} />
-                        </div>
-                        <DialogTitle className="text-center">Enable Maintenance Mode?</DialogTitle>
-                        <DialogDescription className="text-center">
-                            All non-admin users will be immediately redirected to a maintenance page. They will not be able to access the platform until you turn it off.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="flex-row gap-2 sm:justify-center pt-2">
-                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)} className="flex-1">
-                            Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={() => executeMaintenance(true)} className="flex-1">
-                            Enable Maintenance
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <NotificationDialog
+                open={showConfirmDialog}
+                onOpenChange={setShowConfirmDialog}
+                type="warning"
+                title="Enable Maintenance Mode?"
+                description="All non-admin users will be immediately redirected to a maintenance page. They will not be able to access the platform until you turn it off."
+                actionText="Enable Maintenance"
+                onAction={() => executeMaintenance(true)}
+                cancelText="Cancel"
+            />
         </div >
     )
 }
