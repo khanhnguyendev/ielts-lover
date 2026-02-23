@@ -92,6 +92,10 @@ export default withSentryConfig(nextConfig, {
     deleteSourcemapsAfterUpload: true,
   },
 
-  // Tree-shake Sentry logger in production
-  disableLogger: true,
+  // Tree-shake Sentry debug logging in production
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });
