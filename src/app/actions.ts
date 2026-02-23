@@ -199,7 +199,6 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
             );
         }
 
-        const traceId = getCurrentTraceId()!;
         logger.error(`submitAttempt Error: ${attemptId}`, { error });
         return { error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     } finally {
@@ -473,7 +472,6 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
             );
         }
 
-        const traceId = getCurrentTraceId()!;
         logger.error(`unlockCorrection Error: ${attemptId}`, { error: errors });
 
         // Handle Generative AI Overload (503)
@@ -569,7 +567,6 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
             logger.error("Credit refund failed", { error: err, traceId })
         );
 
-        const traceId = getCurrentTraceId()!;
         logger.error("generateWeaknessAnalysis Error", { error });
         return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
     }
