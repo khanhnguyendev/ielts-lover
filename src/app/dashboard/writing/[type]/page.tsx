@@ -28,6 +28,7 @@ import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { BackButton } from "@/components/global/back-button"
 import { FEATURE_KEYS } from "@/lib/constants"
+import { extractBillingError } from "@/lib/billing-errors"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
@@ -136,8 +137,14 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 try {
                     const result = await submitAttempt(currentAttempt.id, text)
 
+                    const billing = result ? extractBillingError(result as any) : null;
+                    if (billing) {
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
+                        notifyWarning(billing.title, `Your work has been saved securely. ${billing.message}`, "OK")
+                        return;
+                    }
+
                     if (result && 'error' in result && result.error === "INTERNAL_ERROR") {
-                        // Refund animation on system error
                         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))
                         notifyError(
                             "System Error",
@@ -158,12 +165,6 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             initialCorrection: result.correction_data ? JSON.parse(result.correction_data) : null
                         } as any)
                         setShowFeedback(true)
-                    } else if (result && 'reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
-                        notifyWarning(
-                            "Insufficient Credits",
-                            "Your work has been saved securely, but you don't have enough StarCredits for evaluation. Please top up your balance.",
-                            "Top Up"
-                        )
                     } else {
                         // Refund if we didn't get a score (logic failure)
                         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: evalCost } }))

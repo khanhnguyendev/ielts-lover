@@ -140,7 +140,7 @@ export function CorrectionTextBlock({ text, corrections, selectedSentenceIdx, on
     }, [text, corrections, selectedSentenceIdx, onSelectSentence]);
 
     return (
-        <div className="prose prose-slate max-w-none text-lg leading-loose text-slate-600 font-serif whitespace-pre-wrap">
+        <div className="prose prose-slate max-w-none text-[15px] leading-[1.9] text-slate-600 font-serif whitespace-pre-wrap">
             {sentenceNodes}
         </div>
     )

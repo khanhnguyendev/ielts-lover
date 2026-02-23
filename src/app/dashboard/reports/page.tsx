@@ -26,6 +26,7 @@ import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import { getBandScoreConfig } from "@/lib/score-utils";
 import { ATTEMPT_STATES } from "@/lib/constants";
+import { extractBillingError } from "@/lib/billing-errors";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
@@ -86,7 +87,12 @@ export default function ReportsPage() {
                         await fetchReports()
                     } else {
                         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
-                        notifyError("Evaluation Failed", result.reason || "Try again later", "Close")
+                        const billing = extractBillingError(result as any);
+                        if (billing) {
+                            notifyError(billing.title, billing.message, "Close")
+                        } else {
+                            notifyError("Evaluation Failed", "Try again later", "Close", (result as any).traceId)
+                        }
                     }
                 } catch {
                     window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))

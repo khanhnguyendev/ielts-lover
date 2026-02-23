@@ -33,22 +33,22 @@ export function ScoreOverview({
             className
         )}>
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-1000">
-                <Sparkles className={cn("h-24 w-24", config.color)} />
+                <Sparkles className={cn("h-16 w-16", config.color)} />
             </div>
 
-            <div className="flex items-center gap-6 sm:gap-10 relative z-10">
+            <div className="flex items-center gap-5 sm:gap-8 relative z-10">
                 <div className="text-center">
-                    <div className={cn("text-4xl sm:text-5xl font-black font-outfit flex items-baseline gap-1", config.color)}>
+                    <div className={cn("text-3xl sm:text-4xl font-black font-outfit flex items-baseline gap-1", config.color)}>
                         {score.toFixed(1)}
-                        <span className="text-lg sm:text-xl text-slate-400/40 font-bold">/9.0</span>
+                        <span className="text-base sm:text-lg text-slate-400/40 font-bold">/9.0</span>
                     </div>
                     <p className="text-[9px] uppercase tracking-[0.2em] font-black text-slate-500/60 mt-0.5">{title}</p>
                 </div>
 
-                <div className="w-px h-12 bg-slate-200/50 mx-1 hidden sm:block" />
+                <div className="w-px h-10 bg-slate-200/50 mx-1 hidden sm:block" />
 
                 <div className="text-center sm:text-left">
-                    <div className={cn("text-2xl sm:text-3xl font-black font-outfit", config.color)}>
+                    <div className={cn("text-xl sm:text-2xl font-black font-outfit", config.color)}>
                         {config.cefr}
                     </div>
                     <p className="text-[9px] uppercase tracking-[0.2em] font-black text-slate-500/60 mt-0.5">{subtitle}</p>

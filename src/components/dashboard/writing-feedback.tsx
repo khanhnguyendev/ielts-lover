@@ -25,6 +25,7 @@ import { CorrectionList } from "./correction-list";
 import { toast } from "sonner";
 import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
 import { useNotification } from "@/lib/contexts/notification-context";
+import { extractBillingError } from "@/lib/billing-errors";
 
 const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
@@ -166,11 +167,11 @@ export function WritingFeedback({
             } else {
                 // Refund if failed
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
-                const reason = (result as any).reason;
                 const traceId = (result as any).traceId;
-                if (reason === APP_ERROR_CODES.INSUFFICIENT_CREDITS) {
-                    notifyError("Insufficient Credits", "You don't have enough StarCredits to unlock this feature.", "Close");
-                } else if (reason === APP_ERROR_CODES.AI_SERVICE_BUSY) {
+                const billing = extractBillingError(result as any);
+                if (billing) {
+                    notifyError(billing.title, billing.message, "Close");
+                } else if ((result as any).reason === APP_ERROR_CODES.AI_SERVICE_BUSY) {
                     notifyError("Service Busy", "Our AI service is currently experiencing high demand. Please try again in a moment.", "Close", traceId);
                 } else {
                     notifyError("Something Went Wrong", "We encountered a problem while unlocking your correction. Please provide the trace ID to support.", "Close", traceId);

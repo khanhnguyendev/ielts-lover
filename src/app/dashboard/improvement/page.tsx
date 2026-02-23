@@ -7,6 +7,7 @@ import { UserMistake, UserActionPlan } from "@/repositories/interfaces"
 import { Button } from "@/components/ui/button"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { extractBillingError } from "@/lib/billing-errors"
 import { cn } from "@/lib/utils"
 import {
     Sparkles,
@@ -92,7 +93,12 @@ export default function ImprovementPage() {
                 setLatestPlan(result.data)
             } else {
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))
-                notifyError("Analysis Failed", result.error === "INSUFFICIENT_CREDITS" ? "Insufficient Credits" : "Please try again later")
+                const billing = extractBillingError(result as any);
+                if (billing) {
+                    notifyError(billing.title, billing.message, "Close")
+                } else {
+                    notifyError("Analysis Failed", "Please try again later", "Close")
+                }
             }
         } catch {
             window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))

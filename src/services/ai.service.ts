@@ -134,11 +134,11 @@ export class AIService {
                     properties: {
                         original_substring: { type: SchemaType.STRING, description: "The EXACT text segment from the user's input that needs correction including punctuation" },
                         suggested_fix: { type: SchemaType.STRING, description: "The corrected text segment" },
-                        better_version: { type: SchemaType.STRING, description: "An optional Band 8.0+ alternative phrasing" },
                         error_type: { type: SchemaType.STRING, enum: ["grammar", "spelling", "vocabulary", "style"] },
+                        error_label: { type: SchemaType.STRING, description: "Short specific label for the error, e.g. 'Plural Noun', 'Subject-Verb Agreement', 'Word Choice', 'Run-on Sentence', 'Missing Article'" },
                         explanation: { type: SchemaType.STRING, description: "Brief explanation of the error or improvement" }
                     },
-                    required: ["original_substring", "suggested_fix", "error_type", "explanation"]
+                    required: ["original_substring", "suggested_fix", "error_type", "error_label", "explanation"]
                 }
             }
         },

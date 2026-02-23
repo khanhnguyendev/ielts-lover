@@ -41,7 +41,7 @@ export function CorrectionList({ corrections, originalText, targetScore }: Corre
     }, [selectedSentenceIdx, originalText, corrections]);
 
     return (
-        <div className="flex flex-col h-[700px] lg:h-[800px] bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-700 relative group/container isolate">
+        <div className="flex flex-col max-h-[800px] bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-700 relative group/container isolate">
             {/* Header Gradient */}
             <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
 

@@ -177,7 +177,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                     {displayData?.prompt && (
                         <div className="relative group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-[2.5rem] blur opacity-25" />
-                            <div className="relative bg-white rounded-[2.5rem] border border-slate-200 p-8 lg:p-10 space-y-8 shadow-sm">
+                            <div className="relative bg-white rounded-[2rem] border border-slate-200 p-6 lg:p-8 space-y-5 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
                                         <FileText className="h-3.5 w-3.5" />
@@ -186,9 +186,9 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                     <div className="h-px flex-1 mx-6 bg-slate-50" />
                                 </div>
 
-                                <div className="space-y-8">
+                                <div className="space-y-5">
                                     {displayData.imageUrl && (
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
                                                     <Layout className="h-4 w-4" />
@@ -213,12 +213,12 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                         </div>
                                     )}
 
-                                    <div className="space-y-4">
+                                    <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
-                                            <HelpCircle className="h-4 w-4" />
+                                            <HelpCircle className="h-3.5 w-3.5" />
                                             Question Text
                                         </div>
-                                        <p className="text-lg font-medium text-slate-700 leading-relaxed italic border-l-4 border-primary/20 pl-6 py-2">
+                                        <p className="text-[15px] font-medium text-slate-700 leading-relaxed italic border-l-4 border-primary/20 pl-5 py-1.5">
                                             "{displayData.prompt}"
                                         </p>
                                     </div>
@@ -236,7 +236,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                     score={score}
                                     showChatButton={!isSample}
                                     onChatClick={() => setIsCatbotOpen(true)}
-                                    className="bg-white rounded-[2.5rem] border border-slate-200 p-10 lg:p-12 shadow-xl shadow-slate-200/40"
+                                    className="bg-white rounded-[2rem] border border-slate-200 shadow-sm"
                                 />
                             );
                         })()}

@@ -19,6 +19,7 @@ export interface TextEdit {
     suggested_fix: string;      // The corrected version (e.g., "The graph shows")
     better_version?: string;    // Optional: A Band 8.0+ paraphrase
     error_type: 'grammar' | 'spelling' | 'vocabulary' | 'style';
+    error_label?: string;
     explanation: string;
 }
 

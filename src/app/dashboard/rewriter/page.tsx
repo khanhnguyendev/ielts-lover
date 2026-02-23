@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { rewriteText } from "@/app/actions"
 import { useNotification } from "@/lib/contexts/notification-context"
+import { extractBillingError } from "@/lib/billing-errors"
 
 export default function RewriterPage() {
     // ---- COMING SOON OVERLAY FLAG ----
@@ -55,12 +56,9 @@ export default function RewriterPage() {
                         // Refund animation if failed
                         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
 
-                        if (result.reason === "INSUFFICIENT_CREDITS") {
-                            notifyError(
-                                "Insufficient Credits",
-                                "You don't have enough StarCredits to use the rewriter. Please top up your balance.",
-                                "Top Up"
-                            )
+                        const billing = extractBillingError(result as any);
+                        if (billing) {
+                            notifyError(billing.title, billing.message, "Close")
                         } else {
                             notifyError(
                                 "Rewrite Failed",

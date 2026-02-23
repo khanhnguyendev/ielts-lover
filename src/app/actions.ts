@@ -552,7 +552,7 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
         return { success: true, data: { improved_sentence: result.data } };
     } catch (error) {
         if (getBillingErrorCode(error)) {
-            return { success: false, error: getBillingErrorCode(error)! };
+            return { success: false, reason: getBillingErrorCode(error)! };
         }
 
         if (billed) {
@@ -609,7 +609,7 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
         return { success: true, data: plan };
     } catch (error) {
         if (getBillingErrorCode(error)) {
-            return { success: false, error: getBillingErrorCode(error)! };
+            return { success: false, reason: getBillingErrorCode(error)! };
         }
 
         // Refund: billing happens before AI call inside generateAIActionPlan

@@ -3,11 +3,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { TextEdit } from "@/types/writing"
-import { X, Sparkles, Languages, ArrowRight, Zap, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react"
+import { X, Sparkles, Zap, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { improveSentence, getFeaturePrice } from "@/app/actions";
 import { toast } from "sonner";
-import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
+import { FEATURE_KEYS } from "@/lib/constants";
+import { extractBillingError } from "@/lib/billing-errors";
 import { useNotification } from "@/lib/contexts/notification-context";
 
 interface CorrectionPanelProps {
@@ -59,13 +60,18 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
             } else {
                 // Refund if failed
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
-                const traceId = (result as any).traceId;
-                notifyError(
-                    "Rewrite Failed",
-                    "We couldn't rewrite this sentence. Please try again later.",
-                    "Close",
-                    traceId
-                );
+                const billing = extractBillingError(result as any);
+                if (billing) {
+                    notifyError(billing.title, billing.message, "Close");
+                } else {
+                    const traceId = (result as any).traceId;
+                    notifyError(
+                        "Rewrite Failed",
+                        "We couldn't rewrite this sentence. Please try again later.",
+                        "Close",
+                        traceId
+                    );
+                }
             }
         } catch (error) {
             // Refund on exception
@@ -119,7 +125,7 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                     {/* 1. Original Sentence */}
                     <div className="space-y-2">
                         <h4 className="text-[10px] uppercase tracking-widest font-black text-slate-400">Original Sentence</h4>
-                        <p className="text-base font-serif text-slate-800 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 text-pretty">
+                        <p className="text-[15px] font-serif text-slate-800 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 text-pretty">
                             {sentenceText}
                         </p>
                     </div>
@@ -147,39 +153,52 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                                     return (
                                         <div key={idx} className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden group hover:border-slate-200 transition-all">
                                             <div className={cn(
-                                                "px-4 py-1.5 border-b flex items-center justify-between",
+                                                "px-4 py-2 border-b flex items-center justify-between",
                                                 isError ? "bg-rose-50/30 border-rose-100/50" : "bg-blue-50/30 border-blue-100/50"
                                             )}>
-                                                <div className="flex items-center gap-2">
-                                                    {isError ? <AlertCircle className="w-3 h-3 text-rose-500" /> : <Lightbulb className="w-3 h-3 text-blue-500" />}
-                                                    <span className={cn(
-                                                        "text-[10px] font-black uppercase tracking-wider",
-                                                        isError ? "text-rose-600" : "text-blue-600"
-                                                    )}>
-                                                        {correction.error_type}
-                                                    </span>
+                                                <div className="flex items-center gap-2.5">
+                                                    {isError ? <AlertCircle className="w-3.5 h-3.5 text-rose-500" /> : <Lightbulb className="w-3.5 h-3.5 text-blue-500" />}
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={cn(
+                                                            "text-[10px] font-black uppercase tracking-wider",
+                                                            isError ? "text-rose-600" : "text-blue-600"
+                                                        )}>
+                                                            {correction.error_type}
+                                                        </span>
+                                                        {correction.error_label && (
+                                                            <span className={cn(
+                                                                "text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+                                                                isError ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700"
+                                                            )}>
+                                                                {correction.error_label}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="p-3 space-y-3">
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex items-baseline gap-2 text-sm text-slate-600 flex-wrap">
+                                            <div className="p-3 space-y-2.5">
+                                                <div className="space-y-1.5">
+                                                    <div className={cn(
+                                                        "flex items-start gap-2 rounded-lg px-2.5 py-2 border",
+                                                        isError ? "bg-rose-50/50 border-rose-100" : "bg-blue-50/50 border-blue-100"
+                                                    )}>
                                                         <span className={cn(
-                                                            "font-medium decoration-2 underline underline-offset-2",
-                                                            isError ? "text-rose-700 decoration-rose-300" : "text-blue-700 decoration-blue-300"
+                                                            "text-[9px] font-black uppercase tracking-wider mt-0.5 shrink-0",
+                                                            isError ? "text-rose-400" : "text-blue-400"
+                                                        )}>was</span>
+                                                        <span className={cn(
+                                                            "text-[13px] font-medium",
+                                                            isError ? "text-rose-700" : "text-blue-700"
                                                         )}>{correction.original_substring}</span>
-                                                        <ArrowRight className="w-4 h-4 text-slate-300 mt-0.5 shrink-0" />
-                                                        <span className="font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/50">{correction.suggested_fix}</span>
+                                                    </div>
+                                                    <div className="flex items-start gap-2 rounded-lg px-2.5 py-2 bg-emerald-50/50 border border-emerald-100">
+                                                        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400 mt-0.5 shrink-0">fix</span>
+                                                        <span className="text-[13px] font-bold text-emerald-700">{correction.suggested_fix}</span>
                                                     </div>
                                                 </div>
-                                                <p className="text-xs text-slate-500 leading-relaxed pl-2 border-l-2 border-slate-100">
+                                                <p className="text-[12px] text-slate-500 leading-relaxed pl-2.5 border-l-2 border-slate-100">
                                                     {correction.explanation}
                                                 </p>
-                                                {correction.better_version && (
-                                                    <div className="bg-slate-50 rounded-lg p-2.5 text-xs text-slate-600 italic">
-                                                        <span className="not-italic font-bold text-[10px] text-slate-400 uppercase tracking-wider block mb-0.5">Better Version</span>
-                                                        "{correction.better_version}"
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     );
@@ -193,44 +212,28 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                     </div>
 
                     {/* 3. Rewrite Action */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2 pb-4">
-                        <div className="flex items-center justify-between px-1">
-                            <h4 className="text-[10px] uppercase tracking-widest font-black text-indigo-400 flex items-center gap-1.5">
-                                <Zap className="w-3 h-3" />
-                                Magic Rewrite
-                            </h4>
-                            {!rewrittenSentence && (
-                                <div className="flex items-center gap-1 bg-yellow-50 ring-1 ring-yellow-100 px-2 py-0.5 rounded-full text-yellow-700">
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                        {!rewrittenSentence ? (
+                            <Button
+                                onClick={handleRewrite}
+                                disabled={isRewriting}
+                                variant="ghost"
+                                className="w-full h-auto flex items-center justify-between px-3 py-2 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100/50 rounded-xl transition-all"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Zap className="w-3.5 h-3.5 text-indigo-500" />
+                                    <span className="text-xs font-bold text-indigo-900">
+                                        {isRewriting ? "Rewriting..." : "Magic Rewrite"}
+                                    </span>
+                                    <span className="text-[10px] text-indigo-500 font-medium">
+                                        Band {targetScore}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 bg-yellow-50 ring-1 ring-yellow-100 px-1.5 py-0.5 rounded-full text-yellow-700">
                                     <div className="flex items-center justify-center w-3 h-3 rounded-full bg-yellow-400 text-[8px] leading-none shadow-sm text-yellow-900">⭐</div>
                                     <span className="text-[9px] font-black tracking-tight">-{cost || 5}</span>
                                 </div>
-                            )}
-                        </div>
-
-                        {!rewrittenSentence ? (
-                            <div className="bg-gradient-to-br from-indigo-50/50 to-blue-50/50 rounded-xl p-0.5 border border-indigo-100/50">
-                                <Button
-                                    onClick={handleRewrite}
-                                    disabled={isRewriting}
-                                    variant="ghost"
-                                    className="w-full h-auto flex items-center justify-between p-2.5 hover:bg-white/50 transition-all bg-white/30"
-                                >
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
-                                            <Languages className="w-3.5 h-3.5" />
-                                        </div>
-                                        <div className="text-left">
-                                            <span className="text-xs font-bold text-indigo-900 block">
-                                                {isRewriting ? "Rewriting..." : "Improve Sentence"}
-                                            </span>
-                                            <span className="text-[10px] text-indigo-600/70 block font-medium">
-                                                Get a Band {targetScore} version
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <ArrowRight className="w-3.5 h-3.5 text-indigo-300" />
-                                </Button>
-                            </div>
+                            </Button>
                         ) : (
                             <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 relative group transition-all">
                                 <div className="flex items-start gap-2.5">
@@ -256,7 +259,7 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                                                 Copy
                                             </Button>
                                         </div>
-                                        <p className="font-serif text-sm leading-relaxed text-indigo-900 text-pretty">
+                                        <p className="font-serif text-[15px] leading-relaxed text-indigo-900 text-pretty">
                                             {rewrittenSentence}
                                         </p>
                                     </div>
