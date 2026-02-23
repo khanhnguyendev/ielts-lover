@@ -165,9 +165,9 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
                         <h4 className="text-sm font-black text-slate-900 truncate capitalize leading-tight">
                             {formatDescription(t.description)}
                         </h4>
-                        {t.exercise_id && (
+                        {t.attempt_id && (
                             <Link
-                                href={`/dashboard/reports/${t.exercise_id}`}
+                                href={`/dashboard/reports/${t.attempt_id}`}
                                 className="inline-flex items-center gap-1 text-[10px] font-black text-primary hover:text-primary/80 transition-colors mt-1"
                             >
                                 Details <ExternalLink size={10} />

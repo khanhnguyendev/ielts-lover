@@ -125,12 +125,12 @@ const columns: DataTableColumn<CreditTransaction>[] = [
                 <span className="text-[12px] font-black text-slate-900 leading-tight">
                     {formatDescription(t.description, t.type)}
                 </span>
-                {t.exercise_id && (
+                {t.attempt_id && (
                     <Link
-                        href={`/dashboard/reports/${t.exercise_id}`}
+                        href={`/dashboard/reports/${t.attempt_id}`}
                         className="text-[9px] font-black text-primary hover:underline flex items-center gap-0.5 w-fit"
                     >
-                        View Exercise <ExternalLink className="h-2.5 w-2.5" />
+                        View Report <ExternalLink className="h-2.5 w-2.5" />
                     </Link>
                 )}
             </div>

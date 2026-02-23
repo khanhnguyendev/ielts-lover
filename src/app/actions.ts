@@ -193,7 +193,7 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         }
 
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
-            await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId);
+            await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId, attemptId);
             billed = true;
         }
         const usage = await attemptService.submitAttempt(attemptId, content);
@@ -271,7 +271,7 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
         const attempt = await attemptService.getAttempt(attemptId);
         if (!attempt) throw new Error("Attempt not found");
 
-        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id, traceId);
+        await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id, traceId, attemptId);
         billed = true;
         const result = await attemptService.reevaluate(attemptId);
         recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1, traceId);
@@ -469,7 +469,7 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
     const traceId = crypto.randomUUID();
     let billed = false;
     try {
-        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id, traceId);
+        await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id, traceId, attemptId);
         billed = true;
         const { data: correction, usage } = await attemptService.unlockCorrection(attemptId);
         recordAICost(usage, user.id, FEATURE_KEYS.DETAILED_CORRECTION, "generateCorrection", 1, traceId);

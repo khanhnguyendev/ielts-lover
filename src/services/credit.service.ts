@@ -57,7 +57,7 @@ export class CreditService {
      * Deducts credits based on feature pricing.
      * Includes lazy grant check.
      */
-    async billUser(userId: string, featureKey: string, exerciseId?: string, traceId?: string): Promise<boolean> {
+    async billUser(userId: string, featureKey: string, exerciseId?: string, traceId?: string, attemptId?: string): Promise<boolean> {
         // 1. Check for daily grant first
         await this.ensureDailyGrant(userId);
 
@@ -104,6 +104,7 @@ export class CreditService {
             type: TRANSACTION_TYPES.USAGE,
             feature_key: featureKey,
             exercise_id: exerciseId,
+            attempt_id: attemptId,
             trace_id: traceId,
             description: description
         });
