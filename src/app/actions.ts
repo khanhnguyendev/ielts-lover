@@ -42,6 +42,27 @@ function getBillingErrorCode(error: unknown): string | null {
     return null;
 }
 
+/** Fire-and-forget notification after an AI action completes. */
+function notifyAIComplete(
+    userId: string,
+    title: string,
+    body: string,
+    deepLink?: string,
+    entityId?: string,
+) {
+    notificationService.notify(
+        userId,
+        NOTIFICATION_TYPES.EVALUATION_COMPLETE,
+        title,
+        body,
+        {
+            deepLink,
+            entityId,
+            entityType: entityId ? NOTIFICATION_ENTITY_TYPES.ATTEMPT : undefined,
+        }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+}
+
 /** Finds the sentence containing a substring from fullText. Splits on sentence boundaries (.!?) */
 function findContainingSentence(fullText: string | null | undefined, substring: string): string | undefined {
     if (!fullText || !substring) return undefined;
@@ -181,18 +202,13 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         const aiMethod = exercise.type.startsWith("writing") ? "generateWritingReport" : "generateFeedback";
         recordAICost(usage, user.id, featureKey, aiMethod, 1, traceId);
 
-        // Notify student that evaluation is ready
-        notificationService.notify(
+        notifyAIComplete(
             user.id,
-            NOTIFICATION_TYPES.EVALUATION_COMPLETE,
             "Evaluation Ready",
             `Your ${exercise.type.startsWith("writing") ? "writing" : "speaking"} submission has been evaluated.`,
-            {
-                deepLink: `/dashboard/reports/${attemptId}`,
-                entityId: attemptId,
-                entityType: NOTIFICATION_ENTITY_TYPES.ATTEMPT,
-            }
-        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+            `/dashboard/reports/${attemptId}`,
+            attemptId,
+        );
 
         return evaluatedAttempt;
     } catch (error) {
@@ -259,6 +275,9 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
         billed = true;
         const result = await attemptService.reevaluate(attemptId);
         recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1, traceId);
+
+        notifyAIComplete(user.id, "Re-evaluation Complete", "Your submission has been re-evaluated with fresh AI analysis.", `/dashboard/reports/${attemptId}`, attemptId);
+
         return result;
     } catch (error) {
         const billingCode = getBillingErrorCode(error);
@@ -397,6 +416,9 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
         billed = true;
         const result = await aiService.rewriteContent(text);
         recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1, traceId);
+
+        notifyAIComplete(user.id, "Text Rewrite Ready", "Your IELTS text has been rewritten and polished.");
+
         return { success: true, text: result.data.rewritten_text };
     } catch (error) {
         if (getBillingErrorCode(error)) {
@@ -479,18 +501,7 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
             logger.error('Correction mistake extraction failed (non-blocking)', { error: extractError });
         }
 
-        // Notify user that detailed correction is ready
-        notificationService.notify(
-            user.id,
-            NOTIFICATION_TYPES.EVALUATION_COMPLETE,
-            "Detailed Correction Ready",
-            "Your sentence-by-sentence correction is now available.",
-            {
-                deepLink: `/dashboard/reports/${attemptId}`,
-                entityId: attemptId,
-                entityType: NOTIFICATION_ENTITY_TYPES.ATTEMPT,
-            }
-        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+        notifyAIComplete(user.id, "Detailed Correction Ready", "Your sentence-by-sentence correction is now available.", `/dashboard/reports/${attemptId}`, attemptId);
 
         return { success: true, data: correction };
     } catch (errors: any) {
@@ -535,6 +546,9 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
         const scoreToUse = targetScore || user.target_score || 9.0;
         const result = await aiService.improveSentence(sentence, scoreToUse);
         recordAICost(result.usage, user.id, FEATURE_KEYS.SENTENCE_IMPROVE, "improveSentence", 1);
+
+        notifyAIComplete(user.id, "Sentence Improved", "Your improved sentence is ready to review.");
+
         return { success: true, data: { improved_sentence: result.data } };
     } catch (error) {
         if (getBillingErrorCode(error)) {
@@ -589,6 +603,9 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
     try {
         const { plan, usage } = await improvementService.generateAIActionPlan(user.id, traceId);
         recordAICost(usage, user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, "analyzeWeaknesses", 1, traceId);
+
+        notifyAIComplete(user.id, "Weakness Analysis Ready", "Your personalized AI action plan is available.", "/dashboard/improvement");
+
         return { success: true, data: plan };
     } catch (error) {
         if (getBillingErrorCode(error)) {
