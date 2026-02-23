@@ -29,6 +29,7 @@ import { CreditService } from "@/services/credit.service";
 import { TeacherService } from "@/services/teacher.service";
 
 import { traceService, traceAction } from "@/lib/aop";
+import { setMaintenanceMode } from "@/lib/maintenance";
 import { USER_ROLES, UserRole, NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
@@ -439,6 +440,13 @@ export const getSystemSettings = traceAction("getSystemSettings", async () => {
 export const updateSystemSetting = traceAction("updateSystemSetting", async (key: string, value: unknown) => {
     await checkAdmin();
     await settingsRepo.updateSetting(key, value as any);
+    revalidatePath("/admin/settings");
+});
+
+export const toggleMaintenanceMode = traceAction("toggleMaintenanceMode", async (enabled: boolean) => {
+    await checkAdmin();
+    await settingsRepo.updateSetting("MAINTENANCE_MODE", enabled);
+    await setMaintenanceMode(enabled);
     revalidatePath("/admin/settings");
 });
 

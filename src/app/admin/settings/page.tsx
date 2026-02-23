@@ -25,11 +25,13 @@ import {
     Target,
     Image,
     FileText,
-    RefreshCw
+    RefreshCw,
+    Construction
 } from "lucide-react"
-import { getSystemSettings, updateSystemSetting, getFeaturePricing, updateFeaturePricing } from "../actions"
+import { getSystemSettings, updateSystemSetting, getFeaturePricing, updateFeaturePricing, toggleMaintenanceMode } from "../actions"
 import { SystemSetting, FeaturePricing } from "@/repositories/interfaces"
 import { NumericInput } from "@/components/global/numeric-input"
+import { Switch } from "@/components/ui/switch"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { Badge } from "@/components/ui/badge"
@@ -60,6 +62,8 @@ export default function AdminSettingsPage() {
     const [pricing, setPricing] = useState<FeaturePricing[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [updatingKeys, setUpdatingKeys] = useState<Set<string>>(new Set())
+    const [maintenanceEnabled, setMaintenanceEnabled] = useState(false)
+    const [togglingMaintenance, setTogglingMaintenance] = useState(false)
     const { notifySuccess, notifyError } = useNotification()
 
     useEffect(() => {
@@ -75,6 +79,8 @@ export default function AdminSettingsPage() {
             ])
             setSettings(settingsData)
             setPricing(pricingData)
+            const maintenanceSetting = settingsData.find(s => s.setting_key === "MAINTENANCE_MODE")
+            setMaintenanceEnabled(maintenanceSetting?.setting_value === true)
         } catch (error) {
             console.error(error)
             notifyError("Error", "Failed to fetch settings/pricing")
@@ -123,6 +129,26 @@ export default function AdminSettingsPage() {
         }
     }
 
+    async function handleToggleMaintenance(enabled: boolean) {
+        if (enabled && !window.confirm("Enable maintenance mode? All non-admin users will be redirected to a maintenance page.")) {
+            return
+        }
+        setTogglingMaintenance(true)
+        try {
+            await toggleMaintenanceMode(enabled)
+            setMaintenanceEnabled(enabled)
+            notifySuccess(
+                enabled ? "Maintenance ON" : "Maintenance OFF",
+                enabled ? "Non-admin users are now blocked." : "Platform is back to normal."
+            )
+        } catch (error) {
+            console.error(error)
+            notifyError("Error", "Failed to toggle maintenance mode")
+        } finally {
+            setTogglingMaintenance(false)
+        }
+    }
+
     if (isLoading) {
         return (
             <div className="p-8 max-w-6xl mx-auto space-y-10">
@@ -166,6 +192,49 @@ export default function AdminSettingsPage() {
                 <div className="flex items-center gap-2 self-start md:self-auto opacity-50">
                     <div className="w-1 h-1 rounded-full bg-emerald-500" />
                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Live Guard Active</span>
+                </div>
+            </div>
+
+            {/* Maintenance Mode Section */}
+            <div className={cn(
+                "rounded-2xl border p-5 transition-all duration-300",
+                maintenanceEnabled
+                    ? "bg-amber-50 border-amber-200 shadow-lg shadow-amber-100/50"
+                    : "bg-white border-slate-100"
+            )}>
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-colors",
+                            maintenanceEnabled ? "bg-amber-200 text-amber-700" : "bg-slate-100 text-slate-400"
+                        )}>
+                            <Construction size={18} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black font-outfit text-slate-900 tracking-tight">Maintenance Mode</h2>
+                            <p className="text-[10px] font-bold text-slate-400">
+                                {maintenanceEnabled
+                                    ? "Platform is in maintenance. Non-admin users are blocked."
+                                    : "Enable to block all non-admin traffic during migrations or updates."
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                        {maintenanceEnabled && (
+                            <Badge className="bg-amber-200 text-amber-800 border-0 text-[8px] font-black uppercase tracking-widest animate-pulse">
+                                Active
+                            </Badge>
+                        )}
+                        {togglingMaintenance ? (
+                            <PulseLoader size="sm" color="primary" />
+                        ) : (
+                            <Switch
+                                checked={maintenanceEnabled}
+                                onCheckedChange={handleToggleMaintenance}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -251,7 +320,7 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
-                    {settings.filter(s => s.setting_key !== 'DAILY_GRANT_PREMIUM').map((setting) => (
+                    {settings.filter(s => s.setting_key !== 'DAILY_GRANT_PREMIUM' && s.setting_key !== 'MAINTENANCE_MODE').map((setting) => (
                         <div
                             key={setting.id}
                             className="group flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 hover:bg-slate-50/50 transition-colors"

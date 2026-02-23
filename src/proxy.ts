@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isMaintenanceMode } from "@/lib/maintenance";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding", "/auth/callback"];
+const PUBLIC_ROUTES = ["/", "/login", "/signup", "/onboarding", "/auth/callback", "/maintenance"];
 
 export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -45,6 +46,33 @@ export default async function proxy(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+
+    // --- Maintenance mode gate ---
+    if (pathname !== "/maintenance" && !pathname.startsWith("/admin")) {
+        const maintenance = await isMaintenanceMode();
+        if (maintenance) {
+            // Allow admins through
+            let isAdmin = false;
+            if (user) {
+                const { data: profile } = await supabase
+                    .from("user_profiles")
+                    .select("role")
+                    .eq("id", user.id)
+                    .single();
+                isAdmin = profile?.role === "admin";
+            }
+
+            if (!isAdmin) {
+                const url = new URL("/maintenance", request.url);
+                const redirectResponse = NextResponse.redirect(url);
+                response.cookies.getAll().forEach((cookie) => {
+                    const { name, value, ...options } = cookie;
+                    redirectResponse.cookies.set(name, value, options);
+                });
+                return redirectResponse;
+            }
+        }
+    }
 
     if (isPublicRoute) {
         if (user && (pathname === "/login" || pathname === "/signup")) {
