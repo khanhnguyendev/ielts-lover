@@ -245,9 +245,11 @@ export class AIService {
         this.modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     }
 
-    private async callModel(model: GenerativeModel, prompt: any): Promise<{ text: string; usage: AIUsageMetadata }> {
+    private static DEFAULT_TIMEOUT_MS = 30_000;
+
+    private async callModel(model: GenerativeModel, prompt: any, timeoutMs: number = AIService.DEFAULT_TIMEOUT_MS): Promise<{ text: string; usage: AIUsageMetadata }> {
         const start = Date.now();
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent(prompt, { timeout: timeoutMs });
         const durationMs = Date.now() - start;
 
         const meta = result.response.usageMetadata;
@@ -398,7 +400,7 @@ export class AIService {
 
         const prompt = `${promptBase}${contextBlock}\n\nSTUDENT RESPONSE:\n${content}\n\nReturn the evaluation in the requested JSON format matching the WritingSampleData structure.`;
 
-        const { text, usage } = await this.callModel(model, prompt);
+        const { text, usage } = await this.callModel(model, prompt, 45_000);
         return { data: JSON.parse(text), usage };
     }
 
@@ -467,7 +469,7 @@ Rules:
 - Sort action items by priority (1 = most urgent).
 - Maximum 5 weaknesses, maximum 7 action items.`;
 
-        const { text, usage } = await this.callModel(model, prompt);
+        const { text, usage } = await this.callModel(model, prompt, 45_000);
         return { data: JSON.parse(text), usage };
     }
 
