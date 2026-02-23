@@ -27,6 +27,7 @@ import { AIUsageMetadata } from "@/services/ai.service";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { evaluateLimiter, simpleAiLimiter, checkRateLimit } from "@/lib/ratelimit";
+import { acquireLock } from "@/lib/distributed-lock";
 import { notificationService } from "@/lib/notification-client";
 import { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 
@@ -145,9 +146,21 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         return attempt;
     }
 
+    // Idempotency guard: prevent concurrent billing+evaluation for the same attempt
+    const release = await acquireLock(`evaluate:${attemptId}`);
+    if (!release) {
+        return { error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "This attempt is already being evaluated." };
+    }
+
     const traceId = crypto.randomUUID();
     let billed = false;
     try {
+        // Re-check state after acquiring lock (another request may have completed)
+        const freshAttempt = await attemptService.getAttempt(attemptId);
+        if (freshAttempt?.state === ATTEMPT_STATES.EVALUATED) {
+            return freshAttempt;
+        }
+
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
             await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId);
             billed = true;
@@ -189,6 +202,8 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         const traceId = getCurrentTraceId()!;
         logger.error(`submitAttempt Error: ${attemptId}`, { error });
         return { error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    } finally {
+        await release();
     }
 });
 
@@ -215,6 +230,12 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
     const rateResult = await checkRateLimit(evaluateLimiter, user.id);
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
+    // Idempotency guard: prevent concurrent re-evaluation for the same attempt
+    const release = await acquireLock(`evaluate:${attemptId}`);
+    if (!release) {
+        return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "This attempt is already being evaluated." };
+    }
+
     const traceId = crypto.randomUUID();
     let billed = false;
     try {
@@ -239,6 +260,8 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
 
         logger.error(`reevaluateAttempt Error: ${attemptId}`, { error });
         return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    } finally {
+        await release();
     }
 });
 
