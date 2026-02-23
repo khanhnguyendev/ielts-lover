@@ -479,6 +479,19 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
             logger.error('Correction mistake extraction failed (non-blocking)', { error: extractError });
         }
 
+        // Notify user that detailed correction is ready
+        notificationService.notify(
+            user.id,
+            NOTIFICATION_TYPES.EVALUATION_COMPLETE,
+            "Detailed Correction Ready",
+            "Your sentence-by-sentence correction is now available.",
+            {
+                deepLink: `/dashboard/reports/${attemptId}`,
+                entityId: attemptId,
+                entityType: NOTIFICATION_ENTITY_TYPES.ATTEMPT,
+            }
+        ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
         return { success: true, data: correction };
     } catch (errors: any) {
         if (getBillingErrorCode(errors)) {
