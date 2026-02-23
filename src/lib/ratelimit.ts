@@ -21,14 +21,14 @@ export const simpleAiLimiter = new Ratelimit({
     prefix: "@upstash/ratelimit/simple-ai",
 });
 
-// Global fallback if Redis is missing
-const mockSuccess = { success: true, pending: Promise.resolve(), limit: 10, remaining: 10, reset: 0 };
+// Fail-closed: deny requests when Redis is unavailable to prevent abuse
+const mockDenied = { success: false, pending: Promise.resolve(), limit: 0, remaining: 0, reset: 0 };
 
 export async function checkRateLimit(
     limiter: Ratelimit,
     identifier: string
 ): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
-    if (!hasRedis) return mockSuccess;
+    if (!hasRedis) return mockDenied;
 
     return await limiter.limit(identifier);
 }
