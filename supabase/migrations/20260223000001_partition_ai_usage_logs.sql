@@ -4,7 +4,12 @@
 -- enables efficient archival of old partitions.
 -- =============================================================
 
--- 1. Rename the existing table
+-- 1. Drop dependent views before rename
+DROP VIEW IF EXISTS ielts_lover_v1.ai_cost_summary_daily;
+DROP VIEW IF EXISTS ielts_lover_v1.ai_cost_summary_7_days;
+DROP VIEW IF EXISTS ielts_lover_v1.ai_cost_summary_30_days;
+
+-- 2. Rename the existing table
 ALTER TABLE ielts_lover_v1.ai_usage_logs RENAME TO ai_usage_logs_old;
 
 -- 2. Drop old indexes (they reference the old table)
@@ -117,7 +122,7 @@ CREATE POLICY "AI usage logs readable by owner"
     ON ielts_lover_v1.ai_usage_logs FOR SELECT
     USING (auth.uid() = user_id);
 
--- 8. Recreate the daily summary view (references the partitioned table)
+-- 8. Recreate all summary views on the partitioned table
 CREATE OR REPLACE VIEW ielts_lover_v1.ai_cost_summary_daily AS
 SELECT
     date_trunc('day', created_at) AS day,
@@ -132,6 +137,30 @@ SELECT
     AVG(duration_ms)::INTEGER AS avg_duration_ms
 FROM ielts_lover_v1.ai_usage_logs
 GROUP BY date_trunc('day', created_at), feature_key, model_name;
+
+CREATE OR REPLACE VIEW ielts_lover_v1.ai_cost_summary_7_days AS
+SELECT
+    COUNT(*) AS total_calls,
+    COALESCE(SUM(prompt_tokens), 0) AS total_prompt_tokens,
+    COALESCE(SUM(completion_tokens), 0) AS total_completion_tokens,
+    COALESCE(SUM(total_tokens), 0) AS total_tokens,
+    COALESCE(SUM(total_cost_usd), 0) AS total_cost_usd,
+    COALESCE(SUM(credits_charged), 0) AS total_credits_charged,
+    COALESCE(AVG(duration_ms)::INTEGER, 0) AS avg_duration_ms
+FROM ielts_lover_v1.ai_usage_logs
+WHERE created_at >= NOW() - INTERVAL '7 days';
+
+CREATE OR REPLACE VIEW ielts_lover_v1.ai_cost_summary_30_days AS
+SELECT
+    COUNT(*) AS total_calls,
+    COALESCE(SUM(prompt_tokens), 0) AS total_prompt_tokens,
+    COALESCE(SUM(completion_tokens), 0) AS total_completion_tokens,
+    COALESCE(SUM(total_tokens), 0) AS total_tokens,
+    COALESCE(SUM(total_cost_usd), 0) AS total_cost_usd,
+    COALESCE(SUM(credits_charged), 0) AS total_credits_charged,
+    COALESCE(AVG(duration_ms)::INTEGER, 0) AS avg_duration_ms
+FROM ielts_lover_v1.ai_usage_logs
+WHERE created_at >= NOW() - INTERVAL '30 days';
 
 -- 9. Drop the old table
 DROP TABLE ielts_lover_v1.ai_usage_logs_old;
