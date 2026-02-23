@@ -477,6 +477,16 @@ export const setUserRole = traceAction("setUserRole", async (userId: string, rol
     }
 
     await userRepo.update(userId, { role: role as UserRole });
+
+    const roleLabel = role === USER_ROLES.TEACHER ? "Teacher" : role === USER_ROLES.ADMIN ? "Admin" : "User";
+    notificationService.notify(
+        userId,
+        NOTIFICATION_TYPES.SYSTEM,
+        "Role Updated",
+        `Your account role has been changed to ${roleLabel}.`,
+        { deepLink: "/dashboard" }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
     revalidatePath("/admin/users");
     logger.info("Admin changed user role", { userId, role });
 });
@@ -486,6 +496,24 @@ export const assignTeacherStudent = traceAction("assignTeacherStudent", async (t
     if (!AdminPolicy.canAccessAdmin(admin)) throw new Error("Unauthorized");
 
     await teacherService.assignStudent(teacherId, studentId, admin!.id);
+
+    const teacher = await userRepo.getById(teacherId);
+    notificationService.notify(
+        studentId,
+        NOTIFICATION_TYPES.SYSTEM,
+        "Teacher Assigned",
+        `You have been assigned to ${teacher?.full_name || "a teacher"} for guided practice.`,
+        { deepLink: "/dashboard" }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
+    notificationService.notify(
+        teacherId,
+        NOTIFICATION_TYPES.SYSTEM,
+        "New Student Assigned",
+        "A new student has been assigned to you.",
+        { deepLink: "/teacher" }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
     revalidatePath("/admin/users");
     logger.info("Admin assigned teacher-student link", { teacherId, studentId });
 });
@@ -493,6 +521,23 @@ export const assignTeacherStudent = traceAction("assignTeacherStudent", async (t
 export const unassignTeacherStudent = traceAction("unassignTeacherStudent", async (teacherId: string, studentId: string) => {
     await checkAdmin();
     await teacherService.unassignStudent(teacherId, studentId);
+
+    notificationService.notify(
+        studentId,
+        NOTIFICATION_TYPES.SYSTEM,
+        "Teacher Unassigned",
+        "You have been unassigned from your teacher.",
+        { deepLink: "/dashboard" }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
+    notificationService.notify(
+        teacherId,
+        NOTIFICATION_TYPES.SYSTEM,
+        "Student Removed",
+        "A student has been removed from your roster.",
+        { deepLink: "/teacher" }
+    ).catch(err => logger.error("Notification failed (non-blocking)", { error: err }));
+
     revalidatePath("/admin/users");
     logger.info("Admin removed teacher-student link", { teacherId, studentId });
 });
