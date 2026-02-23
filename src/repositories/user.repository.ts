@@ -36,10 +36,7 @@ export class UserRepository implements IUserRepository {
         const { error } = await supabase.rpc("deduct_credits", { user_id: id, amount });
 
         if (error) {
-            const user = await this.getById(id);
-            if (user) {
-                await this.update(id, { credits_balance: user.credits_balance - amount });
-            }
+            throw new Error(`[UserRepository] deductCredits failed: ${error.message}`);
         }
     }
 
@@ -48,10 +45,7 @@ export class UserRepository implements IUserRepository {
         const { error } = await supabase.rpc("add_credits", { user_id: id, amount });
 
         if (error) {
-            const user = await this.getById(id);
-            if (user) {
-                await this.update(id, { credits_balance: user.credits_balance + amount });
-            }
+            throw new Error(`[UserRepository] addCredits failed: ${error.message}`);
         }
     }
 
