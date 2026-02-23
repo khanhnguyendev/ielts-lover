@@ -28,6 +28,7 @@ import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { evaluateLimiter, simpleAiLimiter, checkRateLimit } from "@/lib/ratelimit";
 import { acquireLock } from "@/lib/distributed-lock";
+import { submitAttemptSchema, rewriteTextSchema, improveSentenceSchema, saveAttemptDraftSchema, updateUserProfileSchema } from "@/lib/validations";
 import { notificationService } from "@/lib/notification-client";
 import { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 
@@ -124,12 +125,13 @@ function generateTraceId() {
 }
 
 export const submitAttempt = traceAction("submitAttempt", async (attemptId: string, content: string) => {
+    const parsed = submitAttemptSchema.safeParse({ attemptId, content });
+    if (!parsed.success) {
+        return { error: APP_ERROR_CODES.CONTENT_TOO_LONG, message: parsed.error.issues[0]?.message || "Invalid input" };
+    }
+
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
-
-    if (content.length > CONTENT_LIMITS.MAX_ESSAY_LENGTH) {
-        return { error: APP_ERROR_CODES.CONTENT_TOO_LONG, message: `Content exceeds maximum length of ${CONTENT_LIMITS.MAX_ESSAY_LENGTH} characters.` };
-    }
 
     const rateResult = await checkRateLimit(evaluateLimiter, user.id);
     if (!rateResult.success) return { error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Too many evaluations right now. Try again in a minute." };
@@ -207,6 +209,9 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
 });
 
 export const saveAttemptDraft = traceAction("saveAttemptDraft", async (attemptId: string, content: string) => {
+    const parsed = saveAttemptDraftSchema.safeParse({ attemptId, content });
+    if (!parsed.success) throw new Error("Invalid input");
+
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
 
@@ -323,6 +328,9 @@ export async function updateUserProfile(data: {
     test_type?: "academic" | "general";
     exam_date?: string;
 }) {
+    const parsed = updateUserProfileSchema.safeParse(data);
+    if (!parsed.success) throw new Error("Invalid input");
+
     const user = await getCurrentUser();
     if (!user) throw new Error("Unauthorized");
 
@@ -361,12 +369,13 @@ export async function signOut() {
 }
 
 export const rewriteText = traceAction("rewriteText", async (text: string) => {
+    const parsed = rewriteTextSchema.safeParse({ text });
+    if (!parsed.success) {
+        return { success: false, reason: APP_ERROR_CODES.CONTENT_TOO_LONG, message: parsed.error.issues[0]?.message || "Invalid input" };
+    }
+
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
-
-    if (text.length > CONTENT_LIMITS.MAX_REWRITE_LENGTH) {
-        return { success: false, reason: APP_ERROR_CODES.CONTENT_TOO_LONG, message: `Content exceeds maximum length of ${CONTENT_LIMITS.MAX_REWRITE_LENGTH} characters.` };
-    }
 
     const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
@@ -484,12 +493,13 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
 });
 
 export const improveSentence = traceAction("improveSentence", async (sentence: string, targetScore?: number) => {
+    const parsed = improveSentenceSchema.safeParse({ sentence, targetScore });
+    if (!parsed.success) {
+        return { success: false, error: APP_ERROR_CODES.CONTENT_TOO_LONG, message: parsed.error.issues[0]?.message || "Invalid input" };
+    }
+
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
-
-    if (sentence.length > CONTENT_LIMITS.MAX_SENTENCE_LENGTH) {
-        return { success: false, error: APP_ERROR_CODES.CONTENT_TOO_LONG, message: `Sentence exceeds maximum length of ${CONTENT_LIMITS.MAX_SENTENCE_LENGTH} characters.` };
-    }
 
     const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
     if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
