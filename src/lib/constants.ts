@@ -103,6 +103,7 @@ export type TransactionFilter = typeof TRANSACTION_FILTERS[keyof typeof TRANSACT
 
 export const APP_ERROR_CODES = {
     INSUFFICIENT_CREDITS: 'INSUFFICIENT_CREDITS',
+    MONTHLY_LIMIT_REACHED: 'MONTHLY_LIMIT_REACHED',
     INTERNAL_ERROR: 'INTERNAL_ERROR',
     AI_SERVICE_BUSY: 'AI_SERVICE_BUSY',
     CONTENT_TOO_LONG: 'CONTENT_TOO_LONG',
@@ -117,6 +118,7 @@ export const STORAGE_FOLDERS = {
 export const DEFAULT_QUOTAS = {
     FREE_DAILY_LIMIT: 2,
     FREE_DAILY_GRANT: 5,
+    MONTHLY_SPEND_CAP: 500,     // max credits a user can spend per calendar month
 } as const;
 
 export const CONTENT_LIMITS = {

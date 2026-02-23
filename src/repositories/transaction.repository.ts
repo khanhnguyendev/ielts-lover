@@ -1,6 +1,6 @@
 import { ICreditTransactionRepository, CreditTransaction, CreditTransactionWithUser } from "./interfaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { DB_TABLES } from "@/lib/constants";
+import { DB_TABLES, TRANSACTION_TYPES } from "@/lib/constants";
 
 export class CreditTransactionRepository implements ICreditTransactionRepository {
     async create(transaction: Omit<CreditTransaction, "id" | "created_at">): Promise<CreditTransaction> {
@@ -124,5 +124,24 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
                 user_profiles: undefined,
             };
         }) as CreditTransactionWithUser[];
+    }
+
+    async getMonthlyUsage(userId: string): Promise<number> {
+        const supabase = await createServerSupabaseClient();
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+        const { data, error } = await supabase
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
+            .select("amount")
+            .eq("user_id", userId)
+            .eq("type", TRANSACTION_TYPES.USAGE)
+            .gte("created_at", monthStart);
+
+        if (error) throw new Error(`[CreditTransactionRepository] getMonthlyUsage failed: ${error.message}`);
+
+        // Usage transactions have negative amounts; sum and return absolute value
+        const totalSpent = (data || []).reduce((sum, row) => sum + Math.abs(row.amount), 0);
+        return totalSpent;
     }
 }

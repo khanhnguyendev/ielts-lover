@@ -34,6 +34,14 @@ import { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 
 const logger = new Logger("UserActions");
 
+/** Returns the appropriate error code if the error is a billing-related rejection. */
+function getBillingErrorCode(error: unknown): string | null {
+    if (!(error instanceof Error)) return null;
+    if (error.name === "InsufficientFundsError") return APP_ERROR_CODES.INSUFFICIENT_CREDITS;
+    if (error.name === "MonthlyLimitError") return APP_ERROR_CODES.MONTHLY_LIMIT_REACHED;
+    return null;
+}
+
 /** Finds the sentence containing a substring from fullText. Splits on sentence boundaries (.!?) */
 function findContainingSentence(fullText: string | null | undefined, substring: string): string | undefined {
     if (!fullText || !substring) return undefined;
@@ -188,10 +196,11 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
 
         return evaluatedAttempt;
     } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            // If insufficient credits, we still save the work but don't evaluate
+        const billingCode = getBillingErrorCode(error);
+        if (billingCode) {
+            // If insufficient credits or monthly cap, save work but don't evaluate
             await attemptService.updateAttempt(attemptId, { content, state: ATTEMPT_STATES.SUBMITTED });
-            return { ...(await attemptService.getAttempt(attemptId)), reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+            return { ...(await attemptService.getAttempt(attemptId)), reason: billingCode };
         }
 
         // Refund credits if billing succeeded but AI call failed
@@ -252,8 +261,9 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
         recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1, traceId);
         return result;
     } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS, message: error.message };
+        const billingCode = getBillingErrorCode(error);
+        if (billingCode) {
+            return { success: false, reason: billingCode, message: (error as Error).message };
         }
 
         if (billed) {
@@ -389,8 +399,8 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
         recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1, traceId);
         return { success: true, text: result.data.rewritten_text };
     } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        if (getBillingErrorCode(error)) {
+            return { success: false, reason: getBillingErrorCode(error)! };
         }
 
         if (billed) {
@@ -471,8 +481,8 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
 
         return { success: true, data: correction };
     } catch (errors: any) {
-        if (errors instanceof Error && errors.name === "InsufficientFundsError") {
-            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        if (getBillingErrorCode(errors)) {
+            return { success: false, reason: getBillingErrorCode(errors)! };
         }
 
         if (billed) {
@@ -514,8 +524,8 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
         recordAICost(result.usage, user.id, FEATURE_KEYS.SENTENCE_IMPROVE, "improveSentence", 1);
         return { success: true, data: { improved_sentence: result.data } };
     } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        if (getBillingErrorCode(error)) {
+            return { success: false, error: getBillingErrorCode(error)! };
         }
 
         if (billed) {
@@ -568,8 +578,8 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
         recordAICost(usage, user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, "analyzeWeaknesses", 1, traceId);
         return { success: true, data: plan };
     } catch (error) {
-        if (error instanceof Error && error.name === "InsufficientFundsError") {
-            return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        if (getBillingErrorCode(error)) {
+            return { success: false, error: getBillingErrorCode(error)! };
         }
 
         // Refund: billing happens before AI call inside generateAIActionPlan

@@ -1,10 +1,17 @@
-import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS } from "@/lib/constants";
+import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS, DEFAULT_QUOTAS } from "@/lib/constants";
 import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository } from "../repositories/interfaces";
 
 export class InsufficientFundsError extends Error {
     constructor(message: string) {
         super(message);
         this.name = "InsufficientFundsError";
+    }
+}
+
+export class MonthlyLimitError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "MonthlyLimitError";
     }
 }
 
@@ -68,7 +75,14 @@ export class CreditService {
             throw new InsufficientFundsError(`Insufficient StarCredits. Required: ${pricing.cost_per_unit}, Available: ${user.credits_balance}`);
         }
 
-        // 4. Atomic deduction
+        // 4. Check monthly spend cap
+        const monthlyCap = await this.settingsRepo.getByKey<number>("MONTHLY_SPEND_CAP") || DEFAULT_QUOTAS.MONTHLY_SPEND_CAP;
+        const monthlyUsage = await this.transactionRepo.getMonthlyUsage(userId);
+        if (monthlyUsage + pricing.cost_per_unit > monthlyCap) {
+            throw new MonthlyLimitError(`Monthly usage limit reached (${monthlyUsage}/${monthlyCap} credits). Resets next month.`);
+        }
+
+        // 5. Atomic deduction
         await this.userRepo.deductCredits(userId, pricing.cost_per_unit);
 
         // 5. Log transaction

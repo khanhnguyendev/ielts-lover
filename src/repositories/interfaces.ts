@@ -82,6 +82,7 @@ export interface ICreditTransactionRepository {
     getRecentByUserId(userId: string, limit: number): Promise<CreditTransaction[]>;
     getRecentAll(limit: number): Promise<CreditTransactionWithUser[]>;
     getRecentByUserIds(userIds: string[], limit: number): Promise<CreditTransactionWithUser[]>;
+    getMonthlyUsage(userId: string): Promise<number>;
 }
 
 export type SystemSetting = {
