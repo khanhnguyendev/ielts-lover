@@ -32,6 +32,8 @@ import { getSystemSettings, updateSystemSetting, getFeaturePricing, updateFeatur
 import { SystemSetting, FeaturePricing } from "@/repositories/interfaces"
 import { NumericInput } from "@/components/global/numeric-input"
 import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { Badge } from "@/components/ui/badge"
@@ -64,6 +66,7 @@ export default function AdminSettingsPage() {
     const [updatingKeys, setUpdatingKeys] = useState<Set<string>>(new Set())
     const [maintenanceEnabled, setMaintenanceEnabled] = useState(false)
     const [togglingMaintenance, setTogglingMaintenance] = useState(false)
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const { notifySuccess, notifyError } = useNotification()
 
     useEffect(() => {
@@ -129,10 +132,16 @@ export default function AdminSettingsPage() {
         }
     }
 
-    async function handleToggleMaintenance(enabled: boolean) {
-        if (enabled && !window.confirm("Enable maintenance mode? All non-admin users will be redirected to a maintenance page.")) {
+    function handleToggleMaintenance(enabled: boolean) {
+        if (enabled) {
+            setShowConfirmDialog(true)
             return
         }
+        executeMaintenance(false)
+    }
+
+    async function executeMaintenance(enabled: boolean) {
+        setShowConfirmDialog(false)
         setTogglingMaintenance(true)
         try {
             await toggleMaintenanceMode(enabled)
@@ -371,6 +380,29 @@ export default function AdminSettingsPage() {
                     IELTS Lover v1.25
                 </p>
             </div>
+
+            {/* Maintenance Confirmation Dialog */}
+            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="mx-auto w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
+                            <Construction size={22} strokeWidth={2.5} />
+                        </div>
+                        <DialogTitle className="text-center">Enable Maintenance Mode?</DialogTitle>
+                        <DialogDescription className="text-center">
+                            All non-admin users will be immediately redirected to a maintenance page. They will not be able to access the platform until you turn it off.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex-row gap-2 sm:justify-center pt-2">
+                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)} className="flex-1">
+                            Cancel
+                        </Button>
+                        <Button variant="destructive" onClick={() => executeMaintenance(true)} className="flex-1">
+                            Enable Maintenance
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     )
 }
