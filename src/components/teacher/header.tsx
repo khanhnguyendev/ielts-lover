@@ -15,7 +15,7 @@ export function TeacherHeader({ user }: { user: UserProfile }) {
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 pr-6 border-r border-slate-100">
-                    <NotificationOverlay userId={user.id} />
+                    <NotificationOverlay />
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg">
                         <GraduationCap className="h-3.5 w-3.5 text-indigo-600" />
                         <span className="text-[10px] font-black text-indigo-700 uppercase tracking-wider">Teacher</span>

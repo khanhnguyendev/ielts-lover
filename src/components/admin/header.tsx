@@ -25,7 +25,7 @@ export function Header({ user }: { user: UserProfile }) {
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 pr-6 border-r border-slate-100">
-                    <NotificationOverlay userId={user.id} />
+                    <NotificationOverlay />
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-lg">
                         <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
                         <span className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Super Admin</span>

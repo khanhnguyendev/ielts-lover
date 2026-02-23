@@ -13,15 +13,10 @@ import {
 } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useRouter } from "next/navigation"
-import {
-    getNotifications,
-    getUnreadCount,
-    markNotificationRead,
-    markAllNotificationsRead,
-} from "@/app/notification-actions"
 import { AppNotification } from "@/repositories/interfaces"
 import { NOTIFICATION_TYPES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { useNotificationPolling } from "@/lib/contexts/notification-polling-context"
 
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
     [NOTIFICATION_TYPES.EVALUATION_COMPLETE]: { icon: FileText, bg: "bg-emerald-50", color: "text-emerald-600" },
@@ -36,8 +31,6 @@ const TYPE_CONFIG: Record<string, { icon: React.ElementType; bg: string; color: 
 
 const DEFAULT_CONFIG = { icon: Bell, bg: "bg-slate-50", color: "text-slate-500" }
 
-const POLL_INTERVAL_MS = 10_000 // 10s polling for unread count
-
 function relativeTime(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime()
     const mins = Math.floor(diff / 60000)
@@ -49,86 +42,35 @@ function relativeTime(dateStr: string): string {
     return `${days}d ago`
 }
 
-export function NotificationOverlay({ userId }: { userId: string }) {
+export function NotificationOverlay() {
     const router = useRouter()
-    const [notifications, setNotifications] = React.useState<AppNotification[]>([])
-    const [unreadCount, setUnreadCount] = React.useState(0)
+    const {
+        unreadCount,
+        notifications,
+        loading,
+        pulse,
+        refreshNotifications,
+        handleMarkRead,
+        handleMarkAllRead,
+    } = useNotificationPolling()
+
     const [isOpen, setIsOpen] = React.useState(false)
-    const [loading, setLoading] = React.useState(false)
     const [activeTab, setActiveTab] = React.useState<"all" | "unread">("all")
-    const prevCountRef = React.useRef(0)
-    const [pulse, setPulse] = React.useState(false)
 
-    // Fetch unread count from server
-    const refreshUnreadCount = React.useCallback(() => {
-        getUnreadCount().then((count) => {
-            setUnreadCount(prev => {
-                // Trigger pulse animation when count increases
-                if (count > prev && prev === prevCountRef.current) {
-                    setPulse(true)
-                    setTimeout(() => setPulse(false), 2000)
-                }
-                prevCountRef.current = count
-                return count
-            })
-        }).catch(() => { })
-    }, [])
-
-    // Load unread count on mount
-    React.useEffect(() => {
-        refreshUnreadCount()
-    }, [refreshUnreadCount])
-
-    // Poll for unread count changes
-    React.useEffect(() => {
-        const interval = setInterval(refreshUnreadCount, POLL_INTERVAL_MS)
-        return () => clearInterval(interval)
-    }, [refreshUnreadCount])
-
-    // Refresh immediately when tab becomes visible
-    React.useEffect(() => {
-        const handleVisibility = () => {
-            if (document.visibilityState === "visible") {
-                refreshUnreadCount()
-            }
-        }
-        document.addEventListener("visibilitychange", handleVisibility)
-        return () => document.removeEventListener("visibilitychange", handleVisibility)
-    }, [refreshUnreadCount])
-
-    // Load notifications when popover opens (always refresh)
+    // Load notifications when popover opens
     React.useEffect(() => {
         if (!isOpen) return
-        setLoading(true)
-        getNotifications()
-            .then(setNotifications)
-            .catch(() => { })
-            .finally(() => setLoading(false))
-    }, [isOpen])
+        refreshNotifications()
+    }, [isOpen, refreshNotifications])
 
-    const handleClick = async (notification: AppNotification) => {
+    const handleClick = (notification: AppNotification) => {
         if (!notification.is_read) {
-            markNotificationRead(notification.id).catch(() => { })
-            setNotifications(prev =>
-                prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n)
-            )
-            setUnreadCount(prev => {
-                const next = Math.max(0, prev - 1)
-                prevCountRef.current = next
-                return next
-            })
+            handleMarkRead(notification.id)
         }
         if (notification.deep_link) {
             setIsOpen(false)
             router.push(notification.deep_link)
         }
-    }
-
-    const handleMarkAllRead = async () => {
-        markAllNotificationsRead().catch(() => { })
-        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
-        setUnreadCount(0)
-        prevCountRef.current = 0
     }
 
     const filteredNotifications = activeTab === "all"
