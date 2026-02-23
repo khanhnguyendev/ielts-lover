@@ -146,9 +146,11 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     }
 
     const traceId = crypto.randomUUID();
+    let billed = false;
     try {
         if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
             await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId);
+            billed = true;
         }
         const usage = await attemptService.submitAttempt(attemptId, content);
         const evaluatedAttempt = await attemptService.getAttempt(attemptId);
@@ -175,6 +177,13 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
             // If insufficient credits, we still save the work but don't evaluate
             await attemptService.updateAttempt(attemptId, { content, state: ATTEMPT_STATES.SUBMITTED });
             return { ...(await attemptService.getAttempt(attemptId)), reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        // Refund credits if billing succeeded but AI call failed
+        if (billed) {
+            creditService.refundUser(user.id, featureKey, traceId).catch(err =>
+                logger.error("Credit refund failed", { error: err, attemptId, traceId })
+            );
         }
 
         const traceId = getCurrentTraceId()!;
@@ -207,17 +216,25 @@ export const reevaluateAttempt = traceAction("reevaluateAttempt", async (attempt
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
     const traceId = crypto.randomUUID();
+    let billed = false;
     try {
         const attempt = await attemptService.getAttempt(attemptId);
         if (!attempt) throw new Error("Attempt not found");
 
         await creditService.billUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, attempt.exercise_id, traceId);
+        billed = true;
         const result = await attemptService.reevaluate(attemptId);
         recordAICost(result.usage, user.id, FEATURE_KEYS.WRITING_EVALUATION, "generateWritingReport", 1, traceId);
         return result;
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS, message: error.message };
+        }
+
+        if (billed) {
+            creditService.refundUser(user.id, FEATURE_KEYS.WRITING_EVALUATION, traceId).catch(err =>
+                logger.error("Credit refund failed", { error: err, attemptId, traceId })
+            );
         }
 
         logger.error(`reevaluateAttempt Error: ${attemptId}`, { error });
@@ -333,14 +350,22 @@ export const rewriteText = traceAction("rewriteText", async (text: string) => {
     if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
     const traceId = crypto.randomUUID();
+    let billed = false;
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.TEXT_REWRITER, undefined, traceId);
+        billed = true;
         const result = await aiService.rewriteContent(text);
         recordAICost(result.usage, user.id, FEATURE_KEYS.TEXT_REWRITER, "rewriteContent", 1, traceId);
         return { success: true, text: result.data.rewritten_text };
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        if (billed) {
+            creditService.refundUser(user.id, FEATURE_KEYS.TEXT_REWRITER, traceId).catch(err =>
+                logger.error("Credit refund failed", { error: err, traceId })
+            );
         }
 
         logger.error("rewriteText Error", { error });
@@ -379,8 +404,10 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
     }
 
     const traceId = crypto.randomUUID();
+    let billed = false;
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, attempt.exercise_id, traceId);
+        billed = true;
         const { data: correction, usage } = await attemptService.unlockCorrection(attemptId);
         recordAICost(usage, user.id, FEATURE_KEYS.DETAILED_CORRECTION, "generateCorrection", 1, traceId);
 
@@ -413,6 +440,16 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
 
         return { success: true, data: correction };
     } catch (errors: any) {
+        if (errors instanceof Error && errors.name === "InsufficientFundsError") {
+            return { success: false, reason: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        if (billed) {
+            creditService.refundUser(user.id, FEATURE_KEYS.DETAILED_CORRECTION, traceId).catch(err =>
+                logger.error("Credit refund failed", { error: err, attemptId, traceId })
+            );
+        }
+
         const traceId = getCurrentTraceId()!;
         logger.error(`unlockCorrection Error: ${attemptId}`, { error: errors });
 
@@ -436,8 +473,10 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
     const rateResult = await checkRateLimit(simpleAiLimiter, user.id);
     if (!rateResult.success) return { success: false, error: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
 
+    let billed = false;
     try {
         await creditService.billUser(user.id, FEATURE_KEYS.SENTENCE_IMPROVE);
+        billed = true;
         // Use provided target score or fallback to user profile or 9.0
         const scoreToUse = targetScore || user.target_score || 9.0;
         const result = await aiService.improveSentence(sentence, scoreToUse);
@@ -446,6 +485,12 @@ export const improveSentence = traceAction("improveSentence", async (sentence: s
     } catch (error) {
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
+        }
+
+        if (billed) {
+            creditService.refundUser(user.id, FEATURE_KEYS.SENTENCE_IMPROVE).catch(err =>
+                logger.error("Credit refund failed", { error: err })
+            );
         }
 
         const traceId = getCurrentTraceId()!;
@@ -495,6 +540,12 @@ export const generateWeaknessAnalysis = traceAction("generateWeaknessAnalysis", 
         if (error instanceof Error && error.name === "InsufficientFundsError") {
             return { success: false, error: APP_ERROR_CODES.INSUFFICIENT_CREDITS };
         }
+
+        // Refund: billing happens before AI call inside generateAIActionPlan
+        creditService.refundUser(user.id, FEATURE_KEYS.WEAKNESS_ANALYSIS, traceId).catch(err =>
+            logger.error("Credit refund failed", { error: err, traceId })
+        );
+
         const traceId = getCurrentTraceId()!;
         logger.error("generateWeaknessAnalysis Error", { error });
         return { success: false, error: APP_ERROR_CODES.INTERNAL_ERROR, traceId };

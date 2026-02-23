@@ -98,6 +98,26 @@ export class CreditService {
     }
 
     /**
+     * Refunds credits when an AI call fails after billing.
+     * Issues a compensating REFUND transaction linked to the original trace.
+     */
+    async refundUser(userId: string, featureKey: string, traceId?: string): Promise<void> {
+        const pricing = await this.pricingRepo.getByKey(featureKey);
+        if (!pricing) return;
+
+        await this.userRepo.addCredits(userId, pricing.cost_per_unit);
+
+        await this.transactionRepo.create({
+            user_id: userId,
+            amount: pricing.cost_per_unit,
+            type: TRANSACTION_TYPES.REFUND,
+            feature_key: featureKey,
+            trace_id: traceId,
+            description: `Refund: AI service failure for ${featureKey.replace(/_/g, ' ')}`
+        });
+    }
+
+    /**
      * Manual grant for rewards or gift codes.
      */
     async rewardUser(userId: string, amount: number, type: TransactionType, description: string, grantedByAdmin?: string): Promise<void> {
