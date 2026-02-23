@@ -246,22 +246,48 @@ export class AIService {
     }
 
     private static DEFAULT_TIMEOUT_MS = 30_000;
+    private static MAX_RETRIES = 3;
+    private static RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
+
+    private isRetryableError(error: unknown): boolean {
+        if (!(error instanceof Error)) return false;
+        const msg = error.message || '';
+        return msg.includes('429') || msg.includes('503')
+            || msg.includes('Service Unavailable')
+            || msg.includes('RESOURCE_EXHAUSTED')
+            || msg.includes('high demand');
+    }
 
     private async callModel(model: GenerativeModel, prompt: any, timeoutMs: number = AIService.DEFAULT_TIMEOUT_MS): Promise<{ text: string; usage: AIUsageMetadata }> {
-        const start = Date.now();
-        const result = await model.generateContent(prompt, { timeout: timeoutMs });
-        const durationMs = Date.now() - start;
+        let lastError: unknown;
 
-        const meta = result.response.usageMetadata;
-        const usage: AIUsageMetadata = {
-            promptTokens: meta?.promptTokenCount ?? 0,
-            completionTokens: meta?.candidatesTokenCount ?? 0,
-            totalTokens: meta?.totalTokenCount ?? 0,
-            modelName: this.modelName,
-            durationMs,
-        };
+        for (let attempt = 0; attempt < AIService.MAX_RETRIES; attempt++) {
+            try {
+                const start = Date.now();
+                const result = await model.generateContent(prompt, { timeout: timeoutMs });
+                const durationMs = Date.now() - start;
 
-        return { text: result.response.text(), usage };
+                const meta = result.response.usageMetadata;
+                const usage: AIUsageMetadata = {
+                    promptTokens: meta?.promptTokenCount ?? 0,
+                    completionTokens: meta?.candidatesTokenCount ?? 0,
+                    totalTokens: meta?.totalTokenCount ?? 0,
+                    modelName: this.modelName,
+                    durationMs,
+                };
+
+                return { text: result.response.text(), usage };
+            } catch (error) {
+                lastError = error;
+                if (attempt < AIService.MAX_RETRIES - 1 && this.isRetryableError(error)) {
+                    await new Promise(r => setTimeout(r, AIService.RETRY_DELAYS_MS[attempt]));
+                    continue;
+                }
+                throw error;
+            }
+        }
+
+        throw lastError;
     }
 
     async generateFeedback(type: string, content: string, version: AIPromptVersion = "v1"): Promise<AICallResult<AIFeedbackResponse>> {
