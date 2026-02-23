@@ -254,6 +254,8 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                             isUnlocked={isSample ? true : realData?.is_correction_unlocked}
                                             initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
                                             targetScore={targetScore}
+                                            isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
+                                            initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
                                         />
                                     ) : (
                                         <WritingEvaluation data={displayData as any} />

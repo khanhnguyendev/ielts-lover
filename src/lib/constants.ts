@@ -60,6 +60,7 @@ export const FEATURE_KEYS = {
     SENTENCE_IMPROVE: 'sentence_improve',
     WEAKNESS_ANALYSIS: 'weakness_analysis',
     CHART_IMAGE_ANALYSIS: 'chart_image_analysis',
+    EXAMPLE_ESSAY: 'example_essay',
 } as const;
 
 export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];

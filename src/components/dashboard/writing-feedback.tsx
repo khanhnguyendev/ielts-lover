@@ -22,6 +22,7 @@ import { WritingFeedbackResult, CriteriaType } from "@/types/writing";
 import { Button } from "@/components/ui/button";
 import { unlockCorrection, getFeaturePrice } from "@/app/actions";
 import { CorrectionList } from "./correction-list";
+import { ExampleEssay } from "./example-essay";
 import { toast } from "sonner";
 import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
 import { useNotification } from "@/lib/contexts/notification-context";
@@ -64,6 +65,8 @@ interface WritingFeedbackProps {
     isUnlocked?: boolean;
     initialCorrection?: any[] | { edits: any[] } | null;
     targetScore?: number;
+    isExampleEssayUnlocked?: boolean;
+    initialExampleEssay?: any;
 }
 
 export function WritingFeedback({
@@ -75,7 +78,9 @@ export function WritingFeedback({
     originalText,
     isUnlocked: initialIsUnlocked = false,
     initialCorrection,
-    targetScore
+    targetScore,
+    isExampleEssayUnlocked,
+    initialExampleEssay
 }: WritingFeedbackProps) {
     const { notifyError } = useNotification();
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
@@ -420,6 +425,16 @@ export function WritingFeedback({
                         targetScore={targetScore}
                     />
                 )}
+            </div>
+
+            {/* Stage 3: Example Essay */}
+            <div className="pt-8 border-t border-slate-100">
+                <ExampleEssay
+                    attemptId={attemptId}
+                    isUnlocked={isExampleEssayUnlocked}
+                    initialData={initialExampleEssay}
+                    targetScore={targetScore}
+                />
             </div>
         </div>
     );

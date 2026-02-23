@@ -27,6 +27,12 @@ export interface CorrectionResponse {
     edits: TextEdit[];
 }
 
+export interface ExampleEssayResult {
+    essay_text: string;
+    band_score: number;
+    key_techniques: string[];
+}
+
 // Deprecated: Moving to TextEdit
 export interface CorrectionItem {
     idx: number

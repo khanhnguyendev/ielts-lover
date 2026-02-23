@@ -145,6 +145,20 @@ export class AIService {
         required: ["edits"]
     };
 
+    private static EXAMPLE_ESSAY_SCHEMA = {
+        type: SchemaType.OBJECT,
+        properties: {
+            essay_text: { type: SchemaType.STRING, description: "The full model essay" },
+            band_score: { type: SchemaType.NUMBER, description: "The target band score this essay demonstrates" },
+            key_techniques: {
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.STRING },
+                description: "3-5 short bullet points explaining what makes this essay achieve the target band"
+            }
+        },
+        required: ["essay_text", "band_score", "key_techniques"]
+    };
+
     private static OPERATION_SCHEMA = {
         type: SchemaType.OBJECT,
         properties: {
@@ -443,6 +457,33 @@ export class AIService {
         const prompt = `${promptBase}\n\nCONTENT:\n${content}\n\nReturn the corrections in the requested JSON format.`;
 
         const { text, usage } = await this.callModel(model, prompt);
+        return { data: JSON.parse(text), usage };
+    }
+
+    async generateExampleEssay(prompt: string, taskType: string, targetBand: number): Promise<AICallResult<any>> {
+        const model = this.genAI.getGenerativeModel({
+            model: this.modelName,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: AIService.EXAMPLE_ESSAY_SCHEMA as any,
+            },
+        });
+
+        const taskLabel = taskType.includes("task1") ? "Task 1 (report/letter)" : "Task 2 (essay)";
+        const aiPrompt = `You are an expert IELTS examiner. Write a model IELTS Writing ${taskLabel} response that demonstrates Band ${targetBand} quality.
+
+QUESTION/PROMPT:
+${prompt}
+
+Requirements:
+- The essay MUST be a realistic Band ${targetBand} response — match the vocabulary range, grammatical accuracy, coherence, and task achievement expected at this level.
+- For Task 1: Write 150-180 words. Summarize key features, make comparisons, report trends.
+- For Task 2: Write 250-280 words. Present a clear position, develop arguments with examples.
+- Include 3-5 key_techniques bullets explaining what specific techniques (vocabulary, structure, cohesion devices) make this a Band ${targetBand} essay.
+
+Return the response in the requested JSON format.`;
+
+        const { text, usage } = await this.callModel(model, aiPrompt);
         return { data: JSON.parse(text), usage };
     }
 

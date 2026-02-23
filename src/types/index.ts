@@ -44,6 +44,8 @@ export type Attempt = {
     evaluated_at?: string;
     correction_data?: any;
     is_correction_unlocked?: boolean;
+    example_essay_data?: any;
+    is_example_essay_unlocked?: boolean;
     exercises?: {
         title: string;
         type: string;

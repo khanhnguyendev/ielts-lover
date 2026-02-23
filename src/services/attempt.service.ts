@@ -128,4 +128,22 @@ export class AttemptService {
 
         return { data: result.data, usage: result.usage };
     }
+
+    async generateExampleEssay(id: string, prompt: string, taskType: string, targetBand: number): Promise<{ data: any; usage?: AIUsageMetadata }> {
+        const attempt = await this.attemptRepo.getById(id);
+        if (!attempt) throw new Error("Attempt not found");
+
+        if (attempt.is_example_essay_unlocked && attempt.example_essay_data) {
+            return { data: attempt.example_essay_data };
+        }
+
+        const result = await this.aiService.generateExampleEssay(prompt, taskType, targetBand);
+
+        await this.attemptRepo.update(id, {
+            example_essay_data: JSON.stringify(result.data),
+            is_example_essay_unlocked: true
+        });
+
+        return { data: result.data, usage: result.usage };
+    }
 }

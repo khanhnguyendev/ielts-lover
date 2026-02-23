@@ -94,6 +94,7 @@ export class CreditService {
             [FEATURE_KEYS.DETAILED_CORRECTION]: "Detailed Sentence Correction",
             [FEATURE_KEYS.WEAKNESS_ANALYSIS]: "AI Weakness Analysis",
             [FEATURE_KEYS.CHART_IMAGE_ANALYSIS]: "Chart Image Analysis",
+            [FEATURE_KEYS.EXAMPLE_ESSAY]: "Example Essay Generation",
         };
 
         const description = descriptionMap[featureKey] || `Feature Usage: ${featureKey.replace(/_/g, ' ')}`;

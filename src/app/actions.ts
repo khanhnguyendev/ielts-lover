@@ -526,6 +526,61 @@ export const unlockCorrection = traceAction("unlockCorrection", async (attemptId
     }
 });
 
+export const generateExampleEssay = traceAction("generateExampleEssay", async (attemptId: string) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const rateResult = await checkRateLimit(evaluateLimiter, user.id);
+    if (!rateResult.success) return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, message: "Rate limit exceeded" };
+
+    const attempt = await attemptService.getAttempt(attemptId);
+    if (!attempt) throw new Error("Attempt not found");
+
+    // Return cached data if already generated
+    if (attempt.is_example_essay_unlocked && attempt.example_essay_data) {
+        const data = typeof attempt.example_essay_data === 'string'
+            ? JSON.parse(attempt.example_essay_data)
+            : attempt.example_essay_data;
+        return { success: true, data };
+    }
+
+    const exercise = await exerciseService.getExercise(attempt.exercise_id);
+    if (!exercise) throw new Error("Exercise not found");
+
+    const targetBand = user.target_score || 7.0;
+    const traceId = crypto.randomUUID();
+    let billed = false;
+    try {
+        await creditService.billUser(user.id, FEATURE_KEYS.EXAMPLE_ESSAY, attempt.exercise_id, traceId, attemptId);
+        billed = true;
+
+        const { data, usage } = await attemptService.generateExampleEssay(attemptId, exercise.prompt, exercise.type, targetBand);
+        recordAICost(usage, user.id, FEATURE_KEYS.EXAMPLE_ESSAY, "generateExampleEssay", 1, traceId);
+
+        notifyAIComplete(user.id, "Example Essay Ready", `Your Band ${targetBand} model essay is ready to review.`, `/dashboard/reports/${attemptId}`, attemptId);
+
+        return { success: true, data };
+    } catch (error: any) {
+        if (getBillingErrorCode(error)) {
+            return { success: false, reason: getBillingErrorCode(error)! };
+        }
+
+        if (billed) {
+            creditService.refundUser(user.id, FEATURE_KEYS.EXAMPLE_ESSAY, traceId).catch(err =>
+                logger.error("Credit refund failed", { error: err, attemptId, traceId })
+            );
+        }
+
+        logger.error(`generateExampleEssay Error: ${attemptId}`, { error });
+
+        if (error?.message?.includes('503') || error?.message?.includes('Service Unavailable')) {
+            return { success: false, reason: APP_ERROR_CODES.AI_SERVICE_BUSY, traceId };
+        }
+
+        return { success: false, reason: APP_ERROR_CODES.INTERNAL_ERROR, traceId };
+    }
+});
+
 export const improveSentence = traceAction("improveSentence", async (sentence: string, targetScore?: number) => {
     const parsed = improveSentenceSchema.safeParse({ sentence, targetScore });
     if (!parsed.success) {
