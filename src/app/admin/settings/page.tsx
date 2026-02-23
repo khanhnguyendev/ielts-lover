@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils"
 import { FEATURE_KEYS } from "@/lib/constants"
 
 function getFeatureConfig(key: string) {
-    if (key.includes('writing') || key.includes('correction') || key.includes('sentence')) {
+    if (key.includes('writing') || key.includes('correction') || key.includes('sentence') || key.includes('example_essay')) {
         return { icon: PenTool, color: "text-purple-600", bg: "bg-purple-50", category: "Writing" }
     }
     if (key.includes('speaking')) {
