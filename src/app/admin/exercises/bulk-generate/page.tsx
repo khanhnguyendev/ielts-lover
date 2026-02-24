@@ -140,6 +140,7 @@ export default function BulkGeneratePage() {
 
     const [phase, setPhase] = useState<"form" | "running" | "done">("form");
     const [items, setItems] = useState<GenerationItem[]>([]);
+    const [executionTimeMs, setExecutionTimeMs] = useState(0);
 
     const isTask1 = exerciseType === "writing_task1";
 
@@ -147,6 +148,8 @@ export default function BulkGeneratePage() {
         const initial: GenerationItem[] = Array.from({ length: count }, (_, i) => ({ index: i, status: "pending" }));
         setItems(initial);
         setPhase("running");
+
+        const startTime = Date.now();
 
         for (let i = 0; i < count; i++) {
             setItems(prev => prev.map(it => it.index === i ? { ...it, status: "running" } : it));
@@ -174,6 +177,7 @@ export default function BulkGeneratePage() {
             }
         }
 
+        setExecutionTimeMs(Date.now() - startTime);
         setPhase("done");
     }
 
@@ -331,7 +335,7 @@ export default function BulkGeneratePage() {
                                 {failed === 0 ? "All Done!" : succeeded === 0 ? "Generation Failed" : "Partially Done"}
                             </p>
                             <p className="text-sm font-bold text-white/70">
-                                {succeeded} created &middot; {failed} failed &middot; {count} total
+                                {succeeded} created &middot; {failed} failed &middot; {count} total &middot; in {(executionTimeMs / 1000).toFixed(1)}s
                             </p>
                         </div>
 
