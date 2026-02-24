@@ -61,7 +61,7 @@ export function FeedbackModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className={cn(
-                "bg-white rounded-[24px] p-0 overflow-hidden border-none shadow-2xl transition-all duration-500",
+                "bg-white rounded-[24px] p-0 border-none shadow-2xl transition-all duration-500 flex flex-col max-h-[90vh]",
                 isStructuredWritingFeedback ? "sm:max-w-3xl" : "sm:max-w-xl"
             )}>
                 {!isStructuredWritingFeedback ? (
@@ -98,7 +98,7 @@ export function FeedbackModal({
                 )}
 
                 <div className={cn(
-                    "space-y-4 max-h-[65vh] overflow-y-auto scrollbar-hide",
+                    "space-y-4 flex-1 overflow-y-auto min-h-0",
                     isStructuredWritingFeedback ? "p-6 pt-4" : "p-6"
                 )}>
                     {isStructuredWritingFeedback ? (

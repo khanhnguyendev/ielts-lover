@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils"
 import { WritingSampleData, CEFR_COLORS } from "@/lib/sample-data"
 import { HighlightedText } from "./highlighted-text"
 import { Button } from "@/components/ui/button"
-import { Info, ChevronRight, Star, AlertCircle } from "lucide-react"
+import { Info, ChevronRight, Star, AlertCircle, Sparkles, BookOpen } from "lucide-react"
+import { ExampleEssay } from "../dashboard/example-essay"
 
 interface WritingEvaluationProps {
     data: WritingSampleData
@@ -180,6 +181,37 @@ export function WritingEvaluation({ data }: WritingEvaluationProps) {
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Model Essay Section */}
+            <div className="pt-12 border-t border-slate-100">
+                <div className="flex flex-col items-center justify-center space-y-4 mb-10 text-center">
+                    <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100 shadow-sm shadow-amber-200/20">
+                        <Sparkles className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl font-black font-outfit text-slate-900">Learn from a Model Answer</h3>
+                        <p className="text-sm text-slate-500 font-medium max-w-md mx-auto">
+                            Review our expert-crafted model essay to understand high-band structures and vocabulary.
+                        </p>
+                    </div>
+                </div>
+
+                <ExampleEssay
+                    type={data.type === "Writing" ? "writing_task1" : "writing_task2"}
+                    targetScore={8.5}
+                    isUnlocked={true}
+                    initialData={{
+                        essay_text: data.exampleEssay || "Model essay is currently being prepared for this sample.",
+                        band_score: 8.5,
+                        key_techniques: [
+                            "Sophisticated use of academic linking words.",
+                            "Precise data description with varied sentence structures.",
+                            "High-level lexical range with context-accurate collocations.",
+                            "Clear logical progression from overview to specific details."
+                        ]
+                    }}
+                />
             </div>
         </div>
     )

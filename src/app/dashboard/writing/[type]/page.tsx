@@ -16,7 +16,11 @@ import {
     ChevronDown,
     Monitor,
     Layout,
-    X
+    X,
+    Loader2,
+    FileCheck,
+    Brain,
+    BarChart3
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -40,6 +44,8 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [text, setText] = React.useState("")
     const [timeLeft, setTimeLeft] = React.useState(1200) // 20 mins for Task 1 default
+    const [timerStopped, setTimerStopped] = React.useState(false)
+    const [evalStep, setEvalStep] = React.useState(0) // 0=not started, 1=submitting, 2=analyzing, 3=scoring
     const [evalCost, setEvalCost] = React.useState<number>(1) // Default 1
     const [targetScore, setTargetScore] = React.useState<number>(9.0);
 
@@ -107,14 +113,14 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         init()
     }, [exerciseId])
 
-    // Timer logic
+    // Timer logic — stops when submission begins
     React.useEffect(() => {
-        if (isLoading || !exercise) return
+        if (isLoading || !exercise || timerStopped) return
         const timer = setInterval(() => {
             setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
         }, 1000)
         return () => clearInterval(timer)
-    }, [isLoading, exercise])
+    }, [isLoading, exercise, timerStopped])
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -131,11 +137,19 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             "Evaluate Now",
             async () => {
                 setIsSubmitting(true)
+                setTimerStopped(true)
+                setEvalStep(1)
                 // Optimistic decrement animation
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -evalCost } }))
 
+                // Progress steps on timers to give visual feedback during AI wait
+                const stepTimer1 = setTimeout(() => setEvalStep(2), 1500)
+                const stepTimer2 = setTimeout(() => setEvalStep(3), 4000)
+
                 try {
                     const result = await submitAttempt(currentAttempt.id, text)
+                    clearTimeout(stepTimer1)
+                    clearTimeout(stepTimer2)
 
                     const billing = result ? extractBillingError(result as any) : null;
                     if (billing) {
@@ -189,6 +203,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     )
                 } finally {
                     setIsSubmitting(false)
+                    setEvalStep(0)
                 }
             },
             "Cancel"
@@ -343,16 +358,26 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     <div className="flex items-center gap-10">
                         {/* Timer */}
                         <div className="group flex flex-col items-center">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">Time Remaining</span>
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">
+                                {timerStopped ? "Time Used" : "Time Remaining"}
+                            </span>
                             <div className={cn(
                                 "flex items-center gap-2.5 px-4 py-1.5 rounded-full border-2 transition-all duration-300",
-                                timeLeft < 60
-                                    ? "bg-rose-50 border-rose-200 text-rose-500 animate-pulse scale-105 shadow-lg shadow-rose-200/50"
-                                    : "bg-slate-50 border-slate-100 text-slate-900 group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary"
+                                timerStopped
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                                    : timeLeft < 60
+                                        ? "bg-rose-50 border-rose-200 text-rose-500 animate-pulse scale-105 shadow-lg shadow-rose-200/50"
+                                        : "bg-slate-50 border-slate-100 text-slate-900 group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary"
                             )}>
-                                <Clock className={cn("h-4 w-4", timeLeft < 60 ? "animate-spin-slow" : "")} />
+                                {timerStopped
+                                    ? <CheckCircle2 className="h-4 w-4" />
+                                    : <Clock className={cn("h-4 w-4", timeLeft < 60 ? "animate-spin-slow" : "")} />
+                                }
                                 <span className="text-lg font-black font-mono tracking-tighter">
-                                    {formatTime(timeLeft)}
+                                    {timerStopped
+                                        ? formatTime((exercise?.type === "writing_task2" ? 2400 : 1200) - timeLeft)
+                                        : formatTime(timeLeft)
+                                    }
                                 </span>
                             </div>
                         </div>
@@ -392,6 +417,56 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
                 {/* Main Typing Area */}
                 <div className="flex-1 relative group/typing flex flex-col">
+                    {/* Evaluating Overlay */}
+                    {isSubmitting && (
+                        <div className="absolute inset-0 z-30 bg-white/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+                            <div className="flex flex-col items-center gap-8 max-w-sm text-center">
+                                {/* Animated icon */}
+                                <div className="relative">
+                                    <div className="w-24 h-24 rounded-[2rem] bg-primary/5 flex items-center justify-center">
+                                        <Brain className="w-12 h-12 text-primary animate-pulse" />
+                                    </div>
+                                    <div className="absolute -inset-2 rounded-[2.5rem] border-2 border-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black font-outfit text-slate-900">AI Evaluating...</h3>
+                                    <p className="text-sm text-slate-400 font-medium">
+                                        Analyzing your writing across all IELTS criteria
+                                    </p>
+                                </div>
+
+                                {/* Progress steps */}
+                                <div className="w-full space-y-3">
+                                    {[
+                                        { icon: FileCheck, label: "Submitting your essay", step: 1 },
+                                        { icon: Brain, label: "Analyzing content & structure", step: 2 },
+                                        { icon: BarChart3, label: "Scoring band descriptors", step: 3 },
+                                    ].map(({ icon: StepIcon, label, step }) => (
+                                        <div
+                                            key={step}
+                                            className={cn(
+                                                "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500",
+                                                evalStep >= step
+                                                    ? "bg-primary/5 text-slate-900"
+                                                    : "text-slate-300"
+                                            )}
+                                        >
+                                            {evalStep > step ? (
+                                                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                                            ) : evalStep === step ? (
+                                                <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
+                                            ) : (
+                                                <StepIcon className="h-5 w-5 shrink-0" />
+                                            )}
+                                            <span className="text-sm font-bold">{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Background indicators or guidelines */}
                     <div className="absolute inset-0 pointer-events-none opacity-[0.02] flex flex-col px-12 pt-16 gap-8">
                         {Array.from({ length: 20 }).map((_, i) => (
@@ -405,7 +480,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                 value={text}
                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
                                 placeholder="Once there was a horse..."
-                                className="flex-1 w-full border-none focus-visible:ring-0 text-xl md:text-2xl leading-[1.8] font-medium placeholder:text-slate-300 resize-none scrollbar-none bg-transparent selection:bg-primary/10 transition-all duration-300"
+                                disabled={isSubmitting}
+                                className={cn(
+                                    "flex-1 w-full border-none focus-visible:ring-0 text-xl md:text-2xl leading-[1.8] font-medium placeholder:text-slate-300 resize-none scrollbar-none bg-transparent selection:bg-primary/10 transition-all duration-300",
+                                    isSubmitting && "opacity-60 cursor-not-allowed"
+                                )}
                                 autoFocus
                             />
                         </div>

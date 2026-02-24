@@ -12,10 +12,10 @@ import {
     CheckCircle2,
     Info,
     Sparkles,
-    Lock,
-    Zap,
-    ChevronRight,
-    AlertCircle
+    AlertCircle,
+    FileCheck,
+    ScanSearch,
+    WandSparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WritingFeedbackResult, CriteriaType } from "@/types/writing";
@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { extractBillingError } from "@/lib/billing-errors";
+import { PremiumFeatureCard } from "@/components/global/premium-feature-card";
 
 const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
@@ -362,9 +363,22 @@ export function WritingFeedback({
                 </div>
 
                 {!isUnlocked ? (
-                    <div className="relative group overflow-hidden rounded-[24px] border-2 border-slate-100 bg-white min-h-[300px]">
-                        {/* Blurry Preview */}
-                        <div className="p-10 space-y-6 opacity-20 blur-[5px] select-none pointer-events-none grayscale">
+                    <PremiumFeatureCard
+                        title="See every mistake & upgrade"
+                        description="Get line-by-line grammar corrections and Band 8.0+ vocabulary upgrades."
+                        cost={cost ?? 15}
+                        onUnlock={handleUnlock}
+                        isUnlocking={isUnlocking}
+                        variant="primary"
+                        unlockingTitle="Generating Corrections..."
+                        unlockingDescription="Analyzing your essay for grammar, vocabulary & style"
+                        unlockingSteps={[
+                            { icon: FileCheck, label: "Submitting your essay" },
+                            { icon: ScanSearch, label: "Scanning grammar & vocabulary" },
+                            { icon: WandSparkles, label: "Generating corrections" },
+                        ]}
+                    >
+                        <div className="space-y-6">
                             <div className="space-y-3">
                                 <div className="h-3 bg-slate-200 rounded-full w-3/4" />
                                 <div className="h-3 bg-slate-200 rounded-full w-full" />
@@ -376,48 +390,7 @@ export function WritingFeedback({
                                 <div className="h-20 bg-blue-50 rounded-xl border border-blue-100" />
                             </div>
                         </div>
-
-                        {/* Unlock CTA */}
-                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center bg-white/60 backdrop-blur-[2px]">
-                            <div className="w-12 h-12 bg-white rounded-2xl border-2 border-slate-100 shadow-lg flex items-center justify-center mb-4">
-                                <Lock className="w-6 h-6 text-slate-300" />
-                            </div>
-                            <h4 className="text-base font-black text-slate-900 font-outfit mb-1.5 leading-tight">See every mistake & upgrade</h4>
-                            <p className="text-[11px] text-slate-500 font-medium max-w-[280px] mb-6 leading-relaxed">
-                                Get line-by-line grammar corrections and Band 8.0+ vocabulary upgrades.
-                            </p>
-
-                            <Button
-                                onClick={handleUnlock}
-                                disabled={isUnlocking}
-                                className="h-14 px-8 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 text-white shadow-xl shadow-primary/30 font-black text-sm group relative overflow-hidden transition-all hover:scale-[1.02]"
-                            >
-                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <Zap className="w-4 h-4 mr-2 fill-white animate-pulse" />
-
-                                {isUnlocking ? (
-                                    <span>Unlocking...</span>
-                                ) : (
-                                    <div className="flex items-center gap-3">
-                                        <span>Unlock Feedback</span>
-                                        <div className="flex items-center gap-1.5 bg-yellow-100 ring-1 ring-yellow-200/50 px-2.5 py-1 rounded-full shadow-sm text-yellow-700 ml-1 group-hover:bg-yellow-50 transition-colors">
-                                            <div className="flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 text-[9px] leading-none shadow-sm text-yellow-900">⭐</div>
-                                            <span className="text-[10px] font-black tracking-tight">
-                                                -{cost ?? 15}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {!isUnlocking && <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform opacity-80" />}
-                            </Button>
-
-                            <p className="mt-5 text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 opacity-80">
-                                <Sparkles className="w-2.5 h-2.5" />
-                                AI-Powered Analysis
-                            </p>
-                        </div>
-                    </div>
+                    </PremiumFeatureCard>
                 ) : (
                     <CorrectionList
                         corrections={corrections || []}
@@ -431,6 +404,7 @@ export function WritingFeedback({
             <div className="pt-8 border-t border-slate-100">
                 <ExampleEssay
                     attemptId={attemptId}
+                    type={type}
                     isUnlocked={isExampleEssayUnlocked}
                     initialData={initialExampleEssay}
                     targetScore={targetScore}

@@ -141,7 +141,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     return (
         <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-slate-50/30 select-none">
             {/* 1. Main Content: Analysis Result */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="flex-1 overflow-y-auto">
                 <div className="max-w-5xl mx-auto p-8 lg:p-12 space-y-12 pb-32">
 
                     {/* Header: Context & Actions */}

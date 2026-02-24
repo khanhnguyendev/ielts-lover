@@ -50,6 +50,7 @@ export interface WritingSampleData {
     general_comment?: string
     prompt?: string
     imageUrl?: string
+    exampleEssay?: string
 }
 
 export interface SpeakingSampleData {
@@ -204,6 +205,7 @@ export const SAMPLE_REPORTS: Record<number, WritingSampleData | SpeakingSampleDa
             { level: "C2", percentage: 5 }
         ],
         prompt: "The chart below shows the amount of milk consumed in four different countries over a ten-year period. Summarize the information by selecting and reporting the main features, and make comparisons where relevant.",
-        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+        exampleEssay: "The provided bar chart compares the quantity of milk consumed in four distinct nations—Country A, Country B, Country C, and Country D—over a ten-year duration starting from 2010.\n\nOverall, it is clear that milk consumption fluctuated significantly during this timeframe across all countries. Country A and Country C witnessed a noticeable increase in consumption, whereas Country B and Country D experienced a moderate decline by the end of the period.\n\nIn 2010, Country B led the group with approximately 150 liters per capita, followed closely by Country A at 140 liters. Over the next five years, Country A's consumption surged to a peak of 170 liters before stabilizing. Conversely, Country B's intake saw a gradual decrease, falling to 130 liters by 2020.\n\nCountry C and Country D started at lower levels of 100 and 110 liters respectively. Country C showed a steady upward trend, reaching 125 liters by 2020. In contrast, Country D's consumption dropped to 95 liters by 2015 but recovered slightly to 105 liters by the end of the decade."
     }
 }

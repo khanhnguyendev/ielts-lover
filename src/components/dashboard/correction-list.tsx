@@ -41,7 +41,7 @@ export function CorrectionList({ corrections, originalText, targetScore }: Corre
     }, [selectedSentenceIdx, originalText, corrections]);
 
     return (
-        <div className="flex flex-col max-h-[800px] bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-700 relative group/container isolate">
+        <div className="flex flex-col min-h-[500px] max-h-[1200px] bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-700 relative group/container isolate">
             {/* Header Gradient */}
             <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
 
@@ -49,7 +49,7 @@ export function CorrectionList({ corrections, originalText, targetScore }: Corre
             <div className="flex flex-col lg:flex-row h-full">
                 {/* Left Column: Text Area */}
                 <div className="flex-1 overflow-y-auto relative scroll-smooth bg-white">
-                    <div className="p-5 lg:p-8 pb-32 lg:pb-8 max-w-prose mx-auto">
+                    <div className="p-5 lg:p-8 pb-48 lg:pb-8 max-w-prose mx-auto">
                         <div className="mb-4 flex items-center gap-2 lg:hidden">
                             <Sparkles className="w-3.5 h-3.5 text-primary" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tap a sentence to fix</span>

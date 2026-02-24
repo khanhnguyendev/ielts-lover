@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Lock, Sparkles, CheckCircle2 } from "lucide-react"
+import { BookOpen, Sparkles, CheckCircle2, FileCheck, PenTool, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { generateExampleEssay, getFeaturePrice } from "@/app/actions"
 import { FEATURE_KEYS } from "@/lib/constants"
@@ -9,15 +9,17 @@ import { useNotification } from "@/lib/contexts/notification-context"
 import { extractBillingError } from "@/lib/billing-errors"
 import { ExampleEssayResult } from "@/types/writing"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { PremiumFeatureCard } from "@/components/global/premium-feature-card"
 
 interface ExampleEssayProps {
     attemptId?: string
+    type?: "writing_task1" | "writing_task2"
     isUnlocked?: boolean
     initialData?: ExampleEssayResult | null
     targetScore?: number
 }
 
-export function ExampleEssay({ attemptId, isUnlocked: initialUnlocked, initialData, targetScore = 7.0 }: ExampleEssayProps) {
+export function ExampleEssay({ attemptId, type = "writing_task1", isUnlocked: initialUnlocked, initialData, targetScore = 7.0 }: ExampleEssayProps) {
     const { notifyError } = useNotification()
     const [isUnlocked, setIsUnlocked] = React.useState(!!initialUnlocked)
     const [isGenerating, setIsGenerating] = React.useState(false)
@@ -89,50 +91,40 @@ export function ExampleEssay({ attemptId, isUnlocked: initialUnlocked, initialDa
 
             {/* Content */}
             {!isUnlocked ? (
-                <div className="relative rounded-[2rem] border border-slate-200 overflow-hidden">
-                    {/* Blurred preview */}
-                    <div className="p-6 lg:p-8 blur-sm select-none pointer-events-none" aria-hidden>
-                        <p className="text-[15px] font-serif text-slate-400 leading-relaxed">
-                            The provided data illustrates significant changes in employment patterns across four distinct sectors
-                            between 2000 and 2020 in a metropolitan area. Overall, while manufacturing experienced substantial growth,
-                            the services sector saw a notable decline over the two-decade period. Agriculture and the public sector
-                            demonstrated relatively moderate shifts in their respective employment figures...
-                        </p>
-                    </div>
-
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-white/95 flex flex-col items-center justify-center gap-4 p-6">
-                        <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100 shadow-sm">
-                            <Lock className="w-6 h-6 text-amber-600" />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <h4 className="text-sm font-black text-slate-900">See How Band {targetScore} Looks</h4>
-                            <p className="text-xs text-slate-500 font-medium max-w-xs">
-                                Generate a model essay for this exact prompt at your target band score.
-                            </p>
-                        </div>
-                        <Button
-                            onClick={handleGenerate}
-                            disabled={isGenerating}
-                            className="bg-amber-500 hover:bg-amber-600 text-white rounded-2xl h-12 px-6 font-black text-xs shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        >
-                            {isGenerating ? (
-                                <span className="flex items-center gap-2">
-                                    <PulseLoader size="sm" color="white" />
-                                    Generating...
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 fill-white" />
-                                    Generate Example
-                                    <span className="flex items-center gap-0.5 bg-white/20 px-1.5 py-0.5 rounded-lg text-[10px]">
-                                        ⭐ {cost || 2}
-                                    </span>
-                                </span>
-                            )}
-                        </Button>
-                    </div>
-                </div>
+                <PremiumFeatureCard
+                    title={`See How Band ${targetScore} Looks`}
+                    description="Generate a model essay for this exact prompt at your target band score."
+                    cost={cost || 2}
+                    onUnlock={handleGenerate}
+                    isUnlocking={isGenerating}
+                    variant="amber"
+                    footerText="AI-Generated Model Answer"
+                    unlockingTitle="Writing Model Essay..."
+                    unlockingDescription={`Crafting a Band ${targetScore} answer for this prompt`}
+                    unlockingSteps={[
+                        { icon: FileCheck, label: "Analyzing the prompt" },
+                        { icon: PenTool, label: "Crafting model answer" },
+                        { icon: BarChart3, label: "Reviewing key techniques" },
+                    ]}
+                >
+                    <p className="text-[15px] font-serif text-slate-400 leading-relaxed">
+                        {type === "writing_task1" ? (
+                            <>
+                                The provided data illustrates significant changes in employment patterns across four distinct sectors
+                                between 2000 and 2020 in a metropolitan area. Overall, while manufacturing experienced substantial growth,
+                                the services sector saw a notable decline over the two-decade period. Agriculture and the public sector
+                                demonstrated relatively moderate shifts in their respective employment figures...
+                            </>
+                        ) : (
+                            <>
+                                In recent years, the rapid advancement of technology has fundamentally reshaped the way individuals interact and communicate.
+                                While some argue that this phenomenon leads to social isolation, I believe that the benefits of global connectivity
+                                far outweigh the potential drawbacks. This essay will examine how digital platforms have fostered a more inclusive
+                                and accessible environment for sharing ideas and building diverse communities...
+                            </>
+                        )}
+                    </p>
+                </PremiumFeatureCard>
             ) : essayData ? (
                 <div className="rounded-[2rem] border border-slate-200 overflow-hidden bg-white">
                     {/* Essay text */}
@@ -150,19 +142,21 @@ export function ExampleEssay({ attemptId, isUnlocked: initialUnlocked, initialDa
 
                     {/* Key techniques */}
                     {essayData.key_techniques && essayData.key_techniques.length > 0 && (
-                        <div className="border-t border-slate-100 bg-amber-50/30 p-6 lg:p-8">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-1.5">
+                        <div className="border-t border-slate-100 bg-amber-50/20 p-6 lg:p-8">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-4 flex items-center gap-1.5">
                                 <Sparkles className="w-3 h-3" />
-                                Why This Works
+                                Expert Analysis: Why This Works
                             </h4>
-                            <ul className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {essayData.key_techniques.map((technique, idx) => (
-                                    <li key={idx} className="flex items-start gap-2.5 text-[13px] text-slate-600 leading-relaxed">
-                                        <CheckCircle2 className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                                    <div key={idx} className="flex items-start gap-3 p-4 bg-white/60 rounded-xl border border-amber-100/50 text-[12px] text-slate-600 leading-relaxed shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                                            <CheckCircle2 className="w-3 h-3" />
+                                        </div>
                                         {technique}
-                                    </li>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     )}
                 </div>
