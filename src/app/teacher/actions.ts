@@ -142,7 +142,7 @@ export const generateTeacherAIExercise = traceAction("generateTeacherAIExercise"
 
         const { ChartRenderer } = await import("@/lib/chart-renderer");
         const imageBuffer = await ChartRenderer.render(chartData.chart_config);
-        const imageUrl = await storageService.upload(imageBuffer);
+        const imageUrl = imageBuffer ? await storageService.upload(imageBuffer) : undefined;
 
         return {
             title: chartData.title,

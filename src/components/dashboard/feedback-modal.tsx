@@ -20,7 +20,8 @@ interface FeedbackModalProps {
     score?: number;
     feedback?: string; // JSON string or raw text
     attemptId?: string;
-    type: "writing_task1" | "writing_task2";
+    type: "writing_task1" | "writing_task2" | "speaking";
+    title?: string;
     originalText?: string;
     isUnlocked?: boolean;
     initialCorrection?: any[] | { edits: any[] } | null;

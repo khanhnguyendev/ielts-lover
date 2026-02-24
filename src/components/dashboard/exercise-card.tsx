@@ -81,108 +81,96 @@ export function ExerciseCard({
 
     return (
         <Link href={`/dashboard/writing/${id}`} className="group block">
-            <div className="relative bg-white border border-slate-100 rounded-[2rem] p-6 transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-200">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="bg-white border border-slate-100 rounded-[1.5rem] p-4 flex items-center gap-4 transition-all hover:shadow-md hover:border-slate-200 hover:bg-slate-50/50">
+                {/* 1. Icon */}
+                <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform duration-300 group-hover:scale-110",
+                    effectiveColor.includes("bg-") ? effectiveColor.replace("bg-", "border-").replace("50", "100") : "border-slate-100",
+                    effectiveColor
+                )}>
+                    <EffectiveIcon size={20} />
+                </div>
 
-                    {/* Left: Icon & Description */}
-                    <div className="flex items-center gap-5 min-w-0 flex-1">
-                        <div className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm border",
-                            effectiveColor.includes("bg-") ? effectiveColor.replace("bg-", "border-").replace("50", "100") : "border-slate-100",
-                            effectiveColor
-                        )}>
-                            <EffectiveIcon size={20} />
-                        </div>
-
-                        <div className="space-y-2 min-w-0">
-                            {/* Tags Row */}
-                            <div className="flex flex-wrap items-center gap-2">
-                                {/* Subtitle (Type) Tag */}
-                                {subtitle && (
-                                    <div className={cn(
-                                        "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border shadow-sm transition-all duration-500 group-hover:shadow-md whitespace-nowrap",
-                                        color.includes("blue") ? "bg-blue-50 text-blue-700 border-blue-100" :
-                                            color.includes("indigo") ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
-                                                "bg-purple-50 text-purple-700 border-purple-100"
-                                    )}>
-                                        {subtitle}
-                                    </div>
-                                )}
-
-                                {/* Chart Type Tag */}
-                                {chartType && CHART_TYPE_LABELS[chartType] && (
-                                    <div className="text-[9px] font-bold text-slate-500 tracking-wide bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md whitespace-nowrap">
-                                        {CHART_TYPE_LABELS[chartType]}
-                                    </div>
-                                )}
-
-                                {/* Date Time Info */}
-                                {formattedDate && (
-                                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                        <Calendar size={12} className="opacity-60" />
-                                        {formattedDate}
-                                        {formattedTime && (
-                                            <>
-                                                <div className="w-1 h-1 bg-slate-200 rounded-full mx-0.5" />
-                                                <Clock size={12} className="opacity-60" />
-                                                {formattedTime}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Title */}
-                            <h4 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-primary transition-colors leading-tight line-clamp-2">
-                                {title}
-                            </h4>
-
-                            {/* Creator Info below title */}
-                            <div className="flex items-center gap-2 pt-0.5">
-                                {creatorName ? (
-                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
-                                        <span>By <span className="font-bold text-slate-700">{creatorName}</span></span>
-                                        <span className={cn(
-                                            "inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border",
-                                            creatorRole === "admin" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                                creatorRole === "teacher" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
-                                                    "bg-slate-50 text-slate-500 border-slate-200"
-                                        )}>
-                                            {creatorRole || "staff"}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <span className="text-[10px] font-medium text-slate-400 italic">System Generated</span>
-                                )}
-                            </div>
-                        </div>
+                {/* 2. Text Content */}
+                <div className="flex-1 min-w-0">
+                    {/* Top Meta: Subtitle, Chart Type, Date/Time */}
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {subtitle && (
+                            <span className={cn(
+                                "text-[8px] font-black uppercase tracking-widest",
+                                color.includes("blue") ? "text-blue-600" :
+                                    color.includes("indigo") ? "text-indigo-600" :
+                                        "text-purple-600"
+                            )}>
+                                {subtitle}
+                            </span>
+                        )}
+                        {chartType && CHART_TYPE_LABELS[chartType] && (
+                            <span className="text-[8px] font-bold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">
+                                {CHART_TYPE_LABELS[chartType]}
+                            </span>
+                        )}
+                        {formattedDate && (
+                            <span className="text-[8px] font-bold text-slate-400 flex items-center gap-1">
+                                {formattedDate}
+                                {formattedTime && ` at ${formattedTime}`}
+                            </span>
+                        )}
+                        {isRecommended && (
+                            <span className="text-[8px] font-black uppercase tracking-widest text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                ★ Rec
+                            </span>
+                        )}
                     </div>
 
-                    {/* Right: Attempts & Action */}
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-slate-50 shrink-0">
-                        {/* Status Badges */}
-                        <div className="flex items-center sm:flex-col sm:items-end gap-2">
-                            {isRecommended && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-sm shadow-amber-500/20">
-                                    ★ Recommended
-                                </span>
-                            )}
-                            {attempts > 0 ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
-                                    {attempts}× Practice
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">
-                                    New Task
-                                </span>
-                            )}
-                        </div>
+                    {/* Title */}
+                    <h4 className="text-xs font-black text-slate-800 truncate group-hover:text-primary transition-colors">
+                        {title}
+                    </h4>
 
-                        {/* Action Link equivalent */}
-                        <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors group-hover:translate-x-1 duration-300">
-                            Start Writing <ChevronRight size={14} />
-                        </div>
+                    {/* Bottom Meta */}
+                    <div className="flex items-center gap-1.5 mt-1 text-[9px] text-slate-400 font-medium truncate">
+                        {creatorName ? (
+                            <>
+                                <span>By <span className="font-bold text-slate-600">{creatorName}</span></span>
+                                <span className={cn(
+                                    "px-1 rounded-sm text-[7px] font-black uppercase tracking-widest border",
+                                    creatorRole === "admin" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                        creatorRole === "teacher" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                                            "bg-slate-50 text-slate-500 border-slate-200"
+                                )}>
+                                    {creatorRole || "staff"}
+                                </span>
+                            </>
+                        ) : (
+                            <span className="italic">System Generated</span>
+                        )}
                     </div>
+                </div>
+
+                {/* 3. Stats Columns */}
+                <div className="hidden sm:flex items-center gap-4 px-4 border-l border-slate-50">
+                    <div className="text-right">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-300">Attempts</p>
+                        {attempts > 0 ? (
+                            <p className="text-[10px] font-black text-emerald-600">{attempts}×</p>
+                        ) : (
+                            <p className="text-[10px] font-black text-slate-400">0×</p>
+                        )}
+                    </div>
+                    <div className="text-right w-16">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-300">Status</p>
+                        {attempts > 0 ? (
+                            <p className="text-[8px] font-bold uppercase text-emerald-600 truncate">Practiced</p>
+                        ) : (
+                            <p className="text-[8px] font-bold uppercase text-amber-600 truncate">New</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* 4. Action Chevron */}
+                <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg group-hover:bg-primary/5 text-slate-400 group-hover:text-primary transition-colors">
+                    <ChevronRight size={16} />
                 </div>
             </div>
         </Link>

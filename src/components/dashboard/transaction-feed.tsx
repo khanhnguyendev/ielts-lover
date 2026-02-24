@@ -24,7 +24,8 @@ import {
     Ticket,
     PlusCircle,
     CalendarCheck,
-    Coins
+    Coins,
+    ChevronRight
 } from "lucide-react"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import Link from "next/link"
@@ -134,76 +135,69 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
     const isPositive = t.amount > 0
 
     return (
-        <div className="group relative bg-white border border-slate-100 rounded-[2rem] p-6 transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-200">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className={cn(
+            "group bg-white border border-slate-100 rounded-[1.5rem] p-4 flex flex-row items-center gap-4 transition-all hover:shadow-md hover:border-slate-200",
+            t.attempt_id && "hover:bg-slate-50/50"
+        )}>
+            {/* 1. Boxed Icon */}
+            <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform duration-300 group-hover:scale-110",
+                config.bg, config.color, config.border
+            )}>
+                <config.icon size={20} />
+            </div>
 
-                {/* Left: Icon & Description */}
-                <div className="flex items-center gap-5 min-w-0 flex-1">
-                    <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm",
-                        config.bg, config.color, "border", config.border
+            {/* 2. Main Content */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className={cn(
+                        "text-[8px] font-black uppercase tracking-widest",
+                        config.color
                     )}>
-                        <config.icon size={20} />
-                    </div>
-
-                    <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            <div className={cn(
-                                "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border shadow-sm transition-all duration-500 group-hover:shadow-md",
-                                config.bg, config.color, config.border
-                            )}>
-                                {config.label}
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                <Calendar size={12} className="opacity-60" />
-                                {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                <div className="w-1 h-1 bg-slate-200 rounded-full mx-0.5" />
-                                <Clock size={12} className="opacity-60" />
-                                {new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                        </div>
-                        <h4 className="text-sm font-black text-slate-900 truncate capitalize leading-tight">
-                            {formatDescription(t.description)}
-                        </h4>
-                        {t.attempt_id && (
-                            <Link
-                                href={`/dashboard/reports/${t.attempt_id}`}
-                                className="inline-flex items-center gap-1 text-[10px] font-black text-primary hover:text-primary/80 transition-colors mt-1"
-                            >
-                                Details <ExternalLink size={10} />
-                            </Link>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right: Amount & Actor */}
-                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-slate-50">
-                    <div className="flex items-center gap-3">
-                        <div className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-500",
-                            isPositive ? "bg-emerald-50 text-emerald-600 border-emerald-100 group-hover:bg-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100 group-hover:bg-rose-100"
-                        )}>
-                            {isPositive ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
-                        </div>
-                        <CreditBadge amount={t.amount} size="md" />
-                    </div>
+                        {config.label}
+                    </span>
+                    <span className="text-[8px] font-bold text-slate-400 flex items-center gap-1">
+                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        <span className="hidden sm:inline">{' at '}</span>
+                        <span className="hidden sm:inline">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </span>
                     {t.granted_by_admin && (() => {
-                        let adminLabel = "System Support"
+                        let adminLabel = "Support"
                         if (t.description?.includes("Admin Adjustment")) {
                             const match = t.description.match(/Admin Adjustment \((.+)\):/)
                             if (match) adminLabel = match[1]
                         }
-
                         return (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100/80 rounded-lg border border-slate-200/50 backdrop-blur-sm shadow-sm group-hover:bg-slate-100 transition-colors">
-                                <div className="w-4 h-4 rounded-full bg-slate-900 flex items-center justify-center text-[7px] text-white">
-                                    <UserIcon size={10} />
-                                </div>
-                                <span className="text-[9px] font-black text-slate-600 uppercase tracking-tight">Admin: <span className="text-primary tracking-normal lowercase font-bold">{adminLabel}</span></span>
-                            </div>
+                            <span className="text-[7px] font-black uppercase tracking-widest text-slate-500 bg-slate-50 border border-slate-200 px-1 py-0.5 rounded truncate max-w-[80px] sm:max-w-[none]">
+                                Admin · {adminLabel}
+                            </span>
                         )
                     })()}
                 </div>
+                <h4 className="text-xs font-black text-slate-800 truncate group-hover:text-primary transition-colors">
+                    {formatDescription(t.description)}
+                </h4>
+            </div>
+
+            {/* 3. Right: Amount */}
+            <div className="flex flex-col items-end gap-1.5 shrink-0 ml-2 sm:ml-4">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className={cn(
+                        "w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg flex items-center justify-center border",
+                        isPositive ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
+                    )}>
+                        {isPositive ? <ArrowUpRight size={12} className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <ArrowDownLeft size={12} className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+                    </div>
+                    <CreditBadge amount={t.amount} size="sm" />
+                </div>
+                {t.attempt_id && (
+                    <Link
+                        href={`/dashboard/reports/${t.attempt_id}`}
+                        className="text-[8px] sm:text-[9px] font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-widest flex items-center gap-0.5 group-hover:translate-x-1 duration-300"
+                    >
+                        Report <ChevronRight size={10} className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    </Link>
+                )}
             </div>
         </div>
     )
