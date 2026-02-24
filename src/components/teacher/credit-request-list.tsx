@@ -22,10 +22,14 @@ export function CreditRequestList({ requests }: { requests: CreditRequest[] }) {
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="divide-y divide-slate-50">
-                {requests.map((req) => {
+                {requests.map((req, idx) => {
                     const style = STATUS_STYLES[req.status] || STATUS_STYLES[CREDIT_REQUEST_STATUS.PENDING]
                     return (
-                        <div key={req.id} className="p-4 hover:bg-slate-50/50 transition-colors">
+                        <div
+                            key={req.id}
+                            className="p-4 hover:bg-slate-50/50 transition-colors animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                        >
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm font-black text-slate-900">

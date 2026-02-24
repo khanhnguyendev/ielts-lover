@@ -231,7 +231,7 @@ export function TransactionFeed({ transactions }: TransactionFeedProps) {
     )
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8">
             {/* Filter Section */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-2">
                 <FilterGroup
@@ -260,8 +260,14 @@ export function TransactionFeed({ transactions }: TransactionFeedProps) {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
-                    {paginated.map((t) => (
-                        <TransactionCard key={t.id} t={t} />
+                    {paginated.map((t, i) => (
+                        <div
+                            key={t.id}
+                            className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                            style={{ animationDelay: `${i * 100}ms` }}
+                        >
+                            <TransactionCard t={t} />
+                        </div>
                     ))}
                 </div>
             )}

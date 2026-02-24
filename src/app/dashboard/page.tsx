@@ -242,7 +242,12 @@ export default function DashboardPage() {
                                         <Clock size={20} />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Your Activity</h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Your Activity</h3>
+                                            <div className="bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+                                                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{recentActivity.length} items</span>
+                                            </div>
+                                        </div>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historical Progress</p>
                                     </div>
                                 </div>
@@ -254,8 +259,14 @@ export default function DashboardPage() {
                             <div className="space-y-1">
                                 {recentActivity.length > 0 ? (
                                     <div className="divide-y divide-slate-50">
-                                        {recentActivity.map((t) => (
-                                            <ActivityItem key={t.id} transaction={t} />
+                                        {recentActivity.map((t, idx) => (
+                                            <div
+                                                key={t.id}
+                                                className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                                                style={{ animationDelay: `${idx * 100}ms` }}
+                                            >
+                                                <ActivityItem transaction={t} />
+                                            </div>
                                         ))}
                                     </div>
                                 ) : (

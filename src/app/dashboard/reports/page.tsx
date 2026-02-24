@@ -256,14 +256,19 @@ export default function ReportsPage() {
                                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Previous Sessions</span>
                                             </div>
                                             <div className="grid grid-cols-1 gap-2">
-                                                {historicalAttempts.map((attempt) => (
-                                                    <HistoricalReportRow
+                                                {historicalAttempts.map((attempt, idx) => (
+                                                    <div
                                                         key={attempt.id}
-                                                        attempt={attempt}
-                                                        onReevaluate={handleReevaluate}
-                                                        reevaluatingId={reevaluatingId}
-                                                        reevalStep={reevalStep}
-                                                    />
+                                                        className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                                                        style={{ animationDelay: `${idx * 100}ms` }}
+                                                    >
+                                                        <HistoricalReportRow
+                                                            attempt={attempt}
+                                                            onReevaluate={handleReevaluate}
+                                                            reevaluatingId={reevaluatingId}
+                                                            reevalStep={reevalStep}
+                                                        />
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>

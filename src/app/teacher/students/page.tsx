@@ -22,8 +22,14 @@ export default async function TeacherStudentsPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {students.map((student) => (
-                        <StudentCard key={student.id} student={student} />
+                    {students.map((student, idx) => (
+                        <div
+                            key={student.id}
+                            className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                        >
+                            <StudentCard student={student} />
+                        </div>
                     ))}
                 </div>
             )}
