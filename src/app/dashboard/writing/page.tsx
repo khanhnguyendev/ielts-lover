@@ -77,6 +77,7 @@ interface Exercise {
     color: string
     creatorName?: string
     creatorRole?: string
+    createdAt?: string
 }
 
 export default function WritingHubPage() {
@@ -198,6 +199,7 @@ export default function WritingHubPage() {
                         color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50",
                         creatorName: db.creator?.full_name || db.creator?.email,
                         creatorRole: db.creator?.role,
+                        createdAt: db.created_at,
                     };
                 })
                 setExercises(adapted)
@@ -251,9 +253,9 @@ export default function WritingHubPage() {
                         {(activeCategory === "Academic Task 1" || activeCategory === "General Task 1") && availableChartTypes.length > 0 && (
                             <div className="flex flex-wrap items-center gap-4 px-2">
                                 <FilterGroup
-                                    label="Dạng đề"
+                                    label="Chart Type"
                                     options={[
-                                        { value: "all", label: "Tất cả" },
+                                        { value: "all", label: "All" },
                                         ...availableChartTypes.map(ct => ({ value: ct, label: ct.replace("_", " ") }))
                                     ]}
                                     value={chartTypeFilter}
@@ -268,18 +270,31 @@ export default function WritingHubPage() {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 animate-pulse">Syncing Exercises...</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-                                {/* Add Custom Card */}
+                            <div className="flex flex-col gap-2">
+                                {/* Column Headers — only on sm+ */}
+                                <div className="hidden sm:grid grid-cols-[2.5rem_1fr_9rem_9rem_6.5rem_2.5rem] items-center gap-4 px-5 pb-1">
+                                    <div />
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Exercise</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Type</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Created By</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Created At</p>
+                                    <div />
+                                </div>
+
+                                {/* Add Custom Row */}
                                 <button
                                     onClick={() => setIsAddModalOpen(true)}
-                                    className="group h-full bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-4 hover:bg-indigo-50/50 hover:border-indigo-300/50 transition-all duration-300"
+                                    className="group w-full bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl px-5 py-4 flex items-center gap-4 hover:bg-indigo-50/50 hover:border-indigo-300/50 transition-all duration-300"
                                 >
-                                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                        <Plus size={24} />
+                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shrink-0">
+                                        <Plus size={18} />
                                     </div>
-                                    <div className="text-center space-y-1">
-                                        <h4 className="text-sm font-black text-slate-900">Custom Task</h4>
+                                    <div className="flex-1 text-left">
+                                        <p className="text-sm font-black text-slate-900">Custom Task</p>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Add your own prompt</p>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300">
+                                        <Plus size={14} />
                                     </div>
                                 </button>
 
