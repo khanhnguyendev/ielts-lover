@@ -20,7 +20,11 @@ import {
     FileText,
     Settings,
     ChevronRight,
-    Volume2
+    Volume2,
+    Loader2,
+    AudioLines,
+    Brain,
+    BarChart3
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -51,6 +55,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     const [isRecording, setIsRecording] = React.useState(false)
     const [timeLeft, setTimeLeft] = React.useState(0)
     const [status, setStatus] = React.useState<"PRACTICE" | "PROCESSING" | "COMPLETE">("PRACTICE")
+    const [processingStep, setProcessingStep] = React.useState(0)
     const [sidebarExpanded, setSidebarExpanded] = React.useState(true)
 
     const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
@@ -103,6 +108,9 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 setTimeLeft(0)
             } else {
                 setStatus("PROCESSING")
+                setProcessingStep(1)
+                setTimeout(() => setProcessingStep(2), 1500)
+                setTimeout(() => setProcessingStep(3), 3500)
                 setTimeout(() => setStatus("COMPLETE"), 5000)
             }
         } else {
@@ -119,46 +127,47 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     if (status === "PROCESSING") {
         return (
             <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
-                <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
-                    <div className="space-y-4">
-                        <h2 className="text-4xl font-black font-outfit text-[#7C3AED]">Processing...</h2>
-                        <p className="text-muted-foreground font-bold">Your report will be ready in a few minutes...</p>
+                <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-10 text-center shadow-2xl shadow-primary/5 animate-in fade-in duration-300">
+                    {/* Animated icon */}
+                    <div className="relative mx-auto w-fit">
+                        <div className="w-24 h-24 rounded-[2rem] bg-primary/5 flex items-center justify-center">
+                            <Mic2 className="w-12 h-12 text-primary animate-pulse" />
+                        </div>
+                        <div className="absolute -inset-2 rounded-[2.5rem] border-2 border-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
                     </div>
 
-                    <div className="relative mx-auto w-48 h-48 flex items-center justify-center">
-                        <div className="absolute inset-0 bg-primary/5 rounded-full animate-pulse" />
-                        {/* Orbiting Icons */}
-                        <div className="absolute top-0 left-1/2 -ml-5 -mt-5 w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 animate-bounce">
-                            <Volume2 className="h-5 w-5" />
-                        </div>
-                        <div className="absolute top-1/2 -right-5 -mt-5 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 animate-pulse">
-                            <Sparkles className="h-5 w-5" />
-                        </div>
-                        <div className="absolute bottom-4 left-4 w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 animate-pulse">
-                            <Settings className="h-5 w-5" />
-                        </div>
-                        <div className="absolute bottom-4 right-4 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 animate-bounce">
-                            <BookOpen className="h-5 w-5" />
-                        </div>
-
-                        <div className="relative z-10 w-24 h-24 bg-[#EEF2FF] rounded-[32px] flex items-center justify-center shadow-2xl shadow-primary/20 rotate-12">
-                            <FileText className="h-10 w-10 text-[#7C3AED]" />
-                        </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-black font-outfit text-slate-900">AI Evaluating...</h2>
+                        <p className="text-sm text-slate-400 font-medium">Analyzing your speaking performance</p>
                     </div>
 
-                    <div className="space-y-4 max-w-sm mx-auto">
-                        <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-[#7C3AED]">
-                            <span>Analysis Progress</span>
-                            <span>1%</span>
-                        </div>
-                        <div className="w-full bg-[#EEF2FF] h-3 rounded-full overflow-hidden">
-                            <div className="bg-[#7C3AED] h-full w-[1%] transition-all duration-1000" />
-                        </div>
+                    {/* Progress steps */}
+                    <div className="max-w-sm mx-auto space-y-3">
+                        {[
+                            { icon: AudioLines, label: "Processing audio recording", step: 1 },
+                            { icon: Brain, label: "Analyzing fluency & pronunciation", step: 2 },
+                            { icon: BarChart3, label: "Scoring band descriptors", step: 3 },
+                        ].map(({ icon: StepIcon, label, step }) => (
+                            <div
+                                key={step}
+                                className={cn(
+                                    "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500",
+                                    processingStep >= step
+                                        ? "bg-primary/5 text-slate-900"
+                                        : "text-slate-300"
+                                )}
+                            >
+                                {processingStep > step ? (
+                                    <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                                ) : processingStep === step ? (
+                                    <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
+                                ) : (
+                                    <StepIcon className="h-5 w-5 shrink-0" />
+                                )}
+                                <span className="text-sm font-bold">{label}</span>
+                            </div>
+                        ))}
                     </div>
-
-                    <Button disabled className="w-full h-16 rounded-[24px] bg-[#E5E7EB] text-slate-600 font-black text-sm">
-                        Processing...
-                    </Button>
                 </div>
             </div>
         )
