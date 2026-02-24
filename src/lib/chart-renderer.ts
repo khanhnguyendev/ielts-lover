@@ -1,20 +1,5 @@
 import QuickChart from 'quickchart-js';
-
-// Maps IELTS chart type labels → Chart.js types understood by QuickChart
-const IELTS_TO_CHARTJS: Record<string, string> = {
-    bar_chart: 'bar',
-    line_graph: 'line',
-    pie_chart: 'pie',
-    mixed_chart: 'bar',   // fallback: render as bar
-    doughnut: 'doughnut',
-    // passthrough for Chart.js native types
-    bar: 'bar',
-    line: 'line',
-    pie: 'pie',
-};
-
-// Types that cannot be rendered as a Chart.js chart (process, map, table, etc.)
-const NON_RENDERABLE = new Set(['process_diagram', 'map', 'table', 'process']);
+import { IELTS_TO_CHARTJS, CHART_TYPE_NON_RENDERABLE } from '@/lib/constants';
 
 export class ChartRenderer {
     /**
@@ -25,7 +10,7 @@ export class ChartRenderer {
         const rawType: string = chartConfig?.type ?? '';
 
         // Skip non-renderable IELTS types gracefully
-        if (NON_RENDERABLE.has(rawType)) {
+        if (CHART_TYPE_NON_RENDERABLE.has(rawType)) {
             return null;
         }
 

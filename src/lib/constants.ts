@@ -164,6 +164,27 @@ export const CHART_TYPES = {
 
 export type ChartType = typeof CHART_TYPES[keyof typeof CHART_TYPES];
 
+/** Maps IELTS chart type labels → Chart.js type strings understood by renderers like QuickChart. */
+export const IELTS_TO_CHARTJS: Record<string, string> = {
+    bar_chart: 'bar',
+    line_graph: 'line',
+    pie_chart: 'pie',
+    mixed_chart: 'bar',    // fallback: mixed renders as bar
+    doughnut: 'doughnut',
+    // passthrough for Chart.js native types
+    bar: 'bar',
+    line: 'line',
+    pie: 'pie',
+};
+
+/** IELTS chart types that cannot be rendered as a Chart.js chart (no data series). */
+export const CHART_TYPE_NON_RENDERABLE = new Set([
+    'process_diagram',
+    'map',
+    'table',
+    'process',
+]);
+
 export const AI_METHODS = {
     GENERATE_FEEDBACK: 'generateFeedback',
     REWRITE_CONTENT: 'rewriteContent',
