@@ -21,7 +21,7 @@ import { getExercises } from "@/app/actions";
 import { deleteExercise } from "@/app/admin/actions";
 import { Exercise, ExerciseType } from "@/types";
 
-import { Plus, Edit, Trash2, Eye, Search, FileText, Mic, AlertTriangle } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Search, FileText, Mic, AlertTriangle, Sparkles } from "lucide-react";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -113,6 +113,12 @@ function ExercisesContent() {
                             className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium w-64"
                         />
                     </div>
+                    <Link href="/admin/exercises/bulk-generate">
+                        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm text-sm gap-2">
+                            <Sparkles size={16} />
+                            Bulk Generate
+                        </Button>
+                    </Link>
                     <Link href="/admin/exercises/create/writing">
                         <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition shadow-sm text-sm gap-2">
                             <Plus size={18} />

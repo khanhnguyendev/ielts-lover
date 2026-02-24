@@ -320,6 +320,46 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
     return result.data;
 });
 
+export const bulkGenerateExercises = traceAction("bulkGenerateExercises", async (params: {
+    type: string;
+    count: number;
+    chartType?: string;
+    topic?: string;
+}) => {
+    const admin = await checkAdmin();
+    const { type, count, chartType, topic } = params;
+
+    const succeeded: Array<{ index: number; title: string }> = [];
+    const failed: Array<{ index: number; error: string }> = [];
+
+    for (let i = 0; i < count; i++) {
+        try {
+            const generated = await generateAIExercise(type, topic, chartType === "auto" ? undefined : chartType);
+            if (!generated) throw new Error("No data returned");
+
+            await createExercise({
+                title: (generated as any).title,
+                type: type as ExerciseType,
+                prompt: (generated as any).prompt,
+                image_url: (generated as any).image_url,
+                chart_data: (generated as any).chart_data,
+                is_published: true,
+            });
+
+            succeeded.push({ index: i, title: (generated as any).title });
+        } catch (err: any) {
+            logger.error(`bulkGenerateExercises: item ${i} failed`, { error: err });
+            failed.push({ index: i, error: err?.message || "Unknown error" });
+        }
+    }
+
+    revalidatePath("/admin/exercises");
+    revalidatePath("/dashboard/writing");
+    revalidatePath("/dashboard/speaking");
+
+    return { succeeded, failed, total: count };
+});
+
 export const analyzeChartImage = traceAction("analyzeChartImage", async (imageBase64: string, mimeType: string) => {
     const user = await getCurrentUser();
     if (!user) throw new Error("User not authenticated");
