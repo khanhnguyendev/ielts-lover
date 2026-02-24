@@ -275,7 +275,8 @@ export const deleteExercise = traceAction("deleteExercise", async (id: string) =
 });
 
 export const generateAIExercise = traceAction("generateAIExercise", async (type: string, topic?: string, chartType?: string) => {
-    await checkAdmin();
+    const admin = await checkAdmin();
+    const adminUserId = admin.id;
 
     const traceId = crypto.randomUUID();
 
@@ -286,23 +287,23 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
         const chartData = chartResult.data;
 
         aiCostService.recordUsage({
-            userId: null, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
+            userId: adminUserId, featureKey: "exercise_generation", modelName: chartResult.usage.modelName,
             promptTokens: chartResult.usage.promptTokens, completionTokens: chartResult.usage.completionTokens,
             aiMethod: AI_METHODS.GENERATE_CHART_DATA, creditsCharged: 0, durationMs: chartResult.usage.durationMs,
             traceId
         }).catch((err) => logger.error("AI cost recording failed", { error: err }));
 
-        // 2. Render Image
+        // 2. Render Image (returns null for non-renderable types like process_diagram, map, table)
         const { ChartRenderer } = await import("@/lib/chart-renderer");
         const imageBuffer = await ChartRenderer.render(chartData.chart_config);
 
-        // 3. Upload Image
-        const imageUrl = await storageService.upload(imageBuffer);
+        // 3. Upload Image only if rendering succeeded
+        const imageUrl = imageBuffer ? await storageService.upload(imageBuffer) : undefined;
 
         return {
             title: chartData.title,
             prompt: chartData.prompt,
-            image_url: imageUrl,
+            ...(imageUrl && { image_url: imageUrl }),
             chart_data: chartData.chart_config
         };
     }
@@ -310,7 +311,7 @@ export const generateAIExercise = traceAction("generateAIExercise", async (type:
     const result = await aiService.generateExerciseContent(type, topic);
 
     aiCostService.recordUsage({
-        userId: null, featureKey: "exercise_generation", modelName: result.usage.modelName,
+        userId: adminUserId, featureKey: "exercise_generation", modelName: result.usage.modelName,
         promptTokens: result.usage.promptTokens, completionTokens: result.usage.completionTokens,
         aiMethod: AI_METHODS.GENERATE_EXERCISE, creditsCharged: 0, durationMs: result.usage.durationMs,
         traceId,
