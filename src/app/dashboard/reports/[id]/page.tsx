@@ -36,12 +36,21 @@ import { getAttemptWithExercise, getCurrentUser } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
+import { useTitle } from "@/lib/contexts/title-context"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
+    const { setTitle } = useTitle()
+
+    React.useEffect(() => {
+        if (realData?.exercise) {
+            const typeLabel = realData.exercise.type.startsWith("writing") ? "Writing Report" : "Speaking Report"
+            setTitle(typeLabel)
+        }
+    }, [realData, setTitle])
     const { id } = React.use(params)
     const [isCatbotOpen, setIsCatbotOpen] = React.useState(true)
     const [isLightboxOpen, setIsLightboxOpen] = React.useState(false)
-    const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
     const [messages, setMessages] = React.useState<{ role: "user" | "assistant", content: string }[]>([
         { role: "assistant", content: "Hey! I'm your personal IELTS tutor. Got questions about your report? Go ahead and ask." }

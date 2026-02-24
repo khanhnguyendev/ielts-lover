@@ -33,12 +33,22 @@ import { useNotification } from "@/lib/contexts/notification-context"
 import { BackButton } from "@/components/global/back-button"
 import { FEATURE_KEYS } from "@/lib/constants"
 import { extractBillingError } from "@/lib/billing-errors"
+import { useTitle } from "@/lib/contexts/title-context"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
     const exerciseId = resolvedParams.type
 
     const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const { setTitle } = useTitle()
+
+    React.useEffect(() => {
+        if (exercise) {
+            const label = exercise.type === "writing_task1" ? "Writing Task 1" : "Writing Task 2"
+            setTitle(label)
+        }
+        return () => setTitle(null)
+    }, [exercise, setTitle])
     const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -248,7 +258,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                         {/* Question Title & Prompt */}
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                             <div className="space-y-4">
-                                <h1 className="text-4xl font-black font-outfit text-slate-900 tracking-tight leading-tight">
+                                <h1 className="text-3xl font-black font-outfit text-slate-900 tracking-tight leading-tight">
                                     {exercise.title}
                                 </h1>
                                 <div className="h-1.5 w-16 bg-primary rounded-full" />
@@ -264,13 +274,13 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                     {exercise.type === "writing_task1" && exercise.image_url && (
                                         <div className="space-y-6">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-primary/60">
                                                     <Layout className="h-4 w-4" />
                                                     Chart Visualization
                                                 </div>
                                                 <button
                                                     onClick={() => setIsLightboxOpen(true)}
-                                                    className="text-[10px] font-bold text-slate-400 hover:text-primary flex items-center gap-1.5 transition-colors"
+                                                    className="text-[11px] font-bold text-slate-400 hover:text-primary flex items-center gap-1.5 transition-colors"
                                                 >
                                                     <Maximize2 className="h-3 w-3" />
                                                     Full Screen
@@ -292,7 +302,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                     )}
 
                                     <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-primary/60">
                                             <HelpCircle className="h-4 w-4" />
                                             Question Prompt
                                         </div>
@@ -304,7 +314,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                     {/* Task Stats Footnote */}
                                     <div className="flex flex-wrap items-center gap-8 pt-10 border-t border-dashed border-slate-200">
                                         <div className="space-y-2">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Min Target</span>
+                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Min Target</span>
                                             <div className="flex items-center gap-2.5 text-emerald-600">
                                                 <div className="p-1 rounded-md bg-emerald-50">
                                                     <CheckCircle2 className="h-4 w-4" />
@@ -314,7 +324,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                         </div>
                                         <div className="w-px h-10 bg-slate-100 hidden sm:block" />
                                         <div className="space-y-2">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Recommended Time</span>
+                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Recommended Time</span>
                                             <div className="flex items-center gap-2.5 text-blue-600">
                                                 <div className="p-1 rounded-md bg-blue-50">
                                                     <Clock className="h-4 w-4" />
@@ -358,7 +368,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     <div className="flex items-center gap-10">
                         {/* Timer */}
                         <div className="group flex flex-col items-center">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">
                                 {timerStopped ? "Time Used" : "Time Remaining"}
                             </span>
                             <div className={cn(
@@ -373,7 +383,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                     ? <CheckCircle2 className="h-4 w-4" />
                                     : <Clock className={cn("h-4 w-4", timeLeft < 60 ? "animate-spin-slow" : "")} />
                                 }
-                                <span className="text-lg font-black font-mono tracking-tighter">
+                                <span className="text-base font-black font-mono tracking-tighter">
                                     {timerStopped
                                         ? formatTime((exercise?.type === "writing_task2" ? 2400 : 1200) - timeLeft)
                                         : formatTime(timeLeft)
@@ -386,16 +396,16 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
                         {/* Word Count Progress */}
                         <div className="group flex flex-col items-start min-w-[140px]">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">Word Progress</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 group-hover:text-primary transition-colors">Word Progress</span>
                             <div className="w-full space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className={cn(
-                                        "text-xs font-black transition-colors",
+                                        "text-sm font-black transition-colors",
                                         wordCount >= (exercise.type === "writing_task1" ? 150 : 250) ? "text-emerald-500" : "text-slate-900"
                                     )}>
                                         {wordCount} Words
                                     </span>
-                                    <span className="text-[10px] font-bold text-slate-400">/{exercise.type === "writing_task1" ? 150 : 250}</span>
+                                    <span className="text-[11px] font-bold text-slate-400">/{exercise.type === "writing_task1" ? 150 : 250}</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden p-[1px]">
                                     <div
@@ -482,7 +492,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                 placeholder="Once there was a horse..."
                                 disabled={isSubmitting}
                                 className={cn(
-                                    "flex-1 w-full border-none focus-visible:ring-0 text-xl md:text-2xl leading-[1.8] font-medium placeholder:text-slate-300 resize-none scrollbar-none bg-transparent selection:bg-primary/10 transition-all duration-300",
+                                    "flex-1 w-full border-none focus-visible:ring-0 text-lg leading-[1.8] font-medium placeholder:text-slate-300 resize-none scrollbar-none bg-transparent selection:bg-primary/10 transition-all duration-300",
                                     isSubmitting && "opacity-60 cursor-not-allowed"
                                 )}
                                 autoFocus
@@ -497,8 +507,8 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                 <Save className="h-4 w-4 text-emerald-600" />
                             </div>
                             <div className="space-y-0.5">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Status</span>
-                                <span className="text-[10px] font-bold text-emerald-600 block">Cloud Sync Active</span>
+                                <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block">Status</span>
+                                <span className="text-[11px] font-bold text-emerald-600 block">Cloud Sync Active</span>
                             </div>
                         </div>
 

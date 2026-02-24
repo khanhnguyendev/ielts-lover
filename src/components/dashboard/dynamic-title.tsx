@@ -4,6 +4,7 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useTitle } from "@/lib/contexts/title-context"
 
 const ROUTE_MAP: Record<string, string> = {
     "/dashboard": "Dashboard",
@@ -22,6 +23,7 @@ const ROUTE_MAP: Record<string, string> = {
 
 export function DynamicTitle() {
     const pathname = usePathname()
+    const { title: dynamicTitle } = useTitle()
 
     const getBreadcrumbs = () => {
         const items = [
@@ -59,11 +61,18 @@ export function DynamicTitle() {
             items.push({ label, href: currentPath })
         })
 
-        return items
+        const breadcrumbs = items
+
+        // If we have a dynamic title, update the last item's label
+        if (dynamicTitle && breadcrumbs.length > 0) {
+            breadcrumbs[breadcrumbs.length - 1].label = dynamicTitle
+        }
+
+        return breadcrumbs
     }
 
     const breadcrumbs = getBreadcrumbs()
-    const title = breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard"
+    const title = dynamicTitle || breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard"
 
     return (
         <div className="flex flex-col">
