@@ -6,9 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
 import { createExercise, generateAIExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions";
 import { getFeaturePrice, getExerciseById } from "@/app/actions";
-import { Sparkles, Loader2, CheckCircle2, XCircle, ImageIcon } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, XCircle, ImageIcon, CheckCheck, ListRestart } from "lucide-react";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
 import { CHART_TYPES, FEATURE_KEYS } from "@/lib/constants";
@@ -52,7 +60,22 @@ function CreateWritingExerciseContent() {
     // Error Modal State
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const [isErrorOpen, setIsErrorOpen] = useState(false);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [createdTitle, setCreatedTitle] = useState("");
     const { notifySuccess, notifyError } = useNotification();
+
+    function resetForm() {
+        setTitle("");
+        setPrompt("");
+        setTopic("");
+        setChartType("auto");
+        setImageFile(null);
+        setGeneratedImageUrl(null);
+        setChartData(null);
+        setChartDescription("");
+        setImageAnalysis(null);
+        setDuplicateId(null);
+    }
 
     const CHART_TYPE_LABELS: Record<string, string> = {
         [CHART_TYPES.LINE_GRAPH]: "📈 Line Graph",
@@ -182,12 +205,8 @@ function CreateWritingExerciseContent() {
                 chart_data: finalChartData,
                 is_published: true,
             }, duplicateId ?? undefined);
-            notifySuccess(
-                "Exercise Published",
-                "The exercise has been created and is now available for students in the Writing Hub.",
-                "Back to List"
-            );
-            router.push("/admin/exercises");
+            setCreatedTitle(formTitle);
+            setShowSuccessDialog(true);
         } catch (error) {
             console.error("Failed to create exercise:", error);
             notifyError(
@@ -450,6 +469,43 @@ function CreateWritingExerciseContent() {
                 onOpenChange={setIsErrorOpen}
                 error={errorDetails}
             />
+
+            {/* ── Success Dialog ── */}
+            <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+                <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
+                    {/* Header */}
+                    <div className="bg-emerald-600 px-8 pt-8 pb-6 text-white text-center space-y-3">
+                        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto backdrop-blur-sm border border-white/30">
+                            <CheckCheck size={32} className="text-white" />
+                        </div>
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-black text-white">Exercise Published!</DialogTitle>
+                            <DialogDescription className="text-emerald-100 text-sm font-medium">
+                                <span className="font-black text-white">&ldquo;{createdTitle}&rdquo;</span> is now live in the Writing Hub.
+                            </DialogDescription>
+                        </DialogHeader>
+                    </div>
+
+                    {/* Actions */}
+                    <DialogFooter className="flex-col sm:flex-col gap-3 p-6 bg-white">
+                        <Button
+                            onClick={() => router.push("/admin/exercises")}
+                            variant="outline"
+                            className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs border-slate-200 hover:bg-slate-50"
+                        >
+                            <ListRestart size={15} className="mr-2" />
+                            Back to List
+                        </Button>
+                        <Button
+                            onClick={() => { resetForm(); setShowSuccessDialog(false); }}
+                            className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20"
+                        >
+                            <CheckCheck size={15} className="mr-2" />
+                            Create Another
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
