@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
     ArrowLeft, Sparkles, Loader2, CheckCircle2, XCircle,
     ChevronRight, BarChart2, TrendingUp, PieChart, Table,
-    GitBranch, Map, LayoutDashboard, FileText, Mic
+    GitBranch, Map, LayoutDashboard, FileText, Mic, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateAIExercise, createExercise } from "@/app/admin/actions";
@@ -44,28 +44,116 @@ const CHART_TYPE_OPTIONS = [
     { value: CHART_TYPES.MIXED_CHART, label: "Mixed Chart", icon: LayoutDashboard },
 ];
 
-// ── Component ──────────────────────────────────────────────────────────────
+// ── Processing Overlay ─────────────────────────────────────────────────────
+
+function ProcessingOverlay({ items, count }: { items: GenerationItem[]; count: number }) {
+    const completed = items.filter(i => i.status === "done" || i.status === "error").length;
+    const progress = count > 0 ? Math.round(completed / count * 100) : 0;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md">
+            <div className="w-full max-w-lg mx-4 space-y-6 animate-in fade-in zoom-in-95 duration-300">
+
+                {/* Pulsing orb */}
+                <div className="flex justify-center">
+                    <div className="relative w-24 h-24">
+                        <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                        <div className="absolute inset-2 rounded-full bg-primary/10 animate-ping [animation-delay:200ms]" />
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-violet-600 shadow-2xl shadow-primary/40 flex items-center justify-center">
+                            <Sparkles size={36} className="text-white animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Heading */}
+                <div className="text-center space-y-1">
+                    <h2 className="text-2xl font-black text-white tracking-tight">AI is generating…</h2>
+                    <p className="text-sm font-bold text-slate-400">
+                        Step {completed + 1} of {count} — please wait
+                    </p>
+                </div>
+
+                {/* Progress bar */}
+                <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-slate-500">Progress</span>
+                        <span className="text-white">{progress}%</span>
+                    </div>
+                    <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-gradient-to-r from-primary to-violet-500 rounded-full transition-all duration-700 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                        <span>{completed} completed</span>
+                        <span>{count - completed} remaining</span>
+                    </div>
+                </div>
+
+                {/* Step list */}
+                <div className="bg-slate-900/70 rounded-2xl border border-slate-800 overflow-hidden">
+                    <div className="max-h-60 overflow-y-auto divide-y divide-slate-800/50">
+                        {items.map((item) => (
+                            <div
+                                key={item.index}
+                                className={cn(
+                                    "flex items-center gap-3 px-5 py-3 transition-all duration-300",
+                                    item.status === "running" && "bg-primary/10 border-l-2 border-primary"
+                                )}
+                            >
+                                <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                    {item.status === "pending" && <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />}
+                                    {item.status === "running" && <Loader2 size={14} className="animate-spin text-primary" />}
+                                    {item.status === "done" && <CheckCircle2 size={14} className="text-emerald-400" />}
+                                    {item.status === "error" && <XCircle size={14} className="text-rose-400" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    {item.status === "pending" && (
+                                        <p className="text-xs font-bold text-slate-600">Exercise {item.index + 1}</p>
+                                    )}
+                                    {item.status === "running" && (
+                                        <p className="text-xs font-black text-primary animate-pulse">Generating exercise {item.index + 1}…</p>
+                                    )}
+                                    {item.status === "done" && (
+                                        <p className="text-xs font-bold text-slate-400 truncate">{item.title}</p>
+                                    )}
+                                    {item.status === "error" && (
+                                        <p className="text-xs font-bold text-rose-400 truncate">Failed — {item.error}</p>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-black text-slate-700 shrink-0">#{item.index + 1}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <p className="text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center justify-center gap-2">
+                    <Clock size={11} />
+                    Do not close this page
+                </p>
+            </div>
+        </div>
+    );
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 export default function BulkGeneratePage() {
     const router = useRouter();
 
-    // Form state
     const [exerciseType, setExerciseType] = useState("writing_task1");
     const [chartType, setChartType] = useState("auto");
     const [count, setCount] = useState(3);
     const [topic, setTopic] = useState("");
 
-    // Generation state
     const [phase, setPhase] = useState<"form" | "running" | "done">("form");
     const [items, setItems] = useState<GenerationItem[]>([]);
 
     const isTask1 = exerciseType === "writing_task1";
 
     async function handleGenerate() {
-        const initial: GenerationItem[] = Array.from({ length: count }, (_, i) => ({
-            index: i,
-            status: "pending",
-        }));
+        const initial: GenerationItem[] = Array.from({ length: count }, (_, i) => ({ index: i, status: "pending" }));
         setItems(initial);
         setPhase("running");
 
@@ -91,10 +179,7 @@ export default function BulkGeneratePage() {
 
                 setItems(prev => prev.map(it => it.index === i ? { ...it, status: "done", title: generated.title } : it));
             } catch (err: any) {
-                setItems(prev => prev.map(it => it.index === i ? {
-                    ...it, status: "error",
-                    error: err?.message || "Unknown error"
-                } : it));
+                setItems(prev => prev.map(it => it.index === i ? { ...it, status: "error", error: err?.message || "Unknown error" } : it));
             }
         }
 
@@ -103,11 +188,13 @@ export default function BulkGeneratePage() {
 
     const succeeded = items.filter(i => i.status === "done").length;
     const failed = items.filter(i => i.status === "error").length;
-    const running = items.filter(i => i.status === "running").length;
-    const progress = items.length > 0 ? Math.round((succeeded + failed) / items.length * 100) : 0;
 
     return (
         <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
+
+            {/* Full-screen overlay while running */}
+            {phase === "running" && <ProcessingOverlay items={items} count={count} />}
+
             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
                 {/* Header */}
@@ -123,8 +210,8 @@ export default function BulkGeneratePage() {
                     </div>
                 </div>
 
-                {/* ── FORM PHASE ── */}
-                {phase === "form" && (
+                {/* ── FORM ── */}
+                {(phase === "form") && (
                     <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
                         <div className="bg-slate-900 px-8 py-6 flex items-center gap-3">
                             <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
@@ -137,38 +224,35 @@ export default function BulkGeneratePage() {
                         </div>
 
                         <div className="p-8 space-y-8">
+
                             {/* Exercise Type */}
                             <div className="space-y-3">
                                 <label className="text-xs font-black uppercase tracking-widest text-slate-400">Exercise Type</label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {EXERCISE_TYPES.map(opt => {
                                         const Icon = opt.icon;
-                                        const isSelected = exerciseType === opt.value;
+                                        const sel = exerciseType === opt.value;
                                         return (
                                             <button
                                                 key={opt.value}
                                                 onClick={() => setExerciseType(opt.value)}
                                                 className={cn(
                                                     "flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all duration-200",
-                                                    isSelected
-                                                        ? "border-primary bg-primary/5 shadow-sm"
-                                                        : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
+                                                    sel ? "border-primary bg-primary/5 shadow-sm" : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
                                                 )}
                                             >
-                                                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-xs shrink-0", opt.color)}>
+                                                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", opt.color)}>
                                                     <Icon size={15} />
                                                 </div>
-                                                <span className={cn("text-sm font-black", isSelected ? "text-primary" : "text-slate-700")}>
-                                                    {opt.label}
-                                                </span>
-                                                {isSelected && <ChevronRight size={14} className="ml-auto text-primary" />}
+                                                <span className={cn("text-sm font-black", sel ? "text-primary" : "text-slate-700")}>{opt.label}</span>
+                                                {sel && <ChevronRight size={14} className="ml-auto text-primary" />}
                                             </button>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            {/* Chart Type (task1 only) */}
+                            {/* Chart Type */}
                             {isTask1 && (
                                 <div className="space-y-3">
                                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Chart Type</label>
@@ -201,11 +285,7 @@ export default function BulkGeneratePage() {
                                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Count</label>
                                     <span className="text-2xl font-black text-slate-900">{count}</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    min={1}
-                                    max={10}
-                                    value={count}
+                                <input type="range" min={1} max={10} value={count}
                                     onChange={e => setCount(Number(e.target.value))}
                                     className="w-full accent-primary"
                                 />
@@ -215,7 +295,7 @@ export default function BulkGeneratePage() {
                                 </div>
                             </div>
 
-                            {/* Topic (optional) */}
+                            {/* Topic */}
                             <div className="space-y-3">
                                 <label className="text-xs font-black uppercase tracking-widest text-slate-400">
                                     Topic / Theme <span className="text-slate-300 normal-case font-medium">(optional)</span>
@@ -229,7 +309,6 @@ export default function BulkGeneratePage() {
                                 />
                             </div>
 
-                            {/* Generate Button */}
                             <Button
                                 onClick={handleGenerate}
                                 className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-sm gap-3 shadow-lg"
@@ -241,87 +320,69 @@ export default function BulkGeneratePage() {
                     </div>
                 )}
 
-                {/* ── RUNNING / DONE PHASE ── */}
-                {(phase === "running" || phase === "done") && (
-                    <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
-                        {/* Progress Header */}
-                        <div className="px-8 py-6 border-b border-slate-100 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-black text-slate-900">
-                                        {phase === "running"
-                                            ? `Generating… ${succeeded + failed} / ${count}`
-                                            : `Done — ${succeeded} created, ${failed} failed`}
-                                    </p>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                        {phase === "running" ? "AI is working, please wait" : "All exercises are now live"}
-                                    </p>
-                                </div>
-                                {phase === "running" && <Loader2 size={20} className="animate-spin text-primary" />}
-                                {phase === "done" && succeeded > 0 && <CheckCircle2 size={20} className="text-emerald-500" />}
+                {/* ── DONE — results card ── */}
+                {phase === "done" && (
+                    <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                        {/* Summary header */}
+                        <div className={cn(
+                            "px-8 py-8 text-center space-y-3",
+                            failed === 0 ? "bg-emerald-600" : succeeded === 0 ? "bg-rose-600" : "bg-amber-500"
+                        )}>
+                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto border border-white/30">
+                                {failed === 0
+                                    ? <CheckCircle2 size={32} className="text-white" />
+                                    : succeeded === 0
+                                        ? <XCircle size={32} className="text-white" />
+                                        : <Sparkles size={32} className="text-white" />
+                                }
                             </div>
-                            {/* Progress bar */}
-                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-primary rounded-full transition-all duration-500"
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </div>
+                            <p className="text-2xl font-black text-white">
+                                {failed === 0 ? "All Done!" : succeeded === 0 ? "Generation Failed" : "Partially Done"}
+                            </p>
+                            <p className="text-sm font-bold text-white/70">
+                                {succeeded} created &middot; {failed} failed &middot; {count} total
+                            </p>
                         </div>
 
-                        {/* Item list */}
-                        <div className="divide-y divide-slate-50">
+                        {/* Item results */}
+                        <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
                             {items.map(item => (
-                                <div key={item.index} className="px-8 py-4 flex items-center gap-4">
-                                    <div className="w-6 h-6 shrink-0 flex items-center justify-center">
-                                        {item.status === "pending" && <div className="w-2 h-2 rounded-full bg-slate-200" />}
-                                        {item.status === "running" && <Loader2 size={16} className="animate-spin text-primary" />}
-                                        {item.status === "done" && <CheckCircle2 size={18} className="text-emerald-500" />}
-                                        {item.status === "error" && <XCircle size={18} className="text-rose-500" />}
+                                <div key={item.index} className="px-8 py-3.5 flex items-center gap-4">
+                                    <div className="w-5 h-5 shrink-0">
+                                        {item.status === "done"
+                                            ? <CheckCircle2 size={16} className="text-emerald-500" />
+                                            : <XCircle size={16} className="text-rose-400" />
+                                        }
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        {item.status === "pending" && (
-                                            <p className="text-sm text-slate-300 font-medium">Exercise #{item.index + 1}</p>
-                                        )}
-                                        {item.status === "running" && (
-                                            <p className="text-sm text-slate-500 font-bold animate-pulse">Generating…</p>
-                                        )}
-                                        {item.status === "done" && (
-                                            <p className="text-sm text-slate-900 font-black truncate">{item.title}</p>
-                                        )}
-                                        {item.status === "error" && (
-                                            <>
-                                                <p className="text-sm text-rose-600 font-black">Failed — Exercise #{item.index + 1}</p>
-                                                <p className="text-[11px] text-rose-400 font-medium truncate">{item.error}</p>
-                                            </>
-                                        )}
+                                        {item.status === "done"
+                                            ? <p className="text-sm font-black text-slate-900 truncate">{item.title}</p>
+                                            : <p className="text-sm font-bold text-rose-500 truncate">Failed — {item.error}</p>
+                                        }
                                     </div>
+                                    <span className="text-[10px] font-black text-slate-400">#{item.index + 1}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Footer actions (done only) */}
-                        {phase === "done" && (
-                            <div className="p-8 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => router.push("/admin/exercises")}
-                                    className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs"
-                                >
-                                    View All Exercises
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        setPhase("form");
-                                        setItems([]);
-                                    }}
-                                    className="flex-1 h-12 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-xs gap-2"
-                                >
-                                    <Sparkles size={14} />
-                                    Generate More
-                                </Button>
-                            </div>
-                        )}
+                        {/* CTAs */}
+                        <div className="p-8 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => router.push("/admin/exercises")}
+                                className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs"
+                            >
+                                View All Exercises
+                            </Button>
+                            <Button
+                                onClick={() => { setPhase("form"); setItems([]); }}
+                                className="flex-1 h-12 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-xs gap-2"
+                            >
+                                <Sparkles size={14} />
+                                Generate More
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>
