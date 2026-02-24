@@ -27,6 +27,7 @@ function CreateWritingExerciseContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"writing_task1" | "writing_task2">("writing_task1");
+    const [duplicateId, setDuplicateId] = useState<string | null>(null);
     const searchParams = useSearchParams();
 
     // Controlled inputs for AI generation population
@@ -69,9 +70,10 @@ function CreateWritingExerciseContent() {
     useEffect(() => {
         getFeaturePrice(FEATURE_KEYS.CHART_IMAGE_ANALYSIS).then(setAnalysisCost);
 
-        const duplicateId = searchParams.get("duplicate");
-        if (duplicateId) {
-            getExerciseById(duplicateId).then(ex => {
+        const id = searchParams.get("duplicate");
+        if (id) {
+            setDuplicateId(id);
+            getExerciseById(id).then(ex => {
                 if (ex) {
                     setTitle(ex.title);
                     setPrompt(ex.prompt);
@@ -179,7 +181,7 @@ function CreateWritingExerciseContent() {
                 image_url: type === "writing_task1" ? imageUrl : undefined,
                 chart_data: finalChartData,
                 is_published: true,
-            });
+            }, duplicateId ?? undefined);
             notifySuccess(
                 "Exercise Published",
                 "The exercise has been created and is now available for students in the Writing Hub.",
@@ -432,9 +434,14 @@ function CreateWritingExerciseContent() {
                     <Button
                         type="submit"
                         disabled={isLoading || (type === "writing_task1" && !!imageFile && (!imageAnalysis || !imageAnalysis.is_valid))}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 min-w-[150px]"
                     >
-                        {isLoading ? "Creating..." : "Create Exercise"}
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : "Create Exercise"}
                     </Button>
                 </div>
             </form>

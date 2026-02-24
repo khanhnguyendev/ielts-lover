@@ -16,9 +16,15 @@ export class ExerciseService {
         return await this.exerciseRepo.listByType(type);
     }
 
-    async createExerciseVersion(data: Omit<Exercise, "id" | "created_at" | "version">): Promise<Exercise> {
-        const latest = await this.exerciseRepo.getLatestVersion(data.type);
-        const newVersion = latest ? latest.version + 1 : 1;
+    async createExerciseVersion(
+        data: Omit<Exercise, "id" | "created_at" | "version">,
+        sourceExerciseId?: string
+    ): Promise<Exercise> {
+        let newVersion = 1;
+        if (sourceExerciseId) {
+            const source = await this.exerciseRepo.getById(sourceExerciseId);
+            newVersion = source ? source.version + 1 : 1;
+        }
 
         const result = await this.exerciseRepo.createVersion({
             ...data,

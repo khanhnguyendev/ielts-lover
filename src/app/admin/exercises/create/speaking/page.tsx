@@ -26,6 +26,7 @@ function CreateSpeakingExerciseContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [type, setType] = useState<"speaking_part1" | "speaking_part2" | "speaking_part3">("speaking_part1");
+    const [duplicateId, setDuplicateId] = useState<string | null>(null);
     const searchParams = useSearchParams();
 
     // Controlled inputs
@@ -37,9 +38,10 @@ function CreateSpeakingExerciseContent() {
     const [isErrorOpen, setIsErrorOpen] = useState(false);
 
     useEffect(() => {
-        const duplicateId = searchParams.get("duplicate");
-        if (duplicateId) {
-            getExerciseById(duplicateId).then(ex => {
+        const id = searchParams.get("duplicate");
+        if (id) {
+            setDuplicateId(id);
+            getExerciseById(id).then(ex => {
                 if (ex) {
                     setTitle(ex.title);
                     setPrompt(ex.prompt);
@@ -83,7 +85,7 @@ function CreateSpeakingExerciseContent() {
                 type,
                 prompt: formPrompt,
                 is_published: true,
-            });
+            }, duplicateId ?? undefined);
             notifySuccess("Created", "Exercise created successfully!");
             router.push("/admin/exercises");
         } catch (error) {
@@ -194,8 +196,13 @@ function CreateSpeakingExerciseContent() {
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-                        {isLoading ? "Creating..." : "Create Exercise"}
+                    <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 min-w-[150px]">
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : "Create Exercise"}
                     </Button>
                 </div>
             </form>

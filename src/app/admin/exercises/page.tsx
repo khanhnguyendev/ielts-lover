@@ -14,11 +14,14 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import { getExercises } from "@/app/actions";
 import { deleteExercise } from "@/app/admin/actions";
 import { Exercise, ExerciseType } from "@/types";
-import { Plus, Edit, Trash2, Eye, Search, FileText, Mic } from "lucide-react";
+
+import { Plus, Edit, Trash2, Eye, Search, FileText, Mic, AlertTriangle } from "lucide-react";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -35,11 +38,13 @@ function ExercisesContent() {
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [typeFilter, setTypeFilter] = useState<string>("all");
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Exercise | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     async function fetchExercises() {
         setIsLoading(true);
         try {
-            const types: ExerciseType[] = ["writing_task1", "writing_task2", "speaking_part1", "speaking_part2", "speaking_part3"]; // Fetching common writing types
+            const types: ExerciseType[] = ["writing_task1", "writing_task2", "speaking_part1", "speaking_part2", "speaking_part3"];
             const allExercises = await Promise.all(types.map(t => getExercises(t)));
             setExercises(allExercises.flat());
         } catch (error) {
@@ -53,16 +58,17 @@ function ExercisesContent() {
         fetchExercises();
     }, []);
 
-    async function handleDelete(id: string, title: string) {
-        if (!window.confirm(`Are you sure you want to delete "${title}"? This exercise will be archived and hidden from students.`)) {
-            return;
-        }
-
+    async function confirmDelete() {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
         try {
-            await deleteExercise(id);
+            await deleteExercise(deleteTarget.id);
             await fetchExercises();
         } catch (error) {
             console.error("Failed to delete exercise:", error);
+        } finally {
+            setIsDeleting(false);
+            setDeleteTarget(null);
         }
     }
 
@@ -173,13 +179,43 @@ function ExercisesContent() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <div className={cn(
-                                            "inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                                            exercise.type.startsWith('writing')
-                                                ? "bg-purple-50 text-purple-700 border-purple-100"
-                                                : "bg-blue-50 text-blue-700 border-blue-100"
-                                        )}>
-                                            {exercise.type.replace("_", " ")}
+                                        <div className="flex flex-col items-center gap-1.5">
+                                            <div className={cn(
+                                                "inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                                                exercise.type.startsWith('writing')
+                                                    ? "bg-purple-50 text-purple-700 border-purple-100"
+                                                    : "bg-blue-50 text-blue-700 border-blue-100"
+                                            )}>
+                                                {exercise.type.replace("_", " ")}
+                                            </div>
+                                            {exercise.type === "writing_task1" && (() => {
+                                                // AI-generated charts store Chart.js type: "bar"|"line"|"pie"
+                                                // Image-analyzed charts store: "bar_chart"|"line_graph" etc.
+                                                const rawType: string | undefined =
+                                                    exercise.chart_data?.type ||
+                                                    exercise.chart_data?.chart_type;
+                                                const CHART_LABELS: Record<string, string> = {
+                                                    // IELTS long-form (image analysis)
+                                                    "line_graph": "📈 Line Graph",
+                                                    "bar_chart": "📊 Bar Chart",
+                                                    "pie_chart": "🥧 Pie Chart",
+                                                    "table": "📋 Table",
+                                                    "process_diagram": "🔄 Process",
+                                                    "map": "🗺️ Map",
+                                                    "mixed_chart": "📉 Mixed",
+                                                    // Chart.js short-form (AI generation)
+                                                    "bar": "📊 Bar Chart",
+                                                    "line": "� Line Graph",
+                                                    "pie": "🥧 Pie Chart",
+                                                    "doughnut": "🥧 Doughnut",
+                                                };
+                                                if (!rawType || !CHART_LABELS[rawType]) return null;
+                                                return (
+                                                    <span className="text-[9px] font-bold text-slate-400 tracking-wide">
+                                                        {CHART_LABELS[rawType]}
+                                                    </span>
+                                                );
+                                            })()}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -241,7 +277,7 @@ function ExercisesContent() {
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-slate-400 hover:text-red-600 transition-colors"
-                                                onClick={() => handleDelete(exercise.id, exercise.title)}
+                                                onClick={() => setDeleteTarget(exercise)}
                                             >
                                                 <Trash2 size={18} />
                                             </Button>
@@ -252,6 +288,46 @@ function ExercisesContent() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+                <DialogContent className="sm:max-w-md rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+                    <div className="p-6 space-y-4">
+                        <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                                <AlertTriangle className="w-5 h-5 text-red-600" />
+                            </div>
+                            <div>
+                                <DialogHeader>
+                                    <DialogTitle className="text-base font-black text-slate-900">Delete Exercise</DialogTitle>
+                                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                                        Are you sure you want to delete{" "}
+                                        <span className="font-semibold text-slate-700">&ldquo;{deleteTarget?.title}&rdquo;</span>?{" "}
+                                        This exercise will be archived and hidden from students.
+                                    </DialogDescription>
+                                </DialogHeader>
+                            </div>
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setDeleteTarget(null)}
+                                disabled={isDeleting}
+                                className="rounded-xl"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={confirmDelete}
+                                disabled={isDeleting}
+                                className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                            >
+                                {isDeleting ? "Deleting..." : "Delete Exercise"}
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* View Details Dialog */}
             <Dialog open={!!selectedExercise} onOpenChange={(open) => !open && setSelectedExercise(null)}>

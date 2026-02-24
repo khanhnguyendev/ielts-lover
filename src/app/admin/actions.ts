@@ -254,9 +254,12 @@ export async function getLessonQuestions(lessonId: string) {
 
 // Exercise Actions
 
-export const createExercise = traceAction("createExercise", async (exercise: Omit<Exercise, "id" | "created_at" | "version">) => {
+export const createExercise = traceAction("createExercise", async (
+    exercise: Omit<Exercise, "id" | "created_at" | "version">,
+    sourceExerciseId?: string
+) => {
     const user = await checkAdmin();
-    const result = await exerciseService.createExerciseVersion({ ...exercise, created_by: user.id });
+    const result = await exerciseService.createExerciseVersion({ ...exercise, created_by: user.id }, sourceExerciseId);
     revalidatePath("/admin/exercises");
     revalidatePath("/dashboard/writing");
     revalidatePath("/dashboard/speaking");
