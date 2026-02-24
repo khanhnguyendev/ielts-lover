@@ -46,89 +46,80 @@ const CHART_TYPE_OPTIONS = [
 
 // ── Processing Overlay ─────────────────────────────────────────────────────
 
-function ProcessingOverlay({ items, count }: { items: GenerationItem[]; count: number }) {
+function ProcessingCard({ items, count }: { items: GenerationItem[]; count: number }) {
     const completed = items.filter(i => i.status === "done" || i.status === "error").length;
     const progress = count > 0 ? Math.round(completed / count * 100) : 0;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md">
-            <div className="w-full max-w-lg mx-4 space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
 
-                {/* Pulsing orb */}
-                <div className="flex justify-center">
-                    <div className="relative w-24 h-24">
-                        <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                        <div className="absolute inset-2 rounded-full bg-primary/10 animate-ping [animation-delay:200ms]" />
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-violet-600 shadow-2xl shadow-primary/40 flex items-center justify-center">
-                            <Sparkles size={36} className="text-white animate-pulse" />
-                        </div>
+            {/* Header with animated orb */}
+            <div className="bg-slate-900 px-8 py-6 flex items-center gap-4">
+                <div className="relative w-12 h-12 shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/40">
+                        <Sparkles size={20} className="text-white animate-pulse" />
                     </div>
                 </div>
-
-                {/* Heading */}
-                <div className="text-center space-y-1">
-                    <h2 className="text-2xl font-black text-white tracking-tight">AI is generating…</h2>
-                    <p className="text-sm font-bold text-slate-400">
-                        Step {completed + 1} of {count} — please wait
+                <div className="flex-1">
+                    <p className="text-sm font-black text-white">AI is generating…</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                        Step {Math.min(completed + 1, count)} of {count} — please wait
                     </p>
                 </div>
+                <Loader2 size={18} className="text-primary animate-spin shrink-0" />
+            </div>
+
+            <div className="p-8 space-y-6">
 
                 {/* Progress bar */}
                 <div className="space-y-2">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-slate-500">Progress</span>
-                        <span className="text-white">{progress}%</span>
+                        <span className="text-slate-400">Progress</span>
+                        <span className="text-slate-900">{progress}%</span>
                     </div>
-                    <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-gradient-to-r from-primary to-violet-500 rounded-full transition-all duration-700 ease-out"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
                         <span>{completed} completed</span>
                         <span>{count - completed} remaining</span>
                     </div>
                 </div>
 
                 {/* Step list */}
-                <div className="bg-slate-900/70 rounded-2xl border border-slate-800 overflow-hidden">
-                    <div className="max-h-60 overflow-y-auto divide-y divide-slate-800/50">
+                <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
                         {items.map((item) => (
                             <div
                                 key={item.index}
                                 className={cn(
-                                    "flex items-center gap-3 px-5 py-3 transition-all duration-300",
-                                    item.status === "running" && "bg-primary/10 border-l-2 border-primary"
+                                    "flex items-center gap-3 px-5 py-3.5 transition-all duration-300",
+                                    item.status === "running" && "bg-primary/5 border-l-2 border-primary"
                                 )}
                             >
                                 <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                    {item.status === "pending" && <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />}
-                                    {item.status === "running" && <Loader2 size={14} className="animate-spin text-primary" />}
-                                    {item.status === "done" && <CheckCircle2 size={14} className="text-emerald-400" />}
+                                    {item.status === "pending" && <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />}
+                                    {item.status === "running" && <Loader2 size={13} className="animate-spin text-primary" />}
+                                    {item.status === "done" && <CheckCircle2 size={14} className="text-emerald-500" />}
                                     {item.status === "error" && <XCircle size={14} className="text-rose-400" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    {item.status === "pending" && (
-                                        <p className="text-xs font-bold text-slate-600">Exercise {item.index + 1}</p>
-                                    )}
-                                    {item.status === "running" && (
-                                        <p className="text-xs font-black text-primary animate-pulse">Generating exercise {item.index + 1}…</p>
-                                    )}
-                                    {item.status === "done" && (
-                                        <p className="text-xs font-bold text-slate-400 truncate">{item.title}</p>
-                                    )}
-                                    {item.status === "error" && (
-                                        <p className="text-xs font-bold text-rose-400 truncate">Failed — {item.error}</p>
-                                    )}
+                                    {item.status === "pending" && <p className="text-xs font-bold text-slate-300">Exercise {item.index + 1}</p>}
+                                    {item.status === "running" && <p className="text-xs font-black text-primary animate-pulse">Generating exercise {item.index + 1}…</p>}
+                                    {item.status === "done" && <p className="text-xs font-black text-slate-700 truncate">{item.title}</p>}
+                                    {item.status === "error" && <p className="text-xs font-bold text-rose-500 truncate">Failed — {item.error}</p>}
                                 </div>
-                                <span className="text-[10px] font-black text-slate-700 shrink-0">#{item.index + 1}</span>
+                                <span className="text-[10px] font-black text-slate-300 shrink-0">#{item.index + 1}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <p className="text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center justify-center gap-2">
+                <p className="text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center justify-center gap-2">
                     <Clock size={11} />
                     Do not close this page
                 </p>
@@ -193,7 +184,7 @@ export default function BulkGeneratePage() {
         <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
 
             {/* Full-screen overlay while running */}
-            {phase === "running" && <ProcessingOverlay items={items} count={count} />}
+            {phase === "running" && <ProcessingCard items={items} count={count} />}
 
             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
