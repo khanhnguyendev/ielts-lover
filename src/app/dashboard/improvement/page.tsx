@@ -25,7 +25,10 @@ import {
     History,
     ShieldAlert,
     TrendingUp,
-    Lightbulb
+    Lightbulb,
+    Loader2,
+    ScanSearch,
+    Route
 } from "lucide-react"
 import { PulseLoader } from "@/components/global/pulse-loader"
 
@@ -54,6 +57,7 @@ export default function ImprovementPage() {
     const [analysisCost, setAnalysisCost] = React.useState(30)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isGenerating, setIsGenerating] = React.useState(false)
+    const [genStep, setGenStep] = React.useState(0)
     const { notifyError } = useNotification()
 
     const ITEMS_PER_PAGE = 8
@@ -85,10 +89,16 @@ export default function ImprovementPage() {
 
     async function handleGenerateAnalysis() {
         setIsGenerating(true)
+        setGenStep(1)
         window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -analysisCost } }))
+
+        const t1 = setTimeout(() => setGenStep(2), 2000)
+        const t2 = setTimeout(() => setGenStep(3), 5000)
 
         try {
             const result = await generateWeaknessAnalysis()
+            clearTimeout(t1)
+            clearTimeout(t2)
             if (result.success && result.data) {
                 setLatestPlan(result.data)
             } else {
@@ -105,6 +115,7 @@ export default function ImprovementPage() {
             notifyError("Unexpected Error", "Something went wrong.")
         } finally {
             setIsGenerating(false)
+            setGenStep(0)
         }
     }
 
@@ -197,7 +208,48 @@ export default function ImprovementPage() {
                         </Button>
                     </div>
 
-                    {latestPlan ? (
+                    {isGenerating ? (
+                        <div className="relative z-10 py-16 flex flex-col items-center gap-8 animate-in fade-in duration-300">
+                            <div className="relative">
+                                <div className="w-20 h-20 rounded-[2rem] bg-primary/20 flex items-center justify-center">
+                                    <Brain className="w-10 h-10 text-primary animate-pulse" />
+                                </div>
+                                <div className="absolute -inset-2 rounded-[2.5rem] border-2 border-primary/20 animate-ping" style={{ animationDuration: "2s" }} />
+                            </div>
+
+                            <div className="space-y-2 text-center">
+                                <h3 className="text-xl font-black font-outfit text-white">Deep Analysis in Progress...</h3>
+                                <p className="text-sm text-slate-400 font-medium">Scanning your mistake patterns for Band {targetScore.toFixed(1)}</p>
+                            </div>
+
+                            <div className="w-full max-w-sm space-y-3">
+                                {[
+                                    { icon: ScanSearch, label: "Scanning mistake history", step: 1 },
+                                    { icon: Brain, label: "Identifying weakness patterns", step: 2 },
+                                    { icon: Route, label: "Building action plan", step: 3 },
+                                ].map(({ icon: StepIcon, label, step }) => (
+                                    <div
+                                        key={step}
+                                        className={cn(
+                                            "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500",
+                                            genStep >= step
+                                                ? "bg-white/10 text-white"
+                                                : "text-slate-600"
+                                        )}
+                                    >
+                                        {genStep > step ? (
+                                            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                                        ) : genStep === step ? (
+                                            <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
+                                        ) : (
+                                            <StepIcon className="h-5 w-5 shrink-0" />
+                                        )}
+                                        <span className="text-sm font-bold">{label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : latestPlan ? (
                         <div className="relative z-10 space-y-8 animate-in fade-in slide-in-from-top-4 duration-1000">
                             {/* Summary Glass */}
                             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 flex gap-4">
