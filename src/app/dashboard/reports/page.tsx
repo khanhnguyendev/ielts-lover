@@ -15,6 +15,7 @@ import {
     Target,
     ArrowRight,
     BookOpen,
+    Loader2,
     type LucideIcon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -33,6 +34,7 @@ export default function ReportsPage() {
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
+    const [reevalStep, setReevalStep] = React.useState(0)
 
     // Filters
     const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -77,10 +79,16 @@ export default function ReportsPage() {
             "Get AI Feedback",
             async () => {
                 setReevaluatingId(id)
+                setReevalStep(1)
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -1 } }))
+
+                const t1 = setTimeout(() => setReevalStep(2), 2000)
+                const t2 = setTimeout(() => setReevalStep(3), 4500)
 
                 try {
                     const result = await reevaluateAttempt(id)
+                    clearTimeout(t1)
+                    clearTimeout(t2)
                     if (result.success) {
                         notifySuccess("Evaluation Complete", "Your report has been updated with the latest AI feedback.", "View Report")
                         router.refresh()
@@ -99,6 +107,7 @@ export default function ReportsPage() {
                     notifyError("System Error", "Please try again later", "Close")
                 } finally {
                     setReevaluatingId(null)
+                    setReevalStep(0)
                 }
             },
             "Cancel"
@@ -234,6 +243,7 @@ export default function ReportsPage() {
                                                 attempt={latestAttempt}
                                                 onReevaluate={handleReevaluate}
                                                 reevaluatingId={reevaluatingId}
+                                                reevalStep={reevalStep}
                                             />
                                         </div>
                                     )}
@@ -252,6 +262,7 @@ export default function ReportsPage() {
                                                         attempt={attempt}
                                                         onReevaluate={handleReevaluate}
                                                         reevaluatingId={reevaluatingId}
+                                                        reevalStep={reevalStep}
                                                     />
                                                 ))}
                                             </div>
@@ -403,13 +414,16 @@ function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
 }
 
 /* Component A: The "Featured" Card */
+const REEVAL_STEP_LABELS = ["", "Submitting...", "Analyzing...", "Scoring..."]
+
 interface ReportComponentProps {
     attempt: Attempt;
     onReevaluate: (id: string) => void;
     reevaluatingId: string | null;
+    reevalStep: number;
 }
 
-function RecentReportCard({ attempt, onReevaluate, reevaluatingId }: ReportComponentProps) {
+function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
     const dateStr = new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const isWriting = attempt.exercises?.type?.startsWith('writing');
@@ -462,7 +476,12 @@ function RecentReportCard({ attempt, onReevaluate, reevaluatingId }: ReportCompo
                             disabled={reevaluatingId === attempt.id}
                             className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-14 rounded-2xl shadow-xl shadow-primary/20"
                         >
-                            {reevaluatingId === attempt.id ? "Analyzing..." : "Get AI Feedback"}
+                            {reevaluatingId === attempt.id ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    {REEVAL_STEP_LABELS[reevalStep] || "Analyzing..."}
+                                </span>
+                            ) : "Get AI Feedback"}
                         </Button>
                     ) : (
                         <Link href={`/dashboard/reports/${attempt.id}`}>
@@ -478,7 +497,7 @@ function RecentReportCard({ attempt, onReevaluate, reevaluatingId }: ReportCompo
 }
 
 /* Component B: The "History Area" Row */
-function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId }: ReportComponentProps) {
+function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
     const isWriting = attempt.exercises?.type?.startsWith('writing');
 
@@ -529,7 +548,9 @@ function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId }: ReportCo
                         disabled={reevaluatingId === attempt.id}
                         className="h-8 rounded-lg font-black uppercase tracking-widest text-[8px] bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 shadow-none"
                     >
-                        {reevaluatingId === attempt.id ? "..." : "Unlock"}
+                        {reevaluatingId === attempt.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : "Unlock"}
                     </Button>
                 ) : (
                     <Link href={`/dashboard/reports/${attempt.id}`}>
