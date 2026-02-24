@@ -182,10 +182,6 @@ export default function BulkGeneratePage() {
 
     return (
         <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
-
-            {/* Full-screen overlay while running */}
-            {phase === "running" && <ProcessingCard items={items} count={count} />}
-
             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
                 {/* Header */}
@@ -200,6 +196,9 @@ export default function BulkGeneratePage() {
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">AI-powered exercise factory</p>
                     </div>
                 </div>
+
+                {/* ── RUNNING ── */}
+                {phase === "running" && <ProcessingCard items={items} count={count} />}
 
                 {/* ── FORM ── */}
                 {(phase === "form") && (
