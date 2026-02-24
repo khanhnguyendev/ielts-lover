@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ChevronRight, BarChart2, TrendingUp, PieChart, Table, Map, GitBranch, LayoutDashboard, type LucideIcon } from "lucide-react"
+import { ChevronRight, BarChart2, TrendingUp, PieChart, Table, Map, GitBranch, LayoutDashboard, Calendar, Clock, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Maps chart type → { icon, colors } for visual distinction
@@ -81,111 +81,107 @@ export function ExerciseCard({
 
     return (
         <Link href={`/dashboard/writing/${id}`} className="group block">
-            {/* Mobile: simple flex row */}
-            <div className="sm:hidden bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 flex items-center gap-3">
-                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", effectiveColor)}>
-                    <EffectiveIcon size={16} />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-slate-900 truncate group-hover:text-primary transition-colors">{title}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        {isRecommended && <span className="text-[8px] font-black uppercase tracking-widest bg-amber-500 text-white px-1.5 py-0.5 rounded-full">★ Rec</span>}
-                        {attempts > 0
-                            ? <span className="text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">{attempts}×</span>
-                            : <span className="text-[8px] font-black uppercase tracking-widest bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full">New</span>
-                        }
-                    </div>
-                </div>
-                <ChevronRight size={14} className="text-slate-400 group-hover:text-primary transition-colors shrink-0" />
-            </div>
+            <div className="relative bg-white border border-slate-100 rounded-[2rem] p-6 transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-200">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
 
-            {/* Desktop: grid-aligned row — must match header grid-cols-[2.5rem_1fr_9rem_9rem_6.5rem_2.5rem] */}
-            <div className="hidden sm:grid grid-cols-[2.5rem_1fr_9rem_9rem_6.5rem_2.5rem] items-center gap-4 bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm hover:shadow-md hover:border-primary/20 hover:bg-slate-50/30 transition-all duration-300">
-
-                {/* Col 1: Icon */}
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110", effectiveColor)}>
-                    <EffectiveIcon size={18} />
-                </div>
-
-                {/* Col 2: Title + attempts badge */}
-                <div className="min-w-0 flex items-center gap-2">
-                    <p className="text-sm font-black text-slate-900 truncate group-hover:text-primary transition-colors leading-snug">
-                        {title}
-                    </p>
-                    {attempts > 0 ? (
-                        <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 border border-emerald-200">
-                            {attempts}×
-                        </span>
-                    ) : (
-                        <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-slate-100 text-slate-400 border border-slate-200">
-                            New
-                        </span>
-                    )}
-                    {isRecommended && (
-                        <span className="shrink-0 inline-block text-[8px] font-black uppercase tracking-widest bg-amber-500 text-white px-2 py-0.5 rounded-full">
-                            ★
-                        </span>
-                    )}
-                </div>
-
-                {/* Col 3: Type */}
-                <div className="flex flex-col items-center gap-1">
-                    {subtitle && (
-                        <span className={cn(
-                            "inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border whitespace-nowrap",
-                            color.includes("blue")
-                                ? "bg-blue-50 text-blue-700 border-blue-100"
-                                : color.includes("indigo")
-                                    ? "bg-indigo-50 text-indigo-700 border-indigo-100"
-                                    : "bg-purple-50 text-purple-700 border-purple-100"
+                    {/* Left: Icon & Description */}
+                    <div className="flex items-center gap-5 min-w-0 flex-1">
+                        <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm border",
+                            effectiveColor.includes("bg-") ? effectiveColor.replace("bg-", "border-").replace("50", "100") : "border-slate-100",
+                            effectiveColor
                         )}>
-                            {subtitle}
-                        </span>
-                    )}
-                    {chartType && CHART_TYPE_LABELS[chartType] && (
-                        <span className="text-[9px] font-bold text-slate-400 tracking-wide whitespace-nowrap">
-                            {CHART_TYPE_LABELS[chartType]}
-                        </span>
-                    )}
-                </div>
+                            <EffectiveIcon size={20} />
+                        </div>
 
-                {/* Col 4: Created By */}
-                <div className="flex flex-col items-center">
-                    {creatorName ? (
-                        <>
-                            <p className="text-[11px] font-bold text-slate-700 truncate max-w-full text-center">{creatorName}</p>
-                            <span className={cn(
-                                "mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
-                                creatorRole === "admin"
-                                    ? "bg-amber-100 text-amber-700 border-amber-200"
-                                    : creatorRole === "teacher"
-                                        ? "bg-indigo-100 text-indigo-700 border-indigo-200"
-                                        : "bg-slate-100 text-slate-600 border-slate-200"
-                            )}>
-                                {creatorRole || "staff"}
-                            </span>
-                        </>
-                    ) : (
-                        <span className="text-[10px] font-bold text-slate-300">—</span>
-                    )}
-                </div>
+                        <div className="space-y-2 min-w-0">
+                            {/* Tags Row */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {/* Subtitle (Type) Tag */}
+                                {subtitle && (
+                                    <div className={cn(
+                                        "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border shadow-sm transition-all duration-500 group-hover:shadow-md whitespace-nowrap",
+                                        color.includes("blue") ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                            color.includes("indigo") ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
+                                                "bg-purple-50 text-purple-700 border-purple-100"
+                                    )}>
+                                        {subtitle}
+                                    </div>
+                                )}
 
-                {/* Col 5: Created At */}
-                <div className="flex flex-col items-center">
-                    {formattedDate ? (
-                        <>
-                            <p className="text-[11px] font-bold text-slate-500 whitespace-nowrap">{formattedDate}</p>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{formattedTime}</p>
-                        </>
-                    ) : (
-                        <span className="text-[10px] font-bold text-slate-300">—</span>
-                    )}
-                </div>
+                                {/* Chart Type Tag */}
+                                {chartType && CHART_TYPE_LABELS[chartType] && (
+                                    <div className="text-[9px] font-bold text-slate-500 tracking-wide bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md whitespace-nowrap">
+                                        {CHART_TYPE_LABELS[chartType]}
+                                    </div>
+                                )}
 
-                {/* Col 6: Arrow + sessions */}
-                <div className="flex items-center justify-end">
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-300">
-                        <ChevronRight size={14} />
+                                {/* Date Time Info */}
+                                {formattedDate && (
+                                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                        <Calendar size={12} className="opacity-60" />
+                                        {formattedDate}
+                                        {formattedTime && (
+                                            <>
+                                                <div className="w-1 h-1 bg-slate-200 rounded-full mx-0.5" />
+                                                <Clock size={12} className="opacity-60" />
+                                                {formattedTime}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Title */}
+                            <h4 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                                {title}
+                            </h4>
+
+                            {/* Creator Info below title */}
+                            <div className="flex items-center gap-2 pt-0.5">
+                                {creatorName ? (
+                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                                        <span>By <span className="font-bold text-slate-700">{creatorName}</span></span>
+                                        <span className={cn(
+                                            "inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border",
+                                            creatorRole === "admin" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                                creatorRole === "teacher" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                                                    "bg-slate-50 text-slate-500 border-slate-200"
+                                        )}>
+                                            {creatorRole || "staff"}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="text-[10px] font-medium text-slate-400 italic">System Generated</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Attempts & Action */}
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-slate-50 shrink-0">
+                        {/* Status Badges */}
+                        <div className="flex items-center sm:flex-col sm:items-end gap-2">
+                            {isRecommended && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-sm shadow-amber-500/20">
+                                    ★ Recommended
+                                </span>
+                            )}
+                            {attempts > 0 ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                                    {attempts}× Practice
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">
+                                    New Task
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Action Link equivalent */}
+                        <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors group-hover:translate-x-1 duration-300">
+                            Start Writing <ChevronRight size={14} />
+                        </div>
                     </div>
                 </div>
             </div>

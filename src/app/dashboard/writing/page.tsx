@@ -249,9 +249,9 @@ export default function WritingHubPage() {
                 {/* 2. Content Area */}
                 <div className="bg-white rounded-[2.5rem] p-4 lg:p-10 shadow-xl shadow-slate-200/40 border border-slate-100 min-h-[600px]">
                     <div className="space-y-8">
-                        {/* Secondary Filter: Chart Types */}
-                        {(activeCategory === "Academic Task 1" || activeCategory === "General Task 1") && availableChartTypes.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-4 px-2">
+                        {/* Secondary Filter & Count */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+                            {(activeCategory === "Academic Task 1" || activeCategory === "General Task 1") && availableChartTypes.length > 0 ? (
                                 <FilterGroup
                                     label="Chart Type"
                                     options={[
@@ -261,8 +261,13 @@ export default function WritingHubPage() {
                                     value={chartTypeFilter}
                                     onChange={(val) => setChartTypeFilter(val || "all")}
                                 />
+                            ) : (
+                                <div />
+                            )}
+                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                                {filteredExercises.length} Total Exercises
                             </div>
-                        )}
+                        </div>
 
                         {isLoading ? (
                             <div className="py-32 flex flex-col items-center justify-center gap-4">
@@ -270,36 +275,34 @@ export default function WritingHubPage() {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 animate-pulse">Syncing Exercises...</p>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-2">
-                                {/* Column Headers — only on sm+ */}
-                                <div className="hidden sm:grid grid-cols-[2.5rem_1fr_9rem_9rem_6.5rem_2.5rem] items-center gap-4 px-5 pb-1">
-                                    <div />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Exercise</p>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Type</p>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Created By</p>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Created At</p>
-                                    <div />
+                            <div className="flex flex-col gap-4">
+                                {/* Add Custom Row */}
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both" style={{ animationDelay: '0ms' }}>
+                                    <button
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="group w-full bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:bg-indigo-50/50 hover:border-indigo-300/50 transition-all duration-300"
+                                    >
+                                        <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shrink-0">
+                                            <Plus size={20} />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="text-base font-black text-slate-900 group-hover:text-indigo-700 transition-colors">Custom Task</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Add your own prompt or image</p>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300 shrink-0 mt-4 sm:mt-0">
+                                            <Plus size={14} />
+                                        </div>
+                                    </button>
                                 </div>
 
-                                {/* Add Custom Row */}
-                                <button
-                                    onClick={() => setIsAddModalOpen(true)}
-                                    className="group w-full bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl px-5 py-4 flex items-center gap-4 hover:bg-indigo-50/50 hover:border-indigo-300/50 transition-all duration-300"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shrink-0">
-                                        <Plus size={18} />
+                                {filteredExercises.map((ex, idx) => (
+                                    <div
+                                        key={ex.id}
+                                        className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                                        style={{ animationDelay: `${(idx + 1) * 100}ms` }}
+                                    >
+                                        <ExerciseCard {...ex} />
                                     </div>
-                                    <div className="flex-1 text-left">
-                                        <p className="text-sm font-black text-slate-900">Custom Task</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Add your own prompt</p>
-                                    </div>
-                                    <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300">
-                                        <Plus size={14} />
-                                    </div>
-                                </button>
-
-                                {filteredExercises.map((ex) => (
-                                    <ExerciseCard key={ex.id} {...ex} />
                                 ))}
                             </div>
                         )}
