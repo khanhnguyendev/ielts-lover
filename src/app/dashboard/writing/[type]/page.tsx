@@ -68,6 +68,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const { notifySuccess, notifyWarning, notifyError } = useNotification()
     const router = useRouter()
 
+    const DRAFT_KEY = `ielts_guest_draft_${exerciseId}`
     const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
 
     React.useEffect(() => {
@@ -104,9 +105,15 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                     const attempt = await startExerciseAttempt(exerciseId)
                     setCurrentAttempt(attempt)
 
-                    // Resume content if any
+                    // Restore content: prefer server-saved content, then guest draft from localStorage
                     if (attempt.content) {
                         setText(attempt.content)
+                    } else {
+                        const guestDraft = localStorage.getItem(DRAFT_KEY)
+                        if (guestDraft) {
+                            setText(guestDraft)
+                            localStorage.removeItem(DRAFT_KEY)
+                        }
                     }
 
                     // Adjust timer based on type if needed
@@ -148,8 +155,9 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const handleFinish = async () => {
         if (!text.trim()) return;
 
-        // Guests must sign in before submitting
+        // Guests must sign in before submitting — save their draft first
         if (isGuest || !currentAttempt) {
+            if (text.trim()) localStorage.setItem(DRAFT_KEY, text)
             setShowAuthGate(true)
             return
         }
@@ -538,6 +546,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                 variant="ghost"
                                 onClick={async () => {
                                     if (isGuest || !currentAttempt) {
+                                        if (text.trim()) localStorage.setItem(DRAFT_KEY, text)
                                         setShowAuthGate(true)
                                         return
                                     }
