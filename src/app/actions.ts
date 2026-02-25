@@ -402,12 +402,15 @@ export async function updateUserProfile(data: {
     return { success: true };
 }
 
-export const signInWithGoogle = traceAction("signInWithGoogle", async () => {
+export const signInWithGoogle = traceAction("signInWithGoogle", async (returnTo?: string) => {
     const supabase = await createServerSupabaseClient();
+    const callbackUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`);
+    if (returnTo) callbackUrl.searchParams.set('next', returnTo);
+
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+            redirectTo: callbackUrl.toString(),
             queryParams: {
                 access_type: 'offline',
                 prompt: 'select_account',
@@ -418,6 +421,7 @@ export const signInWithGoogle = traceAction("signInWithGoogle", async () => {
     if (error) throw error;
     if (data.url) return redirect(data.url);
 });
+
 
 export async function signOut() {
     const supabase = await createServerSupabaseClient();

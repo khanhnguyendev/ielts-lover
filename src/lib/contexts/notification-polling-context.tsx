@@ -28,7 +28,7 @@ export function NotificationPollingProvider({
     userId,
     children,
 }: {
-    userId: string
+    userId: string | null
     children: React.ReactNode
 }) {
     const [unreadCount, setUnreadCount] = React.useState(0)
@@ -38,6 +38,8 @@ export function NotificationPollingProvider({
     const prevCountRef = React.useRef(0)
 
     const refreshUnreadCount = React.useCallback(() => {
+        if (!userId) return
+
         getUnreadCount().then((count) => {
             setUnreadCount(prev => {
                 if (count > prev && prev === prevCountRef.current) {

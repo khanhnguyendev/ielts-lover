@@ -34,6 +34,7 @@ import { BackButton } from "@/components/global/back-button"
 import { FEATURE_KEYS } from "@/lib/constants"
 import { extractBillingError } from "@/lib/billing-errors"
 import { useTitle } from "@/lib/contexts/title-context"
+import { AuthGate } from "@/components/global/auth-gate"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
@@ -50,6 +51,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         return () => setTitle(null)
     }, [exercise, setTitle])
     const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
+    const [isGuest, setIsGuest] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [text, setText] = React.useState("")
@@ -71,7 +73,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         const init = async () => {
             setIsLoading(true)
             try {
-                // 1. Fetch Exercise
+                // 1. Fetch Exercise (no auth required — public read)
                 const data = await getExerciseById(exerciseId)
                 if (!data) {
                     setExercise(null)
@@ -79,18 +81,21 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 }
                 setExercise(data)
 
-                // 2. Fetch Pricing
+                // 2. Check auth — guests see the question but can't start an attempt
+                const userProfile = await getCurrentUser();
+                if (!userProfile) {
+                    setIsGuest(true)
+                    return
+                }
+
+                setTargetScore(userProfile.target_score || 9.0);
+
+                // 3. Fetch Pricing
                 const featureKey = data.type.startsWith("writing")
                     ? FEATURE_KEYS.WRITING_EVALUATION
                     : FEATURE_KEYS.SPEAKING_EVALUATION;
                 const price = await getFeaturePrice(featureKey);
                 setEvalCost(price);
-
-                // 3. Fetch User for Target Score
-                const userProfile = await getCurrentUser();
-                if (userProfile) {
-                    setTargetScore(userProfile.target_score || 9.0);
-                }
 
                 // 4. Start or Resume Attempt
                 try {
@@ -363,6 +368,14 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
             {/* 2. Right Side: Writing Panel */}
             <div className="flex-1 flex flex-col bg-white relative">
+                {/* AuthGate overlay for guests */}
+                {isGuest && (
+                    <AuthGate
+                        title="Sign in to start practicing"
+                        description="Create a free account to write your essay and get detailed AI feedback on your IELTS band score."
+                        overlay
+                    />
+                )}
                 {/* Header: Immersive Status Bar */}
                 <div className="h-20 border-b flex items-center justify-between px-8 lg:px-12 bg-white/80 backdrop-blur-md z-40 sticky top-0">
                     <div className="flex items-center gap-10">
