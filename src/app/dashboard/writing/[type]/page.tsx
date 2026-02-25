@@ -65,6 +65,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const [showFeedback, setShowFeedback] = React.useState(false)
     const [feedbackData, setFeedbackData] = React.useState<{ score?: number, feedback?: string, attemptId?: string }>({})
     const [isLightboxOpen, setIsLightboxOpen] = React.useState(false)
+    const [currentUserCredits, setCurrentUserCredits] = React.useState<number>(0)
     const { notifySuccess, notifyWarning, notifyError } = useNotification()
     const router = useRouter()
 
@@ -92,6 +93,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 }
 
                 setTargetScore(userProfile.target_score || 9.0);
+                setCurrentUserCredits(userProfile.credits_balance || 0);
 
                 // 3. Fetch Pricing
                 const featureKey = data.type.startsWith("writing")
@@ -159,6 +161,17 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         if (isGuest || !currentAttempt) {
             if (text.trim()) localStorage.setItem(DRAFT_KEY, text)
             setShowAuthGate(true)
+            return
+        }
+
+        // Pre-check credits: stop immediately if not enough
+        if (currentUserCredits < evalCost) {
+            notifyWarning(
+                "Insufficient Credits",
+                `This evaluation requires ${evalCost} StarCredit${evalCost > 1 ? 's' : ''}, but you only have ${currentUserCredits}. Please get more credits to evaluate this work.`,
+                "View Packages",
+                () => router.push("/dashboard/pricing")
+            )
             return
         }
 
