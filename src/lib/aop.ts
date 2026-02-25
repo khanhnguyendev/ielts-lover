@@ -1,4 +1,5 @@
 import { Logger, withTrace } from "./logger";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 /**
  * AOP utility to automatically wrap service methods with tracing and error logging.
@@ -22,6 +23,8 @@ export function traceService<T extends object>(instance: T, serviceName: string)
                             const result = await originalMethod.apply(target, args);
                             return result;
                         } catch (error) {
+                            // Re-throw Next.js redirect signals without logging them as errors
+                            if (isRedirectError(error)) throw error;
                             // Unified error logging with metadata
                             logger.error(`Method ${propKey} failed`, { error, args });
                             throw error;
@@ -45,6 +48,8 @@ export function traceAction<T extends any[], R>(name: string, action: (...args: 
             try {
                 return await action(...args);
             } catch (error) {
+                // Re-throw Next.js redirect signals without logging them as errors
+                if (isRedirectError(error)) throw error;
                 logger.error(`Action ${name} failed`, { error });
                 throw error;
             }
