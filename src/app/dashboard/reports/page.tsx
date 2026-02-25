@@ -25,6 +25,7 @@ import { getUserAttemptsPaginated, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
+import { LoadMoreButton } from "@/components/global/load-more-button";
 import { getBandScoreConfig } from "@/lib/score-utils";
 import { ATTEMPT_STATES } from "@/lib/constants";
 import { extractBillingError } from "@/lib/billing-errors";
@@ -294,20 +295,11 @@ export default function ReportsPage() {
 
                                             {/* Load More */}
                                             {hasMore && (
-                                                <div className="flex justify-center pt-4">
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={handleLoadMore}
-                                                        disabled={isLoadingMore}
-                                                        className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 border-slate-100 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
-                                                    >
-                                                        {isLoadingMore ? (
-                                                            <PulseLoader size="sm" color="primary" />
-                                                        ) : (
-                                                            `Load More (${totalAttempts - attempts.length} remaining)`
-                                                        )}
-                                                    </Button>
-                                                </div>
+                                                <LoadMoreButton
+                                                    onClick={handleLoadMore}
+                                                    isLoading={isLoadingMore}
+                                                    remaining={totalAttempts - attempts.length}
+                                                />
                                             )}
                                         </div>
                                     )}

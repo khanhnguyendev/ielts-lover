@@ -27,8 +27,7 @@ import {
     ChevronRight,
 } from "lucide-react"
 import { CreditBadge } from "@/components/ui/credit-badge"
-import { Button } from "@/components/ui/button"
-import { PulseLoader } from "@/components/global/pulse-loader"
+import { LoadMoreButton } from "@/components/global/load-more-button"
 import Link from "next/link"
 import { getUserTransactionsPaginated } from "@/app/actions"
 
@@ -280,20 +279,11 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
 
             {/* Load More */}
             {hasMore && (
-                <div className="flex justify-center pt-4">
-                    <Button
-                        variant="outline"
-                        onClick={handleLoadMore}
-                        disabled={isLoadingMore}
-                        className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 border-slate-100 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
-                    >
-                        {isLoadingMore ? (
-                            <PulseLoader size="sm" color="primary" />
-                        ) : (
-                            `Load More (${totalCount - transactions.length} remaining)`
-                        )}
-                    </Button>
-                </div>
+                <LoadMoreButton
+                    onClick={handleLoadMore}
+                    isLoading={isLoadingMore}
+                    remaining={totalCount - transactions.length}
+                />
             )}
         </div>
     )

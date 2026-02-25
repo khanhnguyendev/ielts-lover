@@ -24,6 +24,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { LoadMoreButton } from "@/components/global/load-more-button"
 
 
 import { getExercisesPaginated, getUserAttempts, getFeaturePrice } from "@/app/actions"
@@ -334,20 +335,11 @@ export default function WritingHubPage() {
 
                                 {/* Load More */}
                                 {hasMore && (
-                                    <div className="flex justify-center pt-4">
-                                        <Button
-                                            variant="outline"
-                                            onClick={handleLoadMore}
-                                            disabled={isLoadingMore}
-                                            className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 border-slate-100 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
-                                        >
-                                            {isLoadingMore ? (
-                                                <PulseLoader size="sm" color="primary" />
-                                            ) : (
-                                                `Load More (${totalExercises - exercises.length} remaining)`
-                                            )}
-                                        </Button>
-                                    </div>
+                                    <LoadMoreButton
+                                        onClick={handleLoadMore}
+                                        isLoading={isLoadingMore}
+                                        remaining={totalExercises - exercises.length}
+                                    />
                                 )}
                             </div>
                         )}
