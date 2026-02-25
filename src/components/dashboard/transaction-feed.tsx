@@ -7,7 +7,6 @@ import {
     Calendar,
     Clock,
     Sparkles,
-    ArrowRight,
     ExternalLink,
     User as UserIcon,
     ArrowUpRight,
@@ -215,8 +214,6 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
     const [totalCount, setTotalCount] = React.useState(totalTransactions)
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [filter, setFilter] = React.useState<string | null>(null)
-    const [currentPage, setCurrentPage] = React.useState(1)
-    const ITEMS_PER_PAGE = 10
 
     const hasMore = transactions.length < totalCount
 
@@ -239,12 +236,6 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
         })
     }, [transactions, filter])
 
-    const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE)
-    const paginated = filteredTransactions.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
-
     return (
         <div className="space-y-8">
             {/* Filter Section */}
@@ -257,7 +248,7 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                         { value: "spent", label: "Spent" }
                     ]}
                     value={filter}
-                    onChange={(val) => { setFilter(val); setCurrentPage(1); }}
+                    onChange={(val) => { setFilter(val); }}
                 />
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
                     {transactions.length} of {totalCount} Records
@@ -265,7 +256,7 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
             </div>
 
             {/* List */}
-            {paginated.length === 0 ? (
+            {filteredTransactions.length === 0 ? (
                 <div className="text-center py-24 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
                         <History size={32} className="text-slate-300" />
@@ -275,7 +266,7 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
-                    {paginated.map((t, i) => (
+                    {filteredTransactions.map((t, i) => (
                         <div
                             key={t.id}
                             className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
@@ -284,31 +275,6 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                             <TransactionCard t={t} />
                         </div>
                     ))}
-                </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <button
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-primary hover:border-primary/20 disabled:opacity-30 transition-all shadow-sm active:scale-95"
-                        >
-                            <ArrowRight size={16} className="rotate-180" />
-                        </button>
-                        <button
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-primary hover:border-primary/20 disabled:opacity-30 transition-all shadow-sm active:scale-95"
-                        >
-                            <ArrowRight size={16} />
-                        </button>
-                    </div>
                 </div>
             )}
 
