@@ -391,6 +391,8 @@ export class AIService {
         }
         if (chartType && chartType !== "auto") {
             fullPrompt += `REQUIRED CHART TYPE: ${chartType} (Ensure the JSON "type" field matches this exactly)\n`;
+        } else {
+            fullPrompt += `REQUIRED CHART TYPE: You must RANDOMLY choose a variety of chart types ("bar", "line", "pie", "doughnut") to ensure diversity. DO NOT always choose "bar".\n`;
         }
         fullPrompt += `
         Required JSON Structure:
