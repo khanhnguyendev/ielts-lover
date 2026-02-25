@@ -19,7 +19,8 @@ import {
     FileText,
     Clock,
     Layout,
-    HelpCircle
+    HelpCircle,
+    Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -32,15 +33,49 @@ import { RewriterEvaluation } from "@/components/reports/rewriter-evaluation"
 import { WritingFeedback } from "@/components/dashboard/writing-feedback"
 import { ScoreOverview } from "@/components/reports/score-overview"
 import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
-import { getAttemptWithExercise, getCurrentUser } from "@/app/actions"
+import { getAttemptWithExercise, getCurrentUser, reevaluateAttempt } from "@/app/actions"
 import { Attempt, Exercise } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
 import { useTitle } from "@/lib/contexts/title-context"
+import { useNotification } from "@/lib/contexts/notification-context"
+import { extractBillingError } from "@/lib/billing-errors"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
     const { setTitle } = useTitle()
+    const { notifySuccess, notifyError, notifyWarning } = useNotification()
+    const [isEvaluating, setIsEvaluating] = React.useState(false)
+
+    const handleEvaluate = async () => {
+        if (!realData) return;
+        notifyWarning(
+            "Confirm Evaluation",
+            "Are you sure you want to spend 10 StarCredits to evaluate this attempt with AI?",
+            "Confirm",
+            async () => {
+                setIsEvaluating(true)
+                try {
+                    const result = await reevaluateAttempt(realData.id)
+                    if (result.success) {
+                        notifySuccess("Analysis Complete", "Your score is ready.", "View")
+                        const updatedData = await getAttemptWithExercise(id)
+                        setRealData(updatedData as any)
+                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -10 } }))
+                    } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
+                        notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough StarCredits.", "Close")
+                    } else {
+                        throw new Error(('message' in result ? result.message : "Evaluation failed"))
+                    }
+                } catch (error) {
+                    console.error(error)
+                    notifyError("Evaluation Failed", "Could not process your request.", "Close")
+                } finally {
+                    setIsEvaluating(false)
+                }
+            }
+        )
+    }
 
     React.useEffect(() => {
         if (realData?.exercise) {
@@ -238,69 +273,70 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
                     {/* Score & Evaluation Results */}
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                        {(() => {
-                            const score = displayData?.overall_score || displayData?.bandScore || 1.0;
-                            return (
-                                <ScoreOverview
-                                    score={score}
-                                    showChatButton={!isSample}
-                                    onChatClick={() => setIsCatbotOpen(true)}
-                                    className="bg-white rounded-[2rem] border border-slate-200 shadow-sm"
-                                />
-                            );
-                        })()}
-
                         {(isSample || (realData && realData.state === ATTEMPT_STATES.EVALUATED)) ? (
-                            <div className="space-y-12">
-                                {(displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing'))) ? (
-                                    displayData.detailed_scores ? (
-                                        <WritingFeedback
-                                            result={displayData as any}
-                                            type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
-                                            hideScore={true}
-                                            attemptId={isSample ? "sample-" + id : realData?.id}
-                                            originalText={isSample ? displayData.originalText : realData?.content}
-                                            isUnlocked={isSample ? true : realData?.is_correction_unlocked}
-                                            initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
-                                            targetScore={targetScore}
-                                            isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
-                                            initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
+                            <>
+                                {(() => {
+                                    const score = displayData?.overall_score || displayData?.bandScore || 1.0;
+                                    return (
+                                        <ScoreOverview
+                                            score={score}
+                                            showChatButton={!isSample}
+                                            onChatClick={() => setIsCatbotOpen(true)}
+                                            className="bg-white rounded-[2rem] border border-slate-200 shadow-sm"
                                         />
+                                    );
+                                })()}
+                                <div className="space-y-12">
+                                    {(displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing'))) ? (
+                                        displayData.detailed_scores ? (
+                                            <WritingFeedback
+                                                result={displayData as any}
+                                                type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
+                                                hideScore={true}
+                                                attemptId={isSample ? "sample-" + id : realData?.id}
+                                                originalText={isSample ? displayData.originalText : realData?.content}
+                                                isUnlocked={isSample ? true : realData?.is_correction_unlocked}
+                                                initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
+                                                targetScore={targetScore}
+                                                isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
+                                                initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
+                                            />
+                                        ) : (
+                                            <WritingEvaluation data={displayData as any} />
+                                        )
+                                    ) : displayData.type === "Speaking" ? (
+                                        <SpeakingEvaluation data={displayData as any} />
                                     ) : (
-                                        <WritingEvaluation data={displayData as any} />
-                                    )
-                                ) : displayData.type === "Speaking" ? (
-                                    <SpeakingEvaluation data={displayData as any} />
-                                ) : (
-                                    <RewriterEvaluation data={displayData as any} />
-                                )}
-                            </div>
+                                        <RewriterEvaluation data={displayData as any} />
+                                    )}
+                                </div>
+                            </>
                         ) : (
-                            /* Premium Unlock Teaser */
+                            /* Pending Evaluation Teaser */
                             <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-primary rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000" />
+                                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-primary rounded-[3rem] blur opacity-20 transition duration-1000" />
                                 <div className="relative bg-white rounded-[2.5rem] border border-slate-200 p-12 text-center space-y-8 shadow-2xl shadow-slate-200/50 overflow-hidden">
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 
                                     <div className="flex flex-col items-center justify-center p-8 space-y-6 z-10 relative">
-                                        <div className="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-500 relative">
+                                        <div className="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-transform duration-500 relative">
                                             <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
                                             <Lock className="h-10 w-10 text-white relative z-10" />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <h3 className="text-3xl font-black font-outfit text-slate-900">Unlock Mastery Detail</h3>
+                                            <h3 className="text-3xl font-black font-outfit text-slate-900">Analysis Pending</h3>
                                             <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">
                                                 Your response has been saved. Activate AI analysis to receive precision scoring and personalized improvement tips.
                                             </p>
                                         </div>
 
-                                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md pt-4">
-                                            <Button className="flex-1 bg-primary hover:bg-primary/90 text-white h-16 rounded-[2rem] font-black text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all">
-                                                Upgrade to Pro Plan
-                                            </Button>
-                                            <Button variant="white" className="flex-1 border-slate-200 h-16 rounded-[2rem] font-bold text-slate-600 hover:bg-slate-50">
-                                                One-time Evaluation
+                                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md pt-4 justify-center">
+                                            <Button
+                                                onClick={handleEvaluate}
+                                                disabled={isEvaluating}
+                                                className="w-full bg-primary hover:bg-primary/90 text-white h-16 rounded-[2rem] font-black text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all">
+                                                {isEvaluating ? <Loader2 className="h-6 w-6 animate-spin" /> : "Evaluate with AI (10 Credits)"}
                                             </Button>
                                         </div>
                                     </div>
