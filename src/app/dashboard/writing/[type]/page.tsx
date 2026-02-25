@@ -583,17 +583,40 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                                 Save as Draft
                             </Button>
 
-                            <Button
-                                onClick={handleFinish}
-                                disabled={isSubmitting || !text.trim()}
-                                className="group relative h-14 pl-10 pr-8 rounded-[2rem] bg-slate-900 hover:bg-primary text-white font-black text-sm shadow-2xl shadow-slate-200 transition-all duration-500 hover:translate-y-[-2px] hover:shadow-primary/30"
-                            >
-                                <span className="relative z-10 flex items-center gap-3">
-                                    {isSubmitting ? "Processing..." : "Finish Analysis"}
-                                    {!isSubmitting && <Sparkles className="h-5 w-5 fill-white group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500" />}
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
-                            </Button>
+                            {currentUserCredits < evalCost ? (
+                                <Button
+                                    onClick={() => {
+                                        if (text.trim()) localStorage.setItem(DRAFT_KEY, text)
+                                        router.push("/dashboard/credits")
+                                    }}
+                                    className="group relative h-14 pl-8 pr-6 rounded-[2rem] bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-xl shadow-amber-500/20 transition-all duration-500 hover:translate-y-[-2px]"
+                                >
+                                    <span className="relative z-10 flex items-center gap-3">
+                                        Get Credits to Finish
+                                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20">
+                                            <span className="text-xs">⭐</span>
+                                        </div>
+                                    </span>
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={handleFinish}
+                                    disabled={isSubmitting || !text.trim()}
+                                    className="group relative h-14 pl-8 pr-6 rounded-[2rem] bg-slate-900 hover:bg-primary text-white font-black text-sm shadow-2xl shadow-slate-200 transition-all duration-500 hover:translate-y-[-2px] hover:shadow-primary/30"
+                                >
+                                    <span className="relative z-10 flex items-center gap-4">
+                                        {isSubmitting ? "Processing..." : "Finish Analysis"}
+                                        {!isSubmitting && (
+                                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/5">
+                                                <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold">Cost</span>
+                                                <span className="text-xs font-mono font-black">{evalCost}</span>
+                                                <span className="text-xs">⭐</span>
+                                            </div>
+                                        )}
+                                    </span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
