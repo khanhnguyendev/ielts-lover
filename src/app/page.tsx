@@ -72,7 +72,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-              <Link href="/signup">
+              <Link href="/dashboard/writing">
                 <Button variant="cta">
                   Start Practice Now
                   <ArrowRight className="ml-3 h-6 w-6" />
