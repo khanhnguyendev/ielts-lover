@@ -46,34 +46,42 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     const { setTitle } = useTitle()
     const { notifySuccess, notifyError, notifyWarning } = useNotification()
     const [isEvaluating, setIsEvaluating] = React.useState(false)
+    const [pendingEvaluate, setPendingEvaluate] = React.useState(false)
 
-    const handleEvaluate = async () => {
-        if (!realData) return;
+    // Run the actual async evaluation when user confirms
+    React.useEffect(() => {
+        if (!pendingEvaluate || !realData) return
+        setPendingEvaluate(false)
+        setIsEvaluating(true);
+        (async () => {
+            try {
+                const result = await reevaluateAttempt(realData.id)
+                if (result.success) {
+                    const updatedData = await getAttemptWithExercise(realData.id)
+                    setRealData(updatedData as any)
+                    window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -10 } }))
+                    notifySuccess("Analysis Complete", "Your score is ready.", "View")
+                } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
+                    notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough StarCredits.", "Close")
+                } else {
+                    notifyError("Evaluation Failed", ('message' in result && result.message ? result.message : "Evaluation failed"), "Close")
+                }
+            } catch (error) {
+                console.error(error)
+                notifyError("Evaluation Failed", "Could not process your request.", "Close")
+            } finally {
+                setIsEvaluating(false)
+            }
+        })()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pendingEvaluate])
+
+    const handleEvaluate = () => {
         notifyWarning(
             "Confirm Evaluation",
-            "Are you sure you want to spend 10 StarCredits to evaluate this attempt with AI?",
+            "Are you sure you want to spend credits to evaluate this attempt with AI?",
             "Confirm",
-            async () => {
-                setIsEvaluating(true)
-                try {
-                    const result = await reevaluateAttempt(realData.id)
-                    if (result.success) {
-                        notifySuccess("Analysis Complete", "Your score is ready.", "View")
-                        const updatedData = await getAttemptWithExercise(id)
-                        setRealData(updatedData as any)
-                        window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -10 } }))
-                    } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
-                        notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough StarCredits.", "Close")
-                    } else {
-                        throw new Error(('message' in result ? result.message : "Evaluation failed"))
-                    }
-                } catch (error) {
-                    console.error(error)
-                    notifyError("Evaluation Failed", "Could not process your request.", "Close")
-                } finally {
-                    setIsEvaluating(false)
-                }
-            }
+            () => setPendingEvaluate(true)
         )
     }
 
