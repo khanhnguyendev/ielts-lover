@@ -234,10 +234,11 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
             return freshAttempt;
         }
 
-        if (attempt.state !== ATTEMPT_STATES.SUBMITTED) {
-            await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId, attemptId);
-            billed = true;
-        }
+        // Always bill — SUBMITTED from a failed billing attempt is never skipped.
+        // The only legitimate skip is when the attempt is already EVALUATED.
+        await creditService.billUser(user.id, featureKey, attempt.exercise_id, traceId, attemptId);
+        billed = true;
+
         const usage = await attemptService.submitAttempt(attemptId, content);
         const evaluatedAttempt = await attemptService.getAttempt(attemptId);
 
@@ -256,8 +257,14 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     } catch (error) {
         const billingCode = getBillingErrorCode(error);
         if (billingCode) {
-            // If insufficient credits or monthly cap, save work but don't evaluate
-            await attemptService.updateAttempt(attemptId, { content, state: ATTEMPT_STATES.SUBMITTED });
+            // Billing failed — save content but keep state as IN_PROGRESS so the
+            // next submission press will correctly re-attempt billing.
+            // CRITICAL: do NOT advance to SUBMITTED here — that would allow the
+            // billing guard to be bypassed on a retry.
+            await attemptService.updateAttempt(attemptId, {
+                content,
+                state: ATTEMPT_STATES.IN_PROGRESS,
+            });
             return { ...(await attemptService.getAttempt(attemptId)), reason: billingCode };
         }
 
@@ -273,6 +280,7 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
     } finally {
         await release();
     }
+
 });
 
 export const saveAttemptDraft = traceAction("saveAttemptDraft", async (attemptId: string, content: string) => {
