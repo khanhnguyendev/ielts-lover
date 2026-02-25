@@ -327,6 +327,12 @@ export async function getUserAttempts() {
     return attemptRepo.listWritingAttemptsByUserId(user.id);
 }
 
+export async function getMostRecentAttempt() {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    return attemptRepo.getMostRecentAttempt(user.id);
+}
+
 export async function getUserAttemptsPaginated(limit: number, offset: number) {
     const user = await getCurrentUser();
     if (!user) return { data: [], total: 0 };

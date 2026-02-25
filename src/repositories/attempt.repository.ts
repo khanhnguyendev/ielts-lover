@@ -111,6 +111,26 @@ export class AttemptRepository implements IAttemptRepository {
         return data as any[];
     }
 
+    async getMostRecentAttempt(userId: string): Promise<any | null> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from(DB_TABLES.ATTEMPTS)
+            .select(`
+                *,
+                ${DB_TABLES.EXERCISES} (
+                    title,
+                    type
+                )
+            `)
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw new Error(`[AttemptRepository] getMostRecentAttempt failed: ${error.message}`);
+        return data;
+    }
+
     async getTodayCount(): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const today = new Date();

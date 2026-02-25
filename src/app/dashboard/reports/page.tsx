@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-import { getUserAttemptsPaginated, reevaluateAttempt } from "@/app/actions";
+import { getUserAttemptsPaginated, getMostRecentAttempt, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -40,6 +40,7 @@ export default function ReportsPage() {
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const [reevalStep, setReevalStep] = React.useState(0)
+    const [recentAttempt, setRecentAttempt] = React.useState<Attempt | null>(null)
 
     const PAGE_SIZE = 5
 
@@ -53,9 +54,13 @@ export default function ReportsPage() {
     const fetchReports = React.useCallback(async () => {
         setIsLoading(true)
         try {
-            const result = await getUserAttemptsPaginated(PAGE_SIZE, 0)
+            const [result, recent] = await Promise.all([
+                getUserAttemptsPaginated(PAGE_SIZE, 0),
+                getMostRecentAttempt()
+            ])
             setAttempts(result.data as Attempt[])
             setTotalAttempts(result.total)
+            setRecentAttempt(recent as Attempt | null)
         } catch (error) {
             console.error("Failed to fetch reports:", error)
         } finally {
@@ -145,7 +150,7 @@ export default function ReportsPage() {
         )
     }
 
-    const latestAttempt = filteredAttempts[0];
+
     const historicalAttempts = filteredAttempts.slice(1);
 
     // Derived Stats
@@ -197,14 +202,14 @@ export default function ReportsPage() {
                 </div>
 
                 {/* 2. Featured Recent Report */}
-                {latestAttempt && (
+                {recentAttempt && (
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 px-1">
                             <div className="w-6 h-px bg-primary/20" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Your Latest Performance</span>
                         </div>
                         <RecentReportCard
-                            attempt={latestAttempt}
+                            attempt={recentAttempt}
                             onReevaluate={handleReevaluate}
                             reevaluatingId={reevaluatingId}
                             reevalStep={reevalStep}

@@ -28,7 +28,7 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { LoadMoreButton } from "@/components/global/load-more-button"
 
-import { getExercisesPaginated, getUserAttempts, getFeaturePrice, reevaluateAttempt } from "@/app/actions"
+import { getExercisesPaginated, getUserAttempts, getMostRecentAttempt, getFeaturePrice, reevaluateAttempt } from "@/app/actions"
 import { createExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions"
 import { Exercise as DbExercise, ExerciseType, Attempt } from "@/types"
 import { FEATURE_KEYS, ATTEMPT_STATES } from "@/lib/constants"
@@ -110,6 +110,7 @@ export default function WritingHubPage() {
 
     // Attempt tracking
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
+    const [recentAttempt, setRecentAttempt] = React.useState<Attempt | null>(null)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const [reevalStep, setReevalStep] = React.useState(0)
 
@@ -239,17 +240,19 @@ export default function WritingHubPage() {
             setExercises([])
             try {
                 const type = CATEGORY_TO_TYPE[activeCategory] || "writing_task1"
-                const [result, attemptsData] = await Promise.all([
+                const [result, attemptsData, mostRecent] = await Promise.all([
                     getExercisesPaginated(type, PAGE_SIZE, 0),
-                    getUserAttempts()
+                    getUserAttempts(),
+                    getMostRecentAttempt()
                 ]);
 
                 setExercises(adaptExercises(result.data as DbExercise[], attemptsData as { exercise_id: string }[]))
                 setTotalExercises(result.total)
 
-                // Keep only writing attempts
+                // Keep only writing attempts for stats
                 const writingAttempts = (attemptsData as Attempt[]).filter(a => a.exercises?.type?.startsWith('writing'))
                 setAttempts(writingAttempts)
+                setRecentAttempt(mostRecent as Attempt | null)
             } catch (error) {
                 console.error("Failed to fetch writing hub data:", error)
             } finally {
@@ -298,7 +301,6 @@ export default function WritingHubPage() {
     const averageScore = evaluatedAttempts.length > 0
         ? (evaluatedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / evaluatedAttempts.length).toFixed(1)
         : "--";
-    const recentAttempt = attempts.length > 0 ? attempts[0] : null;
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/30">
