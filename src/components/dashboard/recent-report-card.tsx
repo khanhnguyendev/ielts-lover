@@ -45,7 +45,7 @@ export function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reeval
                     "w-32 h-32 rounded-[2.5rem] flex flex-col items-center justify-center border-4 transition-transform group-hover:scale-105 duration-500 shadow-lg",
                     config.bg, config.border, config.color
                 )}>
-                    <span className="text-4xl font-black font-outfit leading-none mb-1">{attempt.score || "--"}</span>
+                    <span className="text-4xl font-black font-outfit leading-none mb-1">{attempt.score != null ? attempt.score : "--"}</span>
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Band Score</span>
                 </div>
 

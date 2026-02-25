@@ -426,6 +426,9 @@ function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
 function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
     const isWriting = attempt.exercises?.type?.startsWith('writing');
+    const dateObj = new Date(attempt.created_at);
+    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     return (
         <div className="group bg-white border border-slate-100 rounded-[1.5rem] p-4 flex items-center gap-4 transition-all hover:shadow-md hover:border-slate-200">
@@ -433,7 +436,7 @@ function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep
                 "w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black font-outfit border shadow-sm",
                 config.bg, config.border, config.color
             )}>
-                {attempt.score || "--"}
+                {attempt.score != null ? attempt.score : "--"}
             </div>
 
             <div className="flex-1 min-w-0">
@@ -445,7 +448,7 @@ function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep
                         {isWriting ? "Writing" : "Speaking"}
                     </span>
                     <span className="text-[8px] font-bold text-slate-400">
-                        {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {dateStr} · {timeStr}
                     </span>
                 </div>
                 <h4 className="text-xs font-black text-slate-800 truncate group-hover:text-primary transition-colors">
