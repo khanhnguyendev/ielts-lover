@@ -12,6 +12,8 @@ import {
     MessageSquare,
     Cat,
     Star,
+    Target,
+    Clock,
     type LucideIcon
 } from "lucide-react"
 import Image from "next/image"
@@ -26,14 +28,16 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { LoadMoreButton } from "@/components/global/load-more-button"
 
-
-import { getExercisesPaginated, getUserAttempts, getFeaturePrice } from "@/app/actions"
+import { getExercisesPaginated, getUserAttempts, getFeaturePrice, reevaluateAttempt } from "@/app/actions"
 import { createExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions"
-import { Exercise as DbExercise, ExerciseType } from "@/types"
-import { FEATURE_KEYS } from "@/lib/constants"
+import { Exercise as DbExercise, ExerciseType, Attempt } from "@/types"
+import { FEATURE_KEYS, ATTEMPT_STATES } from "@/lib/constants"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { ExerciseCard } from "@/components/dashboard/exercise-card"
+import { StatCard } from "@/components/dashboard/stat-card"
+import { RecentReportCard } from "@/components/dashboard/recent-report-card"
+import { extractBillingError } from "@/lib/billing-errors"
 
 const CATEGORIES = [
     "Academic Task 1",
@@ -103,6 +107,12 @@ export default function WritingHubPage() {
     const [imageAnalysis, setImageAnalysis] = React.useState<ImageAnalysis | null>(null)
     const [isCreating, setIsCreating] = React.useState(false)
     const [analysisCost, setAnalysisCost] = React.useState(5)
+
+    // Attempt tracking
+    const [attempts, setAttempts] = React.useState<Attempt[]>([])
+    const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
+    const [reevalStep, setReevalStep] = React.useState(0)
+
     const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     React.useEffect(() => {
@@ -115,6 +125,30 @@ export default function WritingHubPage() {
         setCustomImage(null)
         setCustomImagePreview(null)
         setImageAnalysis(null)
+    }
+
+    async function handleReevaluate(attemptId: string) {
+        setReevaluatingId(attemptId)
+        setReevalStep(1)
+        try {
+            setTimeout(() => setReevalStep(2), 1500)
+            const result = await reevaluateAttempt(attemptId)
+            setReevalStep(3)
+            if (result.success) {
+                notifySuccess("Analysis Complete", "Your updated score is ready.", "View")
+                setRefreshKey(k => k + 1)
+            } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
+                notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough credits.", "Close")
+            } else {
+                throw new Error(('message' in result ? result.message : "Evaluation failed"))
+            }
+        } catch (error) {
+            console.error("Re-evaluation failed:", error)
+            notifyError("Evaluation Failed", "Could not process your request.", "Close")
+        } finally {
+            setReevaluatingId(null)
+            setReevalStep(0)
+        }
     }
 
     async function handleAnalyzeCustomImage() {
@@ -212,6 +246,10 @@ export default function WritingHubPage() {
 
                 setExercises(adaptExercises(result.data as DbExercise[], attemptsData as { exercise_id: string }[]))
                 setTotalExercises(result.total)
+
+                // Keep only writing attempts
+                const writingAttempts = (attemptsData as Attempt[]).filter(a => a.exercises?.type?.startsWith('writing'))
+                setAttempts(writingAttempts)
             } catch (error) {
                 console.error("Failed to fetch writing hub data:", error)
             } finally {
@@ -231,6 +269,10 @@ export default function WritingHubPage() {
             ]);
             setExercises(prev => [...prev, ...adaptExercises(result.data as DbExercise[], attemptsData as { exercise_id: string }[])])
             setTotalExercises(result.total)
+
+            // Keep only writing attempts (refresh list)
+            const writingAttempts = (attemptsData as Attempt[]).filter(a => a.exercises?.type?.startsWith('writing'))
+            setAttempts(writingAttempts)
         } catch (error) {
             console.error("Failed to load more exercises:", error)
         } finally {
@@ -250,12 +292,72 @@ export default function WritingHubPage() {
         return exercises.filter(e => e.chartType === chartTypeFilter)
     }, [exercises, chartTypeFilter])
 
+    // Calculate Stats
+    const totalAttempts = attempts.length;
+    const evaluatedAttempts = attempts.filter(a => a.state === ATTEMPT_STATES.EVALUATED && a.score);
+    const averageScore = evaluatedAttempts.length > 0
+        ? (evaluatedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / evaluatedAttempts.length).toFixed(1)
+        : "--";
+    const recentAttempt = attempts.length > 0 ? attempts[0] : null;
+
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/30">
             <div className="p-6 lg:p-12 space-y-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
 
+                {/* Header Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <StatCard
+                        icon={Activity}
+                        label="Total Writing"
+                        value={totalAttempts.toString()}
+                        subLabel="Essays Written"
+                        color="text-indigo-600"
+                        bgColor="bg-indigo-50"
+                    />
+                    <StatCard
+                        icon={FileText}
+                        label="Evaluated"
+                        value={evaluatedAttempts.length.toString()}
+                        subLabel="Scored by AI"
+                        color="text-emerald-600"
+                        bgColor="bg-emerald-50"
+                    />
+                    <StatCard
+                        icon={Target}
+                        label="Avg Band"
+                        value={averageScore}
+                        subLabel="Writing Score"
+                        color="text-purple-600"
+                        bgColor="bg-purple-50"
+                    />
+                    <StatCard
+                        icon={Clock}
+                        label="In Progress"
+                        value={attempts.filter(a => a.state !== ATTEMPT_STATES.EVALUATED && a.state !== ATTEMPT_STATES.SUBMITTED).length.toString()}
+                        subLabel="Active essays"
+                        color="text-amber-600"
+                        bgColor="bg-amber-50"
+                    />
+                </div>
+
+                {/* Featured Recent Report */}
+                {recentAttempt && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 pl-2">
+                            <Sparkles size={18} className="text-primary" />
+                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Featured Recent Report</h2>
+                        </div>
+                        <RecentReportCard
+                            attempt={recentAttempt}
+                            onReevaluate={handleReevaluate}
+                            reevaluatingId={reevaluatingId}
+                            reevalStep={reevalStep}
+                        />
+                    </div>
+                )}
+
                 {/* 1. Header & Tabs */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pt-4">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/20">
