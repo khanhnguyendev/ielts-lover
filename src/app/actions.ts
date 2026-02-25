@@ -8,7 +8,7 @@ import { ExerciseService } from "@/services/exercise.service";
 import { AttemptService } from "@/services/attempt.service";
 import { AIService } from "@/services/ai.service";
 import { ExerciseType, UserProfile } from "@/types";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createServiceSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 import { LessonRepository } from "@/repositories/lesson.repository";
@@ -422,12 +422,49 @@ export const signInWithGoogle = traceAction("signInWithGoogle", async (returnTo?
     if (data.url) return redirect(data.url);
 });
 
+export async function signUpWithEmail(email: string, password: string, returnTo?: string): Promise<{ error?: string }> {
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) return { error: error.message };
+
+    // Sync the new user's profile (insert row in user_profiles)
+    if (data.user) {
+        const serviceSupabase = await createServiceSupabaseClient();
+        await serviceSupabase.from("user_profiles").upsert({
+            id: data.user.id,
+            email: data.user.email!,
+            created_at: new Date().toISOString(),
+        }, { onConflict: "id", ignoreDuplicates: true });
+    }
+
+    // Supabase may require email confirmation — session will be null until confirmed
+    if (!data.session) {
+        // Account created but email confirmation required
+        return {};
+    }
+
+    // Auto-logged in — redirect to onboarding or returnTo
+    redirect(returnTo || "/onboarding");
+}
+
+export async function signInWithEmail(email: string, password: string, returnTo?: string): Promise<{ error?: string }> {
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) return { error: error.message };
+
+    redirect(returnTo || "/dashboard");
+}
 
 export async function signOut() {
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();
     return redirect("/login");
 }
+
 
 export const rewriteText = traceAction("rewriteText", async (text: string) => {
     const parsed = rewriteTextSchema.safeParse({ text });
