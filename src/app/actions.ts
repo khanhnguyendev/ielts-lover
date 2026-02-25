@@ -118,6 +118,10 @@ export async function getExercises(type: ExerciseType) {
     return exerciseService.listExercises(type);
 }
 
+export async function getExercisesPaginated(type: ExerciseType, limit: number, offset: number) {
+    return exerciseService.listExercisesPaginated(type, limit, offset);
+}
+
 export async function getExerciseById(id: string) {
     return exerciseService.getExercise(id);
 }

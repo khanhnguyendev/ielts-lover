@@ -16,6 +16,10 @@ export class ExerciseService {
         return await this.exerciseRepo.listByType(type);
     }
 
+    async listExercisesPaginated(type: ExerciseType, limit: number, offset: number): Promise<{ data: Exercise[]; total: number }> {
+        return await this.exerciseRepo.listByTypePaginated(type, limit, offset);
+    }
+
     async createExerciseVersion(
         data: Omit<Exercise, "id" | "created_at" | "version">,
         sourceExerciseId?: string

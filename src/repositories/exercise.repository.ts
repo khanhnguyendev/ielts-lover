@@ -50,6 +50,20 @@ export class ExerciseRepository implements IExerciseRepository {
         return data as Exercise[];
     }
 
+    async listByTypePaginated(type: ExerciseType, limit: number, offset: number): Promise<{ data: Exercise[]; total: number }> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error, count } = await supabase
+            .from(DB_TABLES.EXERCISES)
+            .select("*, creator:user_profiles!created_by(full_name, email, role)", { count: "exact" })
+            .eq("type", type)
+            .eq("is_published", true)
+            .order("created_at", { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) throw new Error(`[ExerciseRepository] listByTypePaginated failed: ${error.message}`);
+        return { data: data as Exercise[], total: count || 0 };
+    }
+
     async createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise> {
         const supabase = await createServerSupabaseClient();
         const { creator: _creator, ...insertData } = exercise;

@@ -26,7 +26,7 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 
 
-import { getExercises, getUserAttempts, getFeaturePrice } from "@/app/actions"
+import { getExercisesPaginated, getUserAttempts, getFeaturePrice } from "@/app/actions"
 import { createExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions"
 import { Exercise as DbExercise, ExerciseType } from "@/types"
 import { FEATURE_KEYS } from "@/lib/constants"
@@ -85,9 +85,13 @@ export default function WritingHubPage() {
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
     const [exercises, setExercises] = React.useState<Exercise[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
+    const [isLoadingMore, setIsLoadingMore] = React.useState(false)
+    const [totalExercises, setTotalExercises] = React.useState(0)
     const [refreshKey, setRefreshKey] = React.useState(0)
     const [chartTypeFilter, setChartTypeFilter] = React.useState<string>("all")
     const { notifySuccess, notifyError } = useNotification()
+
+    const PAGE_SIZE = 5
 
     // Custom Task dialog state
     const [customTitle, setCustomTitle] = React.useState("")
@@ -176,33 +180,37 @@ export default function WritingHubPage() {
         }
     }
 
+    const adaptExercises = React.useCallback((exercisesData: DbExercise[], attemptsData: { exercise_id: string }[]): Exercise[] => {
+        return exercisesData.map((db: DbExercise) => {
+            const attemptCount = attemptsData.filter((a) => a.exercise_id === db.id).length;
+            return {
+                id: db.id,
+                title: db.title,
+                subtitle: db.type.replace("_", " ").toUpperCase(),
+                chartType: db.chart_data?.chart_type || db.chart_data?.type || undefined,
+                attempts: attemptCount,
+                icon: TYPE_CONFIG[db.type]?.icon || Cat,
+                color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50",
+                creatorName: db.creator?.full_name || db.creator?.email,
+                creatorRole: db.creator?.role,
+                createdAt: db.created_at,
+            };
+        })
+    }, [])
+
     React.useEffect(() => {
         const fetchExercises = async () => {
             setIsLoading(true)
             setExercises([])
             try {
                 const type = CATEGORY_TO_TYPE[activeCategory] || "writing_task1"
-                const [exercisesData, attemptsData] = await Promise.all([
-                    getExercises(type),
+                const [result, attemptsData] = await Promise.all([
+                    getExercisesPaginated(type, PAGE_SIZE, 0),
                     getUserAttempts()
                 ]);
 
-                const adapted: Exercise[] = exercisesData.map((db: DbExercise) => {
-                    const attemptCount = attemptsData.filter((a: { exercise_id: string }) => a.exercise_id === db.id).length;
-                    return {
-                        id: db.id,
-                        title: db.title,
-                        subtitle: db.type.replace("_", " ").toUpperCase(),
-                        chartType: db.chart_data?.chart_type || db.chart_data?.type || undefined,
-                        attempts: attemptCount,
-                        icon: TYPE_CONFIG[db.type]?.icon || Cat,
-                        color: TYPE_CONFIG[db.type]?.color || "text-purple-600 bg-purple-50",
-                        creatorName: db.creator?.full_name || db.creator?.email,
-                        creatorRole: db.creator?.role,
-                        createdAt: db.created_at,
-                    };
-                })
-                setExercises(adapted)
+                setExercises(adaptExercises(result.data as DbExercise[], attemptsData as { exercise_id: string }[]))
+                setTotalExercises(result.total)
             } catch (error) {
                 console.error("Failed to fetch writing hub data:", error)
             } finally {
@@ -210,7 +218,26 @@ export default function WritingHubPage() {
             }
         }
         fetchExercises()
-    }, [activeCategory, refreshKey])
+    }, [activeCategory, refreshKey, adaptExercises])
+
+    const handleLoadMore = async () => {
+        setIsLoadingMore(true)
+        try {
+            const type = CATEGORY_TO_TYPE[activeCategory] || "writing_task1"
+            const [result, attemptsData] = await Promise.all([
+                getExercisesPaginated(type, PAGE_SIZE, exercises.length),
+                getUserAttempts()
+            ]);
+            setExercises(prev => [...prev, ...adaptExercises(result.data as DbExercise[], attemptsData as { exercise_id: string }[])])
+            setTotalExercises(result.total)
+        } catch (error) {
+            console.error("Failed to load more exercises:", error)
+        } finally {
+            setIsLoadingMore(false)
+        }
+    }
+
+    const hasMore = exercises.length < totalExercises
 
     const availableChartTypes = React.useMemo(() => {
         const types = exercises.filter(e => e.chartType).map(e => e.chartType!)
@@ -265,7 +292,7 @@ export default function WritingHubPage() {
                                 <div />
                             )}
                             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
-                                {filteredExercises.length} Total Exercises
+                                {exercises.length} of {totalExercises} Exercises
                             </div>
                         </div>
 
@@ -304,6 +331,24 @@ export default function WritingHubPage() {
                                         <ExerciseCard {...ex} />
                                     </div>
                                 ))}
+
+                                {/* Load More */}
+                                {hasMore && (
+                                    <div className="flex justify-center pt-4">
+                                        <Button
+                                            variant="outline"
+                                            onClick={handleLoadMore}
+                                            disabled={isLoadingMore}
+                                            className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 border-slate-100 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
+                                        >
+                                            {isLoadingMore ? (
+                                                <PulseLoader size="sm" color="primary" />
+                                            ) : (
+                                                `Load More (${totalExercises - exercises.length} remaining)`
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         )}
 

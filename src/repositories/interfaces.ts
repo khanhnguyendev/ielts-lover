@@ -14,6 +14,7 @@ export interface IExerciseRepository {
     getById(id: string): Promise<Exercise | null>;
     getLatestVersion(type: ExerciseType): Promise<Exercise | null>;
     listByType(type: ExerciseType): Promise<Exercise[]>;
+    listByTypePaginated(type: ExerciseType, limit: number, offset: number): Promise<{ data: Exercise[]; total: number }>;
     createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise>;
     delete(id: string): Promise<void>;
     getTotalCount(): Promise<number>;
