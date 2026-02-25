@@ -284,7 +284,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         {(isSample || (realData && realData.state === ATTEMPT_STATES.EVALUATED)) ? (
                             <>
                                 {(() => {
-                                    const score = displayData?.overall_score || displayData?.bandScore || 1.0;
+                                    const score = displayData?.overall_score || displayData?.bandScore || realData?.score || 0;
                                     return (
                                         <ScoreOverview
                                             score={score}
@@ -295,27 +295,34 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                     );
                                 })()}
                                 <div className="space-y-12">
-                                    {(displayData.type === "Writing" || (!isSample && realData?.exercise?.type.startsWith('writing'))) ? (
-                                        displayData.detailed_scores ? (
-                                            <WritingFeedback
-                                                result={displayData as any}
-                                                type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
-                                                hideScore={true}
-                                                attemptId={isSample ? "sample-" + id : realData?.id}
-                                                originalText={isSample ? displayData.originalText : realData?.content}
-                                                isUnlocked={isSample ? true : realData?.is_correction_unlocked}
-                                                initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
-                                                targetScore={targetScore}
-                                                isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
-                                                initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
-                                            />
+                                    {displayData ? (
+                                        (displayData.type === "Writing" || (!isSample && realData?.exercise?.type?.startsWith('writing'))) ? (
+                                            displayData.detailed_scores ? (
+                                                <WritingFeedback
+                                                    result={displayData as any}
+                                                    type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
+                                                    hideScore={true}
+                                                    attemptId={isSample ? "sample-" + id : realData?.id}
+                                                    originalText={isSample ? displayData.originalText : realData?.content}
+                                                    isUnlocked={isSample ? true : realData?.is_correction_unlocked}
+                                                    initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
+                                                    targetScore={targetScore}
+                                                    isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
+                                                    initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
+                                                />
+                                            ) : (
+                                                <WritingEvaluation data={displayData as any} />
+                                            )
+                                        ) : displayData.type === "Speaking" ? (
+                                            <SpeakingEvaluation data={displayData as any} />
                                         ) : (
-                                            <WritingEvaluation data={displayData as any} />
+                                            <RewriterEvaluation data={displayData as any} />
                                         )
-                                    ) : displayData.type === "Speaking" ? (
-                                        <SpeakingEvaluation data={displayData as any} />
                                     ) : (
-                                        <RewriterEvaluation data={displayData as any} />
+                                        // Evaluated but feedback data is not available (legacy or processing)
+                                        <div className="bg-white rounded-[2rem] border border-slate-100 p-12 text-center space-y-4">
+                                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No feedback data found for this report.</p>
+                                        </div>
                                     )}
                                 </div>
                             </>
