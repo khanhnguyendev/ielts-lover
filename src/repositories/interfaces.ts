@@ -85,6 +85,8 @@ export interface ICreditTransactionRepository {
     getRecentAll(limit: number): Promise<CreditTransactionWithUser[]>;
     getRecentByUserIds(userIds: string[], limit: number): Promise<CreditTransactionWithUser[]>;
     getMonthlyUsage(userId: string): Promise<number>;
+    listByUserIdPaginated(userId: string, limit: number, offset: number): Promise<{ data: CreditTransaction[]; total: number }>;
+    getStatsByUserId(userId: string): Promise<{ totalEarned: number; totalSpent: number }>;
 }
 
 export type SystemSetting = {

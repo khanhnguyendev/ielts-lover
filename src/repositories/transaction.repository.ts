@@ -126,6 +126,37 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
         }) as CreditTransactionWithUser[];
     }
 
+    async listByUserIdPaginated(userId: string, limit: number, offset: number): Promise<{ data: CreditTransaction[]; total: number }> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error, count } = await supabase
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
+            .select("*", { count: "exact" })
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) throw new Error(`[CreditTransactionRepository] listByUserIdPaginated failed: ${error.message}`);
+        return { data: data as CreditTransaction[], total: count || 0 };
+    }
+
+    async getStatsByUserId(userId: string): Promise<{ totalEarned: number; totalSpent: number }> {
+        const supabase = await createServerSupabaseClient();
+        const { data, error } = await supabase
+            .from(DB_TABLES.CREDIT_TRANSACTIONS)
+            .select("amount")
+            .eq("user_id", userId);
+
+        if (error) throw new Error(`[CreditTransactionRepository] getStatsByUserId failed: ${error.message}`);
+
+        let totalEarned = 0;
+        let totalSpent = 0;
+        for (const row of data || []) {
+            if (row.amount > 0) totalEarned += row.amount;
+            else totalSpent += Math.abs(row.amount);
+        }
+        return { totalEarned, totalSpent };
+    }
+
     async getMonthlyUsage(userId: string): Promise<number> {
         const supabase = await createServerSupabaseClient();
         const now = new Date();

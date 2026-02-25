@@ -333,6 +333,18 @@ export async function getUserAttemptsPaginated(limit: number, offset: number) {
     return attemptRepo.listWritingAttemptsByUserIdPaginated(user.id, limit, offset);
 }
 
+export async function getUserTransactionsPaginated(limit: number, offset: number) {
+    const user = await getCurrentUser();
+    if (!user) return { data: [], total: 0 };
+    return transactionRepo.listByUserIdPaginated(user.id, limit, offset);
+}
+
+export async function getUserTransactionStats() {
+    const user = await getCurrentUser();
+    if (!user) return { totalEarned: 0, totalSpent: 0 };
+    return transactionRepo.getStatsByUserId(user.id);
+}
+
 export async function getLessons() {
     return lessonService.getAllLessons();
 }

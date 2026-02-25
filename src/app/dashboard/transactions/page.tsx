@@ -12,6 +12,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+const PAGE_SIZE = 5
+
 export default async function TransactionsPage() {
     const user = await getCurrentUser()
     if (!user) {
@@ -19,16 +21,10 @@ export default async function TransactionsPage() {
     }
 
     const transactionRepo = new CreditTransactionRepository()
-    const transactions = await transactionRepo.listByUserId(user.id)
-
-    // Compute stats
-    const totalEarned = transactions
-        .filter(t => t.amount > 0)
-        .reduce((sum, t) => sum + t.amount, 0)
-
-    const totalSpent = Math.abs(transactions
-        .filter(t => t.amount < 0)
-        .reduce((sum, t) => sum + t.amount, 0))
+    const [{ data: initialTransactions, total }, stats] = await Promise.all([
+        transactionRepo.listByUserIdPaginated(user.id, PAGE_SIZE, 0),
+        transactionRepo.getStatsByUserId(user.id),
+    ])
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/30">
@@ -47,7 +43,7 @@ export default async function TransactionsPage() {
                     <StatCard
                         icon={ArrowUpCircle}
                         label="Total Earned"
-                        value={`${totalEarned} ⭐`}
+                        value={`${stats.totalEarned} ⭐`}
                         subLabel="Lifetime additions"
                         color="text-emerald-600"
                         bgColor="bg-emerald-50"
@@ -55,7 +51,7 @@ export default async function TransactionsPage() {
                     <StatCard
                         icon={ArrowDownCircle}
                         label="Total Spent"
-                        value={`${totalSpent} ⭐`}
+                        value={`${stats.totalSpent} ⭐`}
                         subLabel="Lifetime usage"
                         color="text-rose-600"
                         bgColor="bg-rose-50"
@@ -76,7 +72,11 @@ export default async function TransactionsPage() {
                         </div>
                     </div>
 
-                    <TransactionFeed transactions={transactions.map(t => ({ ...t }))} />
+                    <TransactionFeed
+                        initialTransactions={initialTransactions.map(t => ({ ...t }))}
+                        totalTransactions={total}
+                        pageSize={PAGE_SIZE}
+                    />
                 </div>
             </div>
 

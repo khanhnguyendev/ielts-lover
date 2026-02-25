@@ -25,13 +25,18 @@ import {
     PlusCircle,
     CalendarCheck,
     Coins,
-    ChevronRight
+    ChevronRight,
+    ChevronDown,
+    Loader2
 } from "lucide-react"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import Link from "next/link"
+import { getUserTransactionsPaginated } from "@/app/actions"
 
 interface TransactionFeedProps {
-    transactions: CreditTransaction[]
+    initialTransactions: CreditTransaction[]
+    totalTransactions: number
+    pageSize: number
 }
 
 // ─── Constants & Helpers ─────────────────────────────────────
@@ -205,10 +210,26 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
 
 // ─── Main Feed Component ─────────────────────────────────────
 
-export function TransactionFeed({ transactions }: TransactionFeedProps) {
+export function TransactionFeed({ initialTransactions, totalTransactions, pageSize }: TransactionFeedProps) {
+    const [transactions, setTransactions] = React.useState(initialTransactions)
+    const [totalCount, setTotalCount] = React.useState(totalTransactions)
+    const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [filter, setFilter] = React.useState<string | null>(null)
     const [currentPage, setCurrentPage] = React.useState(1)
     const ITEMS_PER_PAGE = 10
+
+    const hasMore = transactions.length < totalCount
+
+    const handleLoadMore = React.useCallback(async () => {
+        setIsLoadingMore(true)
+        try {
+            const { data, total } = await getUserTransactionsPaginated(pageSize, transactions.length)
+            setTransactions(prev => [...prev, ...data])
+            setTotalCount(total)
+        } finally {
+            setIsLoadingMore(false)
+        }
+    }, [transactions.length, pageSize])
 
     const filteredTransactions = React.useMemo(() => {
         return transactions.filter(t => {
@@ -239,7 +260,7 @@ export function TransactionFeed({ transactions }: TransactionFeedProps) {
                     onChange={(val) => { setFilter(val); setCurrentPage(1); }}
                 />
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
-                    {filteredTransactions.length} Total Records
+                    {transactions.length} of {totalCount} Records
                 </div>
             </div>
 
@@ -288,6 +309,24 @@ export function TransactionFeed({ transactions }: TransactionFeedProps) {
                             <ArrowRight size={16} />
                         </button>
                     </div>
+                </div>
+            )}
+
+            {/* Load More */}
+            {hasMore && (
+                <div className="flex justify-center pt-2">
+                    <button
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 disabled:opacity-60 transition-all shadow-lg hover:shadow-xl active:scale-95"
+                    >
+                        {isLoadingMore ? (
+                            <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                            <ChevronDown size={14} />
+                        )}
+                        {isLoadingMore ? "Loading..." : `Load More (${totalCount - transactions.length} remaining)`}
+                    </button>
                 </div>
             )}
         </div>
