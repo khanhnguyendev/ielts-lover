@@ -28,8 +28,8 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { LoadMoreButton } from "@/components/global/load-more-button"
 
-import { getExercisesPaginated, getUserAttempts, getMostRecentAttempt, getFeaturePrice, reevaluateAttempt } from "@/app/actions"
-import { createExercise, uploadImage, analyzeChartImage } from "@/app/admin/actions"
+import { getExercisesPaginated, getUserAttempts, getMostRecentAttempt, getFeaturePrice, reevaluateAttempt, createCustomExercise, uploadExerciseImage } from "@/app/actions"
+import { analyzeChartImage } from "@/app/admin/actions"
 import { Exercise as DbExercise, ExerciseType, Attempt } from "@/types"
 import { FEATURE_KEYS, ATTEMPT_STATES } from "@/lib/constants"
 import { CreditBadge } from "@/components/ui/credit-badge"
@@ -193,16 +193,15 @@ export default function WritingHubPage() {
             if (customImage) {
                 const uploadFormData = new FormData()
                 uploadFormData.append("file", customImage)
-                imageUrl = await uploadImage(uploadFormData)
+                imageUrl = await uploadExerciseImage(uploadFormData)
             }
 
-            await createExercise({
+            await createCustomExercise({
                 title: customTitle,
                 type: CATEGORY_TO_TYPE[activeCategory] || "writing_task1",
                 prompt: customPrompt,
                 ...(imageUrl && { image_url: imageUrl }),
-                ...(imageAnalysis?.data_points && { chart_data: imageAnalysis.data_points }),
-                is_published: true,
+                ...(imageAnalysis?.data_points && { chart_data: imageAnalysis.data_points as unknown as Record<string, unknown> }),
             })
             notifySuccess("Task Created", "Your custom task has been added successfully!", "Done")
             resetCustomTaskForm()

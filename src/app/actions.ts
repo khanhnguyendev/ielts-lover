@@ -126,6 +126,44 @@ export async function getExerciseById(id: string) {
     return exerciseService.getExercise(id);
 }
 
+/**
+ * Allows any authenticated user to create a custom private exercise.
+ * Unlike admin createExercise, this does NOT require admin role.
+ * The exercise is immediately published and attributed to the creating user.
+ */
+export async function createCustomExercise(exercise: {
+    title: string;
+    type: ExerciseType;
+    prompt: string;
+    image_url?: string;
+    chart_data?: Record<string, unknown>;
+}) {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    return exerciseService.createExerciseVersion({
+        ...exercise,
+        created_by: user.id,
+        is_published: true,
+    });
+}
+
+
+
+/**
+ * Allows any authenticated user to upload an image for their custom exercise.
+ * Unlike admin uploadImage, this only requires authentication.
+ */
+export async function uploadExerciseImage(formData: FormData): Promise<string> {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { StorageService } = await import("@/services/storage.service");
+    const storageService = new StorageService();
+    const file = formData.get("file") as File;
+    if (!file) throw new Error("No file uploaded");
+    return storageService.upload(file);
+}
 
 
 export async function checkFeatureAccess(feature: string, cost: number = 0) {
