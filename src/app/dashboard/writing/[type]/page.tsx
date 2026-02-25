@@ -52,6 +52,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }, [exercise, setTitle])
     const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
     const [isGuest, setIsGuest] = React.useState(false)
+    const [showAuthGate, setShowAuthGate] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [text, setText] = React.useState("")
@@ -81,10 +82,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 }
                 setExercise(data)
 
-                // 2. Check auth — guests see the question but can't start an attempt
+                // 2. Check auth — guests can browse + write, but not submit
                 const userProfile = await getCurrentUser();
                 if (!userProfile) {
                     setIsGuest(true)
+                    // Guests see the exercise but skip attempt creation
                     return
                 }
 
@@ -144,7 +146,13 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }
 
     const handleFinish = async () => {
-        if (!currentAttempt || !text.trim()) return;
+        if (!text.trim()) return;
+
+        // Guests must sign in before submitting
+        if (isGuest || !currentAttempt) {
+            setShowAuthGate(true)
+            return
+        }
 
         notifyWarning(
             "Confirm Evaluation",
@@ -368,11 +376,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
             {/* 2. Right Side: Writing Panel */}
             <div className="flex-1 flex flex-col bg-white relative">
-                {/* AuthGate overlay for guests */}
-                {isGuest && (
+                {/* AuthGate overlay — shown on demand when guest tries to submit */}
+                {showAuthGate && (
                     <AuthGate
-                        title="Sign in to start practicing"
-                        description="Create a free account to write your essay and get detailed AI feedback on your IELTS band score."
+                        title="Sign in to evaluate your essay"
+                        description="Create a free account to submit your writing and get detailed AI band score feedback."
                         overlay
                     />
                 )}
@@ -529,7 +537,11 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                             <Button
                                 variant="ghost"
                                 onClick={async () => {
-                                    if (!currentAttempt) return;
+                                    if (isGuest || !currentAttempt) {
+                                        setShowAuthGate(true)
+                                        return
+                                    }
+                                    if (!text.trim()) return;
                                     setIsSubmitting(true);
                                     try {
                                         await saveAttemptDraft(currentAttempt.id, text);
