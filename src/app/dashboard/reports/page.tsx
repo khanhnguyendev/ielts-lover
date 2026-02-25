@@ -455,7 +455,9 @@ interface ReportComponentProps {
 
 function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
-    const dateStr = new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const dateObj = new Date(attempt.created_at);
+    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const isWriting = attempt.exercises?.type?.startsWith('writing');
 
     return (
@@ -484,7 +486,7 @@ function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reevalStep }:
                             )}>
                                 {isWriting ? "✍️ Writing" : "🎤 Speaking"}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dateStr}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dateStr} · {timeStr}</span>
                         </div>
                         <h3 className="text-2xl font-black text-slate-900 group-hover:text-primary transition-colors">
                             {attempt.exercises?.title || "IELTS Practice Session"}
@@ -494,7 +496,6 @@ function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reevalStep }:
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                         <DetailTag icon={Activity} label={attempt.exercises?.type?.replace('_', ' ') || "Practice"} />
                         <DetailTag icon={Target} label={`CEFR ${config.cefr}`} />
-                        <DetailTag icon={Clock} label={new Date(attempt.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} />
                     </div>
                 </div>
 
