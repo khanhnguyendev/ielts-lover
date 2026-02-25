@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-import { getUserAttempts, reevaluateAttempt } from "@/app/actions";
+import { getUserAttemptsPaginated, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { Attempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -32,9 +32,13 @@ import { extractBillingError } from "@/lib/billing-errors";
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
     const [attempts, setAttempts] = React.useState<Attempt[]>([])
+    const [totalAttempts, setTotalAttempts] = React.useState(0)
     const [isLoading, setIsLoading] = React.useState(true)
+    const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const [reevalStep, setReevalStep] = React.useState(0)
+
+    const PAGE_SIZE = 5
 
     // Filters
     const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -46,8 +50,9 @@ export default function ReportsPage() {
     const fetchReports = React.useCallback(async () => {
         setIsLoading(true)
         try {
-            const data = await getUserAttempts()
-            setAttempts(data as Attempt[])
+            const result = await getUserAttemptsPaginated(PAGE_SIZE, 0)
+            setAttempts(result.data as Attempt[])
+            setTotalAttempts(result.total)
         } catch (error) {
             console.error("Failed to fetch reports:", error)
         } finally {
@@ -58,6 +63,21 @@ export default function ReportsPage() {
     React.useEffect(() => {
         fetchReports()
     }, [fetchReports])
+
+    const handleLoadMore = async () => {
+        setIsLoadingMore(true)
+        try {
+            const result = await getUserAttemptsPaginated(PAGE_SIZE, attempts.length)
+            setAttempts(prev => [...prev, ...(result.data as Attempt[])])
+            setTotalAttempts(result.total)
+        } catch (error) {
+            console.error("Failed to load more reports:", error)
+        } finally {
+            setIsLoadingMore(false)
+        }
+    }
+
+    const hasMore = attempts.length < totalAttempts
 
     // Filter Logic
     const filteredAttempts = React.useMemo(() => {
@@ -126,7 +146,7 @@ export default function ReportsPage() {
     const historicalAttempts = filteredAttempts.slice(1);
 
     // Derived Stats
-    const totalSessions = attempts.length
+    const totalSessions = totalAttempts
     const avgScore = attempts.length > 0
         ? (attempts.reduce((acc, curr) => acc + (curr.score || 0), 0) / attempts.length).toFixed(1)
         : "0.0"
@@ -271,6 +291,24 @@ export default function ReportsPage() {
                                                     </div>
                                                 ))}
                                             </div>
+
+                                            {/* Load More */}
+                                            {hasMore && (
+                                                <div className="flex justify-center pt-4">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={handleLoadMore}
+                                                        disabled={isLoadingMore}
+                                                        className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 border-slate-100 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
+                                                    >
+                                                        {isLoadingMore ? (
+                                                            <PulseLoader size="sm" color="primary" />
+                                                        ) : (
+                                                            `Load More (${totalAttempts - attempts.length} remaining)`
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
