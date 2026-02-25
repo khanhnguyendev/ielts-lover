@@ -169,8 +169,9 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
             notifyWarning(
                 "Insufficient Credits",
                 `This evaluation requires ${evalCost} StarCredit${evalCost > 1 ? 's' : ''}, but you only have ${currentUserCredits}. Please get more credits to evaluate this work.`,
-                "View Packages",
-                () => router.push("/dashboard/credits")
+                "Buy Credits",
+                () => router.push("/dashboard/credits"),
+                "Close"
             )
             return
         }
