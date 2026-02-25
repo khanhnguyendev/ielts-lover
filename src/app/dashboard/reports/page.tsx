@@ -194,7 +194,23 @@ export default function ReportsPage() {
                     />
                 </div>
 
-                {/* 2. Main Content */}
+                {/* 2. Featured Recent Report */}
+                {latestAttempt && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 px-1">
+                            <div className="w-6 h-px bg-primary/20" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Your Latest Performance</span>
+                        </div>
+                        <RecentReportCard
+                            attempt={latestAttempt}
+                            onReevaluate={handleReevaluate}
+                            reevaluatingId={reevaluatingId}
+                            reevalStep={reevalStep}
+                        />
+                    </div>
+                )}
+
+                {/* 3. Main Content */}
                 <div className="bg-white border-none rounded-[2.5rem] p-4 lg:p-8 shadow-xl shadow-slate-200/50">
 
                     {/* Tabs & Filters */}
@@ -252,58 +268,37 @@ export default function ReportsPage() {
                                     <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto">Try adjusting your skill or status filters to see your practice history.</p>
                                 </div>
                             ) : (
-                                <>
-                                    {/* Component A: Featured Recent Report */}
-                                    {latestAttempt && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2 px-1">
-                                                <div className="w-6 h-px bg-primary/20" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Your Latest Performance</span>
-                                            </div>
-                                            <RecentReportCard
-                                                attempt={latestAttempt}
-                                                onReevaluate={handleReevaluate}
-                                                reevaluatingId={reevaluatingId}
-                                                reevalStep={reevalStep}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* Component B: History List */}
-                                    {historicalAttempts.length > 0 && (
-                                        <div className="space-y-4 pt-4">
-                                            <div className="flex items-center gap-2 px-1">
-                                                <div className="w-6 h-px bg-slate-200" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Previous Sessions</span>
-                                            </div>
-                                            <div className="grid grid-cols-1 gap-2">
-                                                {historicalAttempts.map((attempt, idx) => (
-                                                    <div
-                                                        key={attempt.id}
-                                                        className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                                                        style={{ animationDelay: `${idx * 100}ms` }}
-                                                    >
-                                                        <HistoricalReportRow
-                                                            attempt={attempt}
-                                                            onReevaluate={handleReevaluate}
-                                                            reevaluatingId={reevaluatingId}
-                                                            reevalStep={reevalStep}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {/* Load More */}
-                                            {hasMore && (
-                                                <LoadMoreButton
-                                                    onClick={handleLoadMore}
-                                                    isLoading={isLoadingMore}
-                                                    remaining={totalAttempts - attempts.length}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 px-1">
+                                        <div className="w-6 h-px bg-slate-200" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Previous Sessions</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {historicalAttempts.map((attempt, idx) => (
+                                            <div
+                                                key={attempt.id}
+                                                className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                                                style={{ animationDelay: `${idx * 100}ms` }}
+                                            >
+                                                <HistoricalReportRow
+                                                    attempt={attempt}
+                                                    onReevaluate={handleReevaluate}
+                                                    reevaluatingId={reevaluatingId}
+                                                    reevalStep={reevalStep}
                                                 />
-                                            )}
-                                        </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Load More */}
+                                    {hasMore && (
+                                        <LoadMoreButton
+                                            onClick={handleLoadMore}
+                                            isLoading={isLoadingMore}
+                                            remaining={totalAttempts - attempts.length}
+                                        />
                                     )}
-                                </>
+                                </div>
                             )}
                         </div>
                     ) : (
