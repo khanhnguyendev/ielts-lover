@@ -85,7 +85,7 @@ export function PremiumFeatureCard({
 
     return (
         <div className={cn(
-            "relative group overflow-hidden rounded-[32px] border-2 border-slate-100 min-h-[300px] transition-all duration-500",
+            "relative group overflow-hidden rounded-[32px] border-2 border-slate-100 min-h-[400px] transition-all duration-500 flex flex-col justify-center",
             v.bg,
             v.glow
         )}>
@@ -95,7 +95,7 @@ export function PremiumFeatureCard({
             </div>
 
             {/* Unlock CTA Overlay / Progress Overlay */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center bg-white/60 backdrop-blur-[2px]">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center py-12 px-8 text-center bg-white/60 backdrop-blur-[2px]">
                 {isUnlocking && unlockingSteps?.length ? (
                     /* Progress Steps Overlay */
                     <div className="flex flex-col items-center gap-6 max-w-xs animate-in fade-in duration-300">
