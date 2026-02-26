@@ -131,6 +131,21 @@ export class CreditService {
             trace_id: traceId,
             description: `Refund: AI service failure for ${featureKey.replace(/_/g, ' ')}`
         });
+
+        // Notify user about the refund
+        const { notificationService } = await import("@/lib/notification-client");
+        const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+        notificationService.notify(
+            userId,
+            NOTIFICATION_TYPES.SYSTEM,
+            "Credits Refunded",
+            `We encountered an issue processing your request for ${featureKey.replace(/_/g, ' ')}. Your ${pricing.cost_per_unit} StarCredit${pricing.cost_per_unit > 1 ? 's have' : ' has'} been refunded.`,
+            {
+                deepLink: "/dashboard/credits",
+                entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_TRANSACTION,
+            }
+        ).catch(err => console.error("Refund notification failed", err));
     }
 
     /**
