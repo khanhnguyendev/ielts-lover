@@ -166,7 +166,38 @@ export class TeacherService {
         const student = await this.userRepo.getById(studentId);
         if (!student) throw new Error("Student not found");
 
-        return this.teacherStudentRepo.assign(teacherId, studentId, adminId);
+        const assignment = await this.teacherStudentRepo.assign(teacherId, studentId, adminId);
+
+        // Notify Teacher
+        const { notificationService } = await import("@/lib/notification-client");
+        const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+        notificationService.notify(
+            teacherId,
+            NOTIFICATION_TYPES.SYSTEM,
+            "New Student Assigned 🎓",
+            `${student.full_name || 'A student'} has been assigned to your roster.`,
+            {
+                deepLink: `/dashboard/teacher/students/${studentId}`,
+                entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                entityId: studentId,
+            }
+        ).catch(err => console.error("Teacher assignment notification failed", err));
+
+        // Let the Student know
+        notificationService.notify(
+            studentId,
+            NOTIFICATION_TYPES.SYSTEM,
+            "Teacher Assigned 👨‍🏫",
+            `You have been assigned to ${teacher.full_name || 'a new teacher'}. They can now monitor your progress and grant you credits.`,
+            {
+                deepLink: "/dashboard",
+                entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                entityId: teacherId,
+            }
+        ).catch(err => console.error("Student assignment notification failed", err));
+
+        return assignment;
     }
 
     async unassignStudent(teacherId: string, studentId: string) {
