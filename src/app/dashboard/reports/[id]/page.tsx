@@ -64,11 +64,13 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                 } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
                     notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough StarCredits.", "Close")
                 } else {
-                    notifyError("Evaluation Failed", ('message' in result && result.message ? result.message : "Evaluation failed"), "Close")
+                    const debugInfo = ('traceId' in result && result.traceId) ? `\n\nTrace ID: ${result.traceId}` : ""
+                    notifyError("Evaluation Failed", ('message' in result && result.message ? result.message : "Evaluation failed") + debugInfo, "Close")
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error)
-                notifyError("Evaluation Failed", "Could not process your request.", "Close")
+                const traceId = error.traceId ? `\n\nTrace ID: ${error.traceId}` : ""
+                notifyError("Evaluation Failed", `Could not process your request.${traceId}`, "Close")
             } finally {
                 setIsEvaluating(false)
             }
@@ -485,6 +487,30 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                             <p className="text-center text-[9px] font-bold text-slate-300 uppercase tracking-widest">
                                 Horsebot analyze 100% of your current response
                             </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Analyzing Overlay */}
+            {isEvaluating && (
+                <div className="fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2rem] p-8 lg:p-12 shadow-2xl shadow-primary/20 flex flex-col items-center space-y-6 max-w-sm w-full animate-in zoom-in-95 duration-500">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                            <div className="h-20 w-20 bg-primary rounded-full flex items-center justify-center relative shadow-inner">
+                                <Sparkles className="h-8 w-8 text-white animate-pulse" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-bounce">
+                                <span className="text-white text-xs font-black">AI</span>
+                            </div>
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-black font-outfit text-slate-900">Analyzing...</h3>
+                            <p className="text-sm text-slate-500 font-medium">Please wait while our AI tutor evaluates your response.</p>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary rounded-full w-1/2 animate-[progress_2s_ease-in-out_infinite]" />
                         </div>
                     </div>
                 </div>
