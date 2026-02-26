@@ -11,6 +11,7 @@ import { getExerciseById } from "@/app/actions";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useNotification } from "@/lib/contexts/notification-context"
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export default function CreateSpeakingExercisePage() {
     return (
@@ -46,7 +47,7 @@ function CreateSpeakingExerciseContent() {
                     setTitle(ex.title);
                     setPrompt(ex.prompt);
                     setType(ex.type as any);
-                    notifySuccess("Exercise Data Loaded", "You are creating a new version of an existing exercise.");
+                    notifySuccess(NOTIFY_MSGS.SUCCESS.EXERCISE_LOADED.title, NOTIFY_MSGS.SUCCESS.EXERCISE_LOADED.description);
                 }
             });
         }
@@ -60,7 +61,7 @@ function CreateSpeakingExerciseContent() {
             if (result) {
                 setTitle(result.title);
                 setPrompt(result.prompt);
-                notifySuccess("Generated", "Content generated successfully!");
+                notifySuccess(NOTIFY_MSGS.SUCCESS.GENERATED.title, NOTIFY_MSGS.SUCCESS.GENERATED.description);
             }
         } catch (error) {
             console.error("Failed to generate exercise:", error);
@@ -86,11 +87,11 @@ function CreateSpeakingExerciseContent() {
                 prompt: formPrompt,
                 is_published: true,
             }, duplicateId ?? undefined);
-            notifySuccess("Created", "Exercise created successfully!");
+            notifySuccess(NOTIFY_MSGS.SUCCESS.CREATED.title, NOTIFY_MSGS.SUCCESS.CREATED.description);
             router.push("/admin/exercises");
         } catch (error) {
             console.error("Failed to create exercise:", error);
-            notifyError("Failed", "Failed to create exercise");
+            notifyError(NOTIFY_MSGS.ERROR.CREATION_FAILED.title, NOTIFY_MSGS.ERROR.CREATION_FAILED.description);
         } finally {
             setIsLoading(false);
         }

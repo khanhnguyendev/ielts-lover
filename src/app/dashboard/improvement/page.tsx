@@ -31,6 +31,7 @@ import {
     Route
 } from "lucide-react"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 
 const CATEGORY_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
@@ -107,12 +108,12 @@ export default function ImprovementPage() {
                 if (billing) {
                     notifyError(billing.title, billing.message, "Close")
                 } else {
-                    notifyError("Analysis Failed", "Please try again later", "Close")
+                    notifyError(NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.title, NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.description, "Close")
                 }
             }
         } catch {
             window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: analysisCost } }))
-            notifyError("Unexpected Error", "Something went wrong.")
+            notifyError(NOTIFY_MSGS.ERROR.UNEXPECTED.title, NOTIFY_MSGS.ERROR.UNEXPECTED.description)
         } finally {
             setIsGenerating(false)
             setGenStep(0)

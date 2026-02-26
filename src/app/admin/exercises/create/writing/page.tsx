@@ -21,6 +21,7 @@ import { useNotification } from "@/lib/contexts/notification-context";
 import { ErrorDetailsDialog } from "@/components/admin/error-details-dialog";
 import { CHART_TYPES, FEATURE_KEYS } from "@/lib/constants";
 import { CreditBadge } from "@/components/ui/credit-badge";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export default function CreateWritingExercisePage() {
     return (
@@ -130,11 +131,11 @@ function CreateWritingExerciseContent() {
                     setTitle(analysis.data.title);
                 }
             } else if (analysis.error === "INSUFFICIENT_CREDITS") {
-                notifyError("Insufficient Credits", "You need more StarCredits to analyze this image. Please top up to continue.", "Close");
+                notifyError(NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.title, NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.description, "Close");
             }
         } catch (err) {
             console.error("Image analysis failed:", err);
-            notifyError("Analysis Failed", "Could not analyze the uploaded image. Please try again.", "Close");
+            notifyError(NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.title, NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.description, "Close");
         } finally {
             setIsAnalyzing(false);
         }
@@ -156,8 +157,8 @@ function CreateWritingExerciseContent() {
                     setChartData(result.chart_data);
                 }
                 notifySuccess(
-                    "Content Generated",
-                    "AI has successfully generated a title, prompt, and chart for your new exercise. You can now review and publish it.",
+                    NOTIFY_MSGS.SUCCESS.CONTENT_GENERATED.title,
+                    NOTIFY_MSGS.SUCCESS.CONTENT_GENERATED.description,
                     "Review Content"
                 );
             }
@@ -179,7 +180,7 @@ function CreateWritingExerciseContent() {
         try {
             // Block save if image analysis failed validation
             if (type === "writing_task1" && imageFile && imageAnalysis && !imageAnalysis.is_valid) {
-                notifyError("Invalid Chart Image", "The uploaded image failed validation. Please upload a valid IELTS chart/graph.", "Close");
+                notifyError(NOTIFY_MSGS.ERROR.INVALID_CHART.title, NOTIFY_MSGS.ERROR.INVALID_CHART.description, "Close");
                 setIsLoading(false);
                 return;
             }
@@ -210,8 +211,8 @@ function CreateWritingExerciseContent() {
         } catch (error) {
             console.error("Failed to create exercise:", error);
             notifyError(
-                "Creation Failed",
-                "We couldn't save the exercise. Please ensure all fields are filled correctly and try again.",
+                NOTIFY_MSGS.ERROR.CREATION_FAILED.title,
+                NOTIFY_MSGS.ERROR.CREATION_FAILED.description,
                 "Close"
             );
         } finally {

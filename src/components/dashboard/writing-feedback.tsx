@@ -23,11 +23,11 @@ import { Button } from "@/components/ui/button";
 import { unlockCorrection, getFeaturePrice } from "@/app/actions";
 import { CorrectionList } from "./correction-list";
 import { ExampleEssay } from "./example-essay";
-import { toast } from "sonner";
 import { APP_ERROR_CODES, FEATURE_KEYS } from "@/lib/constants";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { extractBillingError } from "@/lib/billing-errors";
 import { PremiumFeatureCard } from "@/components/global/premium-feature-card";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 const CRITERIA_MAP: Record<CriteriaType, { label: string; icon: any; color: string; description: string }> = {
     TA: {
@@ -83,7 +83,7 @@ export function WritingFeedback({
     isExampleEssayUnlocked,
     initialExampleEssay
 }: WritingFeedbackProps) {
-    const { notifyError } = useNotification();
+    const { notifySuccess, notifyError } = useNotification();
     const [activeCriteria, setActiveCriteria] = React.useState<CriteriaType | null>("TA");
     const [isUnlocked, setIsUnlocked] = React.useState(initialIsUnlocked);
     const [corrections, setCorrections] = React.useState<any[] | null>(() => {
@@ -169,7 +169,7 @@ export function WritingFeedback({
                     };
                 }));
                 setIsUnlocked(true);
-                toast.success("Detailed correction unlocked!");
+                notifySuccess(NOTIFY_MSGS.SUCCESS.CORRECTION_UNLOCKED.title, NOTIFY_MSGS.SUCCESS.CORRECTION_UNLOCKED.description);
             } else {
                 // Refund if failed
                 window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
@@ -178,16 +178,16 @@ export function WritingFeedback({
                 if (billing) {
                     notifyError(billing.title, billing.message, "Close");
                 } else if ((result as any).reason === APP_ERROR_CODES.AI_SERVICE_BUSY) {
-                    notifyError("Service Busy", "Our AI service is currently experiencing high demand. Please try again in a moment.", "Close", traceId);
+                    notifyError(NOTIFY_MSGS.ERROR.SERVICE_BUSY.title, NOTIFY_MSGS.ERROR.SERVICE_BUSY.description, "Close", traceId);
                 } else {
-                    notifyError("Something Went Wrong", "We encountered a problem while unlocking your correction. Please provide the trace ID to support.", "Close", traceId);
+                    notifyError(NOTIFY_MSGS.ERROR.UNLOCK_FAILED.title, NOTIFY_MSGS.ERROR.UNLOCK_FAILED.description, "Close", traceId);
                 }
             }
         } catch (error) {
             // Refund on exception
             window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
             console.error("Unlock error:", error);
-            notifyError("Unexpected Error", "An unexpected error occurred while unlocking your correction. Please try again.", "Close");
+            notifyError(NOTIFY_MSGS.ERROR.UNEXPECTED.title, NOTIFY_MSGS.ERROR.UNEXPECTED.description, "Close");
         } finally {
             setIsUnlocking(false);
         }

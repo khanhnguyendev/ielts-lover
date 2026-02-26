@@ -44,6 +44,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { FEATURE_KEYS, AI_METHODS } from "@/lib/constants"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 function getServiceIcon(key: string) {
     switch (key) {
@@ -100,7 +101,7 @@ export default function AICostsPage() {
             setRollingSummaries(rollingData)
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to load AI cost data")
+            notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description)
         } finally {
             setIsLoading(false)
         }
@@ -114,12 +115,12 @@ export default function AICostsPage() {
         setUpdatingIds(prev => new Set(prev).add(id))
         try {
             await updateModelPricing(id, { [field]: value })
-            notifySuccess("Updated", "Model pricing updated.")
+            notifySuccess(NOTIFY_MSGS.SUCCESS.PRICING_UPDATED.title, NOTIFY_MSGS.SUCCESS.PRICING_UPDATED.description)
             const data = await getModelPricingList()
             setPricing(data)
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to update pricing")
+            notifyError(NOTIFY_MSGS.ERROR.UPDATE_PRICING_FAILED.title, NOTIFY_MSGS.ERROR.UPDATE_PRICING_FAILED.description)
         } finally {
             setUpdatingIds(prev => {
                 const next = new Set(prev)
@@ -529,10 +530,10 @@ export default function AICostsPage() {
                                             }
                                         })
                                         await generateAndSeedPackages(tiers)
-                                        notifySuccess("Packages Created", "New credit packages generated with AI content.")
+                                        notifySuccess(NOTIFY_MSGS.SUCCESS.PACKAGES_CREATED.title, NOTIFY_MSGS.SUCCESS.PACKAGES_CREATED.description)
                                     } catch (error) {
                                         console.error(error)
-                                        notifyError("Error", "Failed to generate packages.")
+                                        notifyError(NOTIFY_MSGS.ERROR.GENERATE_PACKAGES_FAILED.title, NOTIFY_MSGS.ERROR.GENERATE_PACKAGES_FAILED.description)
                                     } finally {
                                         setIsGenerating(false)
                                     }

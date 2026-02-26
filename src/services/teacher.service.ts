@@ -1,4 +1,5 @@
 import { TRANSACTION_TYPES, CREDIT_REQUEST_STATUS } from "@/lib/constants";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 import { ITeacherStudentRepository, ICreditRequestRepository, IAttemptRepository, IUserRepository } from "@/repositories/interfaces";
 import { CreditService } from "./credit.service";
 import { UserProfile, CreditRequest } from "@/types";
@@ -75,8 +76,8 @@ export class TeacherService {
         notificationService.notify(
             teacherId,
             NOTIFICATION_TYPES.SYSTEM,
-            "Request Sent to Admin",
-            `Your request for ${amount} StarCredits for your student has been sent and is pending admin approval.`,
+            NOTIFY_MSGS.SUCCESS.REQUEST_SENT.title,
+            NOTIFY_MSGS.SUCCESS.REQUEST_SENT.description(amount),
             {
                 deepLink: "/dashboard/teacher/requests",
                 entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
@@ -111,8 +112,8 @@ export class TeacherService {
         notificationService.notify(
             request.teacher_id,
             NOTIFICATION_TYPES.SYSTEM,
-            "Request Approved",
-            `Your request for ${request.amount} StarCredits has been approved. The student has received them.`,
+            NOTIFY_MSGS.SUCCESS.REQUEST_APPROVED.title,
+            NOTIFY_MSGS.SUCCESS.REQUEST_APPROVED.description(request.amount),
             {
                 deepLink: "/dashboard/teacher/requests",
                 entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
@@ -124,8 +125,8 @@ export class TeacherService {
         notificationService.notify(
             request.student_id,
             NOTIFICATION_TYPES.CREDITS_RECEIVED,
-            "Credits from Teacher! 🎓",
-            `Your teacher has granted you ${request.amount} StarCredits.`,
+            NOTIFY_MSGS.INFO.CREDITS_RECEIVED.title,
+            NOTIFY_MSGS.INFO.CREDITS_RECEIVED.description(request.amount),
             {
                 deepLink: "/dashboard",
                 entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
@@ -149,8 +150,8 @@ export class TeacherService {
         notificationService.notify(
             request.teacher_id,
             NOTIFICATION_TYPES.SYSTEM,
-            "Request Rejected",
-            `Your request for ${request.amount} StarCredits was rejected. ${adminNote ? `Reason: ${adminNote}` : ''}`,
+            NOTIFY_MSGS.ERROR.REQUEST_REJECTED.title,
+            NOTIFY_MSGS.ERROR.REQUEST_REJECTED.description(request.amount, adminNote),
             {
                 deepLink: "/dashboard/teacher/requests",
                 entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_REQUEST,
@@ -175,8 +176,8 @@ export class TeacherService {
         notificationService.notify(
             teacherId,
             NOTIFICATION_TYPES.SYSTEM,
-            "New Student Assigned 🎓",
-            `${student.full_name || 'A student'} has been assigned to your roster.`,
+            NOTIFY_MSGS.INFO.STUDENT_ASSIGNED.title,
+            NOTIFY_MSGS.INFO.STUDENT_ASSIGNED.description(student.full_name ?? null),
             {
                 deepLink: `/dashboard/teacher/students/${studentId}`,
                 entityType: NOTIFICATION_ENTITY_TYPES.USER,
@@ -188,8 +189,8 @@ export class TeacherService {
         notificationService.notify(
             studentId,
             NOTIFICATION_TYPES.SYSTEM,
-            "Teacher Assigned 👨‍🏫",
-            `You have been assigned to ${teacher.full_name || 'a new teacher'}. They can now monitor your progress and grant you credits.`,
+            NOTIFY_MSGS.INFO.TEACHER_ASSIGNED.title,
+            NOTIFY_MSGS.INFO.TEACHER_ASSIGNED.description(teacher.full_name ?? null),
             {
                 deepLink: "/dashboard",
                 entityType: NOTIFICATION_ENTITY_TYPES.USER,

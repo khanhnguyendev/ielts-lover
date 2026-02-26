@@ -41,6 +41,7 @@ import { useNotification } from "@/lib/contexts/notification-context"
 import { extractBillingError } from "@/lib/billing-errors"
 import { EvaluatingOverlay } from "@/components/global/evaluating-overlay"
 import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
@@ -68,17 +69,17 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                     const updatedData = await getAttemptWithExercise(realData.id)
                     setRealData(updatedData as any)
                     window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -10 } }))
-                    notifySuccess("Analysis Complete", "Your score is ready.", "View")
+                    notifySuccess(NOTIFY_MSGS.SUCCESS.ANALYSIS_COMPLETE.title, NOTIFY_MSGS.SUCCESS.ANALYSIS_COMPLETE.description, "View")
                 } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
-                    notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough StarCredits.", "Close")
+                    notifyError(NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.title, extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.description, "Close")
                 } else {
                     const debugInfo = ('traceId' in result && result.traceId) ? `\n\nTrace ID: ${result.traceId}` : ""
-                    notifyError("Evaluation Failed", ('message' in result && result.message ? result.message : "Evaluation failed") + debugInfo, "Close")
+                    notifyError(NOTIFY_MSGS.ERROR.EVALUATION_FAILED.title, ('message' in result && result.message ? result.message : NOTIFY_MSGS.ERROR.EVALUATION_FAILED.description) + debugInfo, "Close")
                 }
             } catch (error: any) {
                 console.error(error)
                 const traceId = error.traceId ? `\n\nTrace ID: ${error.traceId}` : ""
-                notifyError("Evaluation Failed", `Could not process your request.${traceId}`, "Close")
+                notifyError(NOTIFY_MSGS.ERROR.EVALUATION_FAILED.title, `${NOTIFY_MSGS.ERROR.EVALUATION_FAILED.description}${traceId}`, "Close")
             } finally {
                 setIsEvaluating(false)
             }
@@ -88,9 +89,9 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
     const handleEvaluate = () => {
         notifyWarning(
-            "Confirm Evaluation",
-            "Are you sure you want to spend credits to evaluate this attempt with AI?",
-            "Confirm",
+            NOTIFY_MSGS.WARNING.CONFIRM_EVALUATION.title,
+            NOTIFY_MSGS.WARNING.CONFIRM_EVALUATION.description,
+            NOTIFY_MSGS.WARNING.CONFIRM_EVALUATION.action,
             () => setPendingEvaluate(true)
         )
     }

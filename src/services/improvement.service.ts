@@ -1,4 +1,5 @@
 import { FEATURE_KEYS, SkillType } from "@/lib/constants";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 import { IMistakeRepository, IActionPlanRepository, UserMistake, UserActionPlan } from "@/repositories/interfaces";
 import { CreditService } from "./credit.service";
 import { AIService, AIUsageMetadata } from "./ai.service";
@@ -77,8 +78,8 @@ export class ImprovementService {
             await notificationService.notify(
                 userId,
                 NOTIFICATION_TYPES.EVALUATION_COMPLETE,
-                "Analysis Ready 🧠",
-                `Your AI Weakness Analysis of ${mistakes.length} mistakes is ready to review.`,
+                NOTIFY_MSGS.SUCCESS.ANALYSIS_READY.title,
+                NOTIFY_MSGS.SUCCESS.ANALYSIS_READY.description(mistakes.length),
                 {
                     deepLink: `/dashboard/improvement`,
                     entityType: NOTIFICATION_ENTITY_TYPES.USER,

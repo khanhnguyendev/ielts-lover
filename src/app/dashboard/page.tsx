@@ -29,6 +29,7 @@ import { CreditTransaction } from "@/repositories/interfaces"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { ActivityItem } from "@/components/dashboard/activity-item"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
@@ -39,12 +40,12 @@ export default function DashboardPage() {
 
     const handleChatSubmit = () => {
         if (!chatInput.trim()) return
-        notifySuccess("Message Sent", "Horsebot is thinking and will reply soon!", "Close")
+        notifySuccess(NOTIFY_MSGS.SUCCESS.MESSAGE_SENT.title, NOTIFY_MSGS.SUCCESS.MESSAGE_SENT.description, "Close")
         setChatInput("")
     }
 
     const handleFeatureClick = (feature: string) => {
-        notifyInfo("Coming Soon", `The ${feature} feature is currently under development.`, "Close")
+        notifyInfo(NOTIFY_MSGS.INFO.COMING_SOON.title, `The ${feature} feature is currently under development.`, "Close")
     }
 
     React.useEffect(() => {

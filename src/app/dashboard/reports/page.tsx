@@ -31,6 +31,7 @@ import { ATTEMPT_STATES } from "@/lib/constants";
 import { extractBillingError } from "@/lib/billing-errors";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecentReportCard, ReportComponentProps } from "@/components/dashboard/recent-report-card";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
@@ -102,9 +103,9 @@ export default function ReportsPage() {
 
     const handleReevaluate = async (id: string) => {
         notifyWarning(
-            "Confirm Re-evaluation",
-            "This will use 1 StarCredit to get a detailed AI report for this attempt. Do you want to proceed?",
-            "Get AI Feedback",
+            NOTIFY_MSGS.WARNING.CONFIRM_REEVALUATION.title,
+            NOTIFY_MSGS.WARNING.CONFIRM_REEVALUATION.description,
+            NOTIFY_MSGS.WARNING.CONFIRM_REEVALUATION.action,
             async () => {
                 setReevaluatingId(id)
                 setReevalStep(1)
@@ -118,7 +119,7 @@ export default function ReportsPage() {
                     clearTimeout(t1)
                     clearTimeout(t2)
                     if (result.success) {
-                        notifySuccess("Evaluation Complete", "Your report has been updated with the latest AI feedback.", "View Report")
+                        notifySuccess(NOTIFY_MSGS.SUCCESS.EVALUATION_COMPLETE.title, NOTIFY_MSGS.SUCCESS.EVALUATION_COMPLETE.description, "View Report")
                         router.refresh()
                         await fetchReports()
                     } else {
@@ -127,12 +128,12 @@ export default function ReportsPage() {
                         if (billing) {
                             notifyError(billing.title, billing.message, "Close")
                         } else {
-                            notifyError("Evaluation Failed", "Try again later", "Close", (result as any).traceId)
+                            notifyError(NOTIFY_MSGS.ERROR.EVALUATION_FAILED.title, NOTIFY_MSGS.ERROR.EVALUATION_FAILED.description, "Close", (result as any).traceId)
                         }
                     }
                 } catch {
                     window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: 1 } }))
-                    notifyError("System Error", "Please try again later", "Close")
+                    notifyError(NOTIFY_MSGS.ERROR.SYSTEM_ERROR.title, NOTIFY_MSGS.ERROR.SYSTEM_ERROR.description, "Close")
                 } finally {
                     setReevaluatingId(null)
                     setReevalStep(0)

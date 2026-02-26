@@ -17,6 +17,7 @@ import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { StarsBalance } from "@/components/dashboard/stars-balance"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 export default function SettingsPage() {
     const { notifySuccess, notifyError } = useNotification()
@@ -43,7 +44,7 @@ export default function SettingsPage() {
                 }
             } catch (err) {
                 console.error(err)
-                notifyError("Load Failed", "Could not load your profile.")
+                notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description)
             } finally {
                 setIsLoading(false)
             }
@@ -72,10 +73,10 @@ export default function SettingsPage() {
             })
             // Update local user state so hasChanges resets
             setUser(prev => prev ? { ...prev, full_name: fullName, target_score: targetScore, test_type: testType, exam_date: examDate } : null)
-            notifySuccess("Saved", "Your settings have been updated.")
+            notifySuccess(NOTIFY_MSGS.SUCCESS.SETTINGS_UPDATED.title, NOTIFY_MSGS.SUCCESS.SETTINGS_UPDATED.description)
         } catch (err) {
             console.error(err)
-            notifyError("Save Failed", "Could not save your settings. Please try again.")
+            notifyError(NOTIFY_MSGS.ERROR.UPDATE_FAILED.title, NOTIFY_MSGS.ERROR.UPDATE_FAILED.description)
         } finally {
             setIsSaving(false)
         }

@@ -6,10 +6,10 @@ import { TextEdit } from "@/types/writing"
 import { X, Sparkles, Zap, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { improveSentence, getFeaturePrice } from "@/app/actions";
-import { toast } from "sonner";
 import { FEATURE_KEYS } from "@/lib/constants";
 import { extractBillingError } from "@/lib/billing-errors";
 import { useNotification } from "@/lib/contexts/notification-context";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 interface CorrectionPanelProps {
     sentenceText: string | null
@@ -21,7 +21,7 @@ interface CorrectionPanelProps {
 
 export function CorrectionPanel({ sentenceText, corrections, onClose, className, targetScore = 9.0 }: CorrectionPanelProps) {
     // ...
-    const { notifyError } = useNotification();
+    const { notifySuccess, notifyError } = useNotification();
     const [isRewriting, setIsRewriting] = React.useState(false);
     const [rewrittenSentence, setRewrittenSentence] = React.useState<string | null>(null);
     const [cost, setCost] = React.useState<number | null>(null);
@@ -66,8 +66,8 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                 } else {
                     const traceId = (result as any).traceId;
                     notifyError(
-                        "Rewrite Failed",
-                        "We couldn't rewrite this sentence. Please try again later.",
+                        NOTIFY_MSGS.ERROR.REWRITE_FAILED.title,
+                        NOTIFY_MSGS.ERROR.REWRITE_FAILED.description,
                         "Close",
                         traceId
                     );
@@ -78,8 +78,8 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
             window.dispatchEvent(new CustomEvent('credit-change', { detail: { amount: -deductionAmount } }));
             console.error("Failed to rewrite sentence:", error);
             notifyError(
-                "Unexpected Error",
-                "An unexpected error occurred while rewriting. Please try again.",
+                NOTIFY_MSGS.ERROR.UNEXPECTED.title,
+                NOTIFY_MSGS.ERROR.UNEXPECTED.description,
                 "Close"
             );
         } finally {
@@ -253,7 +253,7 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                                                 className="h-5 px-1.5 text-[9px] hover:bg-indigo-100 text-indigo-400 font-bold uppercase tracking-wider"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(rewrittenSentence);
-                                                    toast.success("Copied to clipboard");
+                                                    notifySuccess(NOTIFY_MSGS.SUCCESS.COPIED.title, NOTIFY_MSGS.SUCCESS.COPIED.description);
                                                 }}
                                             >
                                                 Copy

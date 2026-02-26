@@ -49,14 +49,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export default function UsersPage() {
     const { notifySuccess, notifyError } = useNotification();
@@ -103,7 +100,7 @@ export default function UsersPage() {
             const data = await getAdminUserTransactions(userId);
             setUserTransactions(data);
         } catch (error) {
-            notifyError("Fetch Failed", "Could not load transaction history.");
+            notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description);
         } finally {
             setIsLoadingHistory(false);
         }
@@ -120,7 +117,7 @@ export default function UsersPage() {
             setLastActivityMap(activityMap);
         } catch (error) {
             console.error("Failed to fetch users:", error);
-            notifyError("Fetch Failed", "Could not load user profiles.");
+            notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description);
         } finally {
             setIsLoading(false);
         }
@@ -138,7 +135,7 @@ export default function UsersPage() {
             const data = await getAdminUserAttempts(userId);
             setUserAttempts(data);
         } catch (error) {
-            notifyError("Fetch Failed", "Could not load attempt history.");
+            notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description);
         } finally {
             setIsLoadingAttempts(false);
         }
@@ -154,10 +151,10 @@ export default function UsersPage() {
     const handleSetRole = async (userId: string, role: string) => {
         try {
             await setUserRole(userId, role);
-            notifySuccess("Role Updated", `User role changed to ${role}`);
+            notifySuccess(NOTIFY_MSGS.SUCCESS.ROLE_UPDATED.title, `User role changed to ${role}`);
             fetchUsers();
         } catch (error) {
-            notifyError("Role Update Failed", error instanceof Error ? error.message : "Failed to update role");
+            notifyError(NOTIFY_MSGS.ERROR.UPDATE_FAILED.title, error instanceof Error ? error.message : NOTIFY_MSGS.ERROR.UPDATE_FAILED.description);
         }
     };
 
@@ -171,11 +168,11 @@ export default function UsersPage() {
                 parseInt(adjustmentAmount),
                 adjustmentReason
             );
-            notifySuccess("Credits Adjusted", `Successfully adjusted credits for ${selectedUser.email}`);
+            notifySuccess(NOTIFY_MSGS.SUCCESS.CREDITS_ADJUSTED.title, `Successfully adjusted credits for ${selectedUser.email}`);
             setSelectedUser(null);
             fetchUsers();
         } catch (error) {
-            notifyError("Adjustment Failed", "Failed to update user credits.");
+            notifyError(NOTIFY_MSGS.ERROR.UNEXPECTED.title, NOTIFY_MSGS.ERROR.UNEXPECTED.description);
         } finally {
             setIsAdjusting(false);
         }

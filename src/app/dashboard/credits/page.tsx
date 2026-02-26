@@ -8,6 +8,7 @@ import { getAvailablePackages } from "./actions"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { CreditPackage } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 const TYPE_CONFIG: Record<string, { icon: string; accent: string; badge?: string; lightColor: string }> = {
     starter: { icon: "🌱", accent: "border-slate-200 hover:border-primary/20", lightColor: "bg-slate-50" },
@@ -36,8 +37,8 @@ export default function CreditsPage() {
 
     const handleBuyNow = async (_pkg: CreditPackage) => {
         notifyWarning(
-            "Final Connection Stage",
-            "We are currently finalizing the secure bridge to our payment gateway. Real StarCredits will be available to purchase within the next few days!",
+            NOTIFY_MSGS.WARNING.MARKET_RATES.title,
+            NOTIFY_MSGS.WARNING.MARKET_RATES.description,
             "Notify Me"
         )
     }

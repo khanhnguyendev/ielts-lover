@@ -1,4 +1,5 @@
 import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS, DEFAULT_QUOTAS } from "@/lib/constants";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository } from "../repositories/interfaces";
 
 export class InsufficientFundsError extends Error {
@@ -58,8 +59,8 @@ export class CreditService {
             notificationService.notify(
                 userId,
                 NOTIFICATION_TYPES.CREDITS_RECEIVED,
-                "Daily Credits Reloaded! 🎁",
-                `We've added ${grantAmount} free StarCredits to your account for today's practice.`,
+                NOTIFY_MSGS.INFO.DAILY_GRANT.title,
+                NOTIFY_MSGS.INFO.DAILY_GRANT.description(grantAmount),
                 {
                     deepLink: "/dashboard",
                     entityType: NOTIFICATION_ENTITY_TYPES.USER,
@@ -155,8 +156,8 @@ export class CreditService {
         notificationService.notify(
             userId,
             NOTIFICATION_TYPES.SYSTEM,
-            "Credits Refunded",
-            `We encountered an issue processing your request for ${featureKey.replace(/_/g, ' ')}. Your ${pricing.cost_per_unit} StarCredit${pricing.cost_per_unit > 1 ? 's have' : ' has'} been refunded.`,
+            NOTIFY_MSGS.INFO.REFUND.title,
+            NOTIFY_MSGS.INFO.REFUND.description(featureKey, pricing.cost_per_unit),
             {
                 deepLink: "/dashboard/credits",
                 entityType: NOTIFICATION_ENTITY_TYPES.CREDIT_TRANSACTION,
@@ -190,8 +191,8 @@ export class CreditService {
         notificationService.notify(
             userId,
             NOTIFICATION_TYPES.CREDITS_RECEIVED,
-            "Credits Received! 🌟",
-            `You've received ${amount} StarCredits: ${description}`,
+            NOTIFY_MSGS.INFO.REWARD.title,
+            NOTIFY_MSGS.INFO.REWARD.description(amount, description),
             {
                 deepLink: "/dashboard/credits",
                 entityType: NOTIFICATION_ENTITY_TYPES.USER,
@@ -245,8 +246,8 @@ export class CreditService {
         notificationService.notify(
             userId,
             NOTIFICATION_TYPES.WELCOME,
-            "Welcome to IELTS Lover! 👋",
-            `We've added ${amount} StarCredits to your account to get you started. Happy learning!`,
+            NOTIFY_MSGS.INFO.WELCOME.title,
+            NOTIFY_MSGS.INFO.WELCOME.description(amount),
             {
                 deepLink: "/dashboard",
                 entityType: NOTIFICATION_ENTITY_TYPES.USER,

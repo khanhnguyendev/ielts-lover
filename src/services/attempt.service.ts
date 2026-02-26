@@ -2,6 +2,7 @@ import { Attempt } from "@/types";
 import { IAttemptRepository, IUserRepository, IExerciseRepository } from "../repositories/interfaces";
 import { AIService, AIUsageMetadata } from "./ai.service";
 import { ATTEMPT_STATES, EXERCISE_TYPES, APP_ERROR_CODES } from "@/lib/constants";
+import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export class AttemptService {
     constructor(
@@ -92,8 +93,8 @@ export class AttemptService {
             await notificationService.notify(
                 attempt.user_id,
                 NOTIFICATION_TYPES.EVALUATION_COMPLETE,
-                "Evaluation Ready",
-                `Your ${label} submission has been evaluated.`,
+                NOTIFY_MSGS.SUCCESS.EVALUATION_READY.title,
+                NOTIFY_MSGS.SUCCESS.EVALUATION_READY.description(label),
                 {
                     deepLink: `/dashboard/reports/${id}`,
                     entityId: id,

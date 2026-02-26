@@ -38,6 +38,7 @@ import { PulseLoader } from "@/components/global/pulse-loader"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { FEATURE_KEYS } from "@/lib/constants"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 function getFeatureConfig(key: string) {
     if (key.includes('writing') || key.includes('correction') || key.includes('sentence') || key.includes('example_essay')) {
@@ -85,7 +86,7 @@ export default function AdminSettingsPage() {
             setMaintenanceEnabled(maintenanceSetting?.setting_value === true)
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to fetch settings/pricing")
+            notifyError(NOTIFY_MSGS.ERROR.LOAD_FAILED.title, NOTIFY_MSGS.ERROR.LOAD_FAILED.description)
         } finally {
             setIsLoading(false)
         }
@@ -95,13 +96,13 @@ export default function AdminSettingsPage() {
         setUpdatingKeys(prev => new Set(prev).add(key))
         try {
             await updateSystemSetting(key, value)
-            notifySuccess("Updated", `${key} updated successfully.`)
+            notifySuccess(NOTIFY_MSGS.SUCCESS.SETTINGS_UPDATED.title, `${key} updated successfully.`)
             // Refresh settings only
             const data = await getSystemSettings()
             setSettings(data)
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to update setting")
+            notifyError(NOTIFY_MSGS.ERROR.UPDATE_FAILED.title, NOTIFY_MSGS.ERROR.UPDATE_FAILED.description)
         } finally {
             setUpdatingKeys(prev => {
                 const next = new Set(prev)
@@ -115,13 +116,13 @@ export default function AdminSettingsPage() {
         setUpdatingKeys(prev => new Set(prev).add(key))
         try {
             await updateFeaturePricing(key, cost)
-            notifySuccess("Updated", `Pricing for ${key} updated.`)
+            notifySuccess(NOTIFY_MSGS.SUCCESS.PRICING_UPDATED.title, `Pricing for ${key} updated.`)
             // Refresh pricing only
             const data = await getFeaturePricing()
             setPricing(data)
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to update pricing")
+            notifyError(NOTIFY_MSGS.ERROR.UPDATE_PRICING_FAILED.title, NOTIFY_MSGS.ERROR.UPDATE_PRICING_FAILED.description)
         } finally {
             setUpdatingKeys(prev => {
                 const next = new Set(prev)
@@ -151,7 +152,7 @@ export default function AdminSettingsPage() {
             )
         } catch (error) {
             console.error(error)
-            notifyError("Error", "Failed to toggle maintenance mode")
+            notifyError(NOTIFY_MSGS.ERROR.OPERATION_FAILED.title, NOTIFY_MSGS.ERROR.OPERATION_FAILED.description)
         } finally {
             setTogglingMaintenance(false)
         }

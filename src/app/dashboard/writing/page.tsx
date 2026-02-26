@@ -38,6 +38,7 @@ import { ExerciseCard } from "@/components/dashboard/exercise-card"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { RecentReportCard } from "@/components/dashboard/recent-report-card"
 import { extractBillingError } from "@/lib/billing-errors"
+import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 const CATEGORIES = [
     "Academic Task 1",
@@ -136,16 +137,16 @@ export default function WritingHubPage() {
             const result = await reevaluateAttempt(attemptId)
             setReevalStep(3)
             if (result.success) {
-                notifySuccess("Analysis Complete", "Your updated score is ready.", "View")
+                notifySuccess(NOTIFY_MSGS.SUCCESS.UPDATED_SCORE_READY.title, NOTIFY_MSGS.SUCCESS.UPDATED_SCORE_READY.description, "View")
                 setRefreshKey(k => k + 1)
             } else if ('reason' in result && result.reason === "INSUFFICIENT_CREDITS") {
-                notifyError("Insufficient Credits", extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough credits.", "Close")
+                notifyError(NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.title, extractBillingError(new Error("INSUFFICIENT_CREDITS"))?.message || "Not enough credits.", "Close")
             } else {
                 throw new Error(('message' in result ? result.message : "Evaluation failed"))
             }
         } catch (error) {
             console.error("Re-evaluation failed:", error)
-            notifyError("Evaluation Failed", "Could not process your request.", "Close")
+            notifyError(NOTIFY_MSGS.ERROR.EVALUATION_FAILED.title, NOTIFY_MSGS.ERROR.EVALUATION_FAILED.description, "Close")
         } finally {
             setReevaluatingId(null)
             setReevalStep(0)
@@ -173,11 +174,11 @@ export default function WritingHubPage() {
                     setCustomTitle(analysis.data.title)
                 }
             } else if (analysis.error === "INSUFFICIENT_CREDITS") {
-                notifyError("Insufficient Credits", "You need more StarCredits to analyze this image.", "Close")
+                notifyError(NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.title, NOTIFY_MSGS.ERROR.INSUFFICIENT_CREDITS.description, "Close")
             }
         } catch (err) {
             console.error("Image analysis failed:", err)
-            notifyError("Analysis Failed", "Could not analyze the uploaded image.", "Close")
+            notifyError(NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.title, NOTIFY_MSGS.ERROR.ANALYSIS_FAILED.description, "Close")
         } finally {
             setIsAnalyzing(false)
         }
@@ -203,13 +204,13 @@ export default function WritingHubPage() {
                 ...(imageUrl && { image_url: imageUrl }),
                 ...(imageAnalysis?.data_points && { chart_data: imageAnalysis.data_points as unknown as Record<string, unknown> }),
             })
-            notifySuccess("Task Created", "Your custom task has been added successfully!", "Done")
+            notifySuccess(NOTIFY_MSGS.SUCCESS.TASK_CREATED.title, NOTIFY_MSGS.SUCCESS.TASK_CREATED.description, "Done")
             resetCustomTaskForm()
             setIsAddModalOpen(false)
             setRefreshKey(k => k + 1)
         } catch (err) {
             console.error("Failed to create custom task:", err)
-            notifyError("Creation Failed", "Could not create the exercise. Please try again.", "Close")
+            notifyError(NOTIFY_MSGS.ERROR.CREATION_FAILED.title, NOTIFY_MSGS.ERROR.CREATION_FAILED.description, "Close")
         } finally {
             setIsCreating(false)
         }
