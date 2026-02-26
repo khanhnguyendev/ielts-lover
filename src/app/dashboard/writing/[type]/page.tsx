@@ -35,6 +35,7 @@ import { FEATURE_KEYS } from "@/lib/constants"
 import { extractBillingError } from "@/lib/billing-errors"
 import { useTitle } from "@/lib/contexts/title-context"
 import { AuthGate } from "@/components/global/auth-gate"
+import { EvaluatingOverlay } from "@/components/global/evaluating-overlay"
 
 export default function WritingExercisePage({ params }: { params: Promise<{ type: string }> }) {
     const resolvedParams = React.use(params)
@@ -471,54 +472,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 {/* Main Typing Area */}
                 <div className="flex-1 relative group/typing flex flex-col">
                     {/* Evaluating Overlay */}
-                    {isSubmitting && (
-                        <div className="absolute inset-0 z-30 bg-white/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
-                            <div className="flex flex-col items-center gap-8 max-w-sm text-center">
-                                {/* Animated icon */}
-                                <div className="relative">
-                                    <div className="w-24 h-24 rounded-[2rem] bg-primary/5 flex items-center justify-center">
-                                        <Brain className="w-12 h-12 text-primary animate-pulse" />
-                                    </div>
-                                    <div className="absolute -inset-2 rounded-[2.5rem] border-2 border-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <h3 className="text-xl font-black font-outfit text-slate-900">AI Evaluating...</h3>
-                                    <p className="text-sm text-slate-400 font-medium">
-                                        Analyzing your writing across all IELTS criteria
-                                    </p>
-                                </div>
-
-                                {/* Progress steps */}
-                                <div className="w-full space-y-3">
-                                    {[
-                                        { icon: FileCheck, label: "Submitting your essay", step: 1 },
-                                        { icon: Brain, label: "Analyzing content & structure", step: 2 },
-                                        { icon: BarChart3, label: "Scoring band descriptors", step: 3 },
-                                    ].map(({ icon: StepIcon, label, step }) => (
-                                        <div
-                                            key={step}
-                                            className={cn(
-                                                "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500",
-                                                evalStep >= step
-                                                    ? "bg-primary/5 text-slate-900"
-                                                    : "text-slate-300"
-                                            )}
-                                        >
-                                            {evalStep > step ? (
-                                                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                                            ) : evalStep === step ? (
-                                                <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
-                                            ) : (
-                                                <StepIcon className="h-5 w-5 shrink-0" />
-                                            )}
-                                            <span className="text-sm font-bold">{label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    <EvaluatingOverlay isVisible={isSubmitting} step={evalStep} />
 
                     {/* Background indicators or guidelines */}
                     <div className="absolute inset-0 pointer-events-none opacity-[0.02] flex flex-col px-12 pt-16 gap-8">
