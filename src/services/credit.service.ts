@@ -50,6 +50,22 @@ export class CreditService {
                 type: TRANSACTION_TYPES.DAILY_GRANT,
                 description: "Daily StarCredits replenishment"
             });
+
+            // Notify user about daily grant
+            const { notificationService } = await import("@/lib/notification-client");
+            const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+            notificationService.notify(
+                userId,
+                NOTIFICATION_TYPES.CREDITS_RECEIVED,
+                "Daily Credits Reloaded! 🎁",
+                `We've added ${grantAmount} free StarCredits to your account for today's practice.`,
+                {
+                    deepLink: "/dashboard",
+                    entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                    entityId: userId,
+                }
+            ).catch(err => console.error("Daily grant notification failed", err));
         }
     }
 
@@ -166,6 +182,22 @@ export class CreditService {
             description: description,
             granted_by_admin: grantedByAdmin
         });
+
+        // Notify user about the reward
+        const { notificationService } = await import("@/lib/notification-client");
+        const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+        notificationService.notify(
+            userId,
+            NOTIFICATION_TYPES.CREDITS_RECEIVED,
+            "Credits Received! 🌟",
+            `You've received ${amount} StarCredits: ${description}`,
+            {
+                deepLink: "/dashboard/credits",
+                entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                entityId: userId,
+            }
+        ).catch(err => console.error("Reward notification failed", err));
     }
 
     /**
@@ -205,6 +237,22 @@ export class CreditService {
             TRANSACTION_TYPES.REWARD,
             "Welcome to IELTS Lover!"
         );
+
+        // Notify user about the welcome bonus
+        const { notificationService } = await import("@/lib/notification-client");
+        const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+        notificationService.notify(
+            userId,
+            NOTIFICATION_TYPES.WELCOME,
+            "Welcome to IELTS Lover! 👋",
+            `We've added ${amount} StarCredits to your account to get you started. Happy learning!`,
+            {
+                deepLink: "/dashboard",
+                entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                entityId: userId,
+            }
+        ).catch(err => console.error("Welcome bonus notification failed", err));
     }
 
     async getBalance(userId: string): Promise<number> {
