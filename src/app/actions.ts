@@ -245,13 +245,7 @@ export const submitAttempt = traceAction("submitAttempt", async (attemptId: stri
         const aiMethod = exercise.type.startsWith("writing") ? "generateWritingReport" : "generateFeedback";
         recordAICost(usage, user.id, featureKey, aiMethod, 1, traceId);
 
-        notifyAIComplete(
-            user.id,
-            "Evaluation Ready",
-            `Your ${exercise.type.startsWith("writing") ? "writing" : "speaking"} submission has been evaluated.`,
-            `/dashboard/reports/${attemptId}`,
-            attemptId,
-        );
+
 
         return evaluatedAttempt;
     } catch (error) {

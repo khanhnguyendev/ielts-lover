@@ -82,6 +82,28 @@ export class AttemptService {
             evaluated_at: new Date().toISOString()
         });
 
+        // Trigger Evaluation Complete Notification
+        try {
+            const { notificationService } = await import("@/lib/notification-client");
+            const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+            const label = exercise.type.startsWith("writing") ? "writing" : "speaking";
+
+            await notificationService.notify(
+                attempt.user_id,
+                NOTIFICATION_TYPES.EVALUATION_COMPLETE,
+                "Evaluation Ready",
+                `Your ${label} submission has been evaluated.`,
+                {
+                    deepLink: `/dashboard/reports/${id}`,
+                    entityId: id,
+                    entityType: NOTIFICATION_ENTITY_TYPES.ATTEMPT,
+                }
+            );
+        } catch (err) {
+            console.error("[AttemptService] Failed to send evaluation notification:", err);
+        }
+
         return usage;
     }
 
