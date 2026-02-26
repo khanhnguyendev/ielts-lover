@@ -69,6 +69,26 @@ export class ImprovementService {
             mistakes_analyzed: mistakes.length,
         });
 
+        // 5. Notify user that weakness analysis is ready
+        try {
+            const { notificationService } = await import("@/lib/notification-client");
+            const { NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } = await import("@/lib/constants");
+
+            await notificationService.notify(
+                userId,
+                NOTIFICATION_TYPES.EVALUATION_COMPLETE,
+                "Analysis Ready 🧠",
+                `Your AI Weakness Analysis of ${mistakes.length} mistakes is ready to review.`,
+                {
+                    deepLink: `/dashboard/improvement`,
+                    entityType: NOTIFICATION_ENTITY_TYPES.USER,
+                    entityId: userId,
+                }
+            );
+        } catch (err) {
+            console.error("[ImprovementService] Failed to send analysis notification:", err);
+        }
+
         return { plan, usage: result.usage };
     }
 }
