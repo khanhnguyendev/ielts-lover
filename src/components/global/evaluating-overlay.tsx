@@ -8,10 +8,25 @@ interface EvaluatingOverlayProps {
 }
 
 export function EvaluatingOverlay({ isVisible, step = 1 }: EvaluatingOverlayProps) {
+    const [showSlowMessage, setShowSlowMessage] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!isVisible) {
+            setShowSlowMessage(false);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setShowSlowMessage(true);
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    }, [isVisible]);
+
     if (!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-[110] bg-white/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[110] bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
             <div className="flex flex-col items-center gap-8 max-w-sm text-center w-full px-4">
                 {/* Animated icon */}
                 <div className="relative">
@@ -55,6 +70,15 @@ export function EvaluatingOverlay({ isVisible, step = 1 }: EvaluatingOverlayProp
                         </div>
                     ))}
                 </div>
+
+                {showSlowMessage && (
+                    <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <p className="text-[12px] text-slate-500 font-medium italic bg-white px-5 py-2.5 rounded-full border border-slate-200 shadow-sm inline-flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
+                            AI is taking a bit longer than usual. Please hold on...
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );
