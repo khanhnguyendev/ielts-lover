@@ -67,11 +67,13 @@ export function PremiumFeatureCard({
 }: PremiumFeatureCardProps) {
     const v = VARIANTS[variant];
     const [currentStep, setCurrentStep] = React.useState(0);
+    const [showSlowMessage, setShowSlowMessage] = React.useState(false);
 
     // Progress through steps on timers when unlocking
     React.useEffect(() => {
         if (!isUnlocking || !unlockingSteps?.length) {
             setCurrentStep(0);
+            setShowSlowMessage(false);
             return;
         }
 
@@ -80,6 +82,10 @@ export function PremiumFeatureCard({
         for (let i = 2; i <= unlockingSteps.length; i++) {
             timers.push(setTimeout(() => setCurrentStep(i), (i - 1) * 2000));
         }
+
+        // Show slow message after 10 seconds
+        timers.push(setTimeout(() => setShowSlowMessage(true), 10000));
+
         return () => timers.forEach(clearTimeout);
     }, [isUnlocking, unlockingSteps?.length]);
 
@@ -148,6 +154,15 @@ export function PremiumFeatureCard({
                                 );
                             })}
                         </div>
+
+                        {showSlowMessage && (
+                            <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <p className="text-[10px] text-slate-500 font-medium italic bg-white/80 px-4 py-2 rounded-full border border-slate-100 shadow-sm inline-flex items-center gap-2">
+                                    <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                                    AI is taking a bit longer than usual. Please hold on...
+                                </p>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     /* Default Unlock CTA */
