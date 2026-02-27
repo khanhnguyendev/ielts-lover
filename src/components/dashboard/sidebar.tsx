@@ -111,9 +111,9 @@ export function DashboardSidebar() {
                 <div className="flex-1 space-y-8 overflow-y-auto no-scrollbar px-1">
                     <nav className="space-y-1.5">
                         {!isCollapsed && (
-                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Practice Lab</p>
+                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Neural Analytics</p>
                         )}
-                        {MENU_PRACTICE.map((item) => (
+                        {MENU_ANALYSIS.map((item) => (
                             <SidebarItem
                                 key={item.href}
                                 {...item}
@@ -126,9 +126,9 @@ export function DashboardSidebar() {
 
                     <nav className="space-y-1.5">
                         {!isCollapsed && (
-                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Neural Analytics</p>
+                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Practice Lab</p>
                         )}
-                        {MENU_ANALYSIS.map((item) => (
+                        {MENU_PRACTICE.map((item) => (
                             <SidebarItem
                                 key={item.href}
                                 {...item}
