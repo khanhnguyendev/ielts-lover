@@ -4,216 +4,203 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-    Home,
-    FileText,
+    LayoutDashboard,
     PenTool,
     Mic2,
-    RefreshCw,
-    BookOpen,
-    PieChart,
-    Tag,
-    MessageCircle,
-    ChevronLeft,
-    Search,
-    ExternalLink,
+    BarChart3,
     History,
-    TrendingUp
+    Zap,
+    Settings,
+    HelpCircle,
+    Menu,
+    X,
+    Sparkles,
+    ChevronLeft,
+    ChevronRight,
+    TrendingDown,
+    Brain,
+    Languages,
+    LucideIcon
 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { InviteFriendsModal } from "./invite-friends-modal"
 
-const NAV_GROUPS = [
-    {
-        label: "Dashboard",
-        items: [
-            { icon: Home, label: "Home", href: "/dashboard" },
-            { icon: PieChart, label: "My Reports", href: "/dashboard/reports" },
-            { icon: TrendingUp, label: "Improvement", href: "/dashboard/improvement" },
-            { icon: History, label: "Transactions", href: "/dashboard/transactions" },
-        ]
-    },
-    {
-        label: "Practice Area",
-        items: [
-            { icon: PenTool, label: "Writing Tasks", href: "/dashboard/writing" },
-            {
-                icon: Mic2,
-                label: "Speaking Practice",
-                href: "/dashboard/speaking",
-                badge: "Soon",
-                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
-            },
-            {
-                icon: RefreshCw,
-                label: "IELTS Rewriter",
-                href: "/dashboard/rewriter",
-                badge: "Soon",
-                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
-            },
-        ]
-    },
-    {
-        label: "Resources",
-        items: [
-            {
-                icon: BookOpen,
-                label: "Lessons Hub",
-                href: "/dashboard/lessons",
-                badge: "Soon",
-                badgeColor: "bg-amber-100 text-amber-600 border-amber-200"
-            },
-            { icon: FileText, label: "Sample Reports", href: "/dashboard/samples" },
-        ]
-    }
+const MENU_ITEMS_TOP = [
+    { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+    { icon: PenTool, label: "Writing Lab", href: "/dashboard/writing" },
+    { icon: Mic2, label: "Speaking Lab", href: "/dashboard/speaking" },
+    { icon: Languages, label: "Rewriter", href: "/dashboard/rewriter" },
+    { icon: Brain, label: "Improvement", href: "/dashboard/improvement" },
+    { icon: BarChart3, label: "Performance", href: "/dashboard/reports" },
 ]
 
-const BOTTOM_NAV = [
-    { icon: Tag, label: "Buy Credits", href: "/dashboard/credits" },
-    { icon: MessageCircle, label: "Support", href: "/dashboard/support" },
+const MENU_ITEMS_BOTTOM = [
+    { icon: Zap, label: "StarCredits", href: "/dashboard/credits" },
+    { icon: History, label: "History", href: "/dashboard/transactions" },
+    { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+    { icon: HelpCircle, label: "Get Help", href: "/dashboard/support" },
 ]
 
 export function DashboardSidebar() {
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = React.useState(false)
-    const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
+    const [isMobileOpen, setIsMobileOpen] = React.useState(false)
 
     return (
-        <div
-            className={cn(
-                "relative flex flex-col h-screen border-r bg-white transition-all duration-300",
-                isCollapsed ? "w-[80px]" : "w-[260px]"
-            )}
-        >
-            {/* Logo Section */}
-            <div className="p-4 flex items-center justify-between">
-                {!isCollapsed && (
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                        <div className="flex flex-col">
-                            <span className="text-xl font-bold font-outfit text-primary tracking-tight">IELTS LOVER</span>
-                            <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] -mt-1 uppercase">Practice Platform</span>
-                        </div>
-                    </Link>
+        <>
+            {/* Mobile Overlay */}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsMobileOpen(false)}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40] lg:hidden"
+                    />
                 )}
-                {isCollapsed && (
-                    <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 mx-auto" />
-                )}
+            </AnimatePresence>
 
+            {/* Mobile Toggle */}
+            <div className="fixed top-4 left-4 z-[50] lg:hidden">
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute -right-3 top-20 h-6 w-6 rounded-full border bg-white shadow-sm hover:bg-muted"
+                    onClick={() => setIsMobileOpen(!isMobileOpen)}
+                    className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md border border-slate-200 shadow-xl"
                 >
-                    <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+                    {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
                 </Button>
             </div>
 
-            {/* Main Navigation */}
-            <ScrollArea className="flex-1 px-3 py-2">
-                <div className="space-y-4">
-                    {NAV_GROUPS.map((group, idx) => (
-                        <div key={group.label || idx} className="space-y-1.5">
-                            {!isCollapsed && (
-                                <h3 className="px-3 text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-2">
-                                    {group.label}
-                                </h3>
-                            )}
-                            {group.items.map((item: any) => {
-                                const isActive = pathname === item.href
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className={cn(
-                                            "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
-                                            isActive
-                                                ? "bg-primary text-white shadow-md shadow-primary/20"
-                                                : "text-muted-foreground hover:bg-muted"
-                                        )}
-                                    >
-                                        <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "group-hover:text-primary transition-colors")} />
-                                        {!isCollapsed && (
-                                            <div className="flex-1 flex items-center justify-between">
-                                                <span className="text-sm font-semibold">{item.label}</span>
-                                                {item.badge && (
-                                                    <span className={cn(
-                                                        "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border",
-                                                        item.badgeColor || "bg-slate-100 text-slate-600 border-slate-200"
-                                                    )}>
-                                                        {item.badge}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                        {isCollapsed && (
-                                            <div className="absolute left-14 bg-foreground text-background px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex items-center gap-2">
-                                                {item.label}
-                                                {item.badge && (
-                                                    <span className="text-[9px] font-bold bg-white/20 px-1 rounded">
-                                                        {item.badge}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Link>
-                                )
-                            })}
+            {/* Main Sidebar */}
+            <motion.aside
+                initial={false}
+                animate={{
+                    width: isCollapsed ? 88 : 280,
+                    x: isMobileOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -300 : 0)
+                }}
+                className={cn(
+                    "fixed inset-y-0 left-0 lg:relative z-[45] h-screen bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transition-all duration-500 ease-in-out p-4",
+                    isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+                )}
+            >
+                {/* Logo Section */}
+                <div className="h-16 flex items-center px-3 mb-8">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
+                            <Sparkles size={20} className="animate-pulse" />
                         </div>
-                    ))}
-                </div>
-            </ScrollArea>
-
-            {/* Invite Section */}
-            {!isCollapsed && (
-                <div className="px-4 mb-4">
-                    <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-lg shadow-indigo-200 group transition-all hover:shadow-indigo-300">
-                        {/* Decorative background circle */}
-                        <div className="absolute -right-2 -bottom-2 w-16 h-16 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="p-1.5 rounded-lg bg-white/20">
-                                    <ExternalLink className="h-4 w-4 text-white" />
-                                </div>
-                                <h4 className="text-sm font-black tracking-tight text-white underline-offset-4 decoration-white/30 underline">Refer & Earn</h4>
-                            </div>
-
-                            <p className="text-xs text-white/90 font-medium leading-relaxed mb-4">
-                                Get <span className="text-white font-black underline decoration-yellow-400">100 StarCredits</span> for every friend who joins.
-                            </p>
-
-                            <Button
-                                onClick={() => setIsInviteModalOpen(true)}
-                                size="sm"
-                                className="h-9 w-full bg-white text-indigo-600 hover:bg-white/90 text-[10px] font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all"
+                        {!isCollapsed && (
+                            <motion.span
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-xl font-black font-outfit tracking-tighter text-slate-900 dark:text-white"
                             >
-                                Share the love 🐴
-                            </Button>
-                        </div>
+                                IELTS<span className="text-primary truncate">LOVER</span>
+                            </motion.span>
+                        )}
                     </div>
                 </div>
-            )}
 
-            <InviteFriendsModal
-                open={isInviteModalOpen}
-                onOpenChange={setIsInviteModalOpen}
-            />
+                {/* Navigation Items */}
+                <div className="flex-1 space-y-8 overflow-y-auto no-scrollbar px-1">
+                    <nav className="space-y-1.5">
+                        {!isCollapsed && (
+                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Core Lab</p>
+                        )}
+                        {MENU_ITEMS_TOP.map((item) => (
+                            <SidebarItem
+                                key={item.href}
+                                {...item}
+                                active={pathname === item.href}
+                                collapsed={isCollapsed}
+                                onClick={() => setIsMobileOpen(false)}
+                            />
+                        ))}
+                    </nav>
 
-            {/* Bottom Navigation */}
-            <div className="px-3 pb-6 space-y-1.5 border-t pt-6">
-                {BOTTOM_NAV.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted transition-all group relative"
+                    <nav className="space-y-1.5">
+                        {!isCollapsed && (
+                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Account</p>
+                        )}
+                        {MENU_ITEMS_BOTTOM.map((item) => (
+                            <SidebarItem
+                                key={item.href}
+                                {...item}
+                                active={pathname === item.href}
+                                collapsed={isCollapsed}
+                                onClick={() => setIsMobileOpen(false)}
+                            />
+                        ))}
+                    </nav>
+                </div>
+
+                {/* Collapse Toggle (Desktop) */}
+                <div className="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800/50 hidden lg:block">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="w-full h-11 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-primary transition-all duration-300"
                     >
-                        <item.icon className="h-5 w-5 group-hover:text-primary transition-colors" />
-                        {!isCollapsed && <span className="text-sm font-semibold">{item.label}</span>}
-                    </Link>
-                ))}
+                        <motion.div
+                            animate={{ rotate: isCollapsed ? 180 : 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                            <ChevronRight size={20} />
+                        </motion.div>
+                    </button>
+                </div>
+            </motion.aside>
+        </>
+    )
+}
+
+function SidebarItem({ icon: Icon, label, href, active, collapsed, onClick }: {
+    icon: LucideIcon,
+    label: string,
+    href: string,
+    active: boolean,
+    collapsed: boolean,
+    onClick?: () => void
+}) {
+    return (
+        <Link href={href} onClick={onClick} className="block relative group">
+            <div className={cn(
+                "h-11 flex items-center gap-3 px-3 rounded-xl transition-all duration-300 relative z-10",
+                active
+                    ? "text-primary font-black shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 font-bold hover:text-slate-900 dark:hover:text-white"
+            )}>
+                {/* Active Indicator Background */}
+                {active && (
+                    <motion.div
+                        layoutId="active-indicator"
+                        className="absolute inset-0 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10 dark:border-primary/20"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                )}
+
+                <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110",
+                    active ? "bg-primary/10 text-primary" : "bg-transparent"
+                )}>
+                    <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                </div>
+
+                {!collapsed && (
+                    <motion.span
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="text-sm tracking-tight truncate"
+                    >
+                        {label}
+                    </motion.span>
+                )}
+
+                {/* Hover Glow Effect */}
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-slate-100/50 dark:bg-slate-800/30 transition-opacity -z-10" />
             </div>
-        </div>
+        </Link>
     )
 }

@@ -14,8 +14,10 @@ import {
     Star,
     Target,
     Clock,
+    ArrowRight,
     type LucideIcon
 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -307,67 +309,102 @@ export default function WritingHubPage() {
             <div className="p-6 lg:p-12 space-y-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
 
                 {/* Header Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <StatCard
+                        index={0}
                         icon={Activity}
                         label="Total Writing"
                         value={totalAttempts.toString()}
                         subLabel="Essays Written"
                         color="text-indigo-600"
-                        bgColor="bg-indigo-50"
+                        bgColor="bg-indigo-100/50"
                     />
                     <StatCard
+                        index={1}
                         icon={FileText}
                         label="Evaluated"
                         value={evaluatedAttempts.length.toString()}
                         subLabel="Scored by AI"
                         color="text-emerald-600"
-                        bgColor="bg-emerald-50"
+                        bgColor="bg-emerald-100/50"
                     />
                     <StatCard
+                        index={2}
                         icon={Target}
                         label="Avg Band"
                         value={averageScore}
                         subLabel="Writing Score"
                         color="text-purple-600"
-                        bgColor="bg-purple-50"
+                        bgColor="bg-purple-100/50"
                     />
                     <StatCard
+                        index={3}
                         icon={Clock}
                         label="In Progress"
                         value={attempts.filter(a => a.state !== ATTEMPT_STATES.EVALUATED && a.state !== ATTEMPT_STATES.SUBMITTED).length.toString()}
                         subLabel="Active essays"
                         color="text-amber-600"
-                        bgColor="bg-amber-50"
+                        bgColor="bg-amber-100/50"
                     />
                 </div>
 
                 {/* Featured Recent Report */}
-                {recentAttempt && (
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 pl-2">
-                            <Sparkles size={18} className="text-primary" />
-                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Featured Recent Report</h2>
-                        </div>
-                        <RecentReportCard
-                            attempt={recentAttempt}
-                            onReevaluate={handleReevaluate}
-                            reevaluatingId={reevaluatingId}
-                            reevalStep={reevalStep}
-                        />
-                    </div>
-                )}
+                <div className="min-h-[200px] relative">
+                    <AnimatePresence mode="wait">
+                        {isLoading ? (
+                            <motion.div
+                                key="skeleton"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="space-y-4"
+                            >
+                                <div className="flex items-center gap-2 pl-2">
+                                    <div className="w-18 h-4 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                                </div>
+                                <div className="h-[200px] w-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] animate-pulse flex items-center justify-center">
+                                    <PulseLoader size="md" color="primary" />
+                                </div>
+                            </motion.div>
+                        ) : recentAttempt ? (
+                            <motion.div
+                                key="report"
+                                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{
+                                    duration: 0.8,
+                                    ease: [0.16, 1, 0.3, 1],
+                                }}
+                                className="space-y-4"
+                            >
+                                <div className="flex items-center gap-2 pl-2">
+                                    <Sparkles size={18} className="text-primary animate-pulse" />
+                                    <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Featured Recent Report</h2>
+                                </div>
+                                <RecentReportCard
+                                    attempt={recentAttempt}
+                                    onReevaluate={handleReevaluate}
+                                    reevaluatingId={reevaluatingId}
+                                    reevalStep={reevalStep}
+                                />
+                            </motion.div>
+                        ) : null}
+                    </AnimatePresence>
+                </div>
 
                 {/* 1. Header & Tabs */}
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pt-4">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/20">
-                                <PenTool size={20} />
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-primary rounded-2xl text-white shadow-xl shadow-primary/20">
+                                <PenTool size={24} />
                             </div>
-                            <h1 className="text-2xl font-black font-outfit text-slate-900">Writing Lab</h1>
+                            <div>
+                                <h1 className="text-3xl font-black font-outfit text-slate-900 dark:text-white tracking-tight">Writing Lab</h1>
+                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Master Academic & General IELTS</p>
+                            </div>
                         </div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Master Academic & General IELTS</p>
                     </div>
 
                     <FilterGroup
@@ -379,7 +416,7 @@ export default function WritingHubPage() {
                 </div>
 
                 {/* 2. Content Area */}
-                <div className="bg-white rounded-[2.5rem] p-4 lg:p-10 shadow-xl shadow-slate-200/40 border border-slate-100 min-h-[600px]">
+                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl rounded-[2.5rem] p-4 lg:p-10 shadow-2xl border border-white/20 dark:border-slate-800/50 min-h-[600px]">
                     <div className="space-y-8">
                         {/* Secondary Filter & Count */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
@@ -396,46 +433,54 @@ export default function WritingHubPage() {
                             ) : (
                                 <div />
                             )}
-                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                 {exercises.length} of {totalExercises} Exercises
                             </div>
                         </div>
 
                         {isLoading ? (
-                            <div className="py-32 flex flex-col items-center justify-center gap-4">
+                            <div className="py-32 flex flex-col items-center justify-center gap-6">
                                 <PulseLoader size="lg" color="primary" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 animate-pulse">Syncing Exercises...</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 animate-pulse">Syncing Exercises Lab...</p>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-5">
                                 {/* Add Custom Row */}
-                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both" style={{ animationDelay: '0ms' }}>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
                                     <button
                                         onClick={() => setIsAddModalOpen(true)}
-                                        className="group w-full bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:bg-indigo-50/50 hover:border-indigo-300/50 transition-all duration-300"
+                                        className="group w-full bg-white/50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700/50 rounded-3xl p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 hover:bg-white dark:hover:bg-slate-800/50 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-xl"
                                     >
-                                        <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shrink-0">
-                                            <Plus size={20} />
+                                        <div className="w-16 h-16 rounded-2xl bg-primary/5 dark:bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shrink-0">
+                                            <Plus size={28} />
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <p className="text-base font-black text-slate-900 group-hover:text-indigo-700 transition-colors">Custom Task</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Add your own prompt or image</p>
+                                            <p className="text-xl font-black text-slate-900 dark:text-white group-hover:text-primary transition-colors">Custom Task</p>
+                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Upload your own prompt or image to analyze</p>
                                         </div>
-                                        <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300 shrink-0 mt-4 sm:mt-0">
-                                            <Plus size={14} />
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shrink-0 mt-4 sm:mt-0 shadow-sm">
+                                            <Plus size={18} />
                                         </div>
                                     </button>
-                                </div>
+                                </motion.div>
 
-                                {filteredExercises.map((ex, idx) => (
-                                    <div
-                                        key={ex.id}
-                                        className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                                        style={{ animationDelay: `${(idx + 1) * 100}ms` }}
-                                    >
-                                        <ExerciseCard {...ex} />
-                                    </div>
-                                ))}
+                                <AnimatePresence mode="popLayout">
+                                    {filteredExercises.map((ex, idx) => (
+                                        <motion.div
+                                            key={ex.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.4, delay: (idx + 1) * 0.05 }}
+                                        >
+                                            <ExerciseCard {...ex} />
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
 
                                 {/* Load More */}
                                 {hasMore && (

@@ -65,6 +65,11 @@
   --foreground-accent: hsl(262 80% 48%);
   /* Indigo 700ish - Safer contrast ratio (>7:1) */
 
+  /* Glassmorphism Tokens */
+  --glass-surface: hsla(0, 0%, 100%, 0.7);
+  --glass-border: hsla(0, 0%, 100%, 0.1);
+  --glass-blur: 12px;
+
   /* Borders */
   --border-default: hsl(214 32% 91%);
   /* Slate 200 */
@@ -86,6 +91,10 @@
   --surface: hsl(222 47% 7%);
   /* Slightly lighter slate */
   --overlay: hsla(0, 0%, 0%, 0.8);
+
+  /* Glassmorphism Tokens Dark */
+  --glass-surface: hsla(222, 47%, 10%, 0.5);
+  --glass-border: hsla(222, 47%, 20%, 0.3);
 
   /* Foregrounds (Contrast calculated against Dark Background) */
   --foreground-primary: hsl(210 40% 98%);
@@ -109,7 +118,19 @@
   }
 
   body {
-    @apply bg-background text-foreground-primary text-sm leading-normal antialiased;
+    @apply bg-background text-foreground-primary text-sm leading-normal antialiased selection:bg-primary/20;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .glass-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    @apply shadow-xl shadow-black/5;
+  }
+
+  .premium-gradient {
+    background: linear-gradient(135deg, var(--foreground-accent) 0%, #4338ca 100%);
   }
 
   h1,

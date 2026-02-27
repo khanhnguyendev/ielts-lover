@@ -14,8 +14,11 @@ import {
     LayoutGrid,
     Coffee,
     Cloud,
-    Construction
+    Construction,
+    Sparkles,
+    type LucideIcon
 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 // Dialog imports for the "Add Custom Question" modal
@@ -112,36 +115,66 @@ export default function SpeakingHubPage() {
 
     if (IS_COMING_SOON) {
         return (
-            <div className="flex-1 h-full overflow-hidden flex flex-col items-center justify-center p-8 text-center space-y-8 animate-in fade-in duration-700">
-                <div className="relative">
-                    <div className="w-32 h-32 bg-indigo-50 rounded-[2rem] shadow-sm flex items-center justify-center border-4 border-white ring-1 ring-indigo-100 relative z-10">
-                        <Mic2 className="h-14 w-14 text-indigo-500" />
+            <div className="flex-1 h-full overflow-y-auto scrollbar-hide bg-slate-50/30 dark:bg-slate-950/30">
+                <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 lg:p-20 text-center space-y-12">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, type: "spring" }}
+                        className="relative"
+                    >
+                        <div className="w-40 h-40 bg-white/70 dark:bg-slate-800/70 backdrop-blur-3xl rounded-[3rem] shadow-2xl flex items-center justify-center border border-white/40 dark:border-slate-700/50 relative z-10 transition-transform hover:scale-105 duration-500">
+                            <Mic2 className="h-16 w-16 text-primary" />
+                        </div>
+                        <motion.div
+                            initial={{ x: 20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="absolute top-0 right-0 -mr-6 -mt-4 bg-amber-500 text-white text-[10px] font-black px-4 py-2 rounded-2xl border-[3px] border-white dark:border-slate-900 shadow-2xl rotate-12 z-20 uppercase tracking-[0.2em]"
+                        >
+                            Coming Soon
+                        </motion.div>
+                        <div className="absolute -inset-10 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse" />
+                    </motion.div>
+
+                    <div className="space-y-6 max-w-2xl mx-auto z-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <h1 className="text-4xl lg:text-6xl font-black font-outfit text-slate-900 dark:text-white tracking-tight">
+                                Speaking <span className="text-primary">Lab</span>
+                            </h1>
+                        </motion.div>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="text-lg lg:text-xl font-bold text-slate-500 dark:text-slate-400 leading-relaxed"
+                        >
+                            We&apos;re building an immersive AI voice environment that listens, analyzes, and coaches you to IELTS fluency in real-time.
+                        </motion.p>
                     </div>
-                    <div className="absolute top-0 right-0 -mr-4 -mt-4 bg-amber-500 text-white text-xs font-black px-3 py-1.5 rounded-xl border-[3px] border-white shadow-lg rotate-12 z-20 uppercase tracking-widest">
-                        Coming Soon
+
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="flex flex-col items-center gap-4"
+                    >
+                        <div className="flex items-center gap-3 px-6 py-3 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-sm">
+                            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Neural Engine Initializing</p>
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected Release: Q2 2026</p>
+                    </motion.div>
+
+                    {/* Background Visual Effects */}
+                    <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
+                        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
+                        <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-violet-500/5 rounded-full blur-[120px]" />
                     </div>
-                    <div className="absolute -inset-4 bg-indigo-500/5 rounded-full blur-2xl -z-10" />
-                </div>
-
-                <div className="space-y-4 max-w-lg mx-auto">
-                    <h1 className="text-3xl lg:text-4xl font-black font-outfit text-slate-900 tracking-tight">
-                        Speaking Practice
-                    </h1>
-                    <p className="text-base lg:text-lg font-medium text-slate-500 leading-relaxed">
-                        We're building an advanced AI speaking partner that listens, evaluates, and helps you improve your pronunciation and fluency in real-time.
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Under Development</p>
-                </div>
-
-                {/* HIDDEN ORIGINAL CONTENT TO PRESERVE CODE */}
-                <div className="hidden">
-                    {/* Just rendering bits to keep variables used */}
-                    <p>{activeCategory}</p>
-                    <Button onClick={() => setIsAddModalOpen(!isAddModalOpen)}>Test</Button>
                 </div>
             </div>
         )
@@ -321,38 +354,72 @@ function SpeakingCard({
     color: string,
     badge?: { text: string, color: "yellow" | "green" }
 }) {
+    const effectiveColor = color.includes("text-") ? color.split(" ")[0] : "text-primary"
+    const effectiveBg = color.includes("bg-") ? color.replace("50", "100/50") : color
+
     return (
-        <Link href={`/dashboard/speaking/calibrate?test=${title.toLowerCase().replace(/ /g, "-")}`} className="block h-full transition-transform hover:scale-[1.02] duration-300">
-            <div className="h-full bg-card border hover:border-primary/30 rounded-[28px] p-6 flex flex-col gap-6 shadow-sm hover:shadow-xl transition-all duration-300 group relative">
+        <Link href={`/dashboard/speaking/calibrate?test=${title.toLowerCase().replace(/ /g, "-")}`} className="block h-full">
+            <motion.div
+                whileHover={{ y: -5 }}
+                className="h-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/20 dark:border-slate-800/50 rounded-[2rem] p-6 flex flex-col gap-6 shadow-sm hover:shadow-2xl transition-all duration-500 group relative"
+            >
                 <div className="flex items-start gap-4">
-                    <div className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110", color)}>
-                        <Icon className="h-6 w-6" />
+                    <div className={cn(
+                        "w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6 shadow-lg border border-white/20",
+                        effectiveBg
+                    )}>
+                        <Icon className={cn("h-7 w-7", effectiveColor)} />
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
                         <div className="space-y-1">
-                            <h4 className="text-sm font-black font-outfit leading-tight text-foreground-primary pr-2">{title}</h4>
-                            {badge && (
+                            <h4 className="text-base font-black font-outfit leading-tight text-slate-900 dark:text-white truncate pr-2 group-hover:text-primary transition-colors">
+                                {title}
+                            </h4>
+                            <div className="flex items-center gap-2">
                                 <span className={cn(
-                                    "inline-block px-2 py-0.5 rounded-lg text-[9px] font-bold border",
-                                    badge.color === "yellow" ? "bg-amber-50 text-amber-600 border-amber-100/50" : "bg-emerald-50 text-emerald-600 border-emerald-100/50"
+                                    "text-[9px] font-black uppercase tracking-widest leading-none",
+                                    effectiveColor
                                 )}>
-                                    {badge.text}
+                                    {subtitle || "Speaking"}
                                 </span>
-                            )}
+                                {badge && (
+                                    <span className={cn(
+                                        "inline-block px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border border-white/20",
+                                        badge.color === "yellow" ? "bg-amber-100/50 text-amber-600" : "bg-emerald-100/50 text-emerald-600"
+                                    )}>
+                                        {badge.text}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-auto flex items-center justify-between border-t border-dashed pt-4">
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                        {attempts > 0 ? `${attempts} attempt${attempts > 1 ? 's' : ''}` : "No attempts yet"}
-                    </p>
-                    <div className="h-8 px-4 rounded-lg border border-muted-foreground/20 text-[10px] font-black uppercase tracking-widest flex items-center bg-transparent group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-                        {attempts > 0 ? <Plus className="h-3 w-3 mr-1" /> : <Play className="h-3 w-3 mr-1" />}
-                        {attempts > 0 ? "Practice Again" : "Start"}
+                <div className="mt-auto flex items-center justify-between border-t border-slate-100 dark:border-slate-800 border-dashed pt-5">
+                    <div className="flex flex-col gap-0.5">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Usage History</p>
+                        <p className="text-[10px] text-slate-900 dark:text-slate-300 font-black uppercase tracking-widest flex items-center gap-1.5">
+                            {attempts > 0 ? (
+                                <>
+                                    <span className="text-emerald-500">{attempts} Attempts</span>
+                                    <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                    <span className="text-emerald-500">Practiced</span>
+                                </>
+                            ) : (
+                                <span className="text-amber-500">Unattempted</span>
+                            )}
+                        </p>
                     </div>
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="h-10 px-5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-widest flex items-center bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300"
+                    >
+                        {attempts > 0 ? <Zap className="h-3 w-3 mr-2" /> : <Play className="h-3 w-3 mr-2" />}
+                        {attempts > 0 ? "Repeat" : "Launch"}
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
         </Link>
     )
 }

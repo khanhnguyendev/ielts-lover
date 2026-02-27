@@ -41,30 +41,33 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
     }, [])
 
     return (
-        <div className="relative">
+        <div className="relative group/balance">
             <Link
                 href="/dashboard/credits"
                 className={cn(
-                    "group relative flex items-center gap-1.5 bg-yellow-50/50 hover:bg-yellow-50 px-2.5 py-1 rounded-full border border-yellow-200/50 hover:border-yellow-200 shadow-sm transition-all active:scale-95",
+                    "group relative flex items-center gap-2.5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl px-3.5 py-1.5 rounded-[1.25rem] border border-white/20 dark:border-slate-800/50 shadow-sm transition-all duration-500 hover:shadow-xl hover:border-primary/20 active:scale-95",
                     className
                 )}
             >
-                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-yellow-400 group-hover:rotate-12 transition-transform shadow-sm">
-                    <span className="text-[10px] leading-none select-none">⭐</span>
+                {/* Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/5 to-amber-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[1.25rem]" />
+
+                <div className="flex items-center justify-center w-6 h-6 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-amber-500/20 relative z-10">
+                    <span className="text-[11px] leading-none select-none drop-shadow-sm">⭐</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-yellow-700 tracking-tight">
+                <div className="flex items-center gap-2 relative z-10">
+                    <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight font-outfit">
                         {(displayBalance || 0).toLocaleString()}
                     </span>
 
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-yellow-500/10 group-hover:bg-yellow-500 transition-colors">
-                        <Plus className="h-2.5 w-2.5 text-yellow-600 group-hover:text-white transition-colors" />
+                    <div className="flex items-center justify-center w-5 h-5 rounded-lg bg-slate-900/5 dark:bg-white/5 group-hover:bg-primary transition-all duration-500 border border-slate-200/50 dark:border-white/5">
+                        <Plus className="h-3 w-3 text-slate-400 dark:text-slate-500 group-hover:text-white transition-colors" />
                     </div>
                 </div>
 
                 {/* Subtle Sparkle on Hover */}
-                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-yellow-400 opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110" />
+                <Sparkles className="absolute -top-1.5 -right-1.5 h-4 w-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-125 animate-pulse" />
             </Link>
 
             {/* Animation Badge */}
