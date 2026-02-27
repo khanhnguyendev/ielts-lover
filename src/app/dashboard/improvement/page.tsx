@@ -230,6 +230,7 @@ export default function ImprovementPage() {
                         <AIActionButton
                             label={isGenerating ? "Analyzing Patterns..." : (latestPlan ? "Refresh Deep Analysis" : "Launch Deep Scan")}
                             icon={Brain}
+                            variant="neon"
                             onClick={handleGenerateAnalysis}
                             isLoading={isGenerating}
                             badge={analysisCost > 0 ? `-${analysisCost}` : undefined}
