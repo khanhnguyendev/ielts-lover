@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex-1">
-            <div className="p-6 lg:p-10 space-y-10 max-w-7xl mx-auto">
+            <div className="p-4 lg:p-8 space-y-8 max-w-7xl mx-auto">
 
                 {/* 1. High-Density Quick Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                             className="relative overflow-hidden group"
                         >
                             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-600 rounded-[2.5rem] blur opacity-10 group-hover:opacity-25 transition duration-1000"></div>
-                            <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl rounded-[2.5rem] p-8 lg:p-12 border border-white/20 dark:border-slate-800/50 shadow-2xl flex flex-col md:flex-row items-center gap-10">
+                            <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl rounded-[2.5rem] p-6 lg:p-10 border border-white/20 dark:border-slate-800/50 shadow-2xl flex flex-col md:flex-row items-center gap-8">
                                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none" />
 
                                 <div className="relative shrink-0">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, delay: 0.1 }}
-                                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:border-primary/20 transition-all duration-500 shadow-sm relative overflow-hidden"
+                                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-8 rounded-[2.5rem] flex flex-col justify-between group hover:border-primary/20 transition-all duration-500 shadow-sm relative overflow-hidden"
                             >
                                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                                     <GraduationCap className="w-24 h-24 text-primary" />
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
-                            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 lg:p-10 shadow-sm group hover:border-primary/10 transition-all duration-500"
+                            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-6 lg:p-8 shadow-sm group hover:border-primary/10 transition-all duration-500"
                         >
                             <div className="flex items-center justify-between mb-10 px-1">
                                 <div className="flex items-center gap-4">
@@ -362,7 +362,7 @@ function ActionCard({ href, icon: Icon, label, description, theme, meta, badge }
             <motion.div
                 whileHover={{ y: -8 }}
                 className={cn(
-                    "h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 lg:p-10 rounded-[2.5rem] transition-all duration-500 flex flex-col shadow-sm group-hover:shadow-2xl relative overflow-hidden",
+                    "h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-8 rounded-[2.5rem] transition-all duration-500 flex flex-col shadow-sm group-hover:shadow-2xl relative overflow-hidden",
                     current.bg
                 )}
             >
@@ -421,7 +421,7 @@ function StatCard({ icon: Icon, label, value, subLabel, color, bgColor, href, tr
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
-                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 h-full flex flex-col justify-between group"
+                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-7 rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 h-full flex flex-col justify-between group"
             >
                 <div className="flex justify-between items-start mb-8">
                     <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-700 group-hover:scale-110 group-hover:rotate-6", bgColor, color)}>

@@ -126,7 +126,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "PROCESSING") {
         return (
-            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
+            <div className="min-h-[calc(100vh-56px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-10 text-center shadow-2xl shadow-primary/5 animate-in fade-in duration-300">
                     {/* Animated icon */}
                     <div className="relative mx-auto w-fit">
@@ -175,7 +175,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "COMPLETE") {
         return (
-            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
+            <div className="min-h-[calc(100vh-56px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="w-24 h-24 bg-emerald-50 rounded-[32px] flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/10">
                         <CheckCircle2 className="h-12 w-12 text-emerald-500" />
@@ -214,7 +214,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] bg-[#F9FAFB] overflow-hidden relative select-none">
+        <div className="flex h-[calc(100vh-56px)] bg-[#F9FAFB] overflow-hidden relative select-none">
             {/* Background blobs for premium feel */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />

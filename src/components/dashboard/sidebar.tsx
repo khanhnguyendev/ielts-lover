@@ -81,37 +81,31 @@ export function DashboardSidebar() {
             <motion.aside
                 initial={false}
                 animate={{
-                    width: isCollapsed ? 88 : 280,
+                    width: isCollapsed ? 64 : 240,
                     x: isMobileOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -300 : 0)
                 }}
                 className={cn(
-                    "fixed inset-y-0 left-0 lg:relative z-[45] h-screen bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transition-all duration-500 ease-in-out p-4",
+                    "fixed inset-y-0 left-0 lg:relative z-[45] h-screen bg-white dark:bg-slate-950 border-r border-slate-200/50 dark:border-white/10 flex flex-col transition-all duration-500 ease-in-out",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
                 {/* Logo Section */}
-                <div className="h-16 flex items-center px-3 mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
-                            <Sparkles size={20} className="animate-pulse" />
+                <div className="h-14 flex items-center px-4 border-b border-slate-200/30 dark:border-white/5">
+                    <Link href="/dashboard" className="flex items-center gap-2 group">
+                        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                            ✨
                         </div>
                         {!isCollapsed && (
-                            <motion.span
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="text-xl font-black font-outfit tracking-tighter text-slate-900 dark:text-white"
-                            >
-                                IELTS<span className="text-primary truncate">LOVER</span>
-                            </motion.span>
+                            <span className="font-black text-xs tracking-tighter uppercase font-outfit text-slate-900 dark:text-white">IELTS Lover</span>
                         )}
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Navigation Items */}
-                <div className="flex-1 space-y-8 overflow-y-auto no-scrollbar px-1">
-                    <nav className="space-y-1.5">
+                <div className="flex-1 space-y-6 overflow-y-auto no-scrollbar px-1 py-4">
+                    <nav className="space-y-1">
                         {!isCollapsed && (
-                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Neural Analytics</p>
+                            <p className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Neural Analytics</p>
                         )}
                         {MENU_ANALYSIS.map((item) => (
                             <SidebarItem
@@ -124,9 +118,9 @@ export function DashboardSidebar() {
                         ))}
                     </nav>
 
-                    <nav className="space-y-1.5">
+                    <nav className="space-y-1">
                         {!isCollapsed && (
-                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Practice Lab</p>
+                            <p className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Practice Lab</p>
                         )}
                         {MENU_PRACTICE.map((item) => (
                             <SidebarItem
@@ -139,9 +133,9 @@ export function DashboardSidebar() {
                         ))}
                     </nav>
 
-                    <nav className="space-y-1.5">
+                    <nav className="space-y-1">
                         {!isCollapsed && (
-                            <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Command Center</p>
+                            <p className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Command Center</p>
                         )}
                         {MENU_ACCOUNT.map((item) => (
                             <SidebarItem

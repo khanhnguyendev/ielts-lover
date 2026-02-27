@@ -202,7 +202,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] select-none relative">
+        <div className="flex h-[calc(100vh-56px)] overflow-hidden bg-[#F9FAFB] select-none relative">
             {/* Background blobs for premium feel */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />

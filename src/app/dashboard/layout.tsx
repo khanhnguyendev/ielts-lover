@@ -7,7 +7,7 @@ import { StarsBalance } from "@/components/dashboard/stars-balance"
 import { getCurrentUser } from "@/app/actions"
 import { TitleProvider } from "@/lib/contexts/title-context"
 import Link from "next/link"
-import { LogIn } from "lucide-react"
+import { Search, Bell, LogIn } from "lucide-react"
 
 export default async function DashboardLayout({
     children,
@@ -27,16 +27,17 @@ export default async function DashboardLayout({
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 pointer-events-none" />
                         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] -ml-48 -mb-48 pointer-events-none" />
 
-                        <header className="h-16 border-b border-slate-200/50 dark:border-white/10 bg-white/60 dark:bg-slate-950/40 backdrop-blur-3xl flex items-center justify-between px-6 lg:px-10 shrink-0 z-40 relative">
+                        <header className="h-14 border-b border-slate-200/50 dark:border-white/10 bg-white/60 dark:bg-slate-950/40 backdrop-blur-3xl flex items-center justify-between px-6 lg:px-8 shrink-0 z-40 relative">
                             <div className="flex items-center gap-4">
                                 <DynamicTitle />
                             </div>
-                            <div className="flex items-center gap-5 lg:gap-8">
+                            <div className="flex items-center gap-3 lg:gap-5">
+                                <Search className="h-4 w-4 text-slate-400 cursor-pointer hover:text-primary transition-colors hidden sm:block" />
                                 {user ? (
                                     <>
                                         <StarsBalance balance={user.credits_balance} />
-                                        <div className="h-5 w-[1px] bg-slate-200/30 dark:bg-slate-700/30" />
-                                        <div className="flex items-center gap-3 lg:gap-5">
+                                        <div className="h-4 w-[1px] bg-slate-200/30 dark:bg-slate-700/30" />
+                                        <div className="flex items-center gap-3 lg:gap-4">
                                             <NotificationOverlay />
                                             <UserProfileMenu user={user} />
                                         </div>
@@ -44,15 +45,15 @@ export default async function DashboardLayout({
                                 ) : (
                                     <Link
                                         href="/login"
-                                        className="premium-gradient flex items-center gap-3 h-10 px-6 rounded-xl text-white text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95"
+                                        className="premium-gradient flex items-center gap-2 h-8 px-4 rounded-lg text-white text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95"
                                     >
-                                        <LogIn className="w-4 h-4" />
-                                        Initialize Protocol
+                                        <LogIn className="w-3.5 h-3.5" />
+                                        Login
                                     </Link>
                                 )}
                             </div>
                         </header>
-                        <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 h-[calc(100vh-64px)]">
+                        <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 h-[calc(100vh-56px)]">
                             <div className="max-w-[1600px] mx-auto min-h-full flex flex-col">
                                 {children}
                             </div>
