@@ -283,89 +283,103 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-white select-none">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] select-none relative">
+            {/* Background blobs for premium feel */}
+            <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
             {/* 1. Left Side: Question Panel */}
-            <div className="w-[45%] lg:w-[52%] flex flex-col border-r bg-slate-50/50 relative overflow-hidden">
+            <div className="w-[45%] lg:w-[52%] flex flex-col border-r border-slate-200/50 bg-white/40 backdrop-blur-3xl relative overflow-hidden z-10">
                 {/* Decorative background element */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 opacity-20" />
 
-                <div className="flex-1 overflow-y-auto px-6 py-10 lg:px-10 scrollbar-none">
-                    <div className="max-w-2xl mx-auto space-y-8">
+                <div className="flex-1 overflow-y-auto px-6 py-10 lg:px-12 scrollbar-hide relative">
+                    <div className="max-w-2xl mx-auto space-y-10">
                         {/* Question Title & Prompt */}
-                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
                             <div className="space-y-4">
-                                <h1 className="text-3xl font-black font-outfit text-slate-900 tracking-tight leading-tight">
+                                <h1 className="text-4xl font-black font-outfit text-slate-900 tracking-tight leading-tight">
                                     {exercise.title}
                                 </h1>
-                                <div className="h-1.5 w-16 bg-primary rounded-full" />
+                                <div className="h-2 w-20 bg-primary rounded-full" />
                             </div>
 
                             <div className="relative group">
                                 {/* Glass card effect */}
-                                <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-[2.5rem] blur opacity-25" />
+                                <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-[3rem] blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-1000" />
 
-                                <div className="relative bg-white rounded-[2.5rem] border border-slate-200 p-8 lg:p-10 space-y-10 shadow-sm transition-all duration-300">
+                                <div className="relative bg-white/70 backdrop-blur-2xl rounded-[3rem] border border-white/50 p-10 lg:p-12 space-y-12 shadow-2xl shadow-slate-200/20 transition-all duration-700">
 
                                     {/* Task Data (Chart) - Stacked on top for Task 1 */}
                                     {exercise.type === "writing_task1" && exercise.image_url && (
-                                        <div className="space-y-6">
+                                        <div className="space-y-8">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-primary/60">
-                                                    <Layout className="h-4 w-4" />
-                                                    Chart Visualization
+                                                <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-primary/60">
+                                                    <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center">
+                                                        <Layout className="h-4 w-4" />
+                                                    </div>
+                                                    Visual Data Set
                                                 </div>
                                                 <button
                                                     onClick={() => setIsLightboxOpen(true)}
-                                                    className="text-[11px] font-bold text-slate-400 hover:text-primary flex items-center gap-1.5 transition-colors"
+                                                    className="text-[11px] font-black text-slate-400 hover:text-primary flex items-center gap-2 transition-all hover:translate-x-1"
                                                 >
-                                                    <Maximize2 className="h-3 w-3" />
-                                                    Full Screen
+                                                    <Maximize2 className="h-3.5 w-3.5" />
+                                                    EXPAND VIEW
                                                 </button>
                                             </div>
 
                                             <div
                                                 onClick={() => setIsLightboxOpen(true)}
-                                                className="relative aspect-video bg-slate-50 rounded-3xl flex items-center justify-center border-2 border-slate-100 group/img overflow-hidden cursor-zoom-in hover:border-primary/20 transition-all hover:shadow-xl hover:shadow-primary/5"
+                                                className="relative aspect-video bg-white/5 rounded-3xl flex items-center justify-center border border-slate-200/50 group/img overflow-hidden cursor-zoom-in hover:border-primary/20 transition-all hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]"
                                             >
                                                 <img
                                                     src={exercise.image_url}
                                                     alt="Task 1 Chart"
-                                                    className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover/img:scale-105"
+                                                    className="w-full h-full object-contain p-6 transition-transform duration-1000 group-hover/img:scale-[1.03]"
                                                 />
-                                                <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/[0.02] transition-colors" />
+                                                <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/[0.01] transition-colors" />
+                                                <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/50 text-[9px] font-black text-slate-400 shadow-sm opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                                    CLICK TO ENLARGE
+                                                </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-primary/60">
-                                            <HelpCircle className="h-4 w-4" />
-                                            Question Prompt
+                                    <div className="space-y-8">
+                                        <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-primary/60">
+                                            <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center">
+                                                <HelpCircle className="h-4 w-4" />
+                                            </div>
+                                            Academic Directive
                                         </div>
-                                        <p className="text-lg font-medium text-slate-700 leading-relaxed italic selection:bg-primary/10">
-                                            "{exercise.prompt}"
-                                        </p>
+                                        <div className="relative">
+                                            <div className="absolute -left-6 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary/40 to-indigo-500/40 rounded-full" />
+                                            <p className="text-xl font-medium text-slate-700 leading-relaxed italic selection:bg-primary/20 px-2 min-h-[100px]">
+                                                "{exercise.prompt}"
+                                            </p>
+                                        </div>
                                     </div>
 
                                     {/* Task Stats Footnote */}
-                                    <div className="flex flex-wrap items-center gap-8 pt-10 border-t border-dashed border-slate-200">
-                                        <div className="space-y-2">
-                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Min Target</span>
-                                            <div className="flex items-center gap-2.5 text-emerald-600">
-                                                <div className="p-1 rounded-md bg-emerald-50">
+                                    <div className="flex flex-wrap items-center gap-10 pt-10 border-t border-slate-100">
+                                        <div className="space-y-3">
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] block">Submission Target</span>
+                                            <div className="flex items-center gap-3 text-emerald-600">
+                                                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                                                     <CheckCircle2 className="h-4 w-4" />
                                                 </div>
-                                                <span className="text-sm font-black tracking-tight">{exercise.type === "writing_task1" ? "150 Words" : "250 Words"}</span>
+                                                <span className="text-base font-black tracking-tight">{exercise.type === "writing_task1" ? "150 Words" : "250 Words"}</span>
                                             </div>
                                         </div>
-                                        <div className="w-px h-10 bg-slate-100 hidden sm:block" />
-                                        <div className="space-y-2">
-                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Recommended Time</span>
-                                            <div className="flex items-center gap-2.5 text-blue-600">
-                                                <div className="p-1 rounded-md bg-blue-50">
+                                        <div className="w-px h-12 bg-slate-100 hidden sm:block" />
+                                        <div className="space-y-3">
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] block">Temporal Guidance</span>
+                                            <div className="flex items-center gap-3 text-indigo-600">
+                                                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
                                                     <Clock className="h-4 w-4" />
                                                 </div>
-                                                <span className="text-sm font-black tracking-tight">{exercise.type === "writing_task1" ? "20 Minutes" : "40 Minutes"}</span>
+                                                <span className="text-base font-black tracking-tight">{exercise.type === "writing_task1" ? "20 Minutes" : "40 Minutes"}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -378,21 +392,23 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
                 {/* Lightbox Overlay */}
                 {isLightboxOpen && exercise.image_url && (
                     <div
-                        className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md animate-in fade-in duration-300 flex items-center justify-center p-8 lg:p-20"
+                        className="fixed inset-0 z-[100] bg-slate-900/98 backdrop-blur-xl animate-in fade-in duration-500 flex items-center justify-center p-8 lg:p-24"
                         onClick={() => setIsLightboxOpen(false)}
                     >
                         <button
-                            className="absolute top-8 right-8 text-white/40 hover:text-white transition-all hover:rotate-90"
+                            className="absolute top-10 right-10 text-white/30 hover:text-white transition-all hover:rotate-90 p-4"
                             onClick={() => setIsLightboxOpen(false)}
                         >
-                            <X className="h-10 w-10" />
+                            <X className="h-12 w-12" />
                         </button>
-                        <img
-                            src={exercise.image_url}
-                            alt="Full Screen Chart"
-                            className="max-w-full max-h-full object-contain shadow-2xl animate-in zoom-in duration-500"
-                            onClick={(e) => e.stopPropagation()}
-                        />
+                        <div className="relative group/zoom">
+                            <img
+                                src={exercise.image_url}
+                                alt="Full Screen Chart"
+                                className="max-w-full max-h-full object-contain shadow-[0_0_100px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-700"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

@@ -75,19 +75,19 @@ export function DynamicTitle() {
     const title = dynamicTitle || breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard"
 
     return (
-        <div className="flex items-center gap-1.5 py-1">
+        <div className="flex items-center gap-2 py-1">
             {breadcrumbs.map((item, index) => (
                 <React.Fragment key={item.href}>
                     {index > 0 && (
-                        <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 select-none">/</span>
+                        <span className="text-[10px] font-black text-slate-300 dark:text-slate-700 select-none">/</span>
                     )}
                     <Link
                         href={item.href}
                         className={cn(
-                            "text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95",
+                            "text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95",
                             index === breadcrumbs.length - 1
-                                ? "text-primary/70 dark:text-primary/50 bg-primary/[0.03] dark:bg-primary/[0.02] px-2 py-0.5 rounded-lg border border-primary/5 dark:border-primary/10"
-                                : "text-slate-400/60 dark:text-slate-500/40 hover:text-slate-600 dark:hover:text-slate-300"
+                                ? "text-primary/80 dark:text-primary/60 bg-primary/[0.05] dark:bg-primary/[0.04] px-2.5 py-1 rounded-lg border border-primary/10 dark:border-primary/20"
+                                : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                         )}
                     >
                         {item.label}

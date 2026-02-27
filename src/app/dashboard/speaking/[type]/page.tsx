@@ -126,7 +126,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "PROCESSING") {
         return (
-            <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
+            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-10 text-center shadow-2xl shadow-primary/5 animate-in fade-in duration-300">
                     {/* Animated icon */}
                     <div className="relative mx-auto w-fit">
@@ -175,7 +175,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
 
     if (status === "COMPLETE") {
         return (
-            <div className="min-h-[calc(100vh-80px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
+            <div className="min-h-[calc(100vh-64px)] bg-[#F9FAFB] flex flex-col items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white rounded-[40px] border p-12 space-y-12 text-center shadow-2xl shadow-primary/5">
                     <div className="w-24 h-24 bg-emerald-50 rounded-[32px] flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/10">
                         <CheckCircle2 className="h-12 w-12 text-emerald-500" />
@@ -214,72 +214,87 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     }
 
     return (
-        <div className="flex h-[calc(100vh-80px)] bg-[#F9FAFB] overflow-hidden relative">
-            {/* Sidebar Context */}
+        <div className="flex h-[calc(100vh-64px)] bg-[#F9FAFB] overflow-hidden relative select-none">
+            {/* Background blobs for premium feel */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
+            {/* Sidebar Context Redesign */}
             <div
                 className={cn(
-                    "bg-white border-r flex flex-col transition-all duration-500 ease-in-out relative z-10",
-                    sidebarExpanded ? "w-[400px]" : "w-0 overflow-hidden border-none"
+                    "bg-white/40 backdrop-blur-3xl border-r border-slate-200/50 flex flex-col transition-all duration-700 ease-in-out relative z-10",
+                    sidebarExpanded ? "w-[420px]" : "w-0 overflow-hidden border-none"
                 )}
             >
                 {/* Fixed Header in Sidebar */}
-                <div className="p-8 border-b bg-white shrink-0">
+                <div className="p-10 border-b border-slate-100/50 bg-white/40 shrink-0">
                     <div className="flex items-center justify-between mb-8">
                         <BackButton />
-                        <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-2xl">
+                        <div className="flex items-center gap-2.5 bg-primary/10 px-4 py-2 rounded-2xl border border-primary/10">
                             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Speaking Mode</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Intelligence Sync</span>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#7C3AED]">
-                            <History size={12} />
-                            <span>Question {currentQuestion} of {questions.length}</span>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600">
+                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                            <span>PHASE {currentQuestion} / {questions.length}</span>
                         </div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight font-outfit uppercase">
-                            Part 1: Introduction
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight font-outfit uppercase leading-tight">
+                            Introduction & Interview
                         </h1>
                     </div>
                 </div>
 
                 {/* Scrollable Questions List */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                <div className="flex-1 overflow-y-auto p-10 space-y-8 scrollbar-hide">
                     {questions.map((q, idx) => (
                         <div
                             key={idx}
                             className={cn(
-                                "p-6 rounded-[32px] transition-all duration-300 border-2",
+                                "p-8 rounded-[2.5rem] transition-all duration-500 border relative overflow-hidden group/q",
                                 idx + 1 === currentQuestion
-                                    ? "bg-white border-[#7C3AED] shadow-xl shadow-primary/5"
+                                    ? "bg-white border-primary/20 shadow-2xl shadow-primary/5"
                                     : idx + 1 < currentQuestion
-                                        ? "bg-slate-50 border-transparent opacity-50"
-                                        : "bg-white border-transparent text-slate-300"
+                                        ? "bg-slate-50/50 border-transparent opacity-40 grayscale"
+                                        : "bg-white/40 border-slate-100 text-slate-300"
                             )}
                         >
-                            <div className="flex gap-4">
+                            <div className="flex gap-6">
                                 <span className={cn(
-                                    "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black",
-                                    idx + 1 === currentQuestion ? "bg-[#7C3AED] text-white" : "bg-slate-100 text-slate-400"
+                                    "flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black shadow-sm transition-all duration-500",
+                                    idx + 1 === currentQuestion ? "bg-primary text-white scale-110 rotate-3" : "bg-white border text-slate-400"
                                 )}>
                                     {idx + 1}
                                 </span>
-                                <p className="font-bold text-sm leading-relaxed">{q}</p>
+                                <div className="space-y-2">
+                                    <p className={cn(
+                                        "font-bold text-sm leading-relaxed transition-colors duration-500",
+                                        idx + 1 === currentQuestion ? "text-slate-900" : "text-slate-400"
+                                    )}>{q}</p>
+                                    {idx + 1 === currentQuestion && (
+                                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Active Inquiry</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Progress Footer in Sidebar */}
-                <div className="p-8 border-t bg-slate-50/50">
-                    <div className="space-y-4">
+                <div className="p-10 border-t border-slate-100/50 bg-white/40">
+                    <div className="space-y-5">
                         <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Progress</span>
-                            <span className="text-sm font-black text-slate-900">{Math.round((currentQuestion / questions.length) * 100)}%</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Task Completion</span>
+                            <span className="text-base font-black text-slate-900 font-mono">{Math.round((currentQuestion / questions.length) * 100)}%</span>
                         </div>
-                        <div className="h-3 bg-white rounded-full border p-0.5 overflow-hidden">
+                        <div className="h-3.5 bg-white rounded-full border border-slate-100 p-1 overflow-hidden shadow-inner">
                             <div
-                                className="h-full bg-gradient-to-r from-[#7C3AED] to-indigo-600 rounded-full transition-all duration-1000"
+                                className="h-full bg-gradient-to-r from-primary via-indigo-500 to-primary/80 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(37,99,235,0.3)]"
                                 style={{ width: `${(currentQuestion / questions.length) * 100}%` }}
                             />
                         </div>
@@ -287,59 +302,82 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                 </div>
             </div>
 
-            {/* Toggle Sidebar Button */}
+            {/* Toggle Sidebar Button Redesign */}
             <button
                 onClick={() => setSidebarExpanded(!sidebarExpanded)}
                 className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 z-20 w-8 h-24 bg-white border border-l-0 rounded-r-2xl flex items-center justify-center text-slate-400 hover:text-[#7C3AED] transition-all duration-500",
-                    sidebarExpanded ? "translate-x-[400px]" : "translate-x-0"
+                    "absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-32 bg-white/80 backdrop-blur-md border border-slate-200 border-l-0 rounded-r-[2rem] flex items-center justify-center text-slate-400 hover:text-primary transition-all duration-500 shadow-xl",
+                    sidebarExpanded ? "translate-x-[420px]" : "translate-x-0"
                 )}
             >
-                {sidebarExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                {sidebarExpanded ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
             </button>
 
-            {/* Main Practice Area */}
-            <div className="flex-1 flex flex-col bg-[#F9FAFB] relative overflow-hidden">
-                <div className="flex-1 flex flex-col items-center justify-center p-8">
-                    {/* Recording Visualization */}
-                    <div className="w-full max-w-2xl text-center space-y-12">
-                        <div className="space-y-4">
-                            <h2 className="text-4xl font-black text-slate-900 font-outfit uppercase tracking-tight">
+            {/* Main Practice Area Redesign */}
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+                <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-16">
+                    {/* Recording Visualization Area */}
+                    <div className="w-full max-w-3xl text-center space-y-16 animate-in fade-in zoom-in-95 duration-1000">
+                        <div className="space-y-6">
+                            <div className="mx-auto w-fit mb-4">
+                                <div className={cn(
+                                    "px-6 py-2 rounded-2xl border text-[10px] font-black uppercase tracking-[0.4em] transition-all duration-700",
+                                    isRecording
+                                        ? "bg-rose-50 border-rose-200 text-rose-500 shadow-xl shadow-rose-200/20"
+                                        : "bg-white border-slate-200 text-slate-400"
+                                )}>
+                                    {isRecording ? "Neural Capture Active" : "Waiting for Protocol"}
+                                </div>
+                            </div>
+                            <h2 className="text-6xl font-black text-slate-900 font-outfit uppercase tracking-tighter leading-tight">
                                 {isRecording ? "Listening..." : "Your Turn"}
                             </h2>
-                            <p className="text-muted-foreground font-bold max-w-md mx-auto leading-relaxed">
+                            <p className="text-slate-400 font-bold max-w-lg mx-auto leading-relaxed text-lg">
                                 {isRecording
-                                    ? "Speak clearly. Click the button again when you finish your answer."
-                                    : "Practice your answer for the highlighted question. Click the mic to start."
+                                    ? "Maintain steady pace and clear articulation. Signal completion via neural toggle."
+                                    : "Analyze the current directive and initialize response when mentally prepared."
                                 }
                             </p>
                         </div>
 
-                        {/* Mic Button & Timer */}
-                        <div className="relative">
-                            {isRecording && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-48 h-48 bg-primary/10 rounded-full animate-ping" />
-                                    <div className="absolute w-64 h-64 bg-primary/5 rounded-full animate-pulse delay-75" />
-                                </div>
-                            )}
+                        {/* Mic Button & Timer Area */}
+                        <div className="relative flex flex-col items-center gap-12">
+                            {/* Animated Pulse Rings */}
+                            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                                <div className={cn(
+                                    "w-[300px] h-[300px] rounded-full border-2 border-primary/5 transition-all duration-1000",
+                                    isRecording ? "animate-ping opacity-100" : "opacity-0"
+                                )} />
+                            </div>
 
-                            <div className="relative z-10 flex flex-col items-center gap-8">
+                            <div className="relative z-10 flex flex-col items-center gap-12">
                                 <button
                                     onClick={handleMicClick}
                                     className={cn(
-                                        "w-40 h-40 rounded-full flex items-center justify-center transition-all duration-500 transform active:scale-95 shadow-2xl",
+                                        "w-56 h-56 rounded-[5rem] flex items-center justify-center transition-all duration-700 transform active:scale-90 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] relative group/mic",
                                         isRecording
-                                            ? "bg-rose-500 text-white shadow-rose-500/40 rotate-12"
-                                            : "bg-white text-[#7C3AED] hover:scale-105 shadow-primary/10 border-2 border-[#E0E7FF]"
+                                            ? "bg-rose-500 text-white shadow-rose-500/40 rotate-[15deg] scale-105"
+                                            : "bg-white text-primary hover:scale-105 shadow-primary/10 border-2 border-slate-100"
                                     )}
                                 >
-                                    {isRecording ? <Mic2 size={64} className="animate-pulse" /> : <Mic2 size={64} />}
+                                    {isRecording
+                                        ? <Mic2 size={80} className="animate-pulse" />
+                                        : <Mic2 size={80} className="group-hover/mic:scale-110 transition-transform" />
+                                    }
+
+                                    <div className={cn(
+                                        "absolute -bottom-2 -right-2 w-16 h-16 rounded-[1.5rem] bg-white border-4 border-rose-500 flex items-center justify-center font-black text-rose-500 shadow-xl transition-all duration-700",
+                                        isRecording ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-0"
+                                    )}>
+                                        REC
+                                    </div>
                                 </button>
 
                                 <div className={cn(
-                                    "px-8 py-3 rounded-full font-black text-2xl tracking-[0.2em] font-outfit border-2 transition-all duration-500",
-                                    isRecording ? "bg-white border-rose-100 text-rose-500 scale-110" : "bg-white border-[#E0E7FF] text-slate-400"
+                                    "px-10 py-4 rounded-[2rem] font-black text-4xl tracking-[0.2em] font-mono border transition-all duration-700 shadow-2xl",
+                                    isRecording
+                                        ? "bg-white border-rose-100 text-rose-500 scale-110 shadow-rose-200/20"
+                                        : "bg-white border-slate-100 text-slate-300"
                                 )}>
                                     {formatTime(timeLeft)}
                                 </div>
@@ -348,18 +386,23 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                     </div>
                 </div>
 
-                {/* Footer Controls */}
-                <div className="p-8 flex justify-center gap-4">
-                    <div className="flex items-center gap-6 bg-white px-8 py-4 rounded-[32px] border shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mic Ready</span>
+                {/* Footer Controls Redesign */}
+                <div className="p-12 flex justify-center gap-6 relative z-10">
+                    <div className="flex items-center gap-10 bg-white/80 backdrop-blur-md px-10 py-5 rounded-[2.5rem] border border-white/50 shadow-2xl shadow-slate-200/30">
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                <div className="absolute inset-0 w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Neural Link Ready</span>
                         </div>
-                        <div className="w-px h-4 bg-slate-100" />
-                        <div className="flex items-center gap-3">
-                            <Volume2 className="h-4 w-4 text-slate-400" />
-                            <div className="w-32 h-1.5 bg-slate-50 rounded-full overflow-hidden border">
-                                <div className="h-full w-2/3 bg-slate-200" />
+                        <div className="w-px h-6 bg-slate-100" />
+                        <div className="flex items-center gap-5">
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+                                <Volume2 className="h-5 w-5 text-slate-400" />
+                            </div>
+                            <div className="w-48 h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
+                                <div className="h-full w-2/3 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full" />
                             </div>
                         </div>
                     </div>

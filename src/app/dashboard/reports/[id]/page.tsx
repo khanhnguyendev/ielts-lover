@@ -202,9 +202,13 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-slate-50/30 select-none">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] select-none relative">
+            {/* Background blobs for premium feel */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
             {/* 1. Main Content: Analysis Result */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
                 <div className="max-w-5xl mx-auto p-8 lg:p-12 space-y-12 pb-32">
 
                     {/* Header: Context & Actions */}
@@ -214,11 +218,11 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 <h1 className="text-3xl font-black font-outfit text-slate-900 tracking-tight">
                                     {isSample ? "Performance Analysis" : "Session Feedback"}
                                 </h1>
-                                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-0.5">
+                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-0.5">
                                     {isSample ? (
-                                        <span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3 text-amber-500" /> Reference Sample No. {id}</span>
+                                        <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-amber-500" /> Reference Sample No. {id}</span>
                                     ) : (
-                                        <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> Completed {new Date(realData!.created_at).toLocaleDateString()}</span>
+                                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Completed {new Date(realData!.created_at).toLocaleDateString()}</span>
                                     )}
                                 </div>
                             </div>
@@ -230,58 +234,54 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Identity Tag</span>
                                 <span className="text-[10px] font-mono font-bold text-slate-400">ID: {isSample ? `REF-${id}` : realData?.exercise_id?.slice(0, 8)}</span>
                             </div>
-                            <Button variant="white" size="icon" className="h-12 w-12 rounded-2xl shadow-sm border-slate-200 text-slate-400 hover:text-primary transition-all">
+                            <Button variant="white" size="icon" className="h-12 w-12 rounded-2xl shadow-sm border-slate-200 text-slate-400 hover:text-primary transition-all bg-white/50 backdrop-blur-md">
                                 <Share2 className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>
 
-                    {/* Question Prompt Section: Using the Practice Page 'Glass' Style */}
+                    {/* Question Prompt Section: Glass Style */}
                     {displayData?.prompt && (
                         <div className="relative group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-[2.5rem] blur opacity-25" />
-                            <div className="relative bg-white rounded-[2rem] border border-slate-200 p-6 lg:p-8 space-y-5 shadow-sm">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-[2.5rem] blur-xl opacity-25 group-hover:opacity-40 transition-opacity" />
+                            <div className="relative bg-white/60 backdrop-blur-3xl rounded-[2.5rem] border border-white/40 p-8 lg:p-10 space-y-6 shadow-2xl shadow-slate-200/20">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
-                                        <FileText className="h-3.5 w-3.5" />
+                                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                        <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center">
+                                            <FileText className="h-4 w-4" />
+                                        </div>
                                         Inquiry Context
                                     </div>
-                                    <div className="h-px flex-1 mx-6 bg-slate-50" />
+                                    <div className="h-px flex-1 mx-6 bg-slate-200/30" />
                                 </div>
 
-                                <div className="space-y-5">
+                                <div className="space-y-6">
                                     {displayData.imageUrl && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
-                                                    <Layout className="h-4 w-4" />
-                                                    Chart Data
-                                                </div>
-                                            </div>
+                                        <div className="space-y-4">
                                             <div
                                                 onClick={() => setIsLightboxOpen(true)}
-                                                className="relative aspect-video bg-slate-50/50 rounded-2xl flex items-center justify-center border border-slate-200 group/img overflow-hidden cursor-zoom-in hover:border-primary/20 transition-all"
+                                                className="relative aspect-video bg-slate-50/50 rounded-3xl flex items-center justify-center border border-slate-200/50 group/img overflow-hidden cursor-zoom-in hover:border-primary/20 transition-all hover:shadow-2xl"
                                             >
                                                 <img
                                                     src={displayData.imageUrl}
                                                     alt="Task Chart"
-                                                    className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover/img:scale-105"
+                                                    className="w-full h-full object-contain p-6 transition-transform duration-1000 group-hover/img:scale-105"
                                                 />
-                                                <div className="absolute top-4 right-4 opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                                    <Button size="icon" variant="white" className="rounded-xl shadow-xl border border-slate-200 h-10 w-10">
-                                                        <Maximize2 className="h-4 w-4 text-slate-600" />
+                                                <div className="absolute top-6 right-6 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                                    <Button size="icon" variant="white" className="rounded-2xl shadow-2xl border-white/20 h-12 w-12 bg-white/80 backdrop-blur-md">
+                                                        <Maximize2 className="h-5 w-5 text-slate-600" />
                                                     </Button>
                                                 </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/40">
                                             <HelpCircle className="h-3.5 w-3.5" />
-                                            Question Text
+                                            Prompt Content
                                         </div>
-                                        <p className="text-[15px] font-medium text-slate-700 leading-relaxed italic border-l-4 border-primary/20 pl-5 py-1.5">
+                                        <p className="text-lg font-medium text-slate-700 leading-relaxed italic border-l-4 border-primary/20 pl-6 py-2">
                                             "{displayData.prompt}"
                                         </p>
                                     </div>
@@ -297,30 +297,35 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                 {(() => {
                                     const score = displayData?.overall_score || displayData?.bandScore || realData?.score || 0;
                                     return (
-                                        <ScoreOverview
-                                            score={score}
-                                            showChatButton={!isSample}
-                                            onChatClick={() => setIsCatbotOpen(true)}
-                                            className="bg-white rounded-[2rem] border border-slate-200 shadow-sm"
-                                        />
+                                        <div className="relative group">
+                                            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/10 to-primary/10 rounded-[3rem] blur-2xl opacity-20" />
+                                            <ScoreOverview
+                                                score={score}
+                                                showChatButton={!isSample}
+                                                onChatClick={() => setIsCatbotOpen(true)}
+                                                className="bg-white/70 backdrop-blur-3xl rounded-[3rem] border border-white/40 shadow-2xl shadow-slate-200/20"
+                                            />
+                                        </div>
                                     );
                                 })()}
-                                <div className="space-y-12">
+                                <div className="space-y-16">
                                     {displayData ? (
                                         (displayData.type === "Writing" || (!isSample && realData?.exercise?.type?.startsWith('writing'))) ? (
                                             displayData.detailed_scores ? (
-                                                <WritingFeedback
-                                                    result={displayData as any}
-                                                    type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
-                                                    hideScore={true}
-                                                    attemptId={isSample ? "sample-" + id : realData?.id}
-                                                    originalText={isSample ? displayData.originalText : realData?.content}
-                                                    isUnlocked={isSample ? true : realData?.is_correction_unlocked}
-                                                    initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
-                                                    targetScore={targetScore}
-                                                    isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
-                                                    initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
-                                                />
+                                                <div className="space-y-12">
+                                                    <WritingFeedback
+                                                        result={displayData as any}
+                                                        type={isSample ? (displayData as any).writingType : realData?.exercise?.type as any}
+                                                        hideScore={true}
+                                                        attemptId={isSample ? "sample-" + id : realData?.id}
+                                                        originalText={isSample ? displayData.originalText : realData?.content}
+                                                        isUnlocked={isSample ? true : realData?.is_correction_unlocked}
+                                                        initialCorrection={isSample ? { edits: displayData.feedbackCards || [] } : (realData?.correction_data ? JSON.parse(realData.correction_data) : null)}
+                                                        targetScore={targetScore}
+                                                        isExampleEssayUnlocked={!isSample && realData?.is_example_essay_unlocked}
+                                                        initialExampleEssay={!isSample && realData?.example_essay_data ? (typeof realData.example_essay_data === 'string' ? JSON.parse(realData.example_essay_data) : realData.example_essay_data) : null}
+                                                    />
+                                                </div>
                                             ) : (
                                                 <WritingEvaluation data={displayData as any} />
                                             )
@@ -330,9 +335,11 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                             <RewriterEvaluation data={displayData as any} />
                                         )
                                     ) : (
-                                        // Evaluated but feedback data is not available (legacy or processing)
-                                        <div className="bg-white rounded-[2rem] border border-slate-100 p-12 text-center space-y-4">
-                                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No feedback data found for this report.</p>
+                                        <div className="bg-white/60 backdrop-blur-3xl rounded-[3rem] border border-white/40 p-16 text-center shadow-2xl">
+                                            <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                                <Info className="h-10 w-10 text-slate-300" />
+                                            </div>
+                                            <p className="text-base font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">Feedback Stream Offline</p>
                                         </div>
                                     )}
                                 </div>
@@ -340,38 +347,43 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                         ) : (
                             /* Pending Evaluation Teaser */
                             <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-primary rounded-[3rem] blur opacity-20 transition duration-1000" />
-                                <div className="relative bg-white rounded-[2.5rem] border border-slate-200 p-12 text-center space-y-8 shadow-2xl shadow-slate-200/50 overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
+                                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-primary rounded-[3rem] blur-2xl opacity-25 animate-pulse" />
+                                <div className="relative bg-white/60 backdrop-blur-3xl rounded-[3rem] border border-white/40 p-16 text-center space-y-10 shadow-2xl shadow-primary/10 overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20" />
 
-                                    <div className="flex flex-col items-center justify-center p-8 space-y-6 z-10 relative">
-                                        <div className="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-transform duration-500 relative">
-                                            <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-                                            <Lock className="h-10 w-10 text-white relative z-10" />
+                                    <div className="flex flex-col items-center justify-center p-8 space-y-8 z-10 relative">
+                                        <div className="relative">
+                                            <div className="absolute -inset-4 bg-primary/10 rounded-full blur-2xl animate-ping" style={{ animationDuration: '3s' }} />
+                                            <div className="w-28 h-28 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl rotate-3 relative z-10">
+                                                <Lock className="h-12 w-12 text-white" />
+                                            </div>
                                         </div>
 
-                                        <div className="space-y-3">
-                                            <h3 className="text-3xl font-black font-outfit text-slate-900">Analysis Pending</h3>
-                                            <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">
-                                                Your response has been saved. Activate AI analysis to receive precision scoring and personalized improvement tips.
+                                        <div className="space-y-4">
+                                            <h3 className="text-4xl font-black font-outfit text-slate-900 tracking-tight">ANALYSIS LOCKED</h3>
+                                            <p className="text-slate-500 text-lg font-bold max-w-md mx-auto leading-relaxed">
+                                                Your masterpiece is waiting. Unlock deep AI diagnostics to reach your target Band {targetScore}.
                                             </p>
                                         </div>
 
-                                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md pt-4 justify-center">
-                                            <Button
-                                                onClick={handleEvaluate}
-                                                disabled={isEvaluating}
-                                                className="w-full bg-primary hover:bg-primary/90 text-white h-16 rounded-[2rem] font-black text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all">
-                                                {isEvaluating ? <Loader2 className="h-6 w-6 animate-spin" /> : "Evaluate with AI (10 Credits)"}
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    {/* Mock Blur Background */}
-                                    <div className="grid grid-cols-2 gap-8 opacity-[0.03] select-none pointer-events-none absolute inset-0 -z-0 blur-sm">
-                                        <div className="h-64 bg-slate-900 rounded-2xl" />
-                                        <div className="h-64 bg-slate-900 rounded-2xl" />
-                                        <div className="h-80 bg-slate-900 rounded-2xl col-span-2" />
+                                        <Button
+                                            onClick={handleEvaluate}
+                                            disabled={isEvaluating}
+                                            className="group relative w-full max-w-md h-20 pl-10 pr-8 rounded-[2.5rem] bg-slate-900 hover:bg-primary text-white font-black text-lg shadow-2xl shadow-primary/20 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]"
+                                        >
+                                            <span className="relative z-10 flex items-center justify-center gap-4">
+                                                {isEvaluating ? <Loader2 className="h-7 w-7 animate-spin" /> : (
+                                                    <>
+                                                        Initialize Analysis
+                                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/5">
+                                                            <span className="text-[11px] uppercase tracking-widest opacity-80">Cost</span>
+                                                            <span className="text-sm font-mono font-black">10</span>
+                                                            <span className="text-sm">⭐</span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </span>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -380,122 +392,133 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                 </div>
             </div>
 
-            {/* 2. Side Panel: Horsebot AI Tutor */}
+            {/* 2. Side Panel: Horsebot AI Tutor Redesign */}
             {!isSample && (
                 <div
                     className={cn(
-                        "bg-white border-l transition-all duration-700 flex flex-col relative hidden xl:flex shadow-[-20px_0_40px_rgba(0,0,0,0.02)]",
-                        isCatbotOpen ? "w-[420px]" : "w-0 overflow-hidden"
+                        "bg-white/80 backdrop-blur-3xl border-l border-white/40 transition-all duration-700 ease-in-out flex flex-col relative hidden xl:flex shadow-2xl",
+                        isCatbotOpen ? "w-[450px]" : "w-0 overflow-hidden border-none"
                     )}
                 >
-                    <div className="p-8 flex flex-col h-full bg-white relative z-10">
+                    <div className="flex flex-col h-full relative z-10">
                         {/* Chat Header */}
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-8">
-                            <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-400/20 shadow-lg shadow-indigo-600/20 rotate-2">
-                                    <span className="text-2xl">🐴</span>
+                        <div className="p-8 border-b border-slate-100/50 flex items-center justify-between bg-white/50">
+                            <div className="flex items-center gap-5">
+                                <div className="relative group">
+                                    <div className="absolute -inset-1 bg-indigo-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity" />
+                                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl flex items-center justify-center border border-white/20 shadow-xl shadow-indigo-600/20 rotate-3 group-hover:rotate-0 transition-transform">
+                                        <span className="text-3xl">🐴</span>
+                                    </div>
                                 </div>
-                                <div className="space-y-0.5">
-                                    <h4 className="font-black font-outfit text-slate-900">Horsebot AI</h4>
+                                <div className="space-y-1">
+                                    <h4 className="text-lg font-black font-outfit text-slate-900">Horsebot Intelligence</h4>
                                     <div className="flex items-center gap-2">
                                         <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Analysis Expert</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Neural Tutor Active</span>
                                     </div>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setIsCatbotOpen(false)}
-                                className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                                className="h-12 w-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all shadow-sm"
                             >
-                                <X className="h-5 w-5" />
+                                <X className="h-6 w-6" />
                             </button>
                         </div>
 
                         {/* Chat Feed */}
                         <div
                             ref={chatContainerRef}
-                            className="flex-1 overflow-y-auto py-10 space-y-8 scrollbar-hide"
+                            className="flex-1 overflow-y-auto px-8 py-10 space-y-10 scrollbar-hide"
                         >
                             {messages.map((msg, i) => (
                                 <div
                                     key={i}
                                     className={cn(
-                                        "flex flex-col gap-2 max-w-[90%] animate-in fade-in slide-in-from-bottom-2 duration-500",
+                                        "flex flex-col gap-3 max-w-[90%] animate-in fade-in slide-in-from-bottom-4 duration-500",
                                         msg.role === "assistant" ? "items-start" : "items-end ml-auto"
                                     )}
                                 >
                                     <div
                                         className={cn(
-                                            "p-5 rounded-3xl border transition-all selection:bg-primary/20",
+                                            "p-6 rounded-[2rem] border transition-all duration-300 relative group",
                                             msg.role === "assistant"
-                                                ? "bg-slate-50 border-slate-100 rounded-tl-none font-medium text-slate-700 text-sm leading-relaxed"
-                                                : "bg-primary border-primary rounded-tr-none text-white font-bold text-sm shadow-lg shadow-primary/20"
+                                                ? "bg-slate-50 border-slate-100 rounded-tl-none font-bold text-slate-700 text-[15px] leading-relaxed shadow-sm"
+                                                : "bg-primary border-primary rounded-tr-none text-white font-black text-[15px] shadow-2xl shadow-primary/20"
                                         )}
                                     >
                                         {msg.content}
                                     </div>
-                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-2">
-                                        {msg.role === "assistant" ? "Tutor" : "Researcher"}
-                                    </span>
+                                    <div className="flex items-center gap-2 px-3">
+                                        <div className={cn("w-1 h-1 rounded-full", msg.role === "assistant" ? "bg-indigo-400" : "bg-primary")} />
+                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">
+                                            {msg.role === "assistant" ? "Neural Tutor" : "Explorer"}
+                                        </span>
+                                    </div>
                                 </div>
                             ))}
 
                             {isTyping && (
-                                <div className="bg-slate-50 p-5 rounded-3xl rounded-tl-none border border-slate-100 w-fit animate-pulse">
-                                    <div className="flex gap-1.5">
-                                        <div className="w-1.5 h-1.5 bg-indigo-300 rounded-full animate-bounce" />
-                                        <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                <div className="flex flex-col gap-3">
+                                    <div className="bg-slate-50/50 backdrop-blur-md p-6 rounded-[2rem] rounded-tl-none border border-slate-100 w-fit">
+                                        <div className="flex gap-2">
+                                            <div className="w-2 h-2 bg-indigo-300 rounded-full animate-bounce" />
+                                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                        </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
                         {/* Chat Interaction Area */}
-                        <div className="pt-8 border-t border-slate-100 mt-auto space-y-8">
-                            {/* Suggestions */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <Sparkles className="h-3 w-3 text-amber-500" />
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400/60">Guidance Prompts</span>
+                        <div className="p-8 bg-slate-50/50 backdrop-blur-xl border-t border-slate-100">
+                            <div className="space-y-8">
+                                {/* Suggestions */}
+                                <div className="space-y-4 px-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                        <span className="text-[10px] uppercase font-black tracking-[0.3em] text-slate-400">Contextual Inquires</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {["Analyze errors", "Score criteria", "Target 8.0 roadmap"].map(q => (
+                                            <button
+                                                key={q}
+                                                onClick={() => handleSendMessage(q)}
+                                                className="text-[10px] font-black px-5 py-2.5 bg-white border border-slate-200 hover:border-primary hover:text-primary rounded-2xl transition-all shadow-sm active:scale-95 flex items-center gap-2"
+                                            >
+                                                <Sparkles className="h-3 w-3" />
+                                                {q}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {["Improvement tips", "Key mistakes", "Explain score"].map(q => (
-                                        <button
-                                            key={q}
-                                            onClick={() => handleSendMessage(q)}
-                                            className="text-[10px] font-black px-4 py-2 bg-white border border-slate-200 hover:border-primary hover:text-primary rounded-full transition-all shadow-sm active:scale-95"
-                                        >
-                                            {q}
-                                        </button>
-                                    ))}
+
+                                {/* Input Field */}
+                                <div className="relative group/chatinput">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-indigo-500 rounded-3xl blur opacity-0 group-focus-within/chatinput:opacity-10 transition duration-700" />
+                                    <input
+                                        type="text"
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") handleSendMessage(chatInput)
+                                        }}
+                                        placeholder="Command Horsebot Intelligence..."
+                                        className="relative w-full bg-white border border-slate-100 rounded-[1.5rem] h-20 pl-8 pr-20 text-base font-bold placeholder:text-slate-300 focus:outline-none focus:border-primary/30 transition-all shadow-xl shadow-slate-200/50"
+                                    />
+                                    <button
+                                        onClick={() => handleSendMessage(chatInput)}
+                                        className="absolute right-4 top-4 h-12 w-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xl hover:bg-primary transition-all active:scale-90 z-10"
+                                    >
+                                        <Send className="h-5 w-5" />
+                                    </button>
                                 </div>
-                            </div>
 
-                            {/* Input Field */}
-                            <div className="relative group/chatinput">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within/chatinput:opacity-100 transition duration-500" />
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") handleSendMessage(chatInput)
-                                    }}
-                                    placeholder="Inquire with Horsebot..."
-                                    className="relative w-full bg-white border border-slate-200 rounded-2xl h-16 pl-6 pr-16 text-sm font-bold placeholder:text-slate-300 focus:outline-none focus:border-primary transition-all shadow-sm"
-                                />
-                                <button
-                                    onClick={() => handleSendMessage(chatInput)}
-                                    className="absolute right-3 top-3 h-10 w-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg hover:bg-primary transition-all active:scale-90 z-10"
-                                >
-                                    <Send className="h-4 w-4" />
-                                </button>
+                                <p className="text-center text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">
+                                    Data-Driven Academic Support
+                                </p>
                             </div>
-
-                            <p className="text-center text-[9px] font-bold text-slate-300 uppercase tracking-widest">
-                                Horsebot analyze 100% of your current response
-                            </p>
                         </div>
                     </div>
                 </div>
