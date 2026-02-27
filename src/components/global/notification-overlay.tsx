@@ -17,14 +17,15 @@ import { AppNotification } from "@/repositories/interfaces"
 import { NOTIFICATION_TYPES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { useNotificationPolling } from "@/lib/contexts/notification-polling-context"
+import { StarIcon } from "@/components/global/star-icon"
 
-const TYPE_CONFIG: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
+const TYPE_CONFIG: Record<string, { icon: React.ElementType; bg: string; color: string; isCredit?: boolean }> = {
     [NOTIFICATION_TYPES.EVALUATION_COMPLETE]: { icon: FileText, bg: "bg-emerald-50", color: "text-emerald-600" },
-    [NOTIFICATION_TYPES.CREDITS_RECEIVED]: { icon: Coins, bg: "bg-blue-50", color: "text-blue-600" },
-    [NOTIFICATION_TYPES.CREDITS_LOW]: { icon: AlertTriangle, bg: "bg-amber-50", color: "text-amber-600" },
-    [NOTIFICATION_TYPES.CREDIT_REQUEST_APPROVED]: { icon: Gift, bg: "bg-emerald-50", color: "text-emerald-600" },
-    [NOTIFICATION_TYPES.CREDIT_REQUEST_REJECTED]: { icon: XCircle, bg: "bg-rose-50", color: "text-rose-500" },
-    [NOTIFICATION_TYPES.CREDIT_REQUEST_NEW]: { icon: Sparkles, bg: "bg-indigo-50", color: "text-indigo-600" },
+    [NOTIFICATION_TYPES.CREDITS_RECEIVED]: { icon: Coins, bg: "bg-amber-50", color: "text-amber-600", isCredit: true },
+    [NOTIFICATION_TYPES.CREDITS_LOW]: { icon: AlertTriangle, bg: "bg-amber-50", color: "text-amber-600", isCredit: true },
+    [NOTIFICATION_TYPES.CREDIT_REQUEST_APPROVED]: { icon: Gift, bg: "bg-emerald-50", color: "text-emerald-600", isCredit: true },
+    [NOTIFICATION_TYPES.CREDIT_REQUEST_REJECTED]: { icon: XCircle, bg: "bg-rose-50", color: "text-rose-500", isCredit: true },
+    [NOTIFICATION_TYPES.CREDIT_REQUEST_NEW]: { icon: Sparkles, bg: "bg-indigo-50", color: "text-indigo-600", isCredit: true },
     [NOTIFICATION_TYPES.WELCOME]: { icon: Sparkles, bg: "bg-purple-50", color: "text-purple-600" },
     [NOTIFICATION_TYPES.SYSTEM]: { icon: Megaphone, bg: "bg-slate-100", color: "text-slate-600" },
 }
@@ -192,9 +193,13 @@ export function NotificationOverlay() {
 
                                         <div className={cn(
                                             "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-500 group-hover:rotate-6",
-                                            config.bg
+                                            config.isCredit ? "bg-transparent shadow-none" : config.bg
                                         )}>
-                                            <Icon className={cn("h-6 w-6", config.color)} />
+                                            {config.isCredit ? (
+                                                <StarIcon size="md" />
+                                            ) : (
+                                                <Icon className={cn("h-6 w-6", config.color)} />
+                                            )}
                                         </div>
 
                                         <div className="flex flex-col gap-1.5 flex-1 min-w-0">
