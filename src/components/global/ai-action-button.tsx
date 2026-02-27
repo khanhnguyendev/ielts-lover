@@ -4,6 +4,7 @@ import * as React from "react"
 import { Sparkles, LucideIcon, ChevronRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { CreditBadge } from "@/components/ui/credit-badge"
 
 interface AIActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     label: string
@@ -50,9 +51,11 @@ export function AIActionButton({
                 <span className="truncate">{label}</span>
 
                 {badge && (
-                    <span className="shrink-0 px-2 py-0.5 rounded-full bg-amber-500 text-[8px] text-white leading-none shadow-lg shadow-amber-500/30">
-                        {badge}
-                    </span>
+                    <CreditBadge
+                        amount={parseInt(badge)}
+                        size="sm"
+                        className="shrink-0 border-none bg-amber-500 text-white shadow-lg shadow-amber-500/30"
+                    />
                 )}
 
                 {showChevron && !isLoading && (

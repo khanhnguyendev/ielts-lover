@@ -20,6 +20,7 @@ import { USER_ROLES } from "@/lib/constants"
 import { PulseLoader } from "./pulse-loader"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { CreditBadge } from "@/components/ui/credit-badge"
 
 export function UserProfileMenu({ user }: { user: UserProfile }) {
     const [isLoading, setIsLoading] = React.useState(false)
@@ -125,16 +126,15 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                                 </div>
 
                                 <div className="flex items-center justify-between relative z-10">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-yellow-400 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 border border-yellow-300">
-                                            <span className="text-xl leading-none select-none">⭐</span>
-                                        </div>
+                                    <div className="flex items-center gap-4">
+                                        <CreditBadge
+                                            amount={displayBalance || 0}
+                                            size="lg"
+                                            className="h-14 rounded-2xl border-none bg-white shadow-xl shadow-slate-200/50"
+                                        />
                                         <div>
                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Your Balance</p>
-                                            <div className="flex items-baseline gap-1">
-                                                <p className="text-xl font-black text-slate-900 tracking-tight">{(displayBalance || 0).toLocaleString()}</p>
-                                                <p className="text-[9px] font-black text-primary uppercase tracking-widest">Stars</p>
-                                            </div>
+                                            <p className="text-[10px] font-black text-primary uppercase tracking-widest">Active Stars</p>
                                         </div>
                                     </div>
                                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 group-hover:border-primary/30 group-hover:text-primary transition-all duration-500 -rotate-45 group-hover:rotate-0">

@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Sparkles, Plus } from "lucide-react"
+import { StarIcon } from "@/components/global/star-icon"
 
 interface StarsBalanceProps {
     balance: number
@@ -52,9 +53,10 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
                 {/* Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/5 to-amber-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[1.25rem]" />
 
-                <div className="flex items-center justify-center w-6 h-6 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-amber-500/20 relative z-10">
-                    <span className="text-[11px] leading-none select-none drop-shadow-sm">⭐</span>
-                </div>
+                <StarIcon
+                    size="md"
+                    containerClassName="group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 relative z-10"
+                />
 
                 <div className="flex items-center gap-2 relative z-10">
                     <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight font-outfit">

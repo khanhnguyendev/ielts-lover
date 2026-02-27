@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { StarIcon } from "@/components/global/star-icon"
 
 interface CreditBadgeProps {
     amount: number
@@ -34,18 +35,15 @@ export function CreditBadge({
         <div className={cn(
             "inline-flex items-center font-black transition-all shadow-sm border",
             isPositive
-                ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                : "bg-yellow-50 text-yellow-700 border-yellow-200",
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                : "bg-amber-500/10 text-amber-700 border-amber-500/20",
             sizeClasses[size],
             className
         )}>
             {showIcon && (
-                <div className={cn(
-                    "flex items-center justify-center rounded-full bg-yellow-400 shadow-sm",
-                    starSizes[size]
-                )}>
-                    <span className="leading-none select-none">⭐</span>
-                </div>
+                <StarIcon
+                    size={size === "lg" ? "md" : size === "md" ? "sm" : "xs"}
+                />
             )}
             <span className="font-mono tracking-tighter">
                 {isPositive ? "+" : "-"}{Math.abs(amount)}
