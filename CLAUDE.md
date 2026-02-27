@@ -39,12 +39,14 @@ Centralized in a few files — do not scatter `"use server"` across components:
 Every action that does meaningful work must be wrapped with `traceAction()` for observability.
 
 ### Key Services
-- `ai.service.ts` — All AI calls (Gemini). Prompts are versioned and return JSON. Every AI response must be stored in the `reports` table.
+- `ai.service.ts` — All AI calls (Gemini via `@google/generative-ai`). Prompts are versioned and return JSON. Every AI response must be stored in the `reports` table.
 - `attempt.service.ts` — Attempt lifecycle and scoring.
-- `credit.service.ts` — StarCredits economy; baseline rules live in `admin.policy.ts`.
+- `credit.service.ts` — StarCredits economy. Throws `InsufficientFundsError` / `MonthlyLimitError`. Daily grant is lazy (triggered by `ensureDailyGrant()` on billing, not a cron).
 - `improvement.service.ts` — Sentence-level feedback.
 - `ai-cost.service.ts` — AI usage tracking. Record costs non-blocking via `recordAICost()` (fire-and-forget, never await in the action's critical path).
-- `notification.service.ts` — Creates DB records + increments Redis unread counter.
+- `notification.service.ts` — Creates DB records + increments Redis unread counter (dual Redis+Postgres strategy with 24h TTL).
+- `storage.service.ts` — Cloudinary file uploads for exercise images and AI-generated charts.
+- `admin.policy.ts` — Authorization role checks (`canAccessAdmin`, `canAccessTeacher`, `canManageCreditsDirectly`, `canCreateExercises`). Not credit rules.
 
 ### Observability
 
@@ -54,9 +56,22 @@ Every action that does meaningful work must be wrapped with `traceAction()` for 
 - Structured logger at `lib/logger.ts`; respects `LOG_LEVEL` env var.
 - Sentry is integrated (`instrumentation.ts`); 10% trace sampling in prod, 100% in dev.
 
-### Rate Limiting
+### Background Jobs (Inngest)
 
-Redis-based (`@upstash/ratelimit`) in `lib/ratelimit.ts`. Applied per-user on AI evaluation and simple AI actions. Check rate limit before deducting credits.
+Inngest handles async work. Client at `inngest/client.ts`, functions in `inngest/functions/`.
+
+- **Single API route**: `app/api/inngest/route.ts` — the only API route in the app.
+- **`evaluateAttemptBackground`** — triggered by `"attempt/evaluate"` event. Runs AI evaluation, records cost, notifies user. Retries: 2, concurrency: 10. Creates its own isolated service instances per invocation (does not reuse module-level singletons).
+- `submitAttempt` in `app/actions.ts` currently evaluates **synchronously** with a distributed lock. The Inngest path is available for background/async evaluation.
+
+### Redis Infrastructure
+
+Redis (`@upstash/redis`) is **optional** — the app degrades gracefully when not configured.
+
+- `lib/redis.ts` — Client singleton; exports `hasRedis` boolean.
+- `lib/ratelimit.ts` — Per-user rate limiting on AI actions. Fail-closed (denies requests if Redis unavailable). Check rate limit before deducting credits.
+- `lib/distributed-lock.ts` — `acquireLock()` / `withLock()` using `SET NX` with TTL. Used in `submitAttempt` and `reevaluateAttempt` to prevent concurrent billing. Fail-open (skips lock if Redis unavailable).
+- `lib/maintenance.ts` — Redis-backed maintenance mode toggle. Fail-open (allows traffic if Redis unavailable). Checked in middleware for every non-admin, non-`/maintenance` request.
 
 ### Data Immutability
 - `exercises` are versioned and immutable once published.
@@ -80,15 +95,17 @@ Never hardcode system flags, statuses, types, or roles as string literals. Alway
 
 ```ts
 // ❌ Bad
-if (status === 'pending') { ... }
+if (status === 'submitted') { ... }
 if (role === 'admin') { ... }
 
 // ✅ Good
-if (status === ATTEMPT_STATUS.PENDING) { ... }
+if (status === ATTEMPT_STATES.SUBMITTED) { ... }
 if (role === USER_ROLES.ADMIN) { ... }
 ```
 
 If a constant doesn't exist yet, add it to `@/lib/constants.ts` first, then import it.
+
+UI toast messages live in `@/lib/constants/messages.ts` (exported as `NOTIFY_MSGS`).
 
 When validating with Zod: `z.enum(Object.values(TRANSACTION_TYPES) as [string, ...string[]])`
 
@@ -166,9 +183,11 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY
 GEMINI_API_KEY
-GEMINI_MODEL          # gemini-flash-lite-latest
+GEMINI_MODEL                    # gemini-flash-lite-latest
 CLOUDINARY_URL
 NEXT_PUBLIC_APP_URL
+UPSTASH_REDIS_REST_URL          # Optional — Redis for rate limiting, locks, maintenance mode
+UPSTASH_REDIS_REST_TOKEN        # Optional — required if UPSTASH_REDIS_REST_URL is set
 ```
 
 Supabase has two server clients (`lib/supabase/server.ts`): a user-scoped client (respects RLS) and a service-role client (bypasses RLS, for admin operations only).
@@ -178,3 +197,11 @@ Supabase has two server clients (`lib/supabase/server.ts`): a user-scoped client
 Schema name: `ielts_lover_v1`. Migrations are in `supabase/migrations/`.
 
 Auth flow: Supabase email/password → callback at `/auth/callback` → session via cookies. Route protection is in `src/proxy.ts` (Next.js middleware).
+
+### Route Protection (`proxy.ts`)
+
+- **Public routes**: `/`, `/login`, `/signup`, `/onboarding`, `/auth/callback`, `/maintenance`
+- **Guest-browsable**: most `/dashboard/*` sub-routes (exercises, lessons, samples)
+- **Auth-required**: `/dashboard/settings`, `/dashboard/credits`, `/dashboard/transactions`, `/dashboard/improvement`, `/dashboard/reports`, `/dashboard/speaking`, `/admin/*`, `/teacher/*`
+- Authenticated users hitting `/login` or `/signup` are redirected to `/dashboard`
+- Maintenance mode redirects all non-admin users to `/maintenance` (admins bypass)
