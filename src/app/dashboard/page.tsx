@@ -130,41 +130,55 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                     <div className="lg:col-span-12 space-y-10">
 
-                        {/* 2. Immersive AI Coach Console */}
+                        {/* 2. Immersive AI Coach Console (Liquid Glass V2) */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             className="relative overflow-hidden group"
                         >
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-600 rounded-[2.5rem] blur opacity-10 group-hover:opacity-25 transition duration-1000"></div>
-                            <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl rounded-[2.5rem] p-6 lg:p-10 border border-white/20 dark:border-slate-800/50 shadow-2xl flex flex-col md:flex-row items-center gap-8">
-                                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none" />
+                            {/* Premium Animated Border Gradient */}
+                            <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-indigo-500/30 to-primary/30 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
 
+                            <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] p-6 lg:p-8 border border-white/20 dark:border-slate-800/50 shadow-2xl flex flex-col md:flex-row items-center gap-8 overflow-hidden">
+                                {/* Depth Elements */}
+                                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none animate-pulse" />
+                                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+                                {/* Glowing Coach Avatar */}
                                 <div className="relative shrink-0">
-                                    <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-[2rem] flex items-center justify-center text-5xl shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-slate-100 dark:border-slate-700">
-                                        🐴
+                                    <div className="relative w-24 h-24 flex items-center justify-center group/avatar">
+                                        <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover/avatar:scale-125 transition-transform duration-700 animate-pulse" />
+                                        <div className="relative w-20 h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl shadow-2xl border border-white/40 dark:border-white/10 group-hover/avatar:rotate-6 group-hover/avatar:scale-105 transition-all duration-500">
+                                            🐴
+                                        </div>
+                                        {/* Status Ring */}
+                                        <div className="absolute -inset-2 border-2 border-dashed border-primary/20 rounded-full animate-[spin_20s_linear_infinite]" />
                                     </div>
-                                    <div className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full border-4 border-white dark:border-slate-900 shadow-xl">
-                                        <Sparkles size={16} className="animate-pulse" />
+                                    <div className="absolute -bottom-1 -right-1 bg-primary text-white p-1.5 rounded-full border-[3px] border-white dark:border-slate-900 shadow-xl z-10">
+                                        <Sparkles size={14} className="animate-pulse" />
                                     </div>
                                 </div>
 
-                                <div className="flex-1 text-center md:text-left space-y-3">
-                                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                                        Ready for Band {user?.target_score || '7.5'}, <span className="text-primary">{user?.full_name?.split(' ')[0] || 'Learner'}?</span>
-                                    </h1>
-                                    <p className="text-base font-medium text-slate-500 dark:text-slate-400 max-w-lg leading-relaxed">
+                                <div className="flex-1 text-center md:text-left space-y-2.5 z-10">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80 mb-1">Personal AI Mentor</span>
+                                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                                            Ready for Band {user?.target_score || '7.5'}, <span className="premium-text-gradient">{user?.full_name?.split(' ')[0] || 'Learner'}?</span>
+                                        </h1>
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg leading-relaxed">
                                         I&apos;m your personal AI coach. Let&apos;s analyze your latest writing or explore some speaking topics together.
                                     </p>
                                 </div>
 
-                                <div className="w-full md:max-w-md lg:max-w-lg relative group/input">
-                                    <div className="relative bg-white dark:bg-slate-800/80 rounded-2xl p-2 flex items-center border border-slate-200 dark:border-slate-700/50 transition-all hover:border-primary shadow-sm hover:shadow-lg">
+                                {/* Chat Interface Container */}
+                                <div className="w-full md:max-w-md lg:max-w-lg relative group/input z-10">
+                                    <div className="relative bg-white/50 dark:bg-slate-950/20 backdrop-blur-xl rounded-2xl p-1.5 flex items-center border border-white/40 dark:border-white/10 transition-all hover:border-primary/40 shadow-xl group-focus-within/input:ring-2 ring-primary/10">
                                         <input
                                             type="text"
-                                            placeholder="Ask Horsebot a question..."
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold px-4 text-slate-900 dark:text-white placeholder:text-slate-400"
+                                            placeholder="Ask Horsebot anything..."
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold px-4 text-slate-900 dark:text-white placeholder:text-slate-400/60"
                                             value={chatInput}
                                             onChange={(e) => setChatInput(e.target.value)}
                                             onKeyDown={(e) => {
@@ -173,18 +187,20 @@ export default function DashboardPage() {
                                         />
                                         <Button
                                             size="icon"
-                                            className="rounded-xl shadow-lg bg-primary hover:bg-primary/90 transition-all active:scale-95 group/btn h-11 w-11"
+                                            className="rounded-xl shadow-lg premium-gradient border-none hover:shadow-primary/30 transition-all active:scale-95 group/btn h-10 w-10 shrink-0"
                                             onClick={handleChatSubmit}
                                         >
-                                            <Send size={20} className="text-white group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                            <Send size={18} className="text-white group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                                         </Button>
                                     </div>
-                                    <div className="flex gap-2.5 mt-4 px-1 overflow-x-auto no-scrollbar">
+
+                                    {/* Smart Hints */}
+                                    <div className="flex gap-2.5 mt-4 px-1 overflow-x-auto no-scrollbar scroll-smooth">
                                         {['Check Grammar', 'Writing Task 2 Ideas', 'Part 1 Mock'].map((hint) => (
                                             <button
                                                 key={hint}
                                                 onClick={() => handleFeatureClick(hint)}
-                                                className="whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95"
+                                                className="whitespace-nowrap text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white bg-white/40 dark:bg-slate-800/20 hover:bg-primary border border-white/60 dark:border-white/5 hover:border-primary px-4 py-2 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/20 hover:scale-105 active:scale-95"
                                             >
                                                 {hint}
                                             </button>
