@@ -140,12 +140,24 @@ export function ExerciseCard({
                             {formattedDate || "Recent"}
                         </div>
                         <div className="w-1 h-1 rounded-full bg-slate-200" />
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                             <span className="text-slate-400 font-medium lowercase">by</span>
-                            <span className={cn(
-                                "font-black tracking-widest",
-                                creatorRole === "admin" ? "text-amber-500" : "text-indigo-500"
-                            )}>{creatorName?.split(' ')[0] || "System"}</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className={cn(
+                                    "font-black tracking-widest",
+                                    creatorRole === "admin" ? "text-amber-500" : "text-indigo-500"
+                                )}>{creatorName?.split(' ')[0] || "System"}</span>
+                                {creatorRole && (creatorRole === "admin" || creatorRole === "teacher") && (
+                                    <span className={cn(
+                                        "px-1.5 py-0.5 rounded-[4px] text-[8px] font-black uppercase tracking-widest border",
+                                        creatorRole === "admin"
+                                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                            : "bg-indigo-500/10 text-indigo-500 border-indigo-500/20"
+                                    )}>
+                                        {creatorRole}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
