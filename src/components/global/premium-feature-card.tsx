@@ -5,6 +5,7 @@ import { Lock, Zap, Sparkles, ChevronRight, Loader2, CheckCircle2, type LucideIc
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PulseLoader } from "@/components/global/pulse-loader";
+import { AIActionButton } from "@/components/global/ai-action-button";
 
 export interface UnlockingStep {
     icon: LucideIcon;
@@ -183,34 +184,15 @@ export function PremiumFeatureCard({
                             {description}
                         </p>
 
-                        <Button
+                        <AIActionButton
+                            label={isUnlocking ? "Unlocking..." : "Unlock Now"}
+                            icon={Zap}
                             onClick={onUnlock}
-                            disabled={isUnlocking}
-                            className={cn(
-                                "h-14 px-8 rounded-2xl text-white font-black text-sm group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg",
-                                v.button
-                            )}
-                        >
-                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Zap className="w-4 h-4 mr-2 fill-white animate-pulse" />
-
-                            {isUnlocking ? (
-                                <div className="flex items-center gap-2">
-                                    <PulseLoader size="sm" color="white" />
-                                    <span>Unlocking...</span>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    <span>Unlock Now</span>
-                                    <div className="flex items-center gap-1.5 bg-white/20 ring-1 ring-white/30 px-2.5 py-1 rounded-full shadow-sm">
-                                        <span className="text-[10px] leading-none">⭐</span>
-                                        <span className="text-[10px] font-black tracking-tight">{cost}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {!isUnlocking && <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform opacity-80" />}
-                        </Button>
+                            isLoading={isUnlocking}
+                            badge={cost.toString()}
+                            showChevron={!isUnlocking}
+                            className="h-14 w-full px-8 rounded-2xl"
+                        />
 
                         <p className="mt-6 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                             <Sparkles className="w-3 h-3" />

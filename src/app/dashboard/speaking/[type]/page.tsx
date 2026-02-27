@@ -36,6 +36,7 @@ import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { BackButton } from "@/components/global/back-button"
 import { useTitle } from "@/lib/contexts/title-context"
+import { AIActionButton } from "@/components/global/ai-action-button"
 
 export default function SpeakingPracticePage({ params }: { params: { type: string } }) {
     const [exercise, setExercise] = React.useState<Exercise | null>(null)
@@ -194,12 +195,12 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
                         >
                             History
                         </Button>
-                        <Button
-                            className="h-16 rounded-[24px] bg-[#7C3AED] hover:bg-[#6D28D9] font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/25"
+                        <AIActionButton
+                            label="View Score"
+                            icon={BarChart3}
                             onClick={() => setShowFeedback(true)}
-                        >
-                            View Score
-                        </Button>
+                            className="h-16 flex-1"
+                        />
                     </div>
                 </div>
 

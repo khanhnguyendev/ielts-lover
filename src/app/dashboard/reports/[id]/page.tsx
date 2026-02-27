@@ -23,6 +23,7 @@ import {
     Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AIActionButton } from "@/components/global/ai-action-button"
 import { Progress } from "@/components/ui/progress"
 import { BackButton } from "@/components/global/back-button"
 import { cn } from "@/lib/utils"
@@ -183,7 +184,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
     if (isLoading) {
         return (
-            <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-white">
+            <div className="flex h-[calc(100vh-56px)] items-center justify-center bg-white">
                 <div className="flex flex-col items-center gap-4">
                     <PulseLoader size="lg" color="primary" />
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
@@ -366,24 +367,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                             </p>
                                         </div>
 
-                                        <Button
+                                        <AIActionButton
+                                            label={isEvaluating ? "Analyzing..." : "Initialize Analysis"}
+                                            icon={Sparkles}
                                             onClick={handleEvaluate}
-                                            disabled={isEvaluating}
-                                            className="group relative w-full max-w-md h-20 pl-10 pr-8 rounded-[2.5rem] bg-slate-900 hover:bg-primary text-white font-black text-lg shadow-2xl shadow-primary/20 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]"
-                                        >
-                                            <span className="relative z-10 flex items-center justify-center gap-4">
-                                                {isEvaluating ? <Loader2 className="h-7 w-7 animate-spin" /> : (
-                                                    <>
-                                                        Initialize Analysis
-                                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/5">
-                                                            <span className="text-[11px] uppercase tracking-widest opacity-80">Cost</span>
-                                                            <span className="text-sm font-mono font-black">10</span>
-                                                            <span className="text-sm">⭐</span>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </span>
-                                        </Button>
+                                            isLoading={isEvaluating}
+                                            badge="-10"
+                                            className="w-full max-w-md h-20 rounded-[2.5rem] text-lg"
+                                        />
                                     </div>
                                 </div>
                             </div>

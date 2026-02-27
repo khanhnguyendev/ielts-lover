@@ -27,7 +27,7 @@ export default async function DashboardLayout({
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 pointer-events-none" />
                         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] -ml-48 -mb-48 pointer-events-none" />
 
-                        <header className="h-14 border-b border-slate-200/50 dark:border-white/10 bg-white/60 dark:bg-slate-950/40 backdrop-blur-3xl flex items-center justify-between px-6 lg:px-8 shrink-0 z-40 relative">
+                        <header className="h-14 sticky top-0 border-b border-slate-200/50 dark:border-white/10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-3xl flex items-center justify-between px-6 lg:px-8 shrink-0 z-50">
                             <div className="flex items-center gap-4">
                                 <DynamicTitle />
                             </div>

@@ -10,6 +10,7 @@ import { FEATURE_KEYS } from "@/lib/constants";
 import { extractBillingError } from "@/lib/billing-errors";
 import { useNotification } from "@/lib/contexts/notification-context";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
+import { AIActionButton } from "@/components/global/ai-action-button"
 
 interface CorrectionPanelProps {
     sentenceText: string | null
@@ -214,26 +215,14 @@ export function CorrectionPanel({ sentenceText, corrections, onClose, className,
                     {/* 3. Rewrite Action */}
                     <div className="pt-3 border-t border-slate-100 space-y-2">
                         {!rewrittenSentence ? (
-                            <Button
+                            <AIActionButton
+                                label={isRewriting ? "Rewriting..." : "Magic Rewrite"}
+                                icon={Zap}
                                 onClick={handleRewrite}
-                                disabled={isRewriting}
-                                variant="ghost"
-                                className="w-full h-auto flex items-center justify-between px-3 py-2 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100/50 rounded-xl transition-all"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Zap className="w-3.5 h-3.5 text-indigo-500" />
-                                    <span className="text-xs font-bold text-indigo-900">
-                                        {isRewriting ? "Rewriting..." : "Magic Rewrite"}
-                                    </span>
-                                    <span className="text-[10px] text-indigo-500 font-medium">
-                                        Band {targetScore}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1 bg-yellow-50 ring-1 ring-yellow-100 px-1.5 py-0.5 rounded-full text-yellow-700">
-                                    <div className="flex items-center justify-center w-3 h-3 rounded-full bg-yellow-400 text-[8px] leading-none shadow-sm text-yellow-900">⭐</div>
-                                    <span className="text-[9px] font-black tracking-tight">-{cost || 5}</span>
-                                </div>
-                            </Button>
+                                isLoading={isRewriting}
+                                badge={cost ? `-${cost}` : undefined}
+                                className="w-full h-11 lg:h-11"
+                            />
                         ) : (
                             <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 relative group transition-all">
                                 <div className="flex items-start gap-2.5">

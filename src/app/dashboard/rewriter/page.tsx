@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { AIActionButton } from "@/components/global/ai-action-button"
 
 export default function RewriterPage() {
     const [input, setInput] = React.useState("")
@@ -119,23 +120,14 @@ export default function RewriterPage() {
                                             >
                                                 <Eraser size={14} className="mr-2" /> Clear
                                             </Button>
-                                            <Button
+                                            <AIActionButton
+                                                label="Neural Rewrite"
+                                                icon={Sparkles}
                                                 onClick={handleRewrite}
-                                                disabled={isProcessing || !input.trim()}
-                                                className="h-14 px-10 rounded-2xl bg-slate-900 dark:bg-primary text-white font-black text-xs uppercase tracking-[0.3em] gap-4 shadow-2xl hover:scale-105 active:scale-95 transition-all duration-500"
-                                            >
-                                                {isProcessing ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <RefreshCw className="h-4 w-4 animate-spin" />
-                                                        Synthesizing...
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        Neural Rewrite
-                                                        <Sparkles size={16} className="fill-current" />
-                                                    </>
-                                                )}
-                                            </Button>
+                                                isLoading={isProcessing}
+                                                disabled={!input.trim()}
+                                                className="h-14 flex-1"
+                                            />
                                         </div>
                                     </div>
                                 </div>

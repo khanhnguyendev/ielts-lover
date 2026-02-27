@@ -35,6 +35,7 @@ import {
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { NOTIFY_MSGS } from "@/lib/constants/messages"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { AIActionButton } from "@/components/global/ai-action-button"
 
 
 const CATEGORY_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
@@ -226,14 +227,14 @@ export default function ImprovementPage() {
                             </p>
                         </div>
 
-                        <Button
+                        <AIActionButton
+                            label={isGenerating ? "Analyzing Patterns..." : (latestPlan ? "Refresh Deep Analysis" : "Launch Deep Scan")}
+                            icon={Brain}
                             onClick={handleGenerateAnalysis}
-                            disabled={isGenerating}
-                            className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.2em] text-[10px] h-16 px-12 rounded-2xl shadow-2xl shadow-primary/40 group/btn transition-all hover:-translate-y-1 active:scale-95 border-none"
-                        >
-                            {isGenerating ? "Analyzing Patterns..." : (latestPlan ? "Refresh Deep Analysis" : "Launch Deep Scan")}
-                            <CreditBadge amount={-analysisCost} size="sm" className="ml-4 border-white/20 bg-white/10" />
-                        </Button>
+                            isLoading={isGenerating}
+                            badge={analysisCost > 0 ? `-${analysisCost}` : undefined}
+                            className="h-16 px-12"
+                        />
                     </div>
 
                     <AnimatePresence mode="wait">
