@@ -135,12 +135,12 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="relative overflow-hidden group"
+                            className="relative group"
                         >
-                            {/* Premium Animated Border Gradient */}
-                            <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-indigo-500/30 to-primary/30 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
+                            {/* Static Premium Glow */}
+                            <div className="absolute -inset-[2px] bg-gradient-to-r from-primary/10 via-indigo-500/10 to-primary/10 rounded-[2.6rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
-                            <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] p-6 lg:p-8 border border-white/20 dark:border-slate-800/50 shadow-2xl flex flex-col md:flex-row items-center gap-8 overflow-hidden">
+                            <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] p-6 lg:p-8 border border-white/40 dark:border-white/10 shadow-2xl flex flex-col md:flex-row items-center gap-8 overflow-hidden">
                                 {/* Depth Elements */}
                                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none animate-pulse" />
                                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
