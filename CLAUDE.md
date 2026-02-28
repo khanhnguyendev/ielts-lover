@@ -155,6 +155,39 @@ Notifications are always **fire-and-forget** — never await them in the action'
 - **Tailwind**: Mobile-first. Use CSS variable-based semantic tokens (`bg-background`, `text-foreground`, `border-border`), not raw color classes.
 - Before creating any new component, check `components/ui` and `components/` for an 80%+ match to extend instead.
 
+### Liquid Glass Aesthetic
+
+- Use `.glass-card` for container-level elements with `backdrop-blur-3xl` or `backdrop-blur-2xl`.
+- Translucency: `bg-white/40` (Light), `bg-slate-900/40` (Dark). Borders: `border-white/20` / `border-white/10`.
+- Aggressive rounding: `rounded-[2.5rem]` for sections/cards, `rounded-2xl` for components.
+- Depth blobs: absolute-positioned `bg-primary/5 rounded-full blur-[120px]`.
+
+### Interaction Patterns
+
+- **Premium cards**: `whileHover={{ y: -8 }}` + `shadow-2xl`. Scale icons `1.1`, rotate `6deg`.
+- **List items/rows**: `hover:bg-primary/[0.04]`, `active:scale-[0.99]`.
+- **Action buttons**: `hover:scale-105`, `active:scale-95`.
+- **Transitions**: `duration-500` for large surface changes; `duration-300` for micro-interactions.
+
+### Typography
+
+- Headings: `font-black` (`800+`) with `tracking-tight`. Use `font-outfit` for premium emphasis.
+- Action labels: `text-[10px] font-black uppercase tracking-[0.2em]`.
+
+### Spacing
+
+Follow the **8px grid** strictly (`p-8`, `gap-4`). See `globals.css` for automated scaling on small laptops (1024px–1440px).
+
+### Mandatory Utility Functions
+
+- **Date/Time**: Always use `formatDate(date, includeYear?)`, `formatTime(date)`, or `formatDateTime(date)` from `@/lib/utils`. Never use raw `.toLocaleDateString()` etc.
+- **Credits**: Always use `formatCredits(amount)` from `@/lib/utils` for balances (compact notation like `1.5k`).
+
+### Credit Display Components (Reuse)
+
+- **Header/Balance**: `<StarsBalance balance={amount} />` — includes auto-sync and update animations.
+- **Transaction/Inline**: `<CreditBadge amount={amount} size="sm|md|lg" />` — for costs or rewards.
+
 ## Git Commit Convention
 
 Format: `<type>(<scope>): <emoji> <subject>`
