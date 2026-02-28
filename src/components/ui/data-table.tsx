@@ -20,6 +20,9 @@ import {
 } from "lucide-react"
 
 // ─── Types ───────────────────────────────────────────────
+import { LoadMoreButton } from "@/components/global/load-more-button"
+
+// ─── Types ───────────────────────────────────────────────
 export interface DataTableColumn<T> {
     /** Unique key for the column */
     key: string
@@ -42,8 +45,10 @@ export interface DataTableProps<T> {
     data: T[]
     /** Unique key extractor for each row */
     rowKey: (row: T) => string
-    /** Items per page (default: 10) */
+    /** Items per page (for internal paging) */
     pageSize?: number
+    /** Total count of records (if server-side or filtered) */
+    totalCount?: number
     /** Show loading skeleton */
     isLoading?: boolean
     /** Number of skeleton rows to show */
@@ -62,6 +67,15 @@ export interface DataTableProps<T> {
     contained?: boolean
     /** Custom className */
     className?: string
+    /** Toolbar slot for filters/search */
+    toolbar?: React.ReactNode
+    /** Navigation configuration */
+    navigation?: {
+        type: "paged" | "load-more" | "none"
+        onLoadMore?: () => void
+        isLoadingMore?: boolean
+        hasMore?: boolean
+    }
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -70,6 +84,7 @@ export function DataTable<T>({
     data,
     rowKey,
     pageSize = 10,
+    totalCount,
     isLoading = false,
     loadingRows = 5,
     loadingText = "Loading...",
@@ -77,6 +92,8 @@ export function DataTable<T>({
     rowClassName,
     contained = true,
     className,
+    toolbar,
+    navigation = { type: "paged" }
 }: DataTableProps<T>) {
     const [currentPage, setCurrentPage] = React.useState(1)
 
@@ -85,11 +102,13 @@ export function DataTable<T>({
         setCurrentPage(1)
     }, [data.length])
 
-    const totalPages = Math.ceil(data.length / pageSize)
-    const paginatedData = data.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-    )
+    const isPaged = navigation.type === "paged"
+    const totalRecords = totalCount ?? data.length
+    const totalPages = Math.ceil(totalRecords / pageSize)
+
+    const paginatedData = isPaged && !totalCount
+        ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+        : data
 
     const colSpan = columns.length
 
@@ -98,17 +117,27 @@ export function DataTable<T>({
             contained && "rounded-[2rem] border border-slate-100 dark:border-white/10 bg-white dark:bg-slate-900/50 backdrop-blur-3xl shadow-xl shadow-black/5 overflow-hidden",
             className
         )}>
-            {/* Table Header/Toolbar Slot - Can be extended later with a 'toolbar' prop */}
-            <div className="px-6 py-4 border-b border-slate-50 dark:border-white/5 flex items-center justify-between bg-slate-50/30 dark:bg-white/5">
-                <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                        {data.length} Total Records
-                    </span>
+            {/* Table Toolbar & Metrics */}
+            <div className="px-6 py-5 border-b border-slate-50 dark:border-white/5 bg-slate-50/30 dark:bg-white/5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                            {totalRecords} Total Records
+                        </span>
+                    </div>
+                    {isPaged && (
+                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">
+                            Showing {Math.min(totalRecords, (currentPage - 1) * pageSize + 1)}-{Math.min(totalRecords, currentPage * pageSize)}
+                        </div>
+                    )}
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">
-                    Showing {Math.min(data.length, (currentPage - 1) * pageSize + 1)}-{Math.min(data.length, currentPage * pageSize)}
-                </div>
+
+                {toolbar && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-500">
+                        {toolbar}
+                    </div>
+                )}
             </div>
 
             <div className="overflow-x-auto">
@@ -135,7 +164,7 @@ export function DataTable<T>({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {isLoading ? (
+                        {isLoading && data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={colSpan} className="py-24">
                                     <div className="flex flex-col items-center justify-center gap-4">
@@ -208,40 +237,60 @@ export function DataTable<T>({
                 </Table>
             </div>
 
-            {/* Pagination / Footer */}
-            {totalPages > 1 && !isLoading && (
-                <div className="px-8 py-5 flex items-center justify-between border-t border-slate-50 dark:border-white/5 bg-slate-50/20 dark:bg-white/5">
-                    <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
-                            Page {currentPage} of {totalPages}
+            {/* Footer: Pagination OR Load More */}
+            <div className="px-8 py-5 border-t border-slate-50 dark:border-white/5 bg-slate-50/20 dark:bg-white/5">
+                {navigation.type === "paged" && totalPages > 1 && !isLoading && (
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <PaginationButton
+                                icon={ChevronsLeft}
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(1)}
+                            />
+                            <PaginationButton
+                                icon={ChevronLeft}
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            />
+                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1" />
+                            <PaginationButton
+                                icon={ChevronRight}
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            />
+                            <PaginationButton
+                                icon={ChevronsRight}
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(totalPages)}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {navigation.type === "load-more" && navigation.hasMore && (
+                    <div className="flex justify-center w-full py-2">
+                        <LoadMoreButton
+                            onClick={navigation.onLoadMore!}
+                            isLoading={navigation.isLoadingMore || false}
+                            remaining={totalRecords - data.length}
+                        />
+                    </div>
+                )}
+
+                {!navigation.hasMore && navigation.type === "load-more" && data.length > 0 && (
+                    <div className="text-center py-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 dark:text-slate-600">
+                            End of Records
                         </span>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <PaginationButton
-                            icon={ChevronsLeft}
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(1)}
-                        />
-                        <PaginationButton
-                            icon={ChevronLeft}
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        />
-                        <div className="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1" />
-                        <PaginationButton
-                            icon={ChevronRight}
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        />
-                        <PaginationButton
-                            icon={ChevronsRight}
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(totalPages)}
-                        />
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     )
 }

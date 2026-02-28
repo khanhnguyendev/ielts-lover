@@ -111,18 +111,18 @@ function FilterGroup({ label, options, value, onChange }: {
     onChange: (val: string | null) => void
 }) {
     return (
-        <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
-            <div className="flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 whitespace-nowrap">{label}</span>
+            <div className="flex bg-slate-100/50 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
                 {options.map((opt) => (
                     <button
                         key={String(opt.value)}
                         onClick={() => onChange(opt.value)}
                         className={cn(
-                            "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300",
+                            "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                             value === opt.value
-                                ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-100"
-                                : "text-slate-400 hover:text-slate-600"
+                                ? "bg-white dark:bg-slate-800 text-primary shadow-lg shadow-black/5 ring-1 ring-black/5"
+                                : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         )}
                     >
                         {opt.label}
@@ -249,8 +249,11 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                     value={filter}
                     onChange={(val) => { setFilter(val); }}
                 />
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
-                    {transactions.length} of {totalCount} Records
+                <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600">
+                        {transactions.length} of {totalCount} Records
+                    </span>
                 </div>
             </div>
 
