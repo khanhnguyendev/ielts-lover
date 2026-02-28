@@ -27,7 +27,7 @@ import {
     ChevronRight,
 } from "lucide-react"
 import { CreditBadge } from "@/components/ui/credit-badge"
-import { LoadMoreButton } from "@/components/global/load-more-button"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import Link from "next/link"
 import { getUserTransactionsPaginated } from "@/app/actions"
 
@@ -208,86 +208,138 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
 
 // ─── Main Feed Component ─────────────────────────────────────
 
-export function TransactionFeed({ initialTransactions, totalTransactions, pageSize }: TransactionFeedProps) {
-    const [transactions, setTransactions] = React.useState(initialTransactions)
-    const [totalCount, setTotalCount] = React.useState(totalTransactions)
-    const [isLoadingMore, setIsLoadingMore] = React.useState(false)
-    const [filter, setFilter] = React.useState<string | null>(null)
-
-    const hasMore = transactions.length < totalCount
-
-    const handleLoadMore = React.useCallback(async () => {
-        setIsLoadingMore(true)
-        try {
-            const { data, total } = await getUserTransactionsPaginated(pageSize, transactions.length)
-            setTransactions(prev => [...prev, ...data])
-            setTotalCount(total)
-        } finally {
-            setIsLoadingMore(false)
+const columns: DataTableColumn<CreditTransaction>[] = [
+    {
+        key: "context",
+        header: "Activity Type",
+        width: "w-[200px]",
+        render: (t) => {
+            const config = getFeatureContext(t)
+            const Icon = config.icon
+            return (
+                <div className="flex items-center gap-3 py-1">
+                    <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform duration-300 group-hover:scale-110",
+                        config.bg, config.color, config.border, "dark:bg-white/5 dark:border-white/10"
+                    )}>
+                        <Icon size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className={cn("text-[9px] font-black uppercase tracking-widest", config.color)}>
+                            {config.label}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                            {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                    </div>
+                </div>
+            )
         }
-    }, [transactions.length, pageSize])
+    },
+    {
+        key: "description",
+        header: "Description & Audit Trace",
+        render: (t) => (
+            <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                    {formatDescription(t.description)}
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[9px] font-medium text-slate-400 dark:text-slate-600">
+                        ID: {t.id.slice(0, 8)}...
+                    </span>
+                    {t.granted_by_admin && (
+                        <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                            Admin Adjustment
+                        </span>
+                    )}
+                </div>
+            </div>
+        )
+    },
+    {
+        key: "amount",
+        header: "Transaction",
+        align: "right",
+        width: "w-[120px]",
+        render: (t) => (
+            <div className="flex items-center justify-end gap-2 pr-2">
+                <div className={cn(
+                    "w-5 h-5 rounded flex items-center justify-center border",
+                    t.amount > 0
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                        : "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
+                )}>
+                    {t.amount > 0 ? <ArrowUpRight size={12} /> : <ArrowDownLeft size={12} />}
+                </div>
+                <CreditBadge amount={t.amount} size="sm" />
+            </div>
+        )
+    },
+    {
+        key: "actions",
+        header: "Details",
+        align: "right",
+        width: "w-[100px]",
+        render: (t) => t.attempt_id ? (
+            <Link
+                href={`/dashboard/reports/${t.attempt_id}`}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-600 hover:text-primary dark:hover:text-primary transition-all text-[9px] font-black uppercase tracking-widest group/link border border-transparent hover:border-primary/20"
+            >
+                Report <ChevronRight size={10} className="group-hover/link:translate-x-0.5 transition-transform" />
+            </Link>
+        ) : null
+    }
+];
 
-    const filteredTransactions = React.useMemo(() => {
-        return transactions.filter(t => {
-            if (filter === "earned") return t.amount > 0
-            if (filter === "spent") return t.amount < 0
-            return true
-        })
-    }, [transactions, filter])
-
-    return (
-        <div className="space-y-8">
-            {/* Filter Section */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-2">
-                <FilterGroup
-                    label="Filter By"
-                    options={[
+return (
+    <DataTable
+        data={filteredTransactions}
+        columns={columns}
+        rowKey={(t) => t.id}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        navigation={{
+            type: "load-more",
+            onLoadMore: handleLoadMore,
+            isLoadingMore: isLoadingMore,
+            hasMore: hasMore
+        }}
+        toolbar={
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex bg-slate-100/30 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
+                    {[
                         { value: null, label: "All Activity" },
                         { value: "earned", label: "Earned" },
                         { value: "spent", label: "Spent" }
-                    ]}
-                    value={filter}
-                    onChange={(val) => { setFilter(val); }}
-                />
+                    ].map((opt) => (
+                        <button
+                            key={String(opt.value)}
+                            onClick={() => setFilter(opt.value)}
+                            className={cn(
+                                "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                filter === opt.value
+                                    ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-lg shadow-black/5 ring-1 ring-black/5"
+                                    : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            )}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600">
-                        {transactions.length} of {totalCount} Records
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 dark:text-slate-700">
+                        Real-time Ledger Sync
                     </span>
                 </div>
             </div>
-
-            {/* List */}
-            {filteredTransactions.length === 0 ? (
-                <div className="text-center py-24 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
-                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                        <History size={32} className="text-slate-300" />
-                    </div>
-                    <h3 className="text-lg font-black text-slate-900 mb-2">No activity found</h3>
-                    <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto">Try changing your filters or keep practicing to generate more records.</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 gap-4">
-                    {filteredTransactions.map((t, i) => (
-                        <div
-                            key={t.id}
-                            className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                            style={{ animationDelay: `${i * 100}ms` }}
-                        >
-                            <TransactionCard t={t} />
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Load More */}
-            {hasMore && (
-                <LoadMoreButton
-                    onClick={handleLoadMore}
-                    isLoading={isLoadingMore}
-                    remaining={totalCount - transactions.length}
-                />
-            )}
-        </div>
-    )
+        }
+        emptyState={{
+            icon: <History className="h-10 w-10 text-slate-200" />,
+            title: "No activity recorded",
+            description: "Your financial history is currently empty for this filter."
+        }}
+    />
+)
 }
