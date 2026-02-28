@@ -104,10 +104,13 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
                                 </div>
                                 <div className="space-y-1">
                                     <div className="flex items-center justify-center gap-3">
-                                        <StarIcon size="lg" className="text-[24px]" />
-                                        <h2 className="text-4xl font-black font-outfit tracking-tight">
+                                        <StarIcon size="lg" className="text-[24px]" containerClassName="ring-2 ring-white/10" />
+                                        <h2 className={cn(
+                                            "text-4xl font-black font-outfit tracking-tight drop-shadow-sm",
+                                            isPositive ? "text-emerald-400" : "text-rose-400"
+                                        )}>
                                             {isPositive ? "+" : ""}{detail.transaction.amount}
-                                            <span className="text-xl ml-2 font-medium opacity-80 text-white/70">Stars</span>
+                                            <span className="text-xl ml-2 font-medium text-white">Stars</span>
                                         </h2>
                                     </div>
                                     <div className="flex items-center justify-center gap-2 mt-1">
