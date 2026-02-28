@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { Separator } from "@/components/ui/separator"
+import { StarIcon } from "@/components/global/star-icon"
 import {
     Zap,
     Clock,
@@ -102,10 +103,11 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
                                     {isPositive ? <ArrowUpRight size={28} /> : <ArrowDownLeft size={28} />}
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="flex items-center justify-center gap-2">
+                                    <div className="flex items-center justify-center gap-3">
+                                        <StarIcon size="lg" className="text-[24px]" />
                                         <h2 className="text-4xl font-black font-outfit tracking-tight">
                                             {isPositive ? "+" : ""}{detail.transaction.amount}
-                                            <span className="text-xl ml-1 font-medium opacity-80 text-white/70">Stars</span>
+                                            <span className="text-xl ml-2 font-medium opacity-80 text-white/70">Stars</span>
                                         </h2>
                                     </div>
                                     <div className="flex items-center justify-center gap-2 mt-1">
