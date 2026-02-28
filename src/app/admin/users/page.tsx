@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from "@/components/ui/table";
+import { DataTable, DataTableColumn } from "@/components/ui/data-table";
 import {
     Search,
     UserPlus,
@@ -178,225 +171,231 @@ export default function UsersPage() {
         }
     };
 
+    const columns: DataTableColumn<UserProfile>[] = [
+        {
+            key: "profile",
+            header: "User Profile",
+            render: (user) => (
+                <div className="flex items-center gap-3">
+                    <Avatar size="lg" className="border border-slate-200 dark:border-white/10 shadow-sm transition-transform group-hover:scale-105 duration-500">
+                        <AvatarImage src={user.avatar_url || undefined} />
+                        <AvatarFallback className="bg-slate-100 dark:bg-white/5 font-black text-slate-400 dark:text-slate-500 text-[10px] uppercase">
+                            {user.email.substring(0, 2)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                        <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                            {user.full_name && user.full_name.trim() !== "" ? user.full_name : user.email.split('@')[0]}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-500 leading-tight">
+                            {user.email}
+                        </p>
+                    </div>
+                </div>
+            )
+        },
+        {
+            key: "status",
+            header: "Status",
+            align: "center",
+            render: (user) => (
+                <div className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
+                    user.role === USER_ROLES.ADMIN
+                        ? "bg-amber-100/50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                        : user.role === USER_ROLES.TEACHER
+                            ? "bg-indigo-100/50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20"
+                            : "bg-slate-100/50 text-slate-600 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10"
+                )}>
+                    {user.role === USER_ROLES.ADMIN && <ShieldCheck size={12} />}
+                    {user.role === USER_ROLES.TEACHER && <GraduationCap size={12} />}
+                    {user.role === USER_ROLES.ADMIN ? "Admin" : user.role === USER_ROLES.TEACHER ? "Teacher" : "Student"}
+                </div>
+            )
+        },
+        {
+            key: "activity",
+            header: "Last Active",
+            align: "center",
+            render: (user) => {
+                const lastActive = lastActivityMap[user.id];
+                return (
+                    <div className="flex flex-col items-center gap-0.5">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                            {lastActive ? new Date(lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">
+                            {lastActive ? new Date(lastActive).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
+                        </span>
+                    </div>
+                );
+            }
+        },
+        {
+            key: "credits",
+            header: "Credits",
+            align: "center",
+            render: (user) => (
+                <div className="flex flex-col items-center gap-0.5 group/credit">
+                    <span className="text-sm font-black text-slate-900 dark:text-white font-mono group-hover/credit:text-primary transition-colors">
+                        {user.credits_balance ?? 0}
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">StarCredits</span>
+                </div>
+            )
+        },
+        {
+            key: "joined",
+            header: "Joined",
+            align: "center",
+            render: (user) => (
+                <div className="flex flex-col items-center gap-0.5">
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">
+                        {new Date(user.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                    </p>
+                </div>
+            )
+        },
+        {
+            key: "actions",
+            header: "Actions",
+            align: "right",
+            render: (user) => (
+                <div className="flex justify-end gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 rounded-lg font-black text-[9px] uppercase tracking-widest gap-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
+                        onClick={() => setSelectedUser(user)}
+                    >
+                        <CreditCard size={14} className="text-primary" />
+                        Top-Up
+                    </Button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors">
+                                <MoreHorizontal size={16} />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52 rounded-2xl border-slate-100 dark:border-white/10 shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 p-2">
+                            <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">User Control</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-slate-50 dark:bg-white/5 mx-1 my-1" />
+                            <DropdownMenuItem
+                                className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl cursor-pointer focus:bg-slate-50 dark:focus:bg-white/5"
+                                onClick={() => setDetailsUser(user)}
+                            >
+                                <User size={14} className="text-slate-400" />
+                                View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl cursor-pointer focus:bg-slate-50 dark:focus:bg-white/5"
+                                onClick={() => setHistoryUser(user)}
+                            >
+                                <History size={14} className="text-slate-400" />
+                                Transaction History
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl cursor-pointer focus:bg-slate-50 dark:focus:bg-white/5"
+                                onClick={() => setAttemptsUser(user)}
+                            >
+                                <History size={14} className="text-slate-400" />
+                                Attempt History
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-slate-50 dark:bg-white/5 mx-1 my-1" />
+                            <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Role Authority</DropdownMenuLabel>
+                            {user.role === USER_ROLES.USER && (
+                                <DropdownMenuItem
+                                    className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl text-indigo-600 dark:text-indigo-400 focus:bg-indigo-50 dark:focus:bg-indigo-500/10 cursor-pointer"
+                                    onClick={() => handleSetRole(user.id, USER_ROLES.TEACHER)}
+                                >
+                                    <GraduationCap size={14} />
+                                    Promote to Teacher
+                                </DropdownMenuItem>
+                            )}
+                            {user.role === USER_ROLES.TEACHER && (
+                                <DropdownMenuItem
+                                    className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl text-slate-600 dark:text-slate-400 focus:bg-slate-50 dark:focus:bg-white/5 cursor-pointer"
+                                    onClick={() => handleSetRole(user.id, USER_ROLES.USER)}
+                                >
+                                    <UserMinus size={14} />
+                                    Demote to Student
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator className="bg-slate-50 dark:bg-white/5 mx-1 my-1" />
+                            <DropdownMenuItem
+                                disabled={user.role === USER_ROLES.ADMIN}
+                                className="gap-2 font-black text-[10px] uppercase tracking-widest py-3 rounded-xl text-rose-600 dark:text-rose-400 focus:bg-rose-50 dark:focus:bg-rose-500/10 cursor-pointer disabled:opacity-50"
+                            >
+                                <Ban size={14} />
+                                Suspend Account
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )
+        }
+    ];
+
     return (
         <div className="space-y-6 p-6">
-            <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                    {[
-                        { label: "All", value: "all" },
-                        { label: "Students", value: USER_ROLES.USER },
-                        { label: "Teachers", value: USER_ROLES.TEACHER },
-                        { label: "Admins", value: USER_ROLES.ADMIN },
-                    ].map((opt) => (
-                        <button
-                            key={opt.value}
-                            onClick={() => setRoleFilter(opt.value)}
-                            className={cn(
-                                "px-4 py-2 rounded-xl text-xs font-black transition-all",
-                                roleFilter === opt.value
-                                    ? "bg-slate-900 text-white"
-                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            )}
-                        >
-                            {opt.label}
-                        </button>
-                    ))}
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 h-full">
-                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{filteredUsers.length} users</span>
+            <DataTable
+                data={filteredUsers}
+                columns={columns}
+                rowKey={(u) => u.id}
+                isLoading={isLoading}
+                loadingText="Syncing User Data..."
+                pageSize={10}
+                toolbar={
+                    <div className="flex flex-col xl:flex-row justify-between items-center gap-6">
+                        <div className="flex bg-slate-100/50 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
+                            {[
+                                { label: "All", value: "all" },
+                                { label: "Students", value: USER_ROLES.USER },
+                                { label: "Teachers", value: USER_ROLES.TEACHER },
+                                { label: "Admins", value: USER_ROLES.ADMIN },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => setRoleFilter(opt.value)}
+                                    className={cn(
+                                        "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                        roleFilter === opt.value
+                                            ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-lg shadow-black/5 ring-1 ring-black/5"
+                                            : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    )}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search users..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9 pr-6 py-2.5 bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-[10px] font-black uppercase tracking-widest w-64 shadow-inner"
+                                />
+                            </div>
+                            <Button className="bg-slate-900 dark:bg-primary text-white rounded-xl font-black uppercase tracking-widest transition shadow-lg shadow-black/10 text-[10px] gap-2 px-5 h-10">
+                                <UserPlus size={16} />
+                                <span>Add User</span>
+                            </Button>
+                        </div>
                     </div>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search users..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
-                        />
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition shadow-sm text-sm">
-                        <UserPlus size={18} />
-                        <span>Add User</span>
-                    </button>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <Table>
-                    <TableHeader className="bg-slate-50/50">
-                        <TableRow className="hover:bg-transparent border-slate-100">
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest pl-6">User Profile</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Status</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Last Active</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Current Credits</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Joined</TableHead>
-                            <TableHead className="text-right pr-6 text-[10px] font-black uppercase tracking-widest">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="py-24 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-4">
-                                        <PulseLoader size="lg" color="primary" />
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Syncing User Data...</p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : filteredUsers.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="py-20 text-center text-slate-400 font-bold">
-                                    No users match your search criteria.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filteredUsers.map((user) => (
-                                <TableRow key={user.id} className="hover:bg-slate-50/50 border-slate-50 transition-colors">
-                                    <TableCell className="pl-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <Avatar size="lg" className="border border-slate-200">
-                                                <AvatarImage src={user.avatar_url || undefined} />
-                                                <AvatarFallback className="bg-slate-100 font-black text-slate-400 text-[10px] uppercase">
-                                                    {user.email.substring(0, 2)}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex flex-col">
-                                                <p className="text-sm font-black text-slate-900 leading-tight">
-                                                    {user.full_name && user.full_name.trim() !== "" ? user.full_name : user.email.split('@')[0]}
-                                                </p>
-                                                <p className="text-[11px] font-medium text-slate-500 leading-tight">
-                                                    {user.email}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className={cn(
-                                            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                            user.role === USER_ROLES.ADMIN
-                                                ? "bg-amber-100 text-amber-700 border border-amber-200"
-                                                : user.role === USER_ROLES.TEACHER
-                                                    ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
-                                                    : "bg-slate-100 text-slate-600 border border-slate-200"
-                                        )}>
-                                            {user.role === USER_ROLES.ADMIN && <ShieldCheck size={12} />}
-                                            {user.role === USER_ROLES.TEACHER && <GraduationCap size={12} />}
-                                            {user.role === USER_ROLES.ADMIN ? "Admin" : user.role === USER_ROLES.TEACHER ? "Teacher" : "Student"}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {(() => {
-                                            const lastActive = lastActivityMap[user.id];
-                                            return (
-                                                <div className="flex flex-col items-center gap-0.5">
-                                                    <span className="text-xs font-bold text-slate-500">
-                                                        {lastActive ? new Date(lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
-                                                    </span>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                                        {lastActive ? new Date(lastActive).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })()}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <span className="text-sm font-black text-slate-900 font-mono">{user.credits_balance ?? 0}</span>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">StarCredits</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <p className="text-xs font-bold text-slate-500">
-                                                {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </p>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                                {new Date(user.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                                            </p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right pr-6">
-                                        <div className="flex justify-end gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 rounded-lg font-black text-[10px] uppercase tracking-widest gap-2 bg-white border-slate-200 hover:bg-slate-50"
-                                                onClick={() => setSelectedUser(user)}
-                                            >
-                                                <CreditCard size={14} className="text-primary" />
-                                                Manual Top-Up
-                                            </Button>
-
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors">
-                                                        <MoreHorizontal size={16} />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-100 shadow-xl">
-                                                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">User Actions</DropdownMenuLabel>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        className="gap-2 font-bold text-sm py-2.5 cursor-pointer"
-                                                        onClick={() => setDetailsUser(user)}
-                                                    >
-                                                        <User size={14} className="text-slate-400" />
-                                                        View Details
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="gap-2 font-bold text-sm py-2.5 cursor-pointer"
-                                                        onClick={() => setHistoryUser(user)}
-                                                    >
-                                                        <History size={14} className="text-slate-400" />
-                                                        Transaction History
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="gap-2 font-bold text-sm py-2.5 cursor-pointer"
-                                                        onClick={() => setAttemptsUser(user)}
-                                                    >
-                                                        <History size={14} className="text-slate-400" />
-                                                        Attempt History
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role Management</DropdownMenuLabel>
-                                                    {user.role === USER_ROLES.USER && (
-                                                        <DropdownMenuItem
-                                                            className="gap-2 font-bold text-sm py-2.5 text-indigo-600 focus:text-indigo-600 focus:bg-indigo-50 cursor-pointer"
-                                                            onClick={() => handleSetRole(user.id, USER_ROLES.TEACHER)}
-                                                        >
-                                                            <GraduationCap size={14} />
-                                                            Promote to Teacher
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    {user.role === USER_ROLES.TEACHER && (
-                                                        <DropdownMenuItem
-                                                            className="gap-2 font-bold text-sm py-2.5 text-slate-600 focus:text-slate-600 focus:bg-slate-50 cursor-pointer"
-                                                            onClick={() => handleSetRole(user.id, USER_ROLES.USER)}
-                                                        >
-                                                            <UserMinus size={14} />
-                                                            Demote to Student
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        disabled={user.role === USER_ROLES.ADMIN}
-                                                        className="gap-2 font-bold text-sm py-2.5 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        <Ban size={14} />
-                                                        Suspend User
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                }
+                emptyState={{
+                    icon: <User className="h-8 w-8 text-slate-300" />,
+                    title: "No users found",
+                    description: "We couldn't find any users matching your current search or filter criteria."
+                }}
+            />
 
             {/* Credit Adjustment Dialog */}
             <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
