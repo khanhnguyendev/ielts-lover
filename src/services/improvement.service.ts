@@ -8,7 +8,7 @@ import { AIService, AIUsageMetadata } from "./ai.service";
  * Improvement Service: Orchestrates the Mistake Bank and AI Weakness Analysis.
  * 
  * - getMistakeDashboard: Fetches mistakes + stats + latest plan
- * - generateAIActionPlan: Bills user, fetches mistakes, calls AI, stores plan
+ * - generateAIActionPlan: Validates mistakes exist, bills user, calls AI, stores plan
  */
 export class ImprovementService {
     constructor(
@@ -44,21 +44,21 @@ export class ImprovementService {
 
     /**
      * Generates a personalized AI action plan.
-     * 1. Bills the user for the analysis
-     * 2. Fetches last 50 mistakes
+     * 1. Fetches last 50 mistakes (validates before billing)
+     * 2. Bills the user for the analysis
      * 3. Calls AI to find patterns
      * 4. Stores result
      */
     async generateAIActionPlan(userId: string, traceId?: string): Promise<{ plan: UserActionPlan; usage?: AIUsageMetadata }> {
-        // 1. Bill user (throws InsufficientFundsError if not enough credits)
-        await this.creditService.billUser(userId, FEATURE_KEYS.WEAKNESS_ANALYSIS, undefined, traceId);
-
-        // 2. Fetch recent mistakes for analysis
+        // 1. Fetch recent mistakes for analysis (check before billing)
         const mistakes = await this.mistakeRepo.getUserMistakes(userId, undefined, 50);
 
         if (mistakes.length === 0) {
             throw new Error("No mistakes found. Complete some exercises first to build your mistake bank.");
         }
+
+        // 2. Bill user (throws InsufficientFundsError if not enough credits)
+        await this.creditService.billUser(userId, FEATURE_KEYS.WEAKNESS_ANALYSIS, undefined, traceId);
 
         // 3. Call AI for weakness analysis
         const result = await this.aiService.analyzeWeaknesses(mistakes);
