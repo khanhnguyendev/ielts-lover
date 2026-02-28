@@ -24,7 +24,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { cn } from "@/lib/utils"
+import { cn, formatCredits } from "@/lib/utils"
 
 import { getCurrentUser, getRecentActivity } from "@/app/actions"
 import { UserProfile } from "@/types"
@@ -87,7 +87,7 @@ export default function DashboardPage() {
                         index={0}
                         icon={Zap}
                         label="StarCredits"
-                        value={user?.credits_balance?.toString() || "0"}
+                        value={formatCredits(user?.credits_balance || 0)}
                         subLabel="Ready to spend"
                         color="text-amber-500"
                         bgColor="bg-amber-100/50"

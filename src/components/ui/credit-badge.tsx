@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, formatCredits } from "@/lib/utils"
 import { StarIcon } from "@/components/global/star-icon"
 
 interface CreditBadgeProps {
@@ -46,7 +46,7 @@ export function CreditBadge({
                 />
             )}
             <span className="font-mono tracking-tighter">
-                {isPositive ? "+" : "-"}{Math.abs(amount)}
+                {isPositive ? "+" : "-"}{formatCredits(Math.abs(amount))}
             </span>
             <span className={cn(
                 "uppercase font-bold opacity-70 tracking-widest",

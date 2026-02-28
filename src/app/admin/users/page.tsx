@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotification } from "@/lib/contexts/notification-context";
-import { cn } from "@/lib/utils";
+import { cn, formatCredits } from "@/lib/utils";
 import Link from "next/link";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
@@ -238,7 +238,7 @@ export default function UsersPage() {
             render: (user) => (
                 <div className="flex flex-col items-center gap-0.5 group/credit">
                     <span className="text-sm font-black text-slate-900 dark:text-white font-mono group-hover/credit:text-primary transition-colors">
-                        {user.credits_balance ?? 0}
+                        {formatCredits(user.credits_balance ?? 0)}
                     </span>
                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">StarCredits</span>
                 </div>
@@ -560,7 +560,7 @@ export default function UsersPage() {
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Star Balance</span>
-                                <p className="text-lg font-black text-primary font-mono">{detailsUser?.credits_balance ?? 0}</p>
+                                <p className="text-lg font-black text-primary font-mono">{formatCredits(detailsUser?.credits_balance ?? 0)}</p>
                             </div>
                         </div>
 

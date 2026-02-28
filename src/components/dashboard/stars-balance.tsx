@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { cn } from "@/lib/utils"
+import { cn, formatCredits } from "@/lib/utils"
 import { Sparkles, Plus } from "lucide-react"
 import { StarIcon } from "@/components/global/star-icon"
 
@@ -60,7 +60,7 @@ export function StarsBalance({ balance, className }: StarsBalanceProps) {
 
                 <div className="flex items-center gap-2 relative z-10">
                     <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight font-outfit">
-                        {(displayBalance || 0).toLocaleString()}
+                        {formatCredits(displayBalance || 0)}
                     </span>
 
                     <div className="flex items-center justify-center w-5 h-5 rounded-lg bg-slate-900/5 dark:bg-white/5 group-hover:bg-primary transition-all duration-500 border border-slate-200/50 dark:border-white/5">
