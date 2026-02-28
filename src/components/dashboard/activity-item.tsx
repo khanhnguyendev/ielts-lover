@@ -3,6 +3,7 @@
 import { CreditTransactionWithUser } from "@/repositories/interfaces"
 import { cn, formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
+import { CreditBadge } from "@/components/ui/credit-badge"
 import {
     Clock,
     PenTool,
@@ -19,8 +20,6 @@ import {
     CalendarCheck,
     Coins,
     Sparkles,
-    ArrowUpRight,
-    ArrowDownLeft,
 } from "lucide-react"
 
 interface ActivityItemProps {
@@ -113,15 +112,7 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
             </div>
 
             <div className="flex flex-col items-end shrink-0 pl-3 border-l border-slate-100/50">
-                <div className={cn(
-                    "flex items-center gap-1 font-black mb-0.5",
-                    isPositive
-                        ? "text-emerald-500 text-xs"
-                        : "text-slate-800 text-xs"
-                )}>
-                    {isPositive ? <ArrowUpRight size={12} className="opacity-80" /> : <ArrowDownLeft size={12} className="opacity-40" />}
-                    {isPositive ? "+" : "-"}{Math.abs(t.amount)}
-                </div>
+                <CreditBadge amount={t.amount} size="sm" className="mb-0.5" />
                 <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400">
                     <Clock size={9} className="opacity-50" />
                     {formatDate(t.created_at, false)}
