@@ -267,6 +267,31 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
             }
         },
         {
+            key: "type",
+            header: "Activity Type",
+            width: "w-[140px]",
+            render: (t) => {
+                const isRefund = t.type.includes('refund');
+                const isUsage = t.type.includes('usage') || t.type.includes('billing');
+                const isReward = t.type.includes('reward') || t.type.includes('bonus');
+
+                return (
+                    <Badge
+                        variant="outline"
+                        className={cn(
+                            "px-2 py-0.5 rounded-md border text-[8px]",
+                            isRefund && "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+                            isUsage && "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+                            isReward && "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+                            !isRefund && !isUsage && !isReward && "bg-slate-50 text-slate-600 border-slate-100 dark:bg-white/5 dark:text-slate-400 dark:border-white/10"
+                        )}
+                    >
+                        {t.type.replace(/_/g, ' ')}
+                    </Badge>
+                )
+            }
+        },
+        {
             key: "description",
             header: "Description & Audit Trace",
             render: (t) => (
