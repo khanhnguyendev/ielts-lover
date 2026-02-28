@@ -14,6 +14,12 @@
   - Follow the **8px grid** strictly for spacing (`p-8`, `gap-4`).
   - For small laptop screens (1024px-1440px), refer to `globals.css` for automated scaling (decreases padding/font-size).
 
+- **Hover & Interaction (Liquid-Smooth)**:
+  - **Premium Cards**: **ALWAYS** use `whileHover={{ y: -8 }}` and `shadow-2xl`. Scale internal icons by `1.1` and rotate by `6deg`.
+  - **List Items / Rows**: Use `hover:bg-primary/[0.04]` (or `slate-50/80`), subtle border light-up, and `active:scale-[0.99]`.
+  - **Action Buttons**: Use `hover:scale-105` and `active:scale-95`. Enhance shadow/glow on hover for primary actions.
+  - **Transitions**: Use `duration-500` for premium "liquid" feel on large surface changes; `duration-300` for micro-interactions.
+
 - **Typography**:
   - Headings: `font-black` (800+) with `tracking-tight`. Use `font-outfit` for premium emphasis.
   - Action Labels: `text-[10px] font-black uppercase tracking-[0.2em]`.

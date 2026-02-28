@@ -543,24 +543,30 @@ export default function UsersPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                             <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Score</span>
-                                <p className="text-lg font-black text-slate-900">{detailsUser?.target_score || "N/A"}</p>
+                                <p className="text-sm font-black text-slate-900">{detailsUser?.target_score || "N/A"}</p>
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Test Type</span>
-                                <p className="text-lg font-black text-slate-900 capitalize">{detailsUser?.test_type || "N/A"}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Member Since</span>
-                                <p className="text-sm font-bold text-slate-700">
-                                    {detailsUser && formatDate(detailsUser.created_at)}
-                                </p>
+                                <p className="text-sm font-black text-slate-900 uppercase">{detailsUser?.test_type || "N/A"}</p>
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Star Balance</span>
-                                <p className="text-lg font-black text-primary font-mono">{formatCredits(detailsUser?.credits_balance ?? 0)}</p>
+                                <p className="text-sm font-black text-primary font-mono">{formatCredits(detailsUser?.credits_balance ?? 0)}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Exam Date</span>
+                                <p className="text-sm font-bold text-slate-900">{detailsUser?.exam_date ? formatDate(detailsUser.exam_date) : "Not Set"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Seen</span>
+                                <p className="text-sm font-bold text-slate-700">{detailsUser?.last_seen_at ? formatDate(detailsUser.last_seen_at) : "Never"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Member Since</span>
+                                <p className="text-sm font-bold text-slate-500">{detailsUser?.created_at ? formatDate(detailsUser.created_at) : "N/A"}</p>
                             </div>
                         </div>
 

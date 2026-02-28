@@ -3,6 +3,7 @@
 import { CreditTransactionWithUser } from "@/repositories/interfaces"
 import { cn, formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import {
     Clock,
@@ -73,7 +74,7 @@ export function ActivityItem({ transaction: t, showUser = false, href, onClick }
     const isPositive = t.amount > 0
 
     const className = cn(
-        "group flex items-center justify-between gap-3 py-2 px-2 rounded-[1.25rem] hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-300 relative overflow-hidden",
+        "group flex items-center justify-between gap-3 py-2 px-2 rounded-[1.25rem] hover:bg-primary/[0.04] dark:hover:bg-primary/[0.06] border border-transparent hover:border-primary/10 transition-all duration-300 relative overflow-hidden",
         (href || onClick) && "cursor-pointer"
     )
 
@@ -126,16 +127,22 @@ export function ActivityItem({ transaction: t, showUser = false, href, onClick }
 
     if (onClick) {
         return (
-            <div onClick={onClick} className={className}>
+            <motion.div
+                onClick={onClick}
+                className={className}
+                whileTap={{ scale: 0.99 }}
+            >
                 {inner}
-            </div>
+            </motion.div>
         )
     }
 
     if (href) {
         return (
             <Link href={href} className={cn(className, "block no-underline")}>
-                {inner}
+                <motion.div whileTap={{ scale: 0.99 }}>
+                    {inner}
+                </motion.div>
             </Link>
         )
     }

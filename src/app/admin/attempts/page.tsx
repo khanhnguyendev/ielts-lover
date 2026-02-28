@@ -76,14 +76,19 @@ export default function AdminAttemptsPage() {
                         {getExerciseIcon(attempt.exercises?.type)}
                     </div>
                     <div className="flex flex-col">
-                        <Link
-                            href={`/admin/exercises?search=${attempt.exercise_id}`}
-                            className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-primary transition-colors leading-none mb-1"
+                        <div
+                            className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-primary transition-all leading-none mb-1 flex items-center gap-1.5 cursor-pointer group/id"
+                            onClick={() => {
+                                navigator.clipboard.writeText(attempt.exercise_id);
+                                // Optional: add a toast here if available, but for now the interaction is enough
+                            }}
                         >
-                            ID: {attempt.exercise_id?.substring(0, 8)}
-                        </Link>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white leading-none italic">
-                            {attempt.exercises?.type?.startsWith('writing') ? 'Writing Task' : 'Speaking Task'}
+                            <span className="bg-slate-50 dark:bg-white/5 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/10 group-hover/id:border-primary/20 transition-colors">
+                                ID: {attempt.exercise_id?.substring(0, 12)}...
+                            </span>
+                        </div>
+                        <span className="text-sm font-black text-slate-900 dark:text-white leading-none italic">
+                            {attempt.exercises?.type?.replace('_', ' ')}
                         </span>
                     </div>
                 </div>

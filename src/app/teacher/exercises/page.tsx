@@ -72,7 +72,9 @@ function TeacherExercisesContent() {
                 <div className="flex items-center gap-3">
                     <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
-                        exercise.type.startsWith('writing') ? "bg-purple-50 text-purple-600" : "bg-blue-50 text-blue-600"
+                        exercise.type.startsWith('writing')
+                            ? "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"
+                            : "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
                     )}>
                         {exercise.type.startsWith('writing') ? <FileText size={20} /> : <Mic size={20} />}
                     </div>

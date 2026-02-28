@@ -393,8 +393,9 @@ function ActionCard({ href, icon: Icon, label, description, theme, meta, badge }
         <Link href={href} className="group h-full">
             <motion.div
                 whileHover={{ y: -8 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                    "h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-8 rounded-[2.5rem] transition-all duration-500 flex flex-col shadow-sm group-hover:shadow-2xl relative overflow-hidden",
+                    "h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-8 rounded-[2.5rem] transition-all duration-500 flex flex-col shadow-sm hover:shadow-2xl relative overflow-hidden",
                     current.bg
                 )}
             >
@@ -451,8 +452,12 @@ function StatCard({ icon: Icon, label, value, subLabel, color, bgColor, href, tr
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
+                transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: [0.16, 1, 0.3, 1]
+                }}
                 className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 lg:p-7 rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 h-full flex flex-col justify-between group"
             >
                 <div className="flex justify-between items-start mb-8">
@@ -486,7 +491,7 @@ function StatCard({ icon: Icon, label, value, subLabel, color, bgColor, href, tr
 
 function OnboardingItem({ label, completed = false }: { label: string, completed?: boolean }) {
     return (
-        <div className="flex items-center gap-4 group/item cursor-default">
+        <div className="flex items-center gap-4 group/item cursor-default transition-all duration-300 hover:translate-x-1 active:scale-[0.99]">
             <div className={cn(
                 "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 shrink-0",
                 completed ? "bg-primary border-primary shadow-lg shadow-primary/20 scale-110" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
