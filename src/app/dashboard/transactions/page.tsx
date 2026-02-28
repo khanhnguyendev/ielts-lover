@@ -16,10 +16,27 @@ import { StatCard } from "@/components/dashboard/stat-card"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { UserProfile } from "@/types"
 import { CreditTransaction } from "@/repositories/interfaces"
+import { useSearchParams } from "next/navigation"
 
 const PAGE_SIZE = 8
 
 export default function TransactionsPage() {
+    return (
+        <React.Suspense fallback={
+            <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-slate-50/20 dark:bg-slate-950/20">
+                <PulseLoader size="lg" color="primary" />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600 animate-pulse">Initializing Financial Audit...</p>
+            </div>
+        }>
+            <TransactionsContent />
+        </React.Suspense>
+    )
+}
+
+function TransactionsContent() {
+    const searchParams = useSearchParams()
+    const txId = searchParams.get("txId")
+
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [stats, setStats] = React.useState({ totalEarned: 0, totalSpent: 0 })
     const [initialData, setInitialData] = React.useState<{ data: CreditTransaction[], total: number } | null>(null)
@@ -130,6 +147,7 @@ export default function TransactionsPage() {
                             initialTransactions={initialData.data}
                             totalTransactions={initialData.total}
                             pageSize={PAGE_SIZE}
+                            initialSelectedTxId={txId}
                         />
                     </div>
                 </div>

@@ -37,6 +37,7 @@ interface TransactionFeedProps {
     initialTransactions: CreditTransaction[]
     totalTransactions: number
     pageSize: number
+    initialSelectedTxId?: string | null
 }
 
 // ─── Constants & Helpers ─────────────────────────────────────
@@ -210,13 +211,18 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
 
 // ─── Main Feed Component ─────────────────────────────────────
 
-export function TransactionFeed({ initialTransactions, totalTransactions, pageSize }: TransactionFeedProps) {
+export function TransactionFeed({
+    initialTransactions,
+    totalTransactions,
+    pageSize,
+    initialSelectedTxId = null
+}: TransactionFeedProps) {
     const [transactions, setTransactions] = React.useState(initialTransactions)
     const [totalCount, setTotalCount] = React.useState(totalTransactions)
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [filter, setFilter] = React.useState<string | null>(null)
-    const [selectedTxId, setSelectedTxId] = React.useState<string | null>(null)
-    const [isDetailOpen, setIsDetailOpen] = React.useState(false)
+    const [selectedTxId, setSelectedTxId] = React.useState<string | null>(initialSelectedTxId)
+    const [isDetailOpen, setIsDetailOpen] = React.useState(!!initialSelectedTxId)
 
     const hasMore = transactions.length < totalCount
 

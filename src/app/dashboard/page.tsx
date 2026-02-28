@@ -299,7 +299,10 @@ export default function DashboardPage() {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ duration: 0.4, delay: 0.3 + (idx * 0.05) }}
                                             >
-                                                <ActivityItem transaction={t} />
+                                                <ActivityItem
+                                                    transaction={t}
+                                                    href={`/dashboard/transactions?txId=${t.id}`}
+                                                />
                                             </motion.div>
                                         ))}
                                     </div>
