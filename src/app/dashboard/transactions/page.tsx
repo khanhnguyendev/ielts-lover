@@ -4,6 +4,7 @@ import * as React from "react"
 import { TransactionFeed } from "@/components/dashboard/transaction-feed"
 import { redirect } from "next/navigation"
 import { getCurrentUser, getUserTransactionsPaginated, getUserTransactionStats } from "@/app/actions"
+import { formatCredits } from "@/lib/utils"
 import {
     History,
     Sparkles,
@@ -84,7 +85,7 @@ export default function TransactionsPage() {
                         index={0}
                         icon={Zap}
                         label="StarCredits Vault"
-                        value={user?.credits_balance?.toString() || "0"}
+                        value={formatCredits(user?.credits_balance || 0)}
                         subLabel="Ready to spend"
                         color="text-amber-500"
                         bgColor="bg-amber-100/50"
@@ -94,7 +95,7 @@ export default function TransactionsPage() {
                         index={1}
                         icon={ArrowUpCircle}
                         label="Total Accumulation"
-                        value={stats.totalEarned.toString()}
+                        value={formatCredits(stats.totalEarned)}
                         subLabel="Lifetime additions"
                         color="text-emerald-500"
                         bgColor="bg-emerald-100/50"
@@ -103,7 +104,7 @@ export default function TransactionsPage() {
                         index={2}
                         icon={ArrowDownCircle}
                         label="Total Utilization"
-                        value={stats.totalSpent.toString()}
+                        value={formatCredits(stats.totalSpent)}
                         subLabel="Lifetime investment"
                         color="text-rose-500"
                         bgColor="bg-rose-100/50"

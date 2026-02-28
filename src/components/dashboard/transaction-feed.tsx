@@ -259,9 +259,11 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                             <span className={cn("text-[9px] font-black uppercase tracking-widest", config.color)}>
                                 {config.label}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                <span>{new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                <span className="text-[8px] opacity-40">•</span>
+                                <span className="font-medium opacity-80">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                            </div>
                         </div>
                     </div>
                 )
