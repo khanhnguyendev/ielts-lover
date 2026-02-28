@@ -26,6 +26,7 @@ interface ActivityItemProps {
     transaction: CreditTransactionWithUser
     showUser?: boolean
     href?: string
+    onClick?: () => void
 }
 
 function getFeatureConfig(t: CreditTransactionWithUser) {
@@ -67,13 +68,13 @@ function formatDesc(desc: string | undefined) {
     return desc.replace("Used feature: ", "").replace(/_/g, " ")
 }
 
-export function ActivityItem({ transaction: t, showUser = false, href }: ActivityItemProps) {
+export function ActivityItem({ transaction: t, showUser = false, href, onClick }: ActivityItemProps) {
     const config = getFeatureConfig(t)
     const isPositive = t.amount > 0
 
     const className = cn(
         "group flex items-center justify-between gap-3 py-2 px-2 rounded-[1.25rem] hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-300 relative overflow-hidden",
-        href && "cursor-pointer"
+        (href || onClick) && "cursor-pointer"
     )
 
     const inner = (
@@ -122,6 +123,14 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
             </div>
         </>
     )
+
+    if (onClick) {
+        return (
+            <div onClick={onClick} className={className}>
+                {inner}
+            </div>
+        )
+    }
 
     if (href) {
         return (

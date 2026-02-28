@@ -32,13 +32,17 @@ import { CreditTransaction } from "@/repositories/interfaces"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { ActivityItem } from "@/components/dashboard/activity-item"
+import { TransactionDetail } from "@/components/dashboard/transaction-detail"
 import { NOTIFY_MSGS } from "@/lib/constants/messages"
+import { CreditTransactionWithUser } from "@/repositories/interfaces"
 
 export default function DashboardPage() {
     const [user, setUser] = React.useState<UserProfile | null>(null)
     const [recentActivity, setRecentActivity] = React.useState<CreditTransaction[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [chatInput, setChatInput] = React.useState("")
+    const [selectedTxId, setSelectedTxId] = React.useState<string | null>(null)
+    const [isDetailOpen, setIsDetailOpen] = React.useState(false)
     const { notifySuccess, notifyInfo } = useNotification()
 
     const handleChatSubmit = () => {
@@ -300,8 +304,11 @@ export default function DashboardPage() {
                                                 transition={{ duration: 0.4, delay: 0.3 + (idx * 0.05) }}
                                             >
                                                 <ActivityItem
-                                                    transaction={t}
-                                                    href={`/dashboard/transactions?txId=${t.id}`}
+                                                    transaction={t as unknown as CreditTransactionWithUser}
+                                                    onClick={() => {
+                                                        setSelectedTxId(t.id)
+                                                        setIsDetailOpen(true)
+                                                    }}
                                                 />
                                             </motion.div>
                                         ))}
@@ -340,6 +347,12 @@ export default function DashboardPage() {
                     © 2026 IELTS LOVER &nbsp; • &nbsp; AI POWERED COACHING LAB
                 </p>
             </footer>
+
+            <TransactionDetail
+                transactionId={selectedTxId}
+                isOpen={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
+            />
         </div>
     )
 }
