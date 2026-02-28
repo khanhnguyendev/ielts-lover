@@ -179,26 +179,28 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
         })
     }, [transactions, filter])
 
+    const earnedCount = React.useMemo(() => transactions.filter(t => t.amount > 0).length, [transactions])
+    const spentCount = React.useMemo(() => transactions.filter(t => t.amount < 0).length, [transactions])
+
     return (
         <div className="space-y-4">
             {/* Filter Tabs */}
-            <div className="flex bg-slate-100/50 p-0.5 rounded-lg w-fit border border-slate-200/60">
+            <div className="flex bg-slate-100/50 dark:bg-white/5 p-1 rounded-2xl w-fit border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
                 {(["all", "earned", "spent"] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setFilter(tab)}
                         className={cn(
-                            "px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all",
+                            "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                             filter === tab
-                                ? "bg-white text-primary shadow-sm ring-1 ring-black/5"
-                                : "text-muted-foreground hover:text-slate-900"
+                                ? "bg-white dark:bg-slate-800 text-primary shadow-lg shadow-black/5 ring-1 ring-black/5"
+                                : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         )}
                     >
                         {tab}
-                        <span className="ml-1.5 opacity-60 text-[9px] font-bold">
+                        <span className="ml-2 opacity-40 text-[9px] font-bold">
                             {tab === "all" ? transactions.length :
-                                tab === "earned" ? transactions.filter(t => t.amount > 0).length :
-                                    transactions.filter(t => t.amount < 0).length}
+                                tab === "earned" ? earnedCount : spentCount}
                         </span>
                     </button>
                 ))}
