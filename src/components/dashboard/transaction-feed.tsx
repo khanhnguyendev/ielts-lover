@@ -29,6 +29,7 @@ import {
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
 import { getUserTransactionsPaginated, getTransactionDetailAction } from "@/app/actions"
 import { TransactionDetail } from "./transaction-detail"
 
