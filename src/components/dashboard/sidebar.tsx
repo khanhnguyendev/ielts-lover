@@ -25,6 +25,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { AppLogo } from "@/components/global/app-logo"
 
 const MENU_PRACTICE = [
     { icon: PenTool, label: "Writing Lab", href: "/dashboard/writing" },
@@ -90,14 +91,9 @@ export function DashboardSidebar() {
                 )}
             >
                 {/* Logo Section */}
-                <div className="h-14 flex items-center px-4 border-b border-slate-200/30 dark:border-white/5">
-                    <Link href="/dashboard" className="flex items-center gap-2 group">
-                        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                            ✨
-                        </div>
-                        {!isCollapsed && (
-                            <span className="font-black text-xs tracking-tighter uppercase font-outfit text-slate-900 dark:text-white">IELTS Lover</span>
-                        )}
+                <div className="h-16 flex items-center px-4">
+                    <Link href="/dashboard" className="block w-full">
+                        <AppLogo collapsed={isCollapsed} />
                     </Link>
                 </div>
 
@@ -179,7 +175,7 @@ function SidebarItem({ icon: Icon, label, href, active, collapsed, onClick }: {
     return (
         <Link href={href} onClick={onClick} className="block relative group">
             <div className={cn(
-                "h-11 flex items-center gap-3 px-3 rounded-xl transition-all duration-300 relative z-10",
+                "h-12 flex items-center gap-3 px-3 rounded-2xl transition-all duration-300 relative z-10",
                 active
                     ? "text-primary font-black shadow-sm"
                     : "text-slate-500 dark:text-slate-400 font-bold hover:text-slate-900 dark:hover:text-white"
@@ -188,7 +184,7 @@ function SidebarItem({ icon: Icon, label, href, active, collapsed, onClick }: {
                 {active && (
                     <motion.div
                         layoutId="active-indicator"
-                        className="absolute inset-0 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10 dark:border-primary/20"
+                        className="absolute inset-0 bg-primary/10 dark:bg-primary/20 rounded-2xl border border-primary/20 dark:border-primary/30"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                 )}
@@ -211,7 +207,7 @@ function SidebarItem({ icon: Icon, label, href, active, collapsed, onClick }: {
                 )}
 
                 {/* Hover Glow Effect */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-slate-100/50 dark:bg-slate-800/30 transition-opacity -z-10" />
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-slate-100/50 dark:bg-slate-800/30 transition-opacity -z-10" />
             </div>
         </Link>
     )
