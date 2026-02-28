@@ -71,6 +71,13 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl bg-slate-50 dark:bg-slate-950">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Transaction Receipt</DialogTitle>
+                    <DialogDescription>
+                        Detailed breakdown of your credit transaction and AI usage logs.
+                    </DialogDescription>
+                </DialogHeader>
+
                 {isLoading ? (
                     <div className="p-8 space-y-6">
                         <Skeleton className="h-8 w-1/2" />
