@@ -26,7 +26,8 @@ import {
     Sparkles,
     Settings2,
     Package,
-    Loader2
+    Loader2,
+    Activity
 } from "lucide-react"
 import { getAICostAnalytics, getModelPricingList, updateModelPricing, getRollingAICostSummaries, generateAndSeedPackages } from "../actions"
 import { AIModelPricing, AICostSummary } from "@/repositories/interfaces"
@@ -36,6 +37,7 @@ import { PulseLoader } from "@/components/global/pulse-loader"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import {
     Dialog,
     DialogContent,
@@ -319,70 +321,91 @@ export default function AICostsPage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group/panel transition-all hover:shadow-xl hover:shadow-slate-200/50">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-slate-50 bg-slate-50/30">
-                                    <th className="text-left px-6 py-5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">Service Area</th>
-                                    <th className="text-center px-4 py-5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">Volume</th>
-                                    <th className="text-right px-4 py-5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">Cost (USD)</th>
-                                    <th className="text-right px-4 py-5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">Credits</th>
-                                    <th className="text-right px-6 py-5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">ROI Index</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {analytics?.byFeature?.map((f: any) => {
+                <div className="bg-white dark:bg-slate-900/50 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden group/panel transition-all hover:shadow-xl hover:shadow-slate-200/50">
+                    <DataTable
+                        data={analytics?.byFeature || []}
+                        columns={[
+                            {
+                                key: "feature",
+                                header: "Service Area",
+                                render: (f: any) => {
+                                    const config = getServiceIcon(f.feature_key)
+                                    const Icon = config.icon
+                                    return (
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                                                config.bg, config.color, "dark:bg-white/5"
+                                            )}>
+                                                <Icon size={14} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wide">
+                                                    {f.feature_key.replace(/_/g, " ")}
+                                                </span>
+                                                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500">Active Module</span>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            },
+                            {
+                                key: "volume",
+                                header: "Volume",
+                                align: "center",
+                                render: (f: any) => (
+                                    <Badge variant="outline" className="rounded-full bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/10 font-black text-slate-600 dark:text-slate-400 px-3 py-0.5 text-[10px]">
+                                        {f.call_count.toLocaleString()}
+                                    </Badge>
+                                )
+                            },
+                            {
+                                key: "cost",
+                                header: "Cost (USD)",
+                                align: "right",
+                                render: (f: any) => (
+                                    <span className="text-xs font-black text-rose-600 dark:text-rose-400 font-mono">
+                                        ${f.total_cost_usd.toFixed(4)}
+                                    </span>
+                                )
+                            },
+                            {
+                                key: "credits",
+                                header: "Credits",
+                                align: "right",
+                                render: (f: any) => (
+                                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                                        {f.total_credits_charged.toLocaleString()}
+                                    </span>
+                                )
+                            },
+                            {
+                                key: "roi",
+                                header: "ROI Index",
+                                align: "right",
+                                render: (f: any) => {
                                     const costPerCredit = f.total_credits_charged > 0
                                         ? f.total_cost_usd / f.total_credits_charged
                                         : 0
                                     return (
-                                        <tr key={f.feature_key} className="group/row hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                {(() => {
-                                                    const config = getServiceIcon(f.feature_key)
-                                                    const Icon = config.icon
-                                                    return (
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={cn(
-                                                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                                                                config.bg, config.color
-                                                            )}>
-                                                                <Icon size={14} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
-                                                                    {f.feature_key.replace(/_/g, " ")}
-                                                                </span>
-                                                                <span className="text-[9px] font-bold text-slate-400">Active Module</span>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })()}
-                                            </td>
-                                            <td className="text-center px-4 py-4">
-                                                <Badge variant="outline" className="rounded-full bg-slate-50 border-slate-100 font-bold text-slate-600 px-2 py-0">
-                                                    {f.call_count.toLocaleString()}
-                                                </Badge>
-                                            </td>
-                                            <td className="text-right px-4 py-4">
-                                                <span className="text-xs font-black text-rose-600">${f.total_cost_usd.toFixed(4)}</span>
-                                            </td>
-                                            <td className="text-right px-4 py-4">
-                                                <span className="text-xs font-black text-indigo-600">{f.total_credits_charged.toLocaleString()}</span>
-                                            </td>
-                                            <td className="text-right px-6 py-4">
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-xs font-black text-emerald-600">${costPerCredit.toFixed(5)}</span>
-                                                    <span className="text-[9px] font-bold text-slate-300">per credit</span>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                                                ${costPerCredit.toFixed(5)}
+                                            </span>
+                                            <span className="text-[9px] font-black uppercase tracking-tight text-slate-300 dark:text-slate-600">per credit</span>
+                                        </div>
                                     )
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                }
+                            }
+                        ]}
+                        rowKey={(f: any) => f.feature_key}
+                        pageSize={10}
+                        emptyState={{
+                            icon: <Activity className="h-8 w-8 text-slate-300" />,
+                            title: "No feature data",
+                            description: "No AI calls have been recorded for features yet."
+                        }}
+                    />
                 </div>
             </div>
 
