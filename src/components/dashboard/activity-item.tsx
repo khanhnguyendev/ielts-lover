@@ -73,18 +73,18 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
     const isPositive = t.amount > 0
 
     const className = cn(
-        "group flex items-center justify-between gap-4 py-4 px-3 rounded-[1.25rem] hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-300 relative overflow-hidden",
+        "group flex items-center justify-between gap-3 py-2 px-2 rounded-[1.25rem] hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-300 relative overflow-hidden",
         href && "cursor-pointer"
     )
 
     const inner = (
         <>
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={cn(
-                    "w-11 h-11 rounded-[1rem] flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 shadow-sm border",
+                    "w-9 h-9 rounded-[0.8rem] flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 shadow-sm border",
                     config.bg, config.color, "border-white/50"
                 )}>
-                    <config.icon size={18} strokeWidth={2.5} className="opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <config.icon size={16} strokeWidth={2.5} className="opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -97,14 +97,14 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
                         </span>
                     </div>
 
-                    <p className="text-[13px] font-bold text-slate-700 truncate capitalize leading-tight">
+                    <p className="text-xs font-bold text-slate-700 truncate capitalize leading-tight">
                         {formatDesc(t.description)}
                     </p>
 
                     {showUser && t.user_email && (
-                        <div className="flex items-center gap-1.5 mt-1 opacity-60">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                            <span className="text-[10px] font-black text-slate-500 truncate tracking-wide">
+                        <div className="flex items-center gap-1 mt-0.5 opacity-60">
+                            <span className="w-1 h-1 rounded-full bg-slate-300" />
+                            <span className="text-[9px] font-black text-slate-500 truncate tracking-wide">
                                 {t.user_email}
                             </span>
                         </div>
@@ -112,18 +112,18 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
                 </div>
             </div>
 
-            <div className="flex flex-col items-end shrink-0 pl-4 border-l border-slate-100/50">
+            <div className="flex flex-col items-end shrink-0 pl-3 border-l border-slate-100/50">
                 <div className={cn(
-                    "flex items-center gap-1 font-black mb-1",
+                    "flex items-center gap-1 font-black mb-0.5",
                     isPositive
-                        ? "text-emerald-500 text-sm"
-                        : "text-slate-800 text-sm"
+                        ? "text-emerald-500 text-xs"
+                        : "text-slate-800 text-xs"
                 )}>
-                    {isPositive ? <ArrowUpRight size={14} className="opacity-80" /> : <ArrowDownLeft size={14} className="opacity-40" />}
+                    {isPositive ? <ArrowUpRight size={12} className="opacity-80" /> : <ArrowDownLeft size={12} className="opacity-40" />}
                     {isPositive ? "+" : "-"}{Math.abs(t.amount)}
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
-                    <Clock size={10} className="opacity-50" />
+                <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400">
+                    <Clock size={9} className="opacity-50" />
                     {formatDate(t.created_at, false)}
                     <span className="opacity-30">•</span>
                     {formatTime(t.created_at)}
