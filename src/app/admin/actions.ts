@@ -9,14 +9,14 @@ import { AdminPolicy } from "@/services/admin.policy";
 import { Lesson, LessonQuestion } from "@/types";
 import { revalidatePath } from "next/cache";
 
-import { ExerciseRepository } from "@/repositories/exercise.repository";
-import { ExerciseService } from "@/services/exercise.service";
-import { Exercise, ExerciseType } from "@/types";
+import { WritingExerciseRepository } from "@/repositories/writing-exercise.repository";
+import { WritingExerciseService } from "@/services/writing-exercise.service";
+import { WritingExercise, ExerciseType } from "@/types";
 import { AIService } from "@/services/ai.service";
 import { withTrace, getCurrentTraceId, Logger } from "@/lib/logger";
 
 import { UserRepository } from "@/repositories/user.repository";
-import { AttemptRepository } from "@/repositories/attempt.repository";
+import { WritingAttemptRepository } from "@/repositories/writing-attempt.repository";
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { CreditPackageRepository } from "@/repositories/credit-package.repository";
 import { SystemSettingsRepository } from "@/repositories/system-settings.repository";
@@ -39,16 +39,16 @@ import { notificationService } from "@/lib/notification-client";
 const logger = new Logger("AdminActions");
 const creditPackageRepo = traceService(new CreditPackageRepository(), "CreditPackageRepository");
 const userRepo = traceService(new UserRepository(), "UserRepository");
-const attemptRepo = traceService(new AttemptRepository(), "AttemptRepository");
+const attemptRepo = traceService(new WritingAttemptRepository(), "WritingAttemptRepository");
 const transactionRepo = traceService(new CreditTransactionRepository(), "CreditTransactionRepository");
 const lessonRepo = traceService(new LessonRepository(), "LessonRepository");
-const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
+const exerciseRepo = traceService(new WritingExerciseRepository(), "WritingExerciseRepository");
 const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
 const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricingRepository");
 const _aiService = new AIService();
 const aiService = traceService(_aiService, "AIService");
 const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
-const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
+const exerciseService = traceService(new WritingExerciseService(exerciseRepo), "WritingExerciseService");
 const storageService = traceService(new StorageService(), "StorageService");
 const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
 const teacherStudentRepo = traceService(new TeacherStudentRepository(), "TeacherStudentRepository");
@@ -255,7 +255,7 @@ export async function getLessonQuestions(lessonId: string) {
 // Exercise Actions
 
 export const createExercise = traceAction("createExercise", async (
-    exercise: Omit<Exercise, "id" | "created_at" | "version">,
+    exercise: Omit<WritingExercise, "id" | "created_at" | "version">,
     sourceExerciseId?: string
 ) => {
     const user = await checkAdmin();

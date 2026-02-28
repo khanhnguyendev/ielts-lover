@@ -1,6 +1,6 @@
 import { TRANSACTION_TYPES, CREDIT_REQUEST_STATUS } from "@/lib/constants";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
-import { ITeacherStudentRepository, ICreditRequestRepository, IAttemptRepository, IUserRepository } from "@/repositories/interfaces";
+import { ITeacherStudentRepository, ICreditRequestRepository, IWritingAttemptRepository, IUserRepository } from "@/repositories/interfaces";
 import { CreditService } from "./credit.service";
 import { UserProfile, CreditRequest } from "@/types";
 
@@ -14,7 +14,7 @@ export class TeacherService {
     constructor(
         private teacherStudentRepo: ITeacherStudentRepository,
         private creditRequestRepo: ICreditRequestRepository,
-        private attemptRepo: IAttemptRepository,
+        private writingAttemptRepo: IWritingAttemptRepository,
         private userRepo: IUserRepository,
         private creditService: CreditService,
     ) { }
@@ -24,7 +24,7 @@ export class TeacherService {
 
         const summaries: StudentSummary[] = await Promise.all(
             students.map(async (student) => {
-                const attempts = await this.attemptRepo.listByUserId(student.id);
+                const attempts = await this.writingAttemptRepo.listByUserId(student.id);
                 const evaluated = attempts.filter((a) => a.score != null);
                 const avgScore = evaluated.length > 0
                     ? evaluated.reduce((sum, a) => sum + (a.score || 0), 0) / evaluated.length
@@ -50,7 +50,7 @@ export class TeacherService {
         const student = await this.userRepo.getById(studentId);
         if (!student) throw new Error("Student not found");
 
-        const attempts = await this.attemptRepo.listByUserId(studentId);
+        const attempts = await this.writingAttemptRepo.listByUserId(studentId);
 
         return { student, attempts };
     }

@@ -619,7 +619,7 @@ export default function UsersPage() {
                                         render: (attempt) => (
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-bold text-slate-900 leading-none">
-                                                    {attempt.exercises?.type?.startsWith('writing') ? 'Writing Task' : 'Speaking Task'}
+                                                    {attempt.writing_exercises?.type?.startsWith('writing') ? 'Writing Task' : 'Speaking Task'}
                                                 </span>
                                                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">
                                                     ID: {attempt.exercise_id?.substring(0, 8)}

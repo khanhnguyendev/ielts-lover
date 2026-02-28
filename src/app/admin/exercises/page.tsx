@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { getExercises } from "@/app/actions";
 import { deleteExercise } from "@/app/admin/actions";
-import { Exercise, ExerciseType } from "@/types";
+import { WritingExercise, ExerciseType } from "@/types";
 
 import { Plus, Edit, Trash2, Eye, Search, FileText, Mic, AlertTriangle, Sparkles } from "lucide-react";
 import { PulseLoader } from "@/components/global/pulse-loader";
@@ -26,12 +26,12 @@ function ExercisesContent() {
     const searchParams = useSearchParams();
     const initialSearch = searchParams.get("search") || "";
 
-    const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [exercises, setExercises] = useState<WritingExercise[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [typeFilter, setTypeFilter] = useState<string>("all");
-    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-    const [deleteTarget, setDeleteTarget] = useState<Exercise | null>(null);
+    const [selectedExercise, setSelectedExercise] = useState<WritingExercise | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<WritingExercise | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     async function fetchExercises() {
@@ -72,7 +72,7 @@ function ExercisesContent() {
         return matchesSearch && matchesType;
     });
 
-    const columns: DataTableColumn<Exercise>[] = [
+    const columns: DataTableColumn<WritingExercise>[] = [
         {
             key: "info",
             header: "Exercise Information",

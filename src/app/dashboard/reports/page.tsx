@@ -44,7 +44,7 @@ import { cn, formatDate, formatTime } from "@/lib/utils"
 
 import { getUserAttemptsPaginated, getMostRecentAttempt, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
-import { Attempt } from "@/types";
+import { WritingAttempt } from "@/types";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import { LoadMoreButton } from "@/components/global/load-more-button";
 import { getBandScoreConfig } from "@/lib/score-utils";
@@ -56,13 +56,13 @@ import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = React.useState("Reports")
-    const [attempts, setAttempts] = React.useState<Attempt[]>([])
+    const [attempts, setAttempts] = React.useState<WritingAttempt[]>([])
     const [totalAttempts, setTotalAttempts] = React.useState(0)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const [reevalStep, setReevalStep] = React.useState(0)
-    const [recentAttempt, setRecentAttempt] = React.useState<Attempt | null>(null)
+    const [recentAttempt, setRecentAttempt] = React.useState<WritingAttempt | null>(null)
 
     const PAGE_SIZE = 5
 
@@ -80,9 +80,9 @@ export default function ReportsPage() {
                 getUserAttemptsPaginated(PAGE_SIZE, 0),
                 getMostRecentAttempt()
             ])
-            setAttempts(result.data as Attempt[])
+            setAttempts(result.data as WritingAttempt[])
             setTotalAttempts(result.total)
-            setRecentAttempt(recent as Attempt | null)
+            setRecentAttempt(recent as WritingAttempt | null)
         } catch (error) {
             console.error("Failed to fetch reports:", error)
         } finally {
@@ -98,7 +98,7 @@ export default function ReportsPage() {
         setIsLoadingMore(true)
         try {
             const result = await getUserAttemptsPaginated(PAGE_SIZE, attempts.length)
-            setAttempts(prev => [...prev, ...(result.data as Attempt[])])
+            setAttempts(prev => [...prev, ...(result.data as WritingAttempt[])])
             setTotalAttempts(result.total)
         } catch (error) {
             console.error("Failed to load more reports:", error)
@@ -114,7 +114,7 @@ export default function ReportsPage() {
         return attempts.filter(attempt => {
             if (statusFilter && attempt.state !== statusFilter) return false
             if (toolFilter) {
-                const type = attempt.exercises?.type || ""
+                const type = attempt.writing_exercises?.type || ""
                 if (toolFilter === "writing" && !type.startsWith("writing")) return false
                 if (toolFilter === "speaking" && !type.startsWith("speaking")) return false
             }
@@ -198,8 +198,8 @@ export default function ReportsPage() {
     const avgScore = attempts.length > 0
         ? (attempts.filter(a => a.score != null).reduce((acc, curr) => acc + (curr.score || 0), 0) / attempts.filter(a => a.score != null).length || 0).toFixed(1)
         : "0.0"
-    const writingCount = attempts.filter(a => a.exercises?.type?.startsWith('writing')).length
-    const speakingCount = attempts.filter(a => a.exercises?.type?.startsWith('speaking')).length
+    const writingCount = attempts.filter(a => a.writing_exercises?.type?.startsWith('writing')).length
+    const speakingCount = attempts.filter(a => a.writing_exercises?.type?.startsWith('speaking')).length
 
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/20 dark:bg-slate-950/20">
@@ -571,7 +571,7 @@ function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
 
 function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
-    const isWriting = attempt.exercises?.type?.startsWith('writing');
+    const isWriting = attempt.writing_exercises?.type?.startsWith('writing');
     const dateStr = formatDate(attempt.created_at, false);
     const timeStr = formatTime(attempt.created_at);
 
@@ -598,7 +598,7 @@ function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep
                     </span>
                 </div>
                 <h4 className="text-base font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors leading-tight">
-                    {attempt.exercises?.title || "IELTS Practice Session"}
+                    {attempt.writing_exercises?.title || "IELTS Practice Session"}
                 </h4>
             </div>
 

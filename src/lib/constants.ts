@@ -76,8 +76,8 @@ export type PackageTier = typeof PACKAGE_TIERS[keyof typeof PACKAGE_TIERS];
 export const DB_TABLES = {
     USER_PROFILES: 'user_profiles',
     CREDIT_TRANSACTIONS: 'credit_transactions',
-    ATTEMPTS: 'attempts',
-    EXERCISES: 'exercises',
+    WRITING_ATTEMPTS: 'writing_attempts',
+    WRITING_EXERCISES: 'writing_exercises',
     FEATURE_PRICING: 'feature_pricing',
     SYSTEM_SETTINGS: 'system_settings',
     CREDIT_PACKAGES: 'credit_packages',

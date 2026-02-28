@@ -73,7 +73,7 @@ export default function AdminAttemptsPage() {
             render: (attempt) => (
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 shadow-sm transition-transform group-hover:scale-110 duration-500">
-                        {getExerciseIcon(attempt.exercises?.type)}
+                        {getExerciseIcon(attempt.writing_exercises?.type)}
                     </div>
                     <div className="flex flex-col">
                         <div
@@ -88,7 +88,7 @@ export default function AdminAttemptsPage() {
                             </span>
                         </div>
                         <span className="text-sm font-black text-slate-900 dark:text-white leading-none italic">
-                            {attempt.exercises?.type?.replace('_', ' ')}
+                            {attempt.writing_exercises?.type?.replace('_', ' ')}
                         </span>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { TransactionType, SkillType, ErrorCategory, CreditRequestStatus, NotificationType, NotificationEntityType } from "@/lib/constants";
-import { UserProfile, Exercise, Attempt, ExerciseType, TeacherStudent, CreditRequest } from "@/types";
+import { UserProfile, WritingExercise, WritingAttempt, ExerciseType, TeacherStudent, CreditRequest } from "@/types";
 
 export interface IUserRepository {
     getById(id: string): Promise<UserProfile | null>;
@@ -10,21 +10,21 @@ export interface IUserRepository {
     getTotalCount(): Promise<number>;
 }
 
-export interface IExerciseRepository {
-    getById(id: string): Promise<Exercise | null>;
-    getLatestVersion(type: ExerciseType): Promise<Exercise | null>;
-    listByType(type: ExerciseType): Promise<Exercise[]>;
-    listByTypePaginated(type: ExerciseType, limit: number, offset: number): Promise<{ data: Exercise[]; total: number }>;
-    createVersion(exercise: Omit<Exercise, "id" | "created_at">): Promise<Exercise>;
+export interface IWritingExerciseRepository {
+    getById(id: string): Promise<WritingExercise | null>;
+    getLatestVersion(type: ExerciseType): Promise<WritingExercise | null>;
+    listByType(type: ExerciseType): Promise<WritingExercise[]>;
+    listByTypePaginated(type: ExerciseType, limit: number, offset: number): Promise<{ data: WritingExercise[]; total: number }>;
+    createVersion(exercise: Omit<WritingExercise, "id" | "created_at">): Promise<WritingExercise>;
     delete(id: string): Promise<void>;
     getTotalCount(): Promise<number>;
 }
 
-export interface IAttemptRepository {
-    create(data: Omit<Attempt, "id" | "created_at">): Promise<Attempt>;
-    getById(id: string): Promise<Attempt | null>;
-    update(id: string, data: Partial<Attempt>): Promise<void>;
-    listByUserId(userId: string): Promise<Attempt[]>;
+export interface IWritingAttemptRepository {
+    create(data: Omit<WritingAttempt, "id" | "created_at">): Promise<WritingAttempt>;
+    getById(id: string): Promise<WritingAttempt | null>;
+    update(id: string, data: Partial<WritingAttempt>): Promise<void>;
+    listByUserId(userId: string): Promise<WritingAttempt[]>;
     listAll(limit?: number): Promise<any[]>;
     getTodayCount(): Promise<number>;
 }

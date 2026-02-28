@@ -6,11 +6,11 @@ import { motion } from "framer-motion"
 import { cn, formatDate, formatTime } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Loader2, ChevronRight, FileText, Activity, Target, Sparkles, Clock } from "lucide-react"
-import { Attempt } from "@/types"
+import { WritingAttempt } from "@/types"
 import { getBandScoreConfig } from "@/lib/score-utils"
 
 export interface ReportComponentProps {
-    attempt: Attempt;
+    attempt: WritingAttempt;
     onReevaluate: (id: string) => void;
     reevaluatingId: string | null;
     reevalStep: number;
@@ -34,7 +34,7 @@ export function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reeval
     const config = getBandScoreConfig(attempt.score);
     const dateStr = formatDate(attempt.created_at);
     const timeStr = formatTime(attempt.created_at);
-    const isWriting = attempt.exercises?.type?.startsWith('writing');
+    const isWriting = attempt.writing_exercises?.type?.startsWith('writing');
 
     return (
         <motion.div
@@ -82,12 +82,12 @@ export function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reeval
                             </div>
                         </div>
                         <h3 className="text-3xl font-black text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight leading-tight">
-                            {attempt.exercises?.title || "IELTS Practice Session"}
+                            {attempt.writing_exercises?.title || "IELTS Practice Session"}
                         </h3>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                        <DetailTag icon={Activity} label={attempt.exercises?.type?.replace('_', ' ') || "Practice"} color="secondary" />
+                        <DetailTag icon={Activity} label={attempt.writing_exercises?.type?.replace('_', ' ') || "Practice"} color="secondary" />
                         <DetailTag icon={Target} label={`CEFR ${config.cefr}`} />
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl">
                             <Sparkles size={12} className="text-amber-500" />

@@ -32,7 +32,7 @@ import { LoadMoreButton } from "@/components/global/load-more-button"
 
 import { getExercisesPaginated, getUserAttempts, getMostRecentAttempt, getFeaturePrice, reevaluateAttempt, createCustomExercise, uploadExerciseImage } from "@/app/actions"
 import { analyzeChartImage } from "@/app/admin/actions"
-import { Exercise as DbExercise, ExerciseType, Attempt } from "@/types"
+import { WritingExercise as DbExercise, ExerciseType, WritingAttempt } from "@/types"
 import { FEATURE_KEYS, ATTEMPT_STATES } from "@/lib/constants"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { useNotification } from "@/lib/contexts/notification-context"
@@ -112,8 +112,8 @@ export default function WritingHubPage() {
     const [analysisCost, setAnalysisCost] = React.useState(5)
 
     // Attempt tracking
-    const [attempts, setAttempts] = React.useState<Attempt[]>([])
-    const [recentAttempt, setRecentAttempt] = React.useState<Attempt | null>(null)
+    const [attempts, setAttempts] = React.useState<WritingAttempt[]>([])
+    const [recentAttempt, setRecentAttempt] = React.useState<WritingAttempt | null>(null)
     const [reevaluatingId, setReevaluatingId] = React.useState<string | null>(null)
     const [reevalStep, setReevalStep] = React.useState(0)
 
@@ -252,9 +252,9 @@ export default function WritingHubPage() {
                 setTotalExercises(result.total)
 
                 // Keep only writing attempts for stats
-                const writingAttempts = (attemptsData as Attempt[]).filter(a => a.exercises?.type?.startsWith('writing'))
+                const writingAttempts = (attemptsData as WritingAttempt[]).filter(a => a.writing_exercises?.type?.startsWith('writing'))
                 setAttempts(writingAttempts)
-                setRecentAttempt(mostRecent as Attempt | null)
+                setRecentAttempt(mostRecent as WritingAttempt | null)
             } catch (error) {
                 console.error("Failed to fetch writing hub data:", error)
             } finally {
@@ -276,7 +276,7 @@ export default function WritingHubPage() {
             setTotalExercises(result.total)
 
             // Keep only writing attempts (refresh list)
-            const writingAttempts = (attemptsData as Attempt[]).filter(a => a.exercises?.type?.startsWith('writing'))
+            const writingAttempts = (attemptsData as WritingAttempt[]).filter(a => a.writing_exercises?.type?.startsWith('writing'))
             setAttempts(writingAttempts)
         } catch (error) {
             console.error("Failed to load more exercises:", error)

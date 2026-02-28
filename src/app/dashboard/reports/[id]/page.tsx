@@ -35,7 +35,7 @@ import { WritingFeedback } from "@/components/dashboard/writing-feedback"
 import { ScoreOverview } from "@/components/reports/score-overview"
 import { SAMPLE_REPORTS, WritingSampleData } from "@/lib/sample-data"
 import { getAttemptWithExercise, getCurrentUser, reevaluateAttempt } from "@/app/actions"
-import { Attempt, Exercise } from "@/types"
+import { WritingAttempt, WritingExercise } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { useTitle } from "@/lib/contexts/title-context"
 import { useNotification } from "@/lib/contexts/notification-context"
@@ -45,7 +45,7 @@ import { ATTEMPT_STATES, USER_ROLES } from "@/lib/constants"
 import { NOTIFY_MSGS } from "@/lib/constants/messages"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const [realData, setRealData] = React.useState<(Attempt & { exercise: Exercise | null }) | null>(null)
+    const [realData, setRealData] = React.useState<(WritingAttempt & { exercise: WritingExercise | null }) | null>(null)
     const { setTitle } = useTitle()
     const { notifySuccess, notifyError, notifyWarning } = useNotification()
     const [isEvaluating, setIsEvaluating] = React.useState(false)

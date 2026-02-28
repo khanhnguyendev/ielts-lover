@@ -1,22 +1,22 @@
-import { Attempt } from "@/types";
-import { IAttemptRepository, IUserRepository, IExerciseRepository } from "../repositories/interfaces";
+import { WritingAttempt } from "@/types";
+import { IWritingAttemptRepository, IUserRepository, IWritingExerciseRepository } from "../repositories/interfaces";
 import { AIService, AIUsageMetadata } from "./ai.service";
 import { ATTEMPT_STATES, EXERCISE_TYPES, APP_ERROR_CODES } from "@/lib/constants";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
-export class AttemptService {
+export class WritingAttemptService {
     constructor(
-        private attemptRepo: IAttemptRepository,
+        private writingAttemptRepo: IWritingAttemptRepository,
         private userRepo: IUserRepository,
-        private exerciseRepo: IExerciseRepository,
+        private writingExerciseRepo: IWritingExerciseRepository,
         private aiService: AIService
     ) { }
 
-    async startAttempt(userId: string, exerciseId: string): Promise<Attempt> {
-        const exercise = await this.exerciseRepo.getById(exerciseId);
+    async startAttempt(userId: string, exerciseId: string): Promise<WritingAttempt> {
+        const exercise = await this.writingExerciseRepo.getById(exerciseId);
         if (!exercise) throw new Error("Exercise not found");
 
-        return this.attemptRepo.create({
+        return this.writingAttemptRepo.create({
             user_id: userId,
             exercise_id: exerciseId,
             state: ATTEMPT_STATES.CREATED,
@@ -25,7 +25,7 @@ export class AttemptService {
     }
 
     async submitAttempt(id: string, content: string): Promise<AIUsageMetadata | undefined> {
-        const attempt = await this.attemptRepo.getById(id);
+        const attempt = await this.writingAttemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
         if (attempt.state === ATTEMPT_STATES.EVALUATED) {
             return; // Idempotent: already done
@@ -39,7 +39,7 @@ export class AttemptService {
             throw new Error(`Invalid attempt state: ${attempt.state}`);
         }
 
-        await this.attemptRepo.update(id, {
+        await this.writingAttemptRepo.update(id, {
             content,
             state: ATTEMPT_STATES.SUBMITTED,
             submitted_at: new Date().toISOString()
@@ -49,10 +49,10 @@ export class AttemptService {
     }
 
     private async evaluateAttempt(id: string): Promise<AIUsageMetadata | undefined> {
-        const attempt = await this.attemptRepo.getById(id);
+        const attempt = await this.writingAttemptRepo.getById(id);
         if (!attempt || attempt.state !== ATTEMPT_STATES.SUBMITTED) return;
 
-        const exercise = await this.exerciseRepo.getById(attempt.exercise_id);
+        const exercise = await this.writingExerciseRepo.getById(attempt.exercise_id);
         if (!exercise) throw new Error("Exercise not found for attempt");
 
         let feedback;
@@ -76,7 +76,7 @@ export class AttemptService {
             usage = result.usage;
         }
 
-        await this.attemptRepo.update(id, {
+        await this.writingAttemptRepo.update(id, {
             state: ATTEMPT_STATES.EVALUATED,
             score,
             feedback,
@@ -102,23 +102,23 @@ export class AttemptService {
                 }
             );
         } catch (err) {
-            console.error("[AttemptService] Failed to send evaluation notification:", err);
+            console.error("[WritingAttemptService] Failed to send evaluation notification:", err);
         }
 
         return usage;
     }
 
-    async updateAttempt(id: string, data: Partial<Attempt>): Promise<void> {
-        await this.attemptRepo.update(id, data);
+    async updateAttempt(id: string, data: Partial<WritingAttempt>): Promise<void> {
+        await this.writingAttemptRepo.update(id, data);
     }
 
     async reevaluate(id: string): Promise<{ success: boolean; reason?: string; usage?: AIUsageMetadata }> {
-        const attempt = await this.attemptRepo.getById(id);
+        const attempt = await this.writingAttemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
 
         const usage = await this.evaluateAttempt(id);
 
-        const updated = await this.attemptRepo.getById(id);
+        const updated = await this.writingAttemptRepo.getById(id);
         if (updated?.state === ATTEMPT_STATES.EVALUATED) {
             return { success: true, usage };
         }
@@ -126,16 +126,16 @@ export class AttemptService {
         return { success: false, reason: "EVALUATION_FAILED" };
     }
 
-    async getAttempt(id: string): Promise<Attempt | null> {
-        return this.attemptRepo.getById(id);
+    async getAttempt(id: string): Promise<WritingAttempt | null> {
+        return this.writingAttemptRepo.getById(id);
     }
 
-    async getUserAttempts(userId: string): Promise<Attempt[]> {
-        return this.attemptRepo.listByUserId(userId);
+    async getUserAttempts(userId: string): Promise<WritingAttempt[]> {
+        return this.writingAttemptRepo.listByUserId(userId);
     }
 
     async unlockCorrection(id: string): Promise<{ data: any; usage?: AIUsageMetadata }> {
-        const attempt = await this.attemptRepo.getById(id);
+        const attempt = await this.writingAttemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
 
         if (attempt.is_correction_unlocked && attempt.correction_data) {
@@ -144,7 +144,7 @@ export class AttemptService {
 
         const result = await this.aiService.generateCorrection(attempt.content);
 
-        await this.attemptRepo.update(id, {
+        await this.writingAttemptRepo.update(id, {
             correction_data: JSON.stringify(result.data),
             is_correction_unlocked: true
         });
@@ -153,7 +153,7 @@ export class AttemptService {
     }
 
     async generateExampleEssay(id: string, prompt: string, taskType: string, targetBand: number): Promise<{ data: any; usage?: AIUsageMetadata }> {
-        const attempt = await this.attemptRepo.getById(id);
+        const attempt = await this.writingAttemptRepo.getById(id);
         if (!attempt) throw new Error("Attempt not found");
 
         if (attempt.is_example_essay_unlocked && attempt.example_essay_data) {
@@ -162,7 +162,7 @@ export class AttemptService {
 
         const result = await this.aiService.generateExampleEssay(prompt, taskType, targetBand);
 
-        await this.attemptRepo.update(id, {
+        await this.writingAttemptRepo.update(id, {
             example_essay_data: JSON.stringify(result.data),
             is_example_essay_unlocked: true
         });

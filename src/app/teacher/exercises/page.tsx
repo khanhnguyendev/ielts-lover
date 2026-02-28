@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { Exercise } from "@/types";
+import { WritingExercise } from "@/types";
 import { Plus, Search, FileText, Mic, Eye, Edit, Trash2 } from "lucide-react";
 import { PulseLoader } from "@/components/global/pulse-loader";
 import Link from "next/link";
@@ -22,11 +22,11 @@ function TeacherExercisesContent() {
     const searchParams = useSearchParams();
     const initialSearch = searchParams.get("search") || "";
 
-    const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [exercises, setExercises] = useState<WritingExercise[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [typeFilter, setTypeFilter] = useState<string>("all");
-    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [selectedExercise, setSelectedExercise] = useState<WritingExercise | null>(null);
 
     async function fetchExercises() {
         setIsLoading(true);
@@ -64,7 +64,7 @@ function TeacherExercisesContent() {
         return matchesSearch && matchesType;
     });
 
-    const columns: DataTableColumn<Exercise>[] = [
+    const columns: DataTableColumn<WritingExercise>[] = [
         {
             key: "info",
             header: "Exercise Information",

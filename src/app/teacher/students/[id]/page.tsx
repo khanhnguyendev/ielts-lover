@@ -90,8 +90,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                                 <div key={attempt.id} className="p-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4">
                                     <div>
                                         <p className="text-sm font-black text-slate-900 mb-1">
-                                            {attempt.exercises?.type
-                                                ? attempt.exercises.type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
+                                            {attempt.writing_exercises?.type
+                                                ? attempt.writing_exercises.type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
                                                 : "Exercise"}
                                         </p>
                                         <p className="text-[11px] font-medium text-slate-400">

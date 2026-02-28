@@ -1,11 +1,11 @@
 "use server";
 
 import { ATTEMPT_STATES, FEATURE_KEYS, APP_ERROR_CODES, SKILL_TYPES, ERROR_CATEGORIES, SkillType } from "@/lib/constants";
-import { ExerciseRepository } from "@/repositories/exercise.repository";
+import { WritingExerciseRepository } from "@/repositories/writing-exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
-import { AttemptRepository } from "@/repositories/attempt.repository";
-import { ExerciseService } from "@/services/exercise.service";
-import { AttemptService } from "@/services/attempt.service";
+import { WritingAttemptRepository } from "@/repositories/writing-attempt.repository";
+import { WritingExerciseService } from "@/services/writing-exercise.service";
+import { WritingAttemptService } from "@/services/writing-attempt.service";
 import { AIService } from "@/services/ai.service";
 import { ExerciseType, UserProfile } from "@/types";
 import { createServerSupabaseClient, createServiceSupabaseClient } from "@/lib/supabase/server";
@@ -73,15 +73,15 @@ function findContainingSentence(fullText: string | null | undefined, substring: 
 }
 
 // Dependencies Injection
-const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
+const exerciseRepo = traceService(new WritingExerciseRepository(), "WritingExerciseRepository");
 const userRepo = traceService(new UserRepository(), "UserRepository");
-const attemptRepo = traceService(new AttemptRepository(), "AttemptRepository");
+const attemptRepo = traceService(new WritingAttemptRepository(), "WritingAttemptRepository");
 const lessonRepo = traceService(new LessonRepository(), "LessonRepository");
 const _aiService = new AIService();
 const aiService = traceService(_aiService, "AIService");
 
-const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
-const attemptService = traceService(new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService), "AttemptService");
+const exerciseService = traceService(new WritingExerciseService(exerciseRepo), "WritingExerciseService");
+const attemptService = traceService(new WritingAttemptService(attemptRepo, userRepo, exerciseRepo, aiService), "WritingAttemptService");
 const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
 
 // AI Cost Accounting

@@ -1,9 +1,9 @@
 import { inngest } from "../client";
-import { AttemptRepository } from "@/repositories/attempt.repository";
-import { ExerciseRepository } from "@/repositories/exercise.repository";
+import { WritingAttemptRepository } from "@/repositories/writing-attempt.repository";
+import { WritingExerciseRepository } from "@/repositories/writing-exercise.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { AIService } from "@/services/ai.service";
-import { AttemptService } from "@/services/attempt.service";
+import { WritingAttemptService } from "@/services/writing-attempt.service";
 import { AICostService } from "@/services/ai-cost.service";
 import { AIUsageRepository } from "@/repositories/ai-usage.repository";
 import { CreditService } from "@/services/credit.service";
@@ -26,11 +26,11 @@ export const evaluateAttemptBackground = inngest.createFunction(
         const { attemptId, userId, featureKey, traceId } = event.data;
 
         // Initialize services (each invocation is isolated)
-        const attemptRepo = traceService(new AttemptRepository(), "AttemptRepository");
-        const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
+        const attemptRepo = traceService(new WritingAttemptRepository(), "WritingAttemptRepository");
+        const exerciseRepo = traceService(new WritingExerciseRepository(), "WritingExerciseRepository");
         const userRepo = traceService(new UserRepository(), "UserRepository");
         const aiService = traceService(new AIService(), "AIService");
-        const attemptService = new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService);
+        const attemptService = new WritingAttemptService(attemptRepo, userRepo, exerciseRepo, aiService);
 
         // Step 1: Run AI evaluation
         const usage = await step.run("ai-evaluation", async () => {

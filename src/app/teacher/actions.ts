@@ -5,19 +5,19 @@ import { AdminPolicy } from "@/services/admin.policy";
 import { TeacherService } from "@/services/teacher.service";
 import { TeacherStudentRepository } from "@/repositories/teacher-student.repository";
 import { CreditRequestRepository } from "@/repositories/credit-request.repository";
-import { AttemptRepository } from "@/repositories/attempt.repository";
+import { WritingAttemptRepository } from "@/repositories/writing-attempt.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { CreditTransactionRepository } from "@/repositories/transaction.repository";
 import { FeaturePricingRepository } from "@/repositories/pricing.repository";
 import { SystemSettingsRepository } from "@/repositories/system-settings.repository";
 import { CreditService } from "@/services/credit.service";
-import { ExerciseRepository } from "@/repositories/exercise.repository";
-import { ExerciseService } from "@/services/exercise.service";
+import { WritingExerciseRepository } from "@/repositories/writing-exercise.repository";
+import { WritingExerciseService } from "@/services/writing-exercise.service";
 import { AIService } from "@/services/ai.service";
 import { StorageService } from "@/services/storage.service";
 import { traceService, traceAction } from "@/lib/aop";
 import { revalidatePath } from "next/cache";
-import { Exercise } from "@/types";
+import { WritingExercise } from "@/types";
 import { FEATURE_KEYS, APP_ERROR_CODES, AI_METHODS, NOTIFICATION_TYPES, NOTIFICATION_ENTITY_TYPES } from "@/lib/constants";
 import { notificationService } from "@/lib/notification-client";
 import { AICostService } from "@/services/ai-cost.service";
@@ -26,14 +26,14 @@ import { Logger } from "@/lib/logger";
 
 const teacherStudentRepo = traceService(new TeacherStudentRepository(), "TeacherStudentRepository");
 const creditRequestRepo = traceService(new CreditRequestRepository(), "CreditRequestRepository");
-const attemptRepo = traceService(new AttemptRepository(), "AttemptRepository");
+const attemptRepo = traceService(new WritingAttemptRepository(), "WritingAttemptRepository");
 const userRepo = traceService(new UserRepository(), "UserRepository");
 const transactionRepo = traceService(new CreditTransactionRepository(), "CreditTransactionRepository");
 const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricingRepository");
 const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
 const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
-const exerciseRepo = traceService(new ExerciseRepository(), "ExerciseRepository");
-const exerciseService = traceService(new ExerciseService(exerciseRepo), "ExerciseService");
+const exerciseRepo = traceService(new WritingExerciseRepository(), "WritingExerciseRepository");
+const exerciseService = traceService(new WritingExerciseService(exerciseRepo), "WritingExerciseService");
 const _aiService = new AIService();
 const aiService = traceService(_aiService, "AIService");
 const storageService = traceService(new StorageService(), "StorageService");
@@ -106,7 +106,7 @@ export async function getTeacherStats() {
 
 // ── Exercise Management ──
 
-export const createTeacherExercise = traceAction("createTeacherExercise", async (exercise: Omit<Exercise, "id" | "created_at" | "version">) => {
+export const createTeacherExercise = traceAction("createTeacherExercise", async (exercise: Omit<WritingExercise, "id" | "created_at" | "version">) => {
     const user = await checkTeacher();
     const result = await exerciseService.createExerciseVersion({ ...exercise, created_by: user.id });
     revalidatePath("/teacher/exercises");

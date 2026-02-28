@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft, getFeaturePrice, getCurrentUser } from "@/app/actions"
-import { Exercise, Attempt } from "@/types"
+import { WritingExercise, WritingAttempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
@@ -43,7 +43,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
     const resolvedParams = React.use(params)
     const exerciseId = resolvedParams.type
 
-    const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const [exercise, setExercise] = React.useState<WritingExercise | null>(null)
     const [activeTab, setActiveTab] = React.useState<"question" | "editor">("question")
     const { setTitle } = useTitle()
 
@@ -54,7 +54,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
         }
         return () => setTitle(null)
     }, [exercise, setTitle])
-    const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
+    const [currentAttempt, setCurrentAttempt] = React.useState<WritingAttempt | null>(null)
     const [isGuest, setIsGuest] = React.useState(false)
     const [showAuthGate, setShowAuthGate] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(true)

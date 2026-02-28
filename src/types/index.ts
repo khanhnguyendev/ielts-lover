@@ -15,7 +15,7 @@ export type UserProfile = {
 
 export type ExerciseType = "writing_task1" | "writing_task2" | "speaking_part1" | "speaking_part2" | "speaking_part3";
 
-export type Exercise = {
+export type WritingExercise = {
     id: string;
     type: ExerciseType;
     title: string;
@@ -31,7 +31,7 @@ export type Exercise = {
 
 export type AttemptState = "CREATED" | "IN_PROGRESS" | "SUBMITTED" | "EVALUATED";
 
-export type Attempt = {
+export type WritingAttempt = {
     id: string;
     user_id: string;
     exercise_id: string;
@@ -46,7 +46,7 @@ export type Attempt = {
     is_correction_unlocked?: boolean;
     example_essay_data?: any;
     is_example_essay_unlocked?: boolean;
-    exercises?: {
+    writing_exercises?: {
         title: string;
         type: string;
     };

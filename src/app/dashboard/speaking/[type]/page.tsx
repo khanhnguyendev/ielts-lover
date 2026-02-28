@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { getExerciseById, startExerciseAttempt, submitAttempt, saveAttemptDraft } from "@/app/actions"
-import { Exercise, Attempt } from "@/types"
+import { WritingExercise, WritingAttempt } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
 import { FeedbackModal } from "@/components/dashboard/feedback-modal"
 import { useNotification } from "@/lib/contexts/notification-context"
@@ -39,7 +39,7 @@ import { useTitle } from "@/lib/contexts/title-context"
 import { AIActionButton } from "@/components/global/ai-action-button"
 
 export default function SpeakingPracticePage({ params }: { params: { type: string } }) {
-    const [exercise, setExercise] = React.useState<Exercise | null>(null)
+    const [exercise, setExercise] = React.useState<WritingExercise | null>(null)
     const { setTitle } = useTitle()
 
     React.useEffect(() => {
@@ -59,7 +59,7 @@ export default function SpeakingPracticePage({ params }: { params: { type: strin
     const [processingStep, setProcessingStep] = React.useState(0)
     const [sidebarExpanded, setSidebarExpanded] = React.useState(true)
 
-    const [currentAttempt, setCurrentAttempt] = React.useState<Attempt | null>(null)
+    const [currentAttempt, setCurrentAttempt] = React.useState<WritingAttempt | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [showFeedback, setShowFeedback] = React.useState(false)
