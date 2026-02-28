@@ -160,7 +160,7 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
                                             <Clock size={10} /> Time
                                         </div>
                                         <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                                            {new Date(detail.transaction.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(detail.transaction.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                                         </p>
                                     </div>
                                 </div>

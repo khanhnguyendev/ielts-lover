@@ -164,7 +164,7 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
                     <span className="text-[8px] font-bold text-slate-400 flex items-center gap-1">
                         {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         <span className="hidden sm:inline">{' at '}</span>
-                        <span className="hidden sm:inline">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="hidden sm:inline">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
                     </span>
                     {t.granted_by_admin && (() => {
                         let adminLabel = "Support"
@@ -262,7 +262,7 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                                 <span>{new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                 <span className="text-[8px] opacity-40">•</span>
-                                <span className="font-medium opacity-80">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                                <span className="font-medium opacity-80">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
                             </div>
                         </div>
                     </div>

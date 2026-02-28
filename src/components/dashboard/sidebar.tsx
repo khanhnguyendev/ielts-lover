@@ -37,7 +37,7 @@ const MENU_ANALYSIS = [
     { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
     { icon: BarChart3, label: "Performance", href: "/dashboard/reports" },
     { icon: Brain, label: "Improvement", href: "/dashboard/improvement" },
-    { icon: History, label: "History", href: "/dashboard/transactions" },
+    { icon: History, label: "Transactions", href: "/dashboard/transactions" },
 ]
 
 const MENU_ACCOUNT = [
