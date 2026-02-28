@@ -29,7 +29,8 @@ import {
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import Link from "next/link"
-import { getUserTransactionsPaginated } from "@/app/actions"
+import { getUserTransactionsPaginated, getTransactionDetailAction } from "@/app/actions"
+import { TransactionDetail } from "./transaction-detail"
 
 interface TransactionFeedProps {
     initialTransactions: CreditTransaction[]
@@ -213,6 +214,8 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
     const [totalCount, setTotalCount] = React.useState(totalTransactions)
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [filter, setFilter] = React.useState<string | null>(null)
+    const [selectedTxId, setSelectedTxId] = React.useState<string | null>(null)
+    const [isDetailOpen, setIsDetailOpen] = React.useState(false)
 
     const hasMore = transactions.length < totalCount
 
@@ -307,66 +310,86 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
             key: "actions",
             header: "Details",
             align: "right",
-            width: "w-[100px]",
-            render: (t) => t.attempt_id ? (
-                <Link
-                    href={`/dashboard/reports/${t.attempt_id}`}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-600 hover:text-primary dark:hover:text-primary transition-all text-[9px] font-black uppercase tracking-widest group/link border border-transparent hover:border-primary/20"
-                >
-                    Report <ChevronRight size={10} className="group-hover/link:translate-x-0.5 transition-transform" />
-                </Link>
-            ) : null
+            width: "w-[150px]",
+            render: (t) => (
+                <div className="flex items-center justify-end gap-2">
+                    <button
+                        onClick={() => {
+                            setSelectedTxId(t.id);
+                            setIsDetailOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/5 text-primary hover:bg-primary/10 transition-all text-[9px] font-black uppercase tracking-widest border border-primary/10"
+                    >
+                        Receipt
+                    </button>
+                    {t.attempt_id && (
+                        <Link
+                            href={`/dashboard/reports/${t.attempt_id}`}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-600 hover:text-primary dark:hover:text-primary transition-all text-[9px] font-black uppercase tracking-widest group/link border border-transparent hover:border-primary/20"
+                        >
+                            Report <ChevronRight size={10} className="group-hover/link:translate-x-0.5 transition-transform" />
+                        </Link>
+                    )}
+                </div>
+            )
         }
     ];
 
     return (
-        <DataTable
-            data={filteredTransactions}
-            columns={columns}
-            rowKey={(t) => t.id}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            navigation={{
-                type: "load-more",
-                onLoadMore: handleLoadMore,
-                isLoadingMore: isLoadingMore,
-                hasMore: hasMore
-            }}
-            toolbar={
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex bg-slate-100/30 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
-                        {[
-                            { value: null, label: "All Activity" },
-                            { value: "earned", label: "Earned" },
-                            { value: "spent", label: "Spent" }
-                        ].map((opt) => (
-                            <button
-                                key={String(opt.value)}
-                                onClick={() => setFilter(opt.value)}
-                                className={cn(
-                                    "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
-                                    filter === opt.value
-                                        ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-lg shadow-black/5 ring-1 ring-black/5"
-                                        : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                )}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
+        <>
+            <DataTable
+                data={filteredTransactions}
+                columns={columns}
+                rowKey={(t) => t.id}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                navigation={{
+                    type: "load-more",
+                    onLoadMore: handleLoadMore,
+                    isLoadingMore: isLoadingMore,
+                    hasMore: hasMore
+                }}
+                toolbar={
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="flex bg-slate-100/30 dark:bg-white/5 p-1 rounded-2xl border border-slate-200/60 dark:border-white/10 backdrop-blur-md">
+                            {[
+                                { value: null, label: "All Activity" },
+                                { value: "earned", label: "Earned" },
+                                { value: "spent", label: "Spent" }
+                            ].map((opt) => (
+                                <button
+                                    key={String(opt.value)}
+                                    onClick={() => setFilter(opt.value)}
+                                    className={cn(
+                                        "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                        filter === opt.value
+                                            ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-lg shadow-black/5 ring-1 ring-black/5"
+                                            : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    )}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 dark:text-slate-700">
+                                Real-time Ledger Sync
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 dark:text-slate-700">
-                            Real-time Ledger Sync
-                        </span>
-                    </div>
-                </div>
-            }
-            emptyState={{
-                icon: <History className="h-10 w-10 text-slate-200" />,
-                title: "No activity recorded",
-                description: "Your financial history is currently empty for this filter."
-            }}
-        />
+                }
+                emptyState={{
+                    icon: <History className="h-10 w-10 text-slate-200" />,
+                    title: "No activity recorded",
+                    description: "Your financial history is currently empty for this filter."
+                }}
+            />
+            <TransactionDetail
+                transactionId={selectedTxId}
+                isOpen={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
+            />
+        </>
     )
 }

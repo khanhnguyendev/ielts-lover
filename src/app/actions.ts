@@ -84,20 +84,20 @@ const exerciseService = traceService(new ExerciseService(exerciseRepo), "Exercis
 const attemptService = traceService(new AttemptService(attemptRepo, userRepo, exerciseRepo, aiService), "AttemptService");
 const lessonService = traceService(new LessonService(lessonRepo), "LessonService");
 
+// AI Cost Accounting
+const aiUsageRepo = new AIUsageRepository();
+const aiCostService = new AICostService(aiUsageRepo);
+
 // Credit Economy
 const pricingRepo = traceService(new FeaturePricingRepository(), "FeaturePricingRepository");
 const transactionRepo = traceService(new CreditTransactionRepository(), "CreditTransactionRepository");
 const settingsRepo = traceService(new SystemSettingsRepository(), "SystemSettingsRepository");
-const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo), "CreditService");
+const creditService = traceService(new CreditService(userRepo, pricingRepo, transactionRepo, settingsRepo, aiUsageRepo), "CreditService");
 
 // Mistake Bank
 const mistakeRepo = traceService(new MistakeRepository(), "MistakeRepository");
 const actionPlanRepo = traceService(new ActionPlanRepository(), "ActionPlanRepository");
 const improvementService = traceService(new ImprovementService(mistakeRepo, actionPlanRepo, creditService, _aiService), "ImprovementService");
-
-// AI Cost Accounting
-const aiUsageRepo = new AIUsageRepository();
-const aiCostService = new AICostService(aiUsageRepo);
 
 function recordAICost(usage: AIUsageMetadata | undefined, userId: string | null, featureKey: string, aiMethod: string, creditsCharged: number, traceId?: string) {
     if (!usage) return;
@@ -389,6 +389,21 @@ export async function getUserTransactionStats() {
     const user = await getCurrentUser();
     if (!user) return { totalEarned: 0, totalSpent: 0 };
     return transactionRepo.getStatsByUserId(user.id);
+}
+
+export async function getTransactionDetailAction(transactionId: string) {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const detail = await creditService.getTransactionDetail(transactionId);
+    if (!detail) return null;
+
+    // Security check: only owner or admin can see details
+    if (detail.transaction.user_id !== user.id && user.role !== 'admin') {
+        throw new Error("Unauthorized access to transaction record");
+    }
+
+    return detail;
 }
 
 export async function getLessons() {

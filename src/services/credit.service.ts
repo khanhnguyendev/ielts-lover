@@ -1,6 +1,6 @@
 import { TRANSACTION_TYPES, TransactionType, FEATURE_KEYS, DEFAULT_QUOTAS } from "@/lib/constants";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
-import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository } from "../repositories/interfaces";
+import { IUserRepository, IFeaturePricingRepository, ICreditTransactionRepository, ISystemSettingsRepository, IAIUsageRepository, ActivityDetail } from "../repositories/interfaces";
 
 export class InsufficientFundsError extends Error {
     constructor(message: string) {
@@ -21,7 +21,8 @@ export class CreditService {
         private userRepo: IUserRepository,
         private pricingRepo: IFeaturePricingRepository,
         private transactionRepo: ICreditTransactionRepository,
-        private settingsRepo: ISystemSettingsRepository
+        private settingsRepo: ISystemSettingsRepository,
+        private aiUsageRepo: IAIUsageRepository
     ) { }
 
     /**
@@ -263,5 +264,40 @@ export class CreditService {
 
     async getTransactions(userId: string) {
         return this.transactionRepo.listByUserId(userId);
+    }
+
+    /**
+     * Fetches full details for a transaction, including linked AI usage if applicable.
+     */
+    async getTransactionDetail(transactionId: string): Promise<ActivityDetail | null> {
+        const transaction = await this.transactionRepo.getById(transactionId);
+        if (!transaction) return null;
+
+        const user = await this.userRepo.getById(transaction.user_id);
+
+        let aiUsage = null;
+        if (transaction.trace_id && transaction.feature_key) {
+            aiUsage = await this.aiUsageRepo.findByCorrelation(
+                transaction.user_id,
+                transaction.feature_key,
+                transaction.created_at,
+                10, // 10s window fallback
+                transaction.trace_id
+            );
+        }
+
+        return {
+            transaction,
+            user: user ? {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                avatar_url: user.avatar_url,
+                role: user.role || 'user',
+                credits_balance: user.credits_balance,
+                created_at: user.created_at
+            } : null,
+            aiUsage
+        };
     }
 }

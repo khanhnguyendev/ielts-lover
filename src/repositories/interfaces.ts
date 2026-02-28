@@ -210,7 +210,7 @@ export type AICostSummary = {
 
 export interface IAIUsageRepository {
     logUsage(data: Omit<AIUsageLog, 'id' | 'created_at'>): Promise<AIUsageLog>;
-    findByCorrelation(userId: string, featureKey: string, timestamp: string, windowSeconds?: number): Promise<AIUsageLog | null>;
+    findByCorrelation(userId: string, featureKey: string, timestamp: string, windowSeconds?: number, traceId?: string): Promise<AIUsageLog | null>;
     getModelPricing(modelName: string): Promise<AIModelPricing | null>;
     listModelPricing(): Promise<AIModelPricing[]>;
     updateModelPricing(id: string, data: Partial<Pick<AIModelPricing, 'input_price_per_million' | 'output_price_per_million' | 'is_active'>>): Promise<void>;
