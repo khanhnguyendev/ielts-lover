@@ -28,6 +28,9 @@
     - `formatTime(date)`
     - `formatDateTime(date)`
   - **Credits**: **ALWAYS** use `formatCredits(amount)` from `@/lib/utils` for displaying balances. This ensures compact notation (e.g., `1.5k`).
+  - **Credit Components (REUSE)**:
+    - **Header/Balance View**: Use `<StarsBalance balance={amount} />` for top-level credit displays. It includes automatic sync and update animations.
+    - **Transaction/In-line View**: Use `<CreditBadge amount={amount} size="sm|md|lg" />` for displaying transaction costs or rewards.
 
 - **Zustand**: Only for ephemeral UI state (sidebar toggles, active practice state).
 
