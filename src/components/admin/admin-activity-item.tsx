@@ -89,20 +89,20 @@ export function AdminActivityItem({ transaction: t }: AdminActivityItemProps) {
     const isPositive = t.amount > 0
 
     return (
-        <div className="group flex items-center gap-4 py-4 px-4 hover:bg-slate-50 transition-all border-b border-slate-50 last:border-0 relative">
+        <div className="group flex items-center gap-4 py-4 px-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all border-b border-slate-50 dark:border-white/5 last:border-0 relative">
             {/* User Avatar & Info */}
             <div className="flex items-center gap-3 min-w-[200px] max-w-[240px]">
-                <Avatar className="w-8 h-8 border border-slate-100 shadow-sm">
+                <Avatar className="w-8 h-8 border border-slate-100 dark:border-white/10 shadow-sm transition-transform duration-300 group-hover:scale-105">
                     <AvatarImage src={t.user_avatar_url} alt={t.user_full_name || "User"} />
                     <AvatarFallback className="bg-primary/10 text-primary font-black text-[10px]">
                         {getInitials(t)}
                     </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-black text-slate-900 truncate">
+                    <span className="text-xs font-black text-slate-900 dark:text-white truncate">
                         {t.user_full_name || (t.user_email ? t.user_email.split("@")[0] : "Unknown User")}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium truncate">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate">
                         {t.user_email || "No email available"}
                     </span>
                 </div>
@@ -111,19 +111,19 @@ export function AdminActivityItem({ transaction: t }: AdminActivityItemProps) {
             {/* Feature Label & Activity */}
             <div className="flex-1 min-w-0 flex items-center gap-3">
                 <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
-                    config.bg, config.color
+                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-transparent transition-all duration-300 group-hover:border-current/20 group-hover:shadow-md",
+                    config.bg, config.color, "dark:bg-white/5"
                 )}>
                     <config.icon size={14} />
                 </div>
                 <div className="min-w-0">
                     <span className={cn(
-                        "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md inline-block mb-0.5",
-                        config.bg, config.color
+                        "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md inline-block mb-0.5 border border-current/10",
+                        config.bg, config.color, "dark:bg-white/5"
                     )}>
                         {config.label}
                     </span>
-                    <p className="text-xs font-bold text-slate-700 truncate capitalize">
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate capitalize">
                         {formatDesc(t.description)}
                     </p>
                 </div>
@@ -145,11 +145,11 @@ export function AdminActivityItem({ transaction: t }: AdminActivityItemProps) {
                 </div>
 
                 <div className="flex flex-col items-end min-w-[70px]">
-                    <div className="flex items-center gap-1 text-xs font-bold text-slate-600">
+                    <div className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400">
                         <Clock size={12} className="opacity-40" />
                         {new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </div>
-                    <span className="text-[10px] font-medium text-slate-400">
+                    <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600">
                         {new Date(t.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
                     </span>
                 </div>
@@ -157,7 +157,7 @@ export function AdminActivityItem({ transaction: t }: AdminActivityItemProps) {
                 {/* Direct Action */}
                 <Link
                     href={`/admin/activity/${t.id}`}
-                    className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:border-primary/30 hover:text-primary transition-all bg-white"
+                    className="w-8 h-8 rounded-full border border-slate-100 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-slate-600 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-all bg-white dark:bg-slate-900 shadow-sm hover:shadow-primary/10"
                 >
                     <ArrowRight size={14} />
                 </Link>

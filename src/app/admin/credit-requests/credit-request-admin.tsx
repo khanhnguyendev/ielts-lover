@@ -4,6 +4,8 @@ import { useState } from "react"
 import { CreditRequest } from "@/types"
 import { CREDIT_REQUEST_STATUS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { approveCreditRequest, rejectCreditRequest } from "../actions"
 import { Check, X, Search, Filter, History, User } from "lucide-react"
 import { DataTable, DataTableColumn } from "@/components/ui/data-table"
@@ -214,7 +216,5 @@ export function CreditRequestAdmin({ requests }: { requests: CreditRequest[] }) 
                 description: "There are no pending or history requests matching this filter."
             }}
         />
-    )
-}
     )
 }

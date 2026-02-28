@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Plus, Edit, Trash2, Video, Search, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Lesson } from "@/repositories/interfaces";
+import { Lesson } from "@/types/lesson";
 import { cn } from "@/lib/utils";
 
 export default function AdminLessonsPage() {
