@@ -93,6 +93,7 @@
   /* 20px - Condensed */
   --section-gap: 2rem;
   /* 32px */
+  --sidebar-width: 240px;
 }
 
 .dark {
@@ -227,4 +228,78 @@
 
 .animate-logo-fade {
   animation: logoFade 0.8s ease-out forwards;
+}
+
+/* Medium Screens / Small Laptops (1024px – 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  :root {
+    --container-px: 1.5rem !important;
+    --container-py: 1.5rem !important;
+    --card-p: 1rem !important;
+    --section-gap: 1.25rem !important;
+    --sidebar-width: 200px !important;
+  }
+
+  /* Font Scaling */
+  body {
+    font-size: 0.8125rem !important;
+    /* ~13px */
+  }
+
+  h1 {
+    font-size: 1.25rem !important;
+    /* 20px */
+  }
+
+  h2 {
+    font-size: 1.125rem !important;
+    /* 18px */
+  }
+
+  h3 {
+    font-size: 1rem !important;
+    /* 16px */
+  }
+
+  h4 {
+    font-size: 0.875rem !important;
+    /* 14px */
+  }
+
+  /* Tighten specific component spacing via globals if they use utility classes */
+  .px-6.py-5 {
+    padding: 0.75rem 1.25rem !important;
+  }
+
+  .py-5 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .px-8.py-5 {
+    padding: 0.75rem 1.25rem !important;
+  }
+
+  /* Sidebar Width Override */
+  aside.fixed.inset-y-0 {
+    width: var(--sidebar-width) !important;
+  }
+
+  /* Tighten spacing for cards and tables */
+  .space-y-6> :not([hidden])~ :not([hidden]) {
+    margin-top: 1rem !important;
+  }
+
+  .gap-6 {
+    gap: 1rem !important;
+  }
+
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
+
+  /* Stat cards and grid density */
+  .p-6 {
+    padding: 1rem !important;
+  }
 }

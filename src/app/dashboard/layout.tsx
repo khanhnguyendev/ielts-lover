@@ -53,7 +53,7 @@ export default async function DashboardLayout({
                                 )}
                             </div>
                         </header>
-                        <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 h-[calc(100vh-56px)]">
+                        <div className="flex-1 overflow-y-auto relative z-10">
                             <div className="max-w-[1600px] mx-auto min-h-full flex flex-col">
                                 {children}
                             </div>

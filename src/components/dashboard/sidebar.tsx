@@ -82,9 +82,12 @@ export function DashboardSidebar() {
             <motion.aside
                 initial={false}
                 animate={{
-                    width: isCollapsed ? 64 : 240,
                     x: isMobileOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -300 : 0)
                 }}
+                style={{
+                    width: isCollapsed ? '64px' : 'var(--sidebar-width)'
+                } as any}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={cn(
                     "fixed inset-y-0 left-0 lg:relative z-[45] h-screen bg-white dark:bg-slate-950 border-r border-slate-200/50 dark:border-white/10 flex flex-col transition-all duration-500 ease-in-out",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"

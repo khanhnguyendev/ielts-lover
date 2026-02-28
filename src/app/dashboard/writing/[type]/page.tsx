@@ -287,7 +287,7 @@ export default function WritingExercisePage({ params }: { params: Promise<{ type
 
 
     return (
-        <div className="flex flex-col lg:flex-row h-screen lg:h-[calc(100vh-64px)] overflow-hidden bg-[#F9FAFB] select-none relative pt-[56px] lg:pt-0">
+        <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-[#F9FAFB] select-none relative">
             {/* Background blobs for premium feel */}
             <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
