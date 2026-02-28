@@ -5,34 +5,34 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3.5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3.5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 border border-primary/10",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 border border-destructive/10",
         outline:
-          "border-2 bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-2 border-slate-200 bg-transparent shadow-sm hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:hover:bg-slate-800",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-md",
+          "bg-slate-100 text-slate-900 hover:bg-slate-200 shadow-sm border border-slate-200/50",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:bg-primary/5 hover:text-primary transition-colors",
         link: "text-primary underline-offset-4 hover:underline",
-        cta: "bg-primary text-white font-black text-sm h-12 px-8 rounded-lg shadow-xl shadow-primary/30 hover:scale-105 hover:bg-primary/95 transition-all",
-        soft: "bg-primary/10 text-primary hover:bg-primary/20 transition-colors border-none shadow-none",
-        white: "bg-white text-primary hover:bg-slate-50 shadow-lg font-bold",
+        cta: "bg-primary text-white font-black text-sm h-14 px-10 rounded-[1.25rem] shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all",
+        soft: "bg-primary/10 text-primary hover:bg-primary/15 transition-colors border-none shadow-none",
+        white: "bg-white text-primary hover:bg-slate-50 shadow-xl shadow-black/5 font-black border border-slate-100",
       },
       size: {
-        default: "h-9 px-4 has-[>svg]:px-3",
-        xs: "h-7 gap-1 rounded-sm px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-11 rounded-lg px-6 text-base has-[>svg]:px-5",
-        xl: "h-14 rounded-xl px-10 text-lg has-[>svg]:px-8",
-        icon: "size-9 rounded-md",
-        "icon-xs": "size-7 rounded-sm [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8 rounded-md",
-        "icon-lg": "size-11 rounded-lg",
+        default: "h-11 px-5 has-[>svg]:px-4",
+        xs: "h-7 gap-1 rounded-lg px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-9 rounded-xl gap-1.5 px-3 has-[>svg]:px-2.5",
+        lg: "h-13 rounded-2xl px-8 text-base has-[>svg]:px-6",
+        xl: "h-16 rounded-[1.5rem] px-12 text-lg has-[>svg]:px-10",
+        icon: "size-11 rounded-2xl",
+        "icon-xs": "size-7 rounded-lg [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-9 rounded-xl",
+        "icon-lg": "size-13 rounded-2xl",
       },
     },
     defaultVariants: {
