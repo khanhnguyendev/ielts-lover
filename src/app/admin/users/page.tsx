@@ -602,56 +602,72 @@ export default function UsersPage() {
                         ) : userAttempts.length === 0 ? (
                             <div className="py-20 text-center text-slate-400 font-bold">No attempts found for this user.</div>
                         ) : (
-                            <div className="rounded-xl border border-slate-100 overflow-hidden">
-                                <Table>
-                                    <TableHeader className="bg-slate-50/50">
-                                        <TableRow className="hover:bg-transparent border-slate-100">
-                                            <TableHead className="text-[10px] font-black uppercase tracking-widest pl-4">Exercise</TableHead>
-                                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Status</TableHead>
-                                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Score</TableHead>
-                                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-center">Date</TableHead>
-                                            <TableHead className="text-right pr-4 text-[10px] font-black uppercase tracking-widest">Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {userAttempts.map((attempt) => (
-                                            <TableRow key={attempt.id} className="hover:bg-slate-50/50 border-slate-50">
-                                                <TableCell className="pl-4 py-3">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-bold text-slate-900 leading-none">
-                                                            {attempt.exercises?.type?.startsWith('writing') ? 'Writing Task' : 'Speaking Task'}
-                                                        </span>
-                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">
-                                                            ID: {attempt.exercise_id?.substring(0, 8)}
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <Badge className={cn(
-                                                        "rounded-full text-[9px] font-black uppercase tracking-widest",
-                                                        attempt.state === ATTEMPT_STATES.EVALUATED ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
-                                                    )}>
-                                                        {attempt.state}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-center font-black text-slate-900 font-mono">
-                                                    {attempt.score || "-"}
-                                                </TableCell>
-                                                <TableCell className="text-center text-xs font-bold text-slate-500">
-                                                    {new Date(attempt.created_at).toLocaleDateString()}
-                                                </TableCell>
-                                                <TableCell className="text-right pr-4">
-                                                    <Link href={`/dashboard/reports/${attempt.id}`} target="_blank">
-                                                        <Button variant="ghost" size="sm" className="h-8 px-3 rounded-lg font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5">
-                                                            View
-                                                        </Button>
-                                                    </Link>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            <DataTable
+                                data={userAttempts}
+                                rowKey={(a) => a.id}
+                                pageSize={5}
+                                columns={[
+                                    {
+                                        key: "exercise",
+                                        header: "Exercise",
+                                        render: (attempt) => (
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-900 leading-none">
+                                                    {attempt.exercises?.type?.startsWith('writing') ? 'Writing Task' : 'Speaking Task'}
+                                                </span>
+                                                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">
+                                                    ID: {attempt.exercise_id?.substring(0, 8)}
+                                                </span>
+                                            </div>
+                                        )
+                                    },
+                                    {
+                                        key: "status",
+                                        header: "Status",
+                                        align: "center",
+                                        render: (attempt) => (
+                                            <Badge className={cn(
+                                                "rounded-full text-[9px] font-black uppercase tracking-widest",
+                                                attempt.state === ATTEMPT_STATES.EVALUATED ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-slate-100 text-slate-600 hover:bg-slate-100"
+                                            )}>
+                                                {attempt.state}
+                                            </Badge>
+                                        )
+                                    },
+                                    {
+                                        key: "score",
+                                        header: "Score",
+                                        align: "center",
+                                        render: (attempt) => (
+                                            <span className="font-black text-slate-900 font-mono italic">
+                                                {attempt.score || "-"}
+                                            </span>
+                                        )
+                                    },
+                                    {
+                                        key: "date",
+                                        header: "Date",
+                                        align: "center",
+                                        render: (attempt) => (
+                                            <span className="text-xs font-bold text-slate-500">
+                                                {new Date(attempt.created_at).toLocaleDateString()}
+                                            </span>
+                                        )
+                                    },
+                                    {
+                                        key: "action",
+                                        header: "Action",
+                                        align: "right",
+                                        render: (attempt) => (
+                                            <Link href={`/dashboard/reports/${attempt.id}`} target="_blank">
+                                                <Button variant="ghost" size="sm" className="h-8 px-3 rounded-lg font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5">
+                                                    View
+                                                </Button>
+                                            </Link>
+                                        )
+                                    }
+                                ]}
+                            />
                         )}
                     </div>
                 </DialogContent>
