@@ -56,12 +56,12 @@ export function StatCard({
                     </div>
                 )}
             </div>
-            <div className="space-y-1.5 px-0.5">
+            <div className="space-y-1 px-1">
                 {trend && (
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">{label}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors mb-1">{label}</p>
                 )}
-                <div className="text-4xl font-black font-outfit text-slate-900 dark:text-white tracking-tighter leading-none">{value}</div>
-                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight pt-1">{subLabel}</div>
+                <div className="text-4xl lg:text-5xl font-black font-outfit text-slate-900 dark:text-white tracking-tighter leading-none">{value}</div>
+                <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight pt-2">{subLabel}</div>
             </div>
         </motion.div>
     )

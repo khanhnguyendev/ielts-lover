@@ -164,6 +164,37 @@ export const CHART_TYPES = {
 
 export type ChartType = typeof CHART_TYPES[keyof typeof CHART_TYPES];
 
+export const DESIGN_SYSTEM = {
+    COLORS: {
+        PRIMARY: { text: "text-primary", bg: "bg-primary/10", glow: "bg-primary/10" },
+        VIOLET: { text: "text-violet-600 dark:text-violet-400", bg: "bg-violet-100/50", glow: "bg-violet-400/10" },
+        EMERALD: { text: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100/50", glow: "bg-emerald-400/10" },
+        ROSE: { text: "text-rose-500 dark:text-rose-400", bg: "bg-rose-100/50", glow: "bg-rose-400/10" },
+        AMBER: { text: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100/50", glow: "bg-amber-400/10" },
+        SKY: { text: "text-sky-600 dark:text-sky-400", bg: "bg-sky-100/50", glow: "bg-sky-400/10" },
+        INDIGO: { text: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-100/50", glow: "bg-indigo-400/10" },
+        PINK: { text: "text-pink-500 dark:text-pink-400", bg: "bg-pink-100/50", glow: "bg-pink-400/10" },
+        TEAL: { text: "text-teal-600 dark:text-teal-400", bg: "bg-teal-100/50", glow: "bg-teal-400/10" },
+    },
+    RADII: {
+        CARD: "rounded-[2.5rem]",
+        ITEM: "rounded-2xl",
+        INPUT: "rounded-xl",
+        BUTTON: "rounded-2xl",
+    }
+} as const;
+
+export const CHART_CONFIG_MAPPING: Record<string, typeof DESIGN_SYSTEM.COLORS[keyof typeof DESIGN_SYSTEM.COLORS]> = {
+    [CHART_TYPES.LINE_GRAPH]: DESIGN_SYSTEM.COLORS.EMERALD,
+    [CHART_TYPES.BAR_CHART]: DESIGN_SYSTEM.COLORS.VIOLET,
+    [CHART_TYPES.PIE_CHART]: DESIGN_SYSTEM.COLORS.ROSE,
+    [CHART_TYPES.TABLE]: DESIGN_SYSTEM.COLORS.SKY,
+    [CHART_TYPES.PROCESS_DIAGRAM]: DESIGN_SYSTEM.COLORS.AMBER,
+    [CHART_TYPES.MAP]: DESIGN_SYSTEM.COLORS.TEAL,
+    [CHART_TYPES.MIXED_CHART]: DESIGN_SYSTEM.COLORS.INDIGO,
+    doughnut: DESIGN_SYSTEM.COLORS.PINK,
+};
+
 /** Maps IELTS chart type labels → Chart.js type strings understood by renderers like QuickChart. */
 export const IELTS_TO_CHARTJS: Record<string, string> = {
     bar_chart: 'bar',

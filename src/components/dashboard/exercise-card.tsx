@@ -18,22 +18,23 @@ import {
     type LucideIcon
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { CHART_CONFIG_MAPPING, DESIGN_SYSTEM } from "@/lib/constants"
 
-// Maps chart type → { icon, colors } for visual distinction
-const CHART_ICON_CONFIG: Record<string, { icon: LucideIcon; color: string; glow: string }> = {
-    bar_chart: { icon: BarChart2, color: "text-violet-600 dark:text-violet-400 bg-violet-100/50", glow: "bg-violet-400/10" },
-    bar: { icon: BarChart2, color: "text-violet-600 dark:text-violet-400 bg-violet-100/50", glow: "bg-violet-400/10" },
-    line_graph: { icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400 bg-emerald-100/50", glow: "bg-emerald-400/10" },
-    line: { icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400 bg-emerald-100/50", glow: "bg-emerald-400/10" },
-    pie_chart: { icon: PieChart, color: "text-rose-500 dark:text-rose-400 bg-rose-100/50", glow: "bg-rose-400/10" },
-    pie: { icon: PieChart, color: "text-rose-500 dark:text-rose-400 bg-rose-100/50", glow: "bg-rose-400/10" },
-    doughnut: { icon: PieChart, color: "text-pink-500 dark:text-pink-400 bg-pink-100/50", glow: "bg-pink-400/10" },
-    table: { icon: Table, color: "text-sky-600 dark:text-sky-400 bg-sky-100/50", glow: "bg-sky-400/10" },
-    process_diagram: { icon: GitBranch, color: "text-amber-600 dark:text-amber-400 bg-amber-100/50", glow: "bg-amber-400/10" },
-    process: { icon: GitBranch, color: "text-amber-600 dark:text-amber-400 bg-amber-100/50", glow: "bg-amber-400/10" },
-    map: { icon: Map, color: "text-teal-600 dark:text-teal-400 bg-teal-100/50", glow: "bg-teal-400/10" },
-    mixed_chart: { icon: LayoutDashboard, color: "text-indigo-600 dark:text-indigo-400 bg-indigo-100/50", glow: "bg-indigo-400/10" },
-    mixed: { icon: LayoutDashboard, color: "text-indigo-600 dark:text-indigo-400 bg-indigo-100/50", glow: "bg-indigo-400/10" },
+// Mapping chart type to Lucide icons
+const CHART_ICON_ONLY: Record<string, LucideIcon> = {
+    line_graph: TrendingUp,
+    bar_chart: BarChart2,
+    pie_chart: PieChart,
+    table: Table,
+    process_diagram: GitBranch,
+    map: Map,
+    mixed_chart: LayoutDashboard,
+    line: TrendingUp,
+    bar: BarChart2,
+    pie: PieChart,
+    process: GitBranch,
+    mixed: LayoutDashboard,
+    doughnut: PieChart,
 }
 
 interface ExerciseCardProps {
@@ -85,17 +86,19 @@ export function ExerciseCard({
         ? dateObj!.toLocaleDateString("en-US", { month: "short", day: "numeric" })
         : createdAt ?? null
 
-    const chartConfig = chartType ? CHART_ICON_CONFIG[chartType] : undefined
-    const EffectiveIcon = chartConfig?.icon ?? Icon
-    const effectiveBg = chartConfig?.color ?? (color.includes("bg-") ? color.replace("50", "100/50") : color)
-    const effectiveColor = color.includes("text-") ? color.split(" ")[0] : "text-primary"
+    const chartConfig = chartType ? (CHART_CONFIG_MAPPING[chartType] || CHART_CONFIG_MAPPING[chartType?.replace('_chart', '')]) : undefined
+    const EffectiveIcon = chartType ? (CHART_ICON_ONLY[chartType] || CHART_ICON_ONLY[chartType?.replace('_chart', '')]) : Icon
+
+    // Fallback logic for colors
+    const effectiveBg = chartConfig?.bg ?? (color.includes("bg-") ? color.replace("50", "100/50") : color)
+    const effectiveColor = chartConfig?.text ?? (color.includes("text-") ? color.split(" ")[0] : "text-primary")
     const glowColor = chartConfig?.glow ?? "bg-primary/5"
 
     return (
         <Link href={`/dashboard/writing/${id}`} className="group block h-full">
             <motion.div
                 whileHover={{ y: -4, x: 4 }}
-                className="relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-slate-100 dark:border-slate-800/50 rounded-3xl p-5 flex items-center gap-6 transition-all duration-500 shadow-sm hover:shadow-2xl hover:border-primary/20 group-overflow-hidden"
+                className="relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-slate-100 dark:border-slate-800/50 rounded-[2rem] p-5 flex items-center gap-6 transition-all duration-500 shadow-sm hover:shadow-2xl hover:border-primary/20 group-overflow-hidden"
             >
                 {/* Background Glow */}
                 <div className={cn("absolute -right-10 -bottom-10 w-32 h-32 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000", glowColor)} />
