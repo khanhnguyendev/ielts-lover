@@ -32,6 +32,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { getUserTransactionsPaginated, getTransactionDetailAction } from "@/app/actions"
 import { TransactionDetail } from "./transaction-detail"
+import { useRouter, usePathname } from "next/navigation"
 
 interface TransactionFeedProps {
     initialTransactions: CreditTransaction[]
@@ -217,12 +218,28 @@ export function TransactionFeed({
     pageSize,
     initialSelectedTxId = null
 }: TransactionFeedProps) {
+    const router = useRouter()
+    const pathname = usePathname()
+
     const [transactions, setTransactions] = React.useState(initialTransactions)
     const [totalCount, setTotalCount] = React.useState(totalTransactions)
     const [isLoadingMore, setIsLoadingMore] = React.useState(false)
     const [filter, setFilter] = React.useState<string | null>(null)
     const [selectedTxId, setSelectedTxId] = React.useState<string | null>(initialSelectedTxId)
     const [isDetailOpen, setIsDetailOpen] = React.useState(!!initialSelectedTxId)
+
+    // Handle URL cleanup when modal closes
+    React.useEffect(() => {
+        if (!isDetailOpen && initialSelectedTxId) {
+            const params = new URLSearchParams(window.location.search)
+            if (params.has("txId")) {
+                params.delete("txId")
+                const query = params.toString()
+                const cleanUrl = `${pathname}${query ? `?${query}` : ""}`
+                router.replace(cleanUrl, { scroll: false })
+            }
+        }
+    }, [isDetailOpen, initialSelectedTxId, pathname, router])
 
     const hasMore = transactions.length < totalCount
 
@@ -375,6 +392,7 @@ export function TransactionFeed({
                 data={filteredTransactions}
                 columns={columns}
                 rowKey={(t) => t.id}
+                rowClassName={(t) => t.id === initialSelectedTxId ? "animate-row-highlight" : ""}
                 pageSize={pageSize}
                 totalCount={totalCount}
                 navigation={{

@@ -230,6 +230,32 @@
   animation: logoFade 0.8s ease-out forwards;
 }
 
+@keyframes rowHighlight {
+  0% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  10% {
+    background-color: hsla(var(--primary), 0.08);
+    border-color: hsla(var(--primary), 0.2);
+  }
+
+  90% {
+    background-color: hsla(var(--primary), 0.08);
+    border-color: hsla(var(--primary), 0.2);
+  }
+
+  100% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}
+
+.animate-row-highlight {
+  animation: rowHighlight 4s ease-in-out forwards;
+}
+
 /* Medium Screens / Small Laptops (1024px – 1439px) */
 @media (min-width: 1024px) and (max-width: 1439px) {
   :root {
