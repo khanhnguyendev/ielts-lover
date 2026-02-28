@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Loader2, ChevronRight, FileText, Activity, Target, Sparkles, Clock } from "lucide-react"
 import { Attempt } from "@/types"
@@ -32,9 +32,8 @@ export function DetailTag({ icon: Icon, label, color = "primary" }: { icon: Reac
 
 export function RecentReportCard({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
-    const dateObj = new Date(attempt.created_at);
-    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = formatDate(attempt.created_at);
+    const timeStr = formatTime(attempt.created_at);
     const isWriting = attempt.exercises?.type?.startsWith('writing');
 
     return (

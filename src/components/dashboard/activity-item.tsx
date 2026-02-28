@@ -1,7 +1,7 @@
 "use client"
 
 import { CreditTransactionWithUser } from "@/repositories/interfaces"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import {
     Clock,
@@ -124,9 +124,9 @@ export function ActivityItem({ transaction: t, showUser = false, href }: Activit
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
                     <Clock size={10} className="opacity-50" />
-                    {new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {formatDate(t.created_at, false)}
                     <span className="opacity-30">•</span>
-                    {new Date(t.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                    {formatTime(t.created_at)}
                 </div>
             </div>
         </>

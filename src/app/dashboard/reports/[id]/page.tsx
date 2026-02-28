@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button"
 import { AIActionButton } from "@/components/global/ai-action-button"
 import { Progress } from "@/components/ui/progress"
 import { BackButton } from "@/components/global/back-button"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 
 import { WritingEvaluation } from "@/components/reports/writing-evaluation"
 import { SpeakingEvaluation } from "@/components/reports/speaking-evaluation"
@@ -223,7 +223,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                                     {isSample ? (
                                         <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-amber-500" /> Reference Sample No. {id}</span>
                                     ) : (
-                                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Completed {new Date(realData!.created_at).toLocaleDateString()}</span>
+                                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Completed {formatDate(realData!.created_at)}</span>
                                     )}
                                 </div>
                             </div>

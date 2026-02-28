@@ -15,7 +15,7 @@ import { PulseLoader } from "@/components/global/pulse-loader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getTeacherExercises, deleteTeacherExercise } from "@/app/teacher/actions";
-import { cn } from "@/lib/utils";
+import { cn, formatDate, formatTime } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 
 function TeacherExercisesContent() {
@@ -154,10 +154,10 @@ function TeacherExercisesContent() {
             render: (exercise) => (
                 <div className="flex flex-col items-center gap-0.5">
                     <p className="text-xs font-bold text-slate-500">
-                        {new Date(exercise.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {formatDate(exercise.created_at)}
                     </p>
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                        {new Date(exercise.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        {formatTime(exercise.created_at)}
                     </p>
                 </div>
             )

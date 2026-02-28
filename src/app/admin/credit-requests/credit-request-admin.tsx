@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { CreditRequest } from "@/types"
 import { CREDIT_REQUEST_STATUS } from "@/lib/constants"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { approveCreditRequest, rejectCreditRequest } from "../actions"
@@ -85,7 +85,7 @@ export function CreditRequestAdmin({ requests }: { requests: CreditRequest[] }) 
                     </p>
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">
                         <History size={10} />
-                        {new Date(req.created_at).toLocaleDateString()} at {new Date(req.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}
+                        {formatDate(req.created_at)} at {formatTime(req.created_at)}
                     </div>
                 </div>
             )

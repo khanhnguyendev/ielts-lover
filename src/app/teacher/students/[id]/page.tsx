@@ -1,7 +1,7 @@
 import { getStudentProgress } from "../../actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ATTEMPT_STATES } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatDate, formatTime } from "@/lib/utils";
 import { ArrowLeft, Target, FileText, Calendar } from "lucide-react";
 import Link from "next/link";
 import { BackButton } from "@/components/global/back-button";
@@ -69,7 +69,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                         <Calendar className="h-4 w-4 text-purple-500" />
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Joined</p>
-                            <p className="text-sm font-black text-slate-900">{new Date(student.created_at).toLocaleDateString()}</p>
+                            <p className="text-sm font-black text-slate-900">{formatDate(student.created_at)}</p>
                         </div>
                     </div>
                 </div>
@@ -95,8 +95,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                                                 : "Exercise"}
                                         </p>
                                         <p className="text-[11px] font-medium text-slate-400">
-                                            {new Date(attempt.created_at).toLocaleDateString()} at{" "}
-                                            {new Date(attempt.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                            {formatDate(attempt.created_at)} at{" "}
+                                            {formatTime(attempt.created_at)}
+                                            {formatTime(attempt.created_at)}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3">

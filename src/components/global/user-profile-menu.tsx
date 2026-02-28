@@ -184,7 +184,7 @@ export function UserProfileMenu({ user }: { user: UserProfile }) {
                                 href="/dashboard/transactions"
                                 icon={CreditCard}
                                 label="Transactions"
-                                description="Billing & history"
+                                description="Billing & transactions"
                             />
                         </DropdownMenuGroup>
 

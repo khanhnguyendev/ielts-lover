@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { CreditTransaction } from "@/repositories/interfaces"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime, formatDateTime } from "@/lib/utils"
 import {
     Calendar,
     Clock,
@@ -162,9 +162,9 @@ function TransactionCard({ t }: { t: CreditTransaction }) {
                         {config.label}
                     </span>
                     <span className="text-[8px] font-bold text-slate-400 flex items-center gap-1">
-                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {formatDate(t.created_at)}
                         <span className="hidden sm:inline">{' at '}</span>
-                        <span className="hidden sm:inline">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
+                        <span className="hidden sm:inline">{formatTime(t.created_at)}</span>
                     </span>
                     {t.granted_by_admin && (() => {
                         let adminLabel = "Support"
@@ -260,9 +260,9 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                                 {config.label}
                             </span>
                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                <span>{new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                <span>{formatDate(t.created_at, false)}</span>
                                 <span className="text-[8px] opacity-40">•</span>
-                                <span className="font-medium opacity-80">{new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
+                                <span className="font-medium opacity-80">{formatTime(t.created_at)}</span>
                             </div>
                         </div>
                     </div>
@@ -409,8 +409,8 @@ export function TransactionFeed({ initialTransactions, totalTransactions, pageSi
                 }
                 emptyState={{
                     icon: <History className="h-10 w-10 text-slate-200" />,
-                    title: "No activity recorded",
-                    description: "Your financial history is currently empty for this filter."
+                    title: "No transactions found",
+                    description: "Your financial transactions are currently empty for this filter."
                 }}
             />
             <TransactionDetail

@@ -1,7 +1,7 @@
 "use client"
 
 import { CreditTransactionWithUser } from "@/repositories/interfaces"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import {
     Clock,
@@ -147,10 +147,10 @@ export function AdminActivityItem({ transaction: t }: AdminActivityItemProps) {
                 <div className="flex flex-col items-end min-w-[70px]">
                     <div className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400">
                         <Clock size={12} className="opacity-40" />
-                        {new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {formatDate(t.created_at, false)}
                     </div>
                     <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600">
-                        {new Date(t.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
+                        {formatTime(t.created_at)}
                     </span>
                 </div>
 

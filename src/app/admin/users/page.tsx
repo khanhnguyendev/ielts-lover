@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotification } from "@/lib/contexts/notification-context";
-import { cn, formatCredits } from "@/lib/utils";
+import { cn, formatCredits, formatDate, formatTime } from "@/lib/utils";
 import Link from "next/link";
 import { NOTIFY_MSGS } from "@/lib/constants/messages";
 
@@ -222,10 +222,10 @@ export default function UsersPage() {
                 return (
                     <div className="flex flex-col items-center gap-0.5">
                         <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                            {lastActive ? new Date(lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "-"}
+                            {lastActive ? formatDate(lastActive, false) : "-"}
                         </span>
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">
-                            {lastActive ? new Date(lastActive).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
+                            {lastActive ? formatTime(lastActive) : ""}
                         </span>
                     </div>
                 );
@@ -251,10 +251,10 @@ export default function UsersPage() {
             render: (user) => (
                 <div className="flex flex-col items-center gap-0.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                        {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {formatDate(user.created_at)}
                     </p>
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600">
-                        {new Date(user.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        {formatTime(user.created_at)}
                     </p>
                 </div>
             )
@@ -555,7 +555,7 @@ export default function UsersPage() {
                             <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Member Since</span>
                                 <p className="text-sm font-bold text-slate-700">
-                                    {detailsUser && new Date(detailsUser.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    {detailsUser && formatDate(detailsUser.created_at)}
                                 </p>
                             </div>
                             <div className="space-y-1">
@@ -650,7 +650,7 @@ export default function UsersPage() {
                                         align: "center",
                                         render: (attempt) => (
                                             <span className="text-xs font-bold text-slate-500">
-                                                {new Date(attempt.created_at).toLocaleDateString()}
+                                                {formatDate(attempt.created_at)}
                                             </span>
                                         )
                                     },

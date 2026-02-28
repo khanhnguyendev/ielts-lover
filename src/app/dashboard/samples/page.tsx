@@ -13,7 +13,7 @@ import {
     Clock
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 
 interface Sample {
     id: number;
@@ -147,7 +147,7 @@ function SampleCard({ sample }: { sample: Sample }) {
             <div className="flex items-center justify-between pt-6 border-t border-slate-50 mt-auto">
                 <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     <Clock size={12} className="opacity-60" />
-                    {new Date(sample.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {formatDate(sample.date, false)}
                 </div>
                 <Link href={`/dashboard/reports/${sample.id}`}>
                     <Button variant="ghost" size="sm" className="h-9 rounded-xl font-black uppercase tracking-widest text-[10px] text-slate-400 hover:text-primary hover:bg-primary/5 px-4">

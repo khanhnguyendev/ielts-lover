@@ -1,7 +1,7 @@
 "use client"
 
 import { ActivityDetail } from "@/repositories/interfaces"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import {
     User, Clock, CreditCard, Cpu, Zap, Timer,
@@ -142,7 +142,7 @@ export function ActivityDetailView({ detail }: ActivityDetailViewProps) {
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-outfit">
                             {mounted ? (
                                 <>
-                                    {new Date(t.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatDate(t.created_at, false)} • {formatTime(t.created_at)}
                                 </>
                             ) : (
                                 <span className="animate-pulse">Loading...</span>

@@ -24,7 +24,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { cn, formatCredits } from "@/lib/utils"
+import { cn, formatCredits, formatDate } from "@/lib/utils"
 
 import { getCurrentUser, getRecentActivity } from "@/app/actions"
 import { UserProfile } from "@/types"
@@ -108,8 +108,8 @@ export default function DashboardPage() {
                         index={2}
                         icon={Calendar}
                         label="Exam Date"
-                        value={user?.exam_date ? new Date(user.exam_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "Not Set"}
-                        subLabel={user?.exam_date ? new Date(user.exam_date).getFullYear().toString() : "Set target date"}
+                        value={user?.exam_date ? formatDate(user.exam_date, false) : "Not Set"}
+                        subLabel={user?.exam_date ? formatDate(user.exam_date, true).split(', ')[1] : "Set target date"}
                         color="text-sky-500"
                         bgColor="bg-sky-100/50"
                         href="/dashboard/settings"
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
                                 <Link href="/dashboard/transactions" className="group/link flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary transition-all hover:translate-x-1">
-                                    View Full History <ArrowRight size={14} />
+                                    View Full Transactions <ArrowRight size={14} />
                                 </Link>
                             </div>
 

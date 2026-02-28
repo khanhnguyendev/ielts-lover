@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { getAdminAttempts } from "../actions";
 import { PulseLoader } from "@/components/global/pulse-loader";
-import { cn } from "@/lib/utils";
+import { cn, formatDate, formatTime } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -133,10 +133,10 @@ export default function AdminAttemptsPage() {
             render: (attempt) => (
                 <div className="flex flex-col items-center">
                     <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {new Date(attempt.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {formatDate(attempt.created_at)}
                     </p>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-0.5">
-                        {new Date(attempt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(attempt.created_at)}
                     </p>
                 </div>
             )

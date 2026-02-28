@@ -40,7 +40,7 @@ import {
     Cell
 } from 'recharts'
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 
 import { getUserAttemptsPaginated, getMostRecentAttempt, reevaluateAttempt } from "@/app/actions";
 import { useNotification } from "@/lib/contexts/notification-context";
@@ -171,7 +171,7 @@ export default function ReportsPage() {
             .slice(0, 10)
             .reverse()
             .map(a => ({
-                date: new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                date: formatDate(a.created_at, false),
                 score: a.score
             }))
     }, [attempts])
@@ -572,9 +572,8 @@ function FilterGroup({ label, options, value, onChange }: FilterGroupProps) {
 function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep }: ReportComponentProps) {
     const config = getBandScoreConfig(attempt.score);
     const isWriting = attempt.exercises?.type?.startsWith('writing');
-    const dateObj = new Date(attempt.created_at);
-    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = formatDate(attempt.created_at, false);
+    const timeStr = formatTime(attempt.created_at);
 
     return (
         <div className="group bg-white/50 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/50 rounded-3xl p-5 flex items-center gap-6 transition-all duration-500 hover:shadow-2xl hover:bg-white dark:hover:bg-slate-800/80 hover:border-primary/20 group relative overflow-hidden">
@@ -595,7 +594,7 @@ function HistoricalReportRow({ attempt, onReevaluate, reevaluatingId, reevalStep
                     </span>
                     <span className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                         <Clock size={10} className="text-slate-300" />
-                        {dateStr} · {timeStr}
+                        {dateStr} • {timeStr}
                     </span>
                 </div>
                 <h4 className="text-base font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors leading-tight">

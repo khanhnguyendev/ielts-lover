@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { CreditBadge } from "@/components/ui/credit-badge"
 import { useNotification } from "@/lib/contexts/notification-context"
 import { extractBillingError } from "@/lib/billing-errors"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import {
     Sparkles,
     Brain,
@@ -519,9 +519,9 @@ function MistakeRow({ mistake: m }: { mistake: UserMistake }) {
                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{isWriting ? "Writing Lab" : "Speaking Lab"}</span>
                         </div>
                         <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
-                            {new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {formatDate(m.created_at, false)}
                             <div className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-1" />
-                            {new Date(m.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                            {formatTime(m.created_at)}
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { CreditTransaction } from "@/repositories/interfaces"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import { TRANSACTION_TYPES } from "@/lib/constants"
 import {
     Calendar,
@@ -88,11 +88,11 @@ const columns: DataTableColumn<CreditTransaction>[] = [
             <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-1 text-[11px] font-black text-slate-900">
                     <Calendar className="h-3 w-3 text-slate-400" />
-                    {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {formatDate(t.created_at)}
                 </div>
                 <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
                     <Clock className="h-3 w-3" />
-                    {new Date(t.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    {formatTime(t.created_at)}
                 </div>
             </div>
         )
@@ -215,7 +215,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 emptyState={{
                     icon: <CreditCard className="h-6 w-6 text-slate-300" />,
                     title: "No transactions found",
-                    description: "No credit history matches your filter."
+                    description: "No credit transactions match your filter."
                 }}
             />
         </div>

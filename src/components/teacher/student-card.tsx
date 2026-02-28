@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChevronRight, Clock, FileText, Target } from "lucide-react"
+import { cn, formatDate } from "@/lib/utils"
 import type { StudentSummary } from "@/services/teacher.service"
 
 function getInitials(student: StudentSummary): string {
@@ -27,7 +28,7 @@ function formatLastSeen(dateStr: string | null): string {
     if (diffHours < 24) return `${diffHours}h ago`
     const diffDays = Math.floor(diffHours / 24)
     if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString()
+    return formatDate(date)
 }
 
 export function StudentCard({ student }: { student: StudentSummary }) {

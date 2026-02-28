@@ -16,7 +16,7 @@ import {
     Camera
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import { getCurrentUser, updateUserProfile } from "@/app/actions"
 import { UserProfile } from "@/types"
 import { PulseLoader } from "@/components/global/pulse-loader"
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                                         </span>
                                         <span className="text-slate-300 dark:text-slate-700">•</span>
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                            Joined {user && new Date(user.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                                            Joined {user && formatDate(user.created_at)}
                                         </span>
                                     </div>
                                 </div>
@@ -285,7 +285,7 @@ export default function SettingsPage() {
 
                             <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800">
                                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest max-w-[200px]">
-                                    Last synchronized: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                    Last synchronized: {formatTime(new Date().toISOString())}
                                 </p>
 
                                 <Button

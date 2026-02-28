@@ -17,7 +17,7 @@ import {
     Star,
     type LucideIcon
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { CHART_CONFIG_MAPPING, DESIGN_SYSTEM } from "@/lib/constants"
 
 // Mapping chart type to Lucide icons
@@ -83,7 +83,7 @@ export function ExerciseCard({
     const dateObj = createdAt ? new Date(createdAt) : null
     const isValidDate = dateObj && !isNaN(dateObj.getTime())
     const formattedDate = isValidDate
-        ? dateObj!.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        ? formatDate(dateObj!, false)
         : createdAt ?? null
 
     const chartConfig = chartType ? (CHART_CONFIG_MAPPING[chartType] || CHART_CONFIG_MAPPING[chartType?.replace('_chart', '')]) : undefined

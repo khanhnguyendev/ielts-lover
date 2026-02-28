@@ -2,7 +2,7 @@
 
 import { CreditRequest } from "@/types"
 import { CREDIT_REQUEST_STATUS } from "@/lib/constants"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
     [CREDIT_REQUEST_STATUS.PENDING]: { bg: "bg-amber-50", text: "text-amber-600" },
@@ -45,7 +45,7 @@ export function CreditRequestList({ requests }: { requests: CreditRequest[] }) {
                             </div>
                             <p className="text-xs font-medium text-slate-500 mb-1">{req.reason}</p>
                             <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400">
-                                <span>{new Date(req.created_at).toLocaleDateString()}</span>
+                                <span>{formatDate(req.created_at)}</span>
                                 {req.admin_note && (
                                     <span className="text-slate-500">Admin: {req.admin_note}</span>
                                 )}

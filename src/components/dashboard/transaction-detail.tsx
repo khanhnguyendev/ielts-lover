@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { getTransactionDetailAction } from "@/app/actions"
 import { ActivityDetail } from "@/repositories/interfaces"
-import { cn } from "@/lib/utils"
+import { cn, formatDate, formatTime } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface TransactionDetailProps {
@@ -152,7 +152,7 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
                                             <Calendar size={10} /> Date
                                         </div>
                                         <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                                            {new Date(detail.transaction.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                            {formatDate(detail.transaction.created_at)}
                                         </p>
                                     </div>
                                     <div className="space-y-1">
@@ -160,7 +160,7 @@ export function TransactionDetail({ transactionId, isOpen, onOpenChange }: Trans
                                             <Clock size={10} /> Time
                                         </div>
                                         <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                                            {new Date(detail.transaction.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                                            {formatTime(detail.transaction.created_at)}
                                         </p>
                                     </div>
                                 </div>
